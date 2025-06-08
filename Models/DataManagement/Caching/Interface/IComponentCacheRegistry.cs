@@ -13,8 +13,10 @@ namespace GainsLab.Models.DataManagement.Caching.Interface
         bool TryGetComponent<T>(IIdentifier id, out T? component)where T : IWorkoutComponent;
         bool TryGetComponents<T>(List<IIdentifier> ids, out ComponentLists<T>? component) where T : IWorkoutComponent;
         
-        void Store<T>(IIdentifier id, T component)where T : IWorkoutComponent;
-        void StoreAll<T>(List<IIdentifier> ids, List<T> components) where T : IWorkoutComponent;
+        void Store<T>(T component)where T : IWorkoutComponent;
+        void StoreAll<T>(List<T> components) where T : IWorkoutComponent;
+
+        public void StoreAll<T>(eWorkoutComponents type, List<T> components) where T : IWorkoutComponent;
         
         void Remove<T>(IIdentifier id) where T : IWorkoutComponent;
         void RemoveAll<T>(List<IIdentifier> ids) where T : IWorkoutComponent;

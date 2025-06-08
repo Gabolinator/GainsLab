@@ -33,17 +33,17 @@ public class MovementContent : ComponentContent
     public ComponentReference<MovementCategory.MovementCategory>? CategoryReference  
         => GetReferencesOfType<MovementCategory.MovementCategory>().FirstOrDefault();
 
-    public ComponentReference<MuscleGroups>? MusclesGroupReference  
-        => GetReferencesOfType<MuscleGroups>().FirstOrDefault();
+    public ComponentReference<MusclesGroup>? MusclesGroupReference  
+        => GetReferencesOfType<MusclesGroup>().FirstOrDefault();
 
     public ComponentReference<EquipmentList>? EquipmentListReference  
         => GetReferencesOfType<EquipmentList>().FirstOrDefault();
     
-    public ComponentReference<MuscleGroups>? MusclesWorkedReference
-        => GetReferencesOfType<MuscleGroups>().FirstOrDefault();
+    public ComponentReference<MusclesGroup>? MusclesWorkedReference
+        => GetReferencesOfType<MusclesGroup>().FirstOrDefault();
 
-    public MuscleGroups MusclesWorked =>
-        HasMuscleGroup ? MusclesWorkedReference!.Component! : new MuscleGroups();
+    public MusclesGroup MusclesesWorked =>
+        HasMuscleGroup ? MusclesWorkedReference!.Component! : new MusclesGroup();
     
     public Movement? VariantOf 
         => HasMovementVariant ? VariantOfReference!.Component : null;
@@ -69,8 +69,8 @@ public class MovementContent : ComponentContent
     public void AddVariantOf(Movement variant) 
         => Add(eWorkoutComponents.Movement, variant);
     
-    public void AddMuscleGroups(MuscleGroups muscleGroups) 
-        =>  Add(eWorkoutComponents.MuscleGroup, muscleGroups);
+    public void AddMuscleGroups(MusclesGroup musclesGroup) 
+        =>  Add(eWorkoutComponents.MuscleGroup, musclesGroup);
     
     public void AddEquipmentList(EquipmentList equipments) 
         =>  Add(eWorkoutComponents.EquipmentList, equipments);
@@ -80,7 +80,7 @@ public class MovementContent : ComponentContent
     {
        // Console.WriteLine($"[AddMainMuscles] Called with {muscleList.Count} muscles");
 
-        var musclegroup = HasMuscleGroup ? MusclesWorked : new MuscleGroups();
+        var musclegroup = HasMuscleGroup ? MusclesesWorked : new MusclesGroup();
       //  Console.WriteLine($"[AddMainMuscles] Using {(HasMuscleGroup ? "existing" : "new")} MuscleGroups");
 
         musclegroup.AddMainMuscles(muscleList);
@@ -97,7 +97,7 @@ public class MovementContent : ComponentContent
     {
      //   Console.WriteLine($"[AddSecondaryMuscles] Called with {secondaryMuscles.Count} muscles");
 
-        var musclegroup = HasMuscleGroup ? MusclesWorked : new MuscleGroups();
+        var musclegroup = HasMuscleGroup ? MusclesesWorked : new MusclesGroup();
      //   Console.WriteLine($"[AddSecondaryMuscles] Using {(HasMuscleGroup ? "existing" : "new")} MuscleGroups");
 
         musclegroup.AddSecondaryMuscles(secondaryMuscles);
@@ -130,7 +130,7 @@ public class MovementContent : ComponentContent
         string category = CategoryReference?.Identifier?.ToString() ?? "None";
       //  string equipment = RequireEquipment ?RequiredEquipment.ToString() : "None";
 
-        return $"MovementContent:\n  VariantOf: {variant}\n  Muscles: [{MusclesWorked}]\n  Category: {category}\n  Equipment: {RequiredEquipment}  Calculation Profile {WorkloadCalculation}";
+        return $"MovementContent:\n  VariantOf: {variant}\n  Muscles: [{MusclesesWorked}]\n  Category: {category}\n  Equipment: {RequiredEquipment}  Calculation Profile {WorkloadCalculation}";
     }
 
 

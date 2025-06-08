@@ -42,8 +42,8 @@ public class Movement : ICompositeWorkoutComponent<MovementContent>
     public void AddSecondaryMuscles(MuscleList muscleList) => 
         Content.AddSecondaryMuscles(muscleList);
 
-    public void AddMusclesGroup(MuscleGroups muscleGroups) => 
-        Content.AddMuscleGroups(muscleGroups);
+    public void AddMusclesGroup(MusclesGroup musclesGroup) => 
+        Content.AddMuscleGroups(musclesGroup);
 
     public void AddMovementCategory(MovementCategory.MovementCategory movementCategory) => 
         Content.AddMovementCategory(movementCategory);

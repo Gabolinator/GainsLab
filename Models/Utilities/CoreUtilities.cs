@@ -14,26 +14,24 @@ public static class CoreUtilities
     public static eWorkoutComponents GetComponentTypeFromGeneric<T>() where T : IWorkoutComponent
     {
         var type = typeof(T);
-        
-        var eType = type.Name switch
+
+        return type switch
         {
-            nameof(Muscle) => eWorkoutComponents.Muscle,
-            nameof(EquipmentList) => eWorkoutComponents.EquipmentList,
-            nameof(MuscleGroups) => eWorkoutComponents.MuscleGroup,
-            nameof(MovementCategory) => eWorkoutComponents.MovementCategory,
-            nameof(Movement) => eWorkoutComponents.Movement,
-            nameof(Equipment) => eWorkoutComponents.Equipment,
-            nameof(WorkloadCalculationProfile) => eWorkoutComponents.WorkloadProfile,
-           // nameof(Exercise) => eWorkoutComponents.Exercise,
-          //  nameof(ExerciseBlock) => eWorkoutComponents.ExerciseBlock,
-          //  nameof(WorkoutBlock) => eWorkoutComponents.WorkoutBlock,
-          //  nameof(Workout) => eWorkoutComponents.Workout,
-           // nameof(Program) => eWorkoutComponents.Program,
+            var t when t == typeof(Muscle) => eWorkoutComponents.Muscle,
+            var t when t == typeof(EquipmentList) => eWorkoutComponents.EquipmentList,
+            var t when t == typeof(MusclesGroup) => eWorkoutComponents.MuscleGroup,
+            var t when t == typeof(MovementCategory) => eWorkoutComponents.MovementCategory,
+            var t when t == typeof(Movement) => eWorkoutComponents.Movement,
+            var t when t == typeof(Equipment) => eWorkoutComponents.Equipment,
+            var t when t == typeof(WorkloadCalculationProfile) => eWorkoutComponents.WorkloadProfile,
+            // future types (uncomment as you implement)
+            // var t when t == typeof(Exercise) => eWorkoutComponents.Exercise,
+            // var t when t == typeof(ExerciseBlock) => eWorkoutComponents.ExerciseBlock,
+            // var t when t == typeof(WorkoutBlock) => eWorkoutComponents.WorkoutBlock,
+            // var t when t == typeof(Workout) => eWorkoutComponents.Workout,
+            // var t when t == typeof(Program) => eWorkoutComponents.Program,
             _ => eWorkoutComponents.unidentified
         };
-        
-       // Console.WriteLine($"Component Type for {type.Name} is {eType}");
-        return eType;
     }
 
     

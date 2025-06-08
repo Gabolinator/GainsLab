@@ -4,21 +4,21 @@ using System.Collections.Generic;
 
 namespace GainsLab.Models.Core.WorkoutComponents;
 
-public class MuscleGroups : IWorkoutComponent
+public class MusclesGroup : IWorkoutComponent
 {
 
 
-    public MuscleGroups()
+    public MusclesGroup()
     {
     }
     
-    public MuscleGroups(MuscleList mainMuscles, MuscleList secondaryMuscles)
+    public MusclesGroup(MuscleList mainMuscles, MuscleList secondaryMuscles)
     {
         AddMainMuscles(mainMuscles);
         AddSecondaryMuscles(secondaryMuscles);
     }
     
-    public MuscleGroups(List<Muscle> mainMuscles, List<Muscle> secondaryMuscles)
+    public MusclesGroup(List<Muscle> mainMuscles, List<Muscle> secondaryMuscles)
     {
        AddMainMuscles(mainMuscles);
        AddSecondaryMuscles(secondaryMuscles);

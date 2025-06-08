@@ -33,7 +33,7 @@ public class ComponentFactory
         var harmstring = new Muscle("Harmstring", "harmstring",  eBodySection.LowerBody);
         Muscle.SetAsAntagonists(quad, harmstring);
      
-        var muscleGroups = new MuscleGroups(quad.ToComponentList(), harmstring.ToComponentList());
+        var muscleGroups = new MusclesGroup(quad.ToComponentList(), harmstring.ToComponentList());
         
     
 
