@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GainsLab.Models.Core;
 using GainsLab.Models.Core.Results;
 using GainsLab.Models.DataManagement.Caching.Interface;
+using GainsLab.Models.DataManagement.DB;
 using GainsLab.Models.DataManagement.FileAccess;
 using GainsLab.Models.Factory;
 using GainsLab.Models.Logging;
@@ -37,20 +38,24 @@ public class DataManager :IDataManager
         public async Task InitializeAsync()
     {
         _logger.Log(nameof(DataManager), "Initializing...");
-        // Initialization logic if needed later
+        
     }
 
     public async Task LoadAndCacheDataAsync()
     {
+        
         _logger.Log(nameof(DataManager), "Loading and caching data...");
 
         //Load from files
+        //not implemented
         Dictionary<eWorkoutComponents, List<IWorkoutComponent>> fileData = await _fileDataService.LoadAllComponentsAsync();
         
         //batch insert all in database
+        //not implemented
         await _dataProvider.BatchSaveComponentsAsync(fileData); 
         
         //Load from DB to cache
+        //not implemented
         Dictionary<eWorkoutComponents, List<IWorkoutComponent>>
             dataFromDB = await _dataProvider.GetAllComponentsAsync();
         
@@ -150,7 +155,9 @@ public class DataManager :IDataManager
     {
         if (component.Identifier.IsEmpty()) return;
 
+        _logger.Log(nameof(DataManager), $"Saving component {component.Name}");
         _cache.Store(component);
+        
         //save to database
         await _dataProvider.SaveComponentAsync(component);
     }
@@ -161,11 +168,14 @@ public class DataManager :IDataManager
         if(list.Count ==0) return;
         
         
-        foreach (var component in list)
-        {
-            if (component.Identifier.IsEmpty()) continue;
-            _cache.Store(component);
-        }
+        _cache.StoreAll<T>(list.ToList());
+        
+        //
+        // foreach (var component in list)
+        // {
+        //     if (component.Identifier.IsEmpty()) continue;
+        //     _cache.StoreAll(components);
+        // }
         
         await _dataProvider.SaveComponentsAsync(list[0].ComponentType,list);
     }

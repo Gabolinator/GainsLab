@@ -4,7 +4,7 @@ namespace GainsLab.Models.Core;
 
 public class Identifier : IIdentifier
 {
-    
+    public Identifier() { } 
     
     public Identifier(int? id, string? uid, eWorkoutComponents type)
     {

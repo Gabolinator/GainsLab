@@ -24,4 +24,16 @@ public class WorkoutLogger : IWorkoutLogger
         if(!Enabled) return;
         Console.WriteLine($"[{context}] {message}");
     }
+
+    public void LogWarning(string context, string message)
+    {
+        if (!Enabled) return;
+        Console.WriteLine($"[{context}] {message}");
+    }
+
+    public void LogError(string context, string message)
+    {
+        if(!Enabled) return;
+        Console.WriteLine($"[{context}] {message}");
+    }
 }

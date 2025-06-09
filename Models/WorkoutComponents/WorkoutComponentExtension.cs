@@ -13,7 +13,7 @@ public static class WorkoutComponentExtension
     
     public static EquipmentList ToComponentList(this Equipment equipment, params Equipment[] others)
     {
-        var list = new EquipmentList { ComponentReference<Equipment>.FromComponent(equipment) };
+        var list = new EquipmentList {Items = new(){ComponentReference<Equipment>.FromComponent(equipment)} };
         foreach (var other in others)
             list.AddComponent(other);
         return list;
@@ -21,7 +21,7 @@ public static class WorkoutComponentExtension
 
     public static MuscleList ToComponentList(this Muscle muscle, params Muscle[] others)
     {
-        var list = new MuscleList { ComponentReference<Muscle>.FromComponent(muscle) };
+        var list = new MuscleList { Items = new(){ComponentReference<Muscle>.FromComponent(muscle)} };
         foreach (var other in others)
             list.AddComponent(other);
         return list;

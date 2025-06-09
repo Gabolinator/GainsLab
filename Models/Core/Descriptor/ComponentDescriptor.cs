@@ -1,7 +1,14 @@
-﻿namespace GainsLab.Models.Core;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace GainsLab.Models.Core;
 
 public class ComponentDescriptor : IComponentDescriptor
 {
+
+    public ComponentDescriptor()
+    {
+        
+    }
     public ComponentDescriptor(string name, Notes notes, Description description, CreationInfo creationInfo)
     {
         Name = name;
@@ -25,6 +32,8 @@ public class ComponentDescriptor : IComponentDescriptor
     public Notes Notes { get; set; }
     public Description Description { get; set; }
     public CreationInfo CreationInfo { get; set; }
+  
+    [NotMapped]
     public TagList Tags { get; set; }
 
     public IComponentDescriptor Copy()

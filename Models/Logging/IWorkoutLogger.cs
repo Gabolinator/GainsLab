@@ -9,4 +9,8 @@ public interface IWorkoutLogger
     void Log(string message);
     
     void Log(string context,string message);
+    
+    void LogWarning(string context,string message);
+    
+    void LogError(string context,string message);
 }

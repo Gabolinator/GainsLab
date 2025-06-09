@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using GainsLab.Models.Core;
 using GainsLab.Models.Core.Results;
 
-namespace GainsLab.Models.DataManagement;
+namespace GainsLab.Models.DataManagement.DB;
 
 public interface IDataProvider
 {

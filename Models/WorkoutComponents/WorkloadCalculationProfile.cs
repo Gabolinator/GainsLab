@@ -5,7 +5,7 @@ namespace GainsLab.Models.WorkoutComponents;
 public class WorkloadCalculationProfile : IWorkoutComponent
 {
     
-    public WorkloadCalculationProfile(IComponentDescriptor descriptor, IIdentifier identifier,  eWorkloadCalculationType calculationType)
+    public WorkloadCalculationProfile(ComponentDescriptor descriptor, Identifier identifier,  eWorkloadCalculationType calculationType)
     {
         Descriptor = descriptor;
         Identifier = identifier;
@@ -20,8 +20,8 @@ public class WorkloadCalculationProfile : IWorkoutComponent
     }
     
     public eWorkoutComponents ComponentType => eWorkoutComponents.WorkloadProfile;
-    public IComponentDescriptor Descriptor { get; set; }
-    public IIdentifier Identifier { get; set; }
+    public ComponentDescriptor Descriptor { get; set; }
+    public Identifier Identifier { get; set; }
     
     public eWorkloadCalculationType CalculationType { get; set; } = eWorkloadCalculationType.Custom;
 

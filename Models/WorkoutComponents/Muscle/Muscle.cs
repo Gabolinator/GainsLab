@@ -5,7 +5,13 @@ namespace GainsLab.Models.Core.WorkoutComponents;
 
 public class Muscle : ICompositeWorkoutComponent<MuscleContent>
 {
-    public Muscle(IComponentDescriptor descriptor, IIdentifier identifier, eBodySection bodySection, Muscle? antagonist)
+
+    public Muscle()
+    {
+    }
+    
+
+    public Muscle(ComponentDescriptor descriptor, Identifier identifier, eBodySection bodySection, Muscle? antagonist)
     {
         Descriptor = descriptor;
         Identifier = identifier;
@@ -27,8 +33,8 @@ public class Muscle : ICompositeWorkoutComponent<MuscleContent>
     
     public eWorkoutComponents ComponentType => eWorkoutComponents.Muscle;
     
-    public IComponentDescriptor Descriptor { get; set; }
-    public IIdentifier Identifier { get; set; }
+    public ComponentDescriptor Descriptor { get; set; }
+    public Identifier Identifier { get; set; }
     public MuscleContent Content { get; set  ; } 
     
     /*--Specific members--*/
@@ -49,7 +55,7 @@ public class Muscle : ICompositeWorkoutComponent<MuscleContent>
     
     public IWorkoutComponent Copy()
     {
-        return new Muscle(Descriptor.Copy(),Identifier.Copy(), BodySection, Antagonist );
+        return new Muscle((ComponentDescriptor)Descriptor.Copy(),(Identifier)Identifier.Copy(), BodySection, Antagonist );
         
     }
     

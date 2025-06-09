@@ -7,9 +7,17 @@ namespace GainsLab.Models.Core.WorkoutComponents;
 public class EquipmentList : ComponentLists<Equipment> , IWorkoutComponent
 {
     
+    public int Id
+    {
+        get => Identifier.ID ?? -1;
+
+        set => Identifier.ID = value;
+    }
+    
     public EquipmentList()
     {
-     
+        Identifier = new EmptyIdentifier();
+        Descriptor = new ComponentDescriptor();
     }
     
     public EquipmentList(Equipment equipment)
@@ -34,15 +42,21 @@ public class EquipmentList : ComponentLists<Equipment> , IWorkoutComponent
     }
     public override eWorkoutComponents ComponentsType { get; set; } = eWorkoutComponents.Equipment;
     
-    public EquipmentList GetDistinct() => new EquipmentList(this.Distinct());
+    public List<ComponentReference<Equipment>> Equipments
+    {
+        get => Items;
+        set => Items = value;
+    }
+    
+    public EquipmentList GetDistinct() => new EquipmentList(Equipments.Distinct());
     
     public eWorkoutComponents ComponentType => eWorkoutComponents.EquipmentList;
-    public IComponentDescriptor Descriptor { get; set; } = new EmptyDescriptor();
-    public IIdentifier Identifier { get; set; } = new EmptyIdentifier();
+    public ComponentDescriptor Descriptor { get; set; } = new EmptyDescriptor();
+    public Identifier Identifier { get; set; } = new EmptyIdentifier();
     
     public IWorkoutComponent Copy()
     {
-        return new EquipmentList(this.CopyList());
+        return new EquipmentList(Items);
     }
     
 }

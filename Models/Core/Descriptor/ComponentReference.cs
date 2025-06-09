@@ -1,28 +1,32 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Threading.Tasks;
-using GainsLab.Models.DataManagement;
+using System.ComponentModel.DataAnnotations.Schema;
+
 
 namespace GainsLab.Models.Core;
 
+[NotMapped] 
 public class ComponentReference<TComponent> : IComponentReference,  IEquatable<ComponentReference<TComponent>> where TComponent : IWorkoutComponent 
 {
     
-    public Func<IIdentifier, Task<TComponent?>>? ComponentResolver { get; set; }
-    public IIdentifier Identifier { get; set; } = new EmptyIdentifier();
+    public int Id { get =>Identifier.ID ?? -1; set => Identifier.ID = value; } 
+    
+   // public Func<IIdentifier, Task<TComponent?>>? ComponentResolver { get; set; }
+    public Identifier Identifier { get; set; } = new EmptyIdentifier();
+   
+    [NotMapped]
     public TComponent? Component { get; set; }
     public eWorkoutComponents ComponentType => Identifier.ComponentType;
     public bool IsComponentResolved => Component != null;
 
-    public async Task<TComponent?> GetOrResolveComponentAsync()
-    {
-        if (IsComponentResolved) return Component;
-        var component = await ComponentResolver!(Identifier);
-        AssignComponent(component);
-        
-        return component;
-        
-    }
+    // public async Task<TComponent?> GetOrResolveComponentAsync()
+    // {
+    //     if (IsComponentResolved) return Component;
+    //     var component = await ComponentResolver!(Identifier);
+    //     AssignComponent(component);
+    //     
+    //     return component;
+    //     
+    // }
 
     public void AssignComponent(TComponent? component)
     {
@@ -68,7 +72,7 @@ public class ComponentReference<TComponent> : IComponentReference,  IEquatable<C
         Console.WriteLine($"[FromComponent]   {typeof(TComponent).Name} ({component.Name}) to ComponentReference<{typeof(TComponent).Name}>");
         return new ComponentReference<TComponent>
         {
-            Identifier = component.Identifier,
+            Identifier = (Identifier)component.Identifier,
             Component = component
         };
     }
@@ -77,7 +81,7 @@ public class ComponentReference<TComponent> : IComponentReference,  IEquatable<C
     {
         return new ComponentReference<TComponent>
         {
-            Identifier = identifier,
+            Identifier = (Identifier)identifier,
         };
     }
 

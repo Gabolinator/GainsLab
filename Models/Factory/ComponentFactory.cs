@@ -1,9 +1,10 @@
-﻿using System;
+﻿
 using GainsLab.Models.Core;
 using GainsLab.Models.Core.WorkoutComponents;
 using GainsLab.Models.DataManagement;
+using GainsLab.Models.DataManagement.FileAccess;
 using GainsLab.Models.Logging;
-using GainsLab.Models.Utilities;
+
 using GainsLab.Models.WorkoutComponents;
 using GainsLab.Models.WorkoutComponents.Movement;
 using GainsLab.Models.WorkoutComponents.MovementCategory;
@@ -28,6 +29,10 @@ public class ComponentFactory
         
         var jumpRope = new Equipment("Jump Rope","jumpRope");
         
+        _dataManager.SaveComponentAsync(jumpRope);
+        
+        
+        
         var quad = new Muscle("Quadriceps", "quad", eBodySection.LowerBody);
         
         var harmstring = new Muscle("Harmstring", "harmstring",  eBodySection.LowerBody);
@@ -35,8 +40,6 @@ public class ComponentFactory
      
         var muscleGroups = new MusclesGroup(quad.ToComponentList(), harmstring.ToComponentList());
         
-    
-
         var bodyweight = new MovementCategory("BodyWeight", "bodyweight", eMovementCategories.BodyWeight);
 
         var squat = new Movement("Squat", "squat");
@@ -45,16 +48,16 @@ public class ComponentFactory
             new WorkloadCalculationProfile("Weight x Reps", "weightReps", eWorkloadCalculationType.Weight_Reps);
 
         
-        _logger.Log(nameof(ComponentFactory),jumpRope.ToComponentList().ToString());
+      //  _logger.Log(nameof(ComponentFactory),jumpRope.ToComponentList().ToString());
      
         squat.AddMusclesGroup(muscleGroups);
         squat.AddMovementCategory(bodyweight);
         squat.AddWorkloadCalculationProfile(weightReps);
         squat.AddEquipmentList(jumpRope.ToComponentList());
       
-        _logger.Log(nameof(ComponentFactory),squat.ToString());
+       // _logger.Log(nameof(ComponentFactory),squat.ToString());
 
-
+       
 
 
 

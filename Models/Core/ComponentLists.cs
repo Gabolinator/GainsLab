@@ -2,15 +2,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using GainsLab.Models.WorkoutComponents;
 
 
 namespace GainsLab.Models.Core;
 
-public class ComponentLists<TComponent> : List<ComponentReference<TComponent>>, IComponentList
+public class ComponentLists<TComponent> : IComponentList
     where TComponent : IWorkoutComponent
 {
+ 
+    [JsonIgnore]
+    public List<ComponentReference<TComponent>> Items { get; set; } = new();
+    
     public virtual eWorkoutComponents ComponentsType { get; set; } = eWorkoutComponents.unidentified;
 
     public ComponentLists() { }
@@ -18,7 +23,7 @@ public class ComponentLists<TComponent> : List<ComponentReference<TComponent>>, 
     public ComponentLists(ComponentReference<TComponent> component)
     {
         ComponentsType = component.ComponentType;
-        Add(component);
+        Items.Add(component);
     }
     
     public ComponentLists(List<ComponentReference<TComponent>> components)
@@ -28,8 +33,7 @@ public class ComponentLists<TComponent> : List<ComponentReference<TComponent>>, 
         ComponentsType = components[0].ComponentType;
         AddComponents(components);
     }
-    
-    
+
     private bool IsTypeMismatch(eWorkoutComponents type)
     {
         if (ComponentsType == eWorkoutComponents.unidentified)
@@ -65,19 +69,23 @@ public class ComponentLists<TComponent> : List<ComponentReference<TComponent>>, 
     public void AddComponent(ComponentReference<TComponent> reference)
     {
         if (IsTypeMismatch(reference.ComponentType)) return;
-        Add(reference);
+        
+        Items.Add(reference);
     }
 
     public void AddComponent(TComponent component)
     {
         if (IsTypeMismatch(component.ComponentType)) return;
-        Add(ComponentReference<TComponent>.FromComponent(component));
+        var reference = ComponentReference<TComponent>.FromComponent(component);
+        
+        Items.Add(reference);
+      
     }
 
     public void AddComponent(IIdentifier id)
     {
         if (IsTypeMismatch(id.ComponentType)) return;
-        Add(ComponentReference<TComponent>.FromIdentifier(id));
+        Items.Add(ComponentReference<TComponent>.FromIdentifier(id));
     }
 
     public void AddComponents(IEnumerable<TComponent> components)
@@ -100,8 +108,8 @@ public class ComponentLists<TComponent> : List<ComponentReference<TComponent>>, 
 
     public void AddComponents(ComponentLists<TComponent> otherList)
     {
-        Console.WriteLine($"[ComponentLists] Adding {otherList.Count} components of type {(otherList.Any() ? otherList[0].ComponentType : "no element in list")} from component list");
-        foreach (var r in otherList) AddComponent(r);
+        Console.WriteLine($"[ComponentLists] Adding {otherList.Items.Count} components of type {(otherList.Items.Any() ? otherList.Items[0].ComponentType : "no element in list")} from component list");
+        foreach (var r in otherList.Items) AddComponent(r);
     }
 
     public IEnumerable<ComponentReference<IWorkoutComponent>> GetUnresolvedReferences() =>
@@ -110,13 +118,13 @@ public class ComponentLists<TComponent> : List<ComponentReference<TComponent>>, 
     
     
     public List<TComponent> GetResolvedComponents() =>
-        this.Where(r => r.IsComponentResolved).Select(r => r.Component!).ToList();
+        this.Items.Where(r => r.IsComponentResolved).Select(r => r.Component!).ToList();
 
     public List<ComponentReference<TComponent>> GetResolvedReferences() =>
-        this.Where(r => r.IsComponentResolved).ToList();
+        this.Items.Where(r => r.IsComponentResolved).ToList();
 
     public IEnumerable<ComponentReference<IWorkoutComponent>> References =>
-        this.Select(r => new ComponentReference<IWorkoutComponent>
+        this.Items.Select(r => new ComponentReference<IWorkoutComponent>
         {
             Identifier = r.Identifier,
             Component = r.Component
@@ -150,11 +158,11 @@ public class ComponentLists<TComponent> : List<ComponentReference<TComponent>>, 
 
         var result = new ComponentLists<TComponent> { ComponentsType = a.ComponentsType };
 
-        foreach (var item in a)
+        foreach (var item in a.Items)
         {
-            if (!b.Any(x => x.Identifier.Equals(item.Identifier)))
+            if (!b.Items.Any(x => x.Identifier.Equals(item.Identifier)))
             {
-                result.Add(item);
+                result.Items.Add(item);
             }
         }
 
@@ -168,7 +176,7 @@ public class ComponentLists<TComponent> : List<ComponentReference<TComponent>>, 
             ComponentsType = this.ComponentsType
         };
 
-        foreach (var reference in this)
+        foreach (var reference in this.Items)
         {
             var referenceCopy = new ComponentReference<TComponent>
             {
@@ -179,19 +187,22 @@ public class ComponentLists<TComponent> : List<ComponentReference<TComponent>>, 
             // Optionally deep copy the component if needed:
             // referenceCopy.Component = reference.Component?.Copy() as TComponent;
 
-            copy.Add(referenceCopy);
+            copy.Items.Add(referenceCopy);
         }
 
         return copy;
     }
     
+
+    
+    
     
     public override string ToString()
     {
         
-        var resolvedCount = this.Count(c => c.IsComponentResolved);
-        var content = this.Count(c => c.IsComponentResolved) > 0 ? string.Join(", ", this.Where(c => c.IsComponentResolved).Select(it => it.Component.Name)): "none";
-        return $"ComponentList<{typeof(TComponent).Name}> of type {ComponentsType}, Count: {Count}, Resolved: {resolvedCount} - Contents : {content}";
+        var resolvedCount = this.Items.Count(c => c.IsComponentResolved);
+        var content = this.Items.Count(c => c.IsComponentResolved) > 0 ? string.Join(", ", this.Items.Where(c => c.IsComponentResolved).Select(it => it.Component.Name)): "none";
+        return $"ComponentList<{typeof(TComponent).Name}> of type {ComponentsType}, Count: {Items.Count}, Resolved: {resolvedCount} - Contents : {content}";
     }
     
 }

@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using GainsLab.Models.DataManagement;
 using GainsLab.Models.DataManagement.Caching.Interface;
+using GainsLab.Models.DataManagement.DB;
 using GainsLab.Models.Logging;
 
 namespace GainsLab.Models.App;

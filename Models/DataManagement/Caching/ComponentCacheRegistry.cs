@@ -4,25 +4,32 @@ using System.Linq;
 using System.Threading.Tasks;
 using GainsLab.Models.Core;
 using GainsLab.Models.DataManagement.Caching.Interface;
+using GainsLab.Models.Logging;
 using GainsLab.Models.Utilities;
 
 namespace GainsLab.Models.DataManagement.Caching;
 
 public class ComponentCacheRegistry : IComponentCacheRegistry
 {
-    
+
+    private readonly IWorkoutLogger _logger;
     private Dictionary<eWorkoutComponents, IComponentCacheBase> _caches = new ();
-    
+
+    public ComponentCacheRegistry(IWorkoutLogger logger)
+    {
+        _logger = logger;
+    }
+
     public async Task InitializeAsync()
     {
         //create all components cache
-        _caches[eWorkoutComponents.Equipment] = new EquipmentsCache();
-        _caches[eWorkoutComponents.EquipmentList] = new EquipmentListCache();
-        _caches[eWorkoutComponents.Muscle] = new MusclesCache();
-        _caches[eWorkoutComponents.MuscleGroup] = new MusclesGroupCache();
-        _caches[eWorkoutComponents.MovementCategory] = new MovementCategoryCache();
-        _caches[eWorkoutComponents.Movement] = new MovementCache();
-        _caches[eWorkoutComponents.WorkloadProfile] = new WorkloadProfileCache();
+        _caches[eWorkoutComponents.Equipment] = new EquipmentsCache(_logger);
+        _caches[eWorkoutComponents.EquipmentList] = new EquipmentListCache(_logger);
+        _caches[eWorkoutComponents.Muscle] = new MusclesCache(_logger);
+        _caches[eWorkoutComponents.MuscleGroup] = new MusclesGroupCache(_logger);
+        _caches[eWorkoutComponents.MovementCategory] = new MovementCategoryCache(_logger);
+        _caches[eWorkoutComponents.Movement] = new MovementCache(_logger);
+        _caches[eWorkoutComponents.WorkloadProfile] = new WorkloadProfileCache(_logger);
         
     }
 
@@ -78,8 +85,10 @@ public class ComponentCacheRegistry : IComponentCacheRegistry
         var id = component.Identifier;
         if(id.IsEmpty()) return;
         
+        
         if (TryGetCache<T>(out var cache))
         {
+            _logger.Log(nameof(ComponentCacheRegistry), $"Adding component {component.Name}  to {cache.ComponentType} cache ");
             cache.Store(id, component);
         }
     }
@@ -89,15 +98,15 @@ public class ComponentCacheRegistry : IComponentCacheRegistry
         if (!TryGetCache<T>(out var cache))
             return;
 
-        var ids = components
-            .Select(it => it.Identifier)
-            .Where(id => !id.IsEmpty())
+        var comps = components
+            .Where(comp => !comp.Identifier.IsEmpty())
             .ToList();
-        
-        for (int i = 0; i < Math.Min(ids.Count, components.Count); i++)
+
+        foreach (var comp in comps)
         {
-            cache.Store(ids[i], components[i]);
+            cache.Store(comp.Identifier,comp );
         }
+        
     }
     
     public void StoreAll<T>(eWorkoutComponents type, List<T>  components) where T : IWorkoutComponent

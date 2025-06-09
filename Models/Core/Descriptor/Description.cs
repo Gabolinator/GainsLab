@@ -1,8 +1,19 @@
 ﻿namespace GainsLab.Models.Core;
 
-public record Description(string? Text, IIdentifier? Identifier)
+public record Description(string? Text, Identifier Identifier)
 {
-    public bool IsEmpty() => string.IsNullOrWhiteSpace(Text) && Identifier == null;
+    public bool IsEmpty() => string.IsNullOrWhiteSpace(Text) && Identifier.IsEmpty();
+
+    public int Id
+    {
+        get => Identifier.ID ?? -1;
+
+        set => Identifier.ID = value;
+    }
+    
+    public Description() : this("", new EmptyIdentifier())
+    {
+    }
 
     public Description Copy()
     {

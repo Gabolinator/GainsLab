@@ -36,14 +36,14 @@ public class MuscleList : ComponentLists<Muscle>
 
     public MuscleList GetDistinct()
     {
-        var distinct = this.Distinct().ToList();
+        var distinct = this.Items.Distinct().ToList();
         return new MuscleList(distinct);
     }
     
     public override string ToString()
     {
-        var resolved = this.Where(m => m.IsComponentResolved);
-        return $"MuscleList: Count={Count} [{string.Join(", ", this.Select(m=> m.ToString()))}], Resolved={resolved.Count()} [{string.Join(", ", resolved.Select(m=> m.ToString()))}] ";
+        var resolved = this.Items.Where(m => m.IsComponentResolved);
+        return $"MuscleList: Count={Items.Count} [{string.Join(", ", this.Items.Select(m=> m.ToString()))}], Resolved={resolved.Count()} [{string.Join(", ", resolved.Select(m=> m.ToString()))}] ";
     }
     
 }

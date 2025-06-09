@@ -19,11 +19,11 @@ public class MovementContent : ComponentContent
                                       && VariantOfReference.IsComponentResolved;
     public bool RequireEquipment => EquipmentListReference != null 
                                     && EquipmentListReference.IsComponentResolved 
-                                    && EquipmentListReference.Component!.Count >0;
+                                    && EquipmentListReference.Component!.Items.Count >0;
 
     public bool HasMuscleGroup => MusclesWorkedReference != null
                                   && MusclesWorkedReference.IsComponentResolved
-                                  && MusclesWorkedReference.Component!.GetAllMuscles().Count > 0;
+                                  && MusclesWorkedReference.Component!.GetAllMuscles().Items.Count > 0;
     
     #region Getter
 
@@ -113,7 +113,7 @@ public class MovementContent : ComponentContent
     
 
     public void AddEquipment(Equipment equipment)
-        => RequiredEquipment.Add(ComponentReference<Equipment>.FromComponent(equipment));
+        => RequiredEquipment.Items.Add(ComponentReference<Equipment>.FromComponent(equipment));
     
     
     public void AddMovementCategory(GainsLab.Models.WorkoutComponents.MovementCategory.MovementCategory category) =>

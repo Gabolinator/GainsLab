@@ -1,10 +1,23 @@
-﻿using GainsLab.Models.Core;
+﻿
 
 namespace GainsLab.Models.Core.WorkoutComponents;
 
 public class Equipment : IWorkoutComponent
 {
-    public Equipment(IComponentDescriptor descriptor, IIdentifier identifier)
+    public int Id
+    {
+        get => Identifier.ID ?? -1;
+
+        set => Identifier.ID = value;
+    }
+    
+    public Equipment()
+    {
+        Identifier = new EmptyIdentifier();
+        Descriptor = new ComponentDescriptor();
+    }
+
+    public Equipment(ComponentDescriptor descriptor, Identifier identifier)
     {
         Descriptor = descriptor;
         Identifier = identifier;
@@ -19,8 +32,8 @@ public class Equipment : IWorkoutComponent
 
     public eWorkoutComponents ComponentType => eWorkoutComponents.Equipment;
     
-    public IComponentDescriptor Descriptor { get; set; } 
-    public IIdentifier Identifier { get; set; }
+    public ComponentDescriptor Descriptor { get; set; } 
+    public Identifier Identifier { get; set; }
     
     public IWorkoutComponent Copy()
     {

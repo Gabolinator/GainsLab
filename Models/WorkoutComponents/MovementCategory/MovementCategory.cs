@@ -4,8 +4,20 @@ namespace GainsLab.Models.WorkoutComponents.MovementCategory;
 
 public class MovementCategory : IWorkoutComponent
 {
+    public int Id
+    {
+        get => Identifier.ID ?? -1;
 
-    public MovementCategory(IComponentDescriptor descriptor, IIdentifier identifier, eMovementCategories baseCategory)
+        set => Identifier.ID = value;
+    }
+    
+    public MovementCategory()
+    {
+        Identifier = new EmptyIdentifier();
+        Descriptor = new ComponentDescriptor();
+    }
+
+    public MovementCategory(ComponentDescriptor descriptor, Identifier identifier, eMovementCategories baseCategory)
     {
         Descriptor = descriptor;
         Identifier = identifier;
@@ -24,8 +36,8 @@ public class MovementCategory : IWorkoutComponent
     public eWorkoutComponents ComponentType => eWorkoutComponents.MovementCategory;
 
     public eMovementCategories BaseCategory { get; set; } = eMovementCategories.undefined;
-    public IComponentDescriptor Descriptor { get; set; }
-    public IIdentifier Identifier { get; set; }
+    public ComponentDescriptor Descriptor { get; set; }
+    public Identifier Identifier { get; set; }
     
     public IWorkoutComponent Copy()
     {

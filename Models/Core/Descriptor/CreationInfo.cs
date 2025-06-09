@@ -2,10 +2,22 @@
 
 namespace GainsLab.Models.Core;
 
-public record CreationInfo(string? CreatedBy, IIdentifier? Identifier ,DateTime? CreatedAt, DateTime? UpdatedAt = null)
+public record CreationInfo(string? CreatedBy, Identifier Identifier ,DateTime? CreatedAt, DateTime? UpdatedAt = null)
 {
-    public bool IsEmpty() => string.IsNullOrWhiteSpace(CreatedBy) && Identifier == null;
-  
+    public bool IsEmpty() => string.IsNullOrWhiteSpace(CreatedBy) && Identifier.IsEmpty();
+
+    public CreationInfo(): this("", new EmptyIdentifier(), null, null)
+    {
+        
+    }
+
+    public int Id
+    {
+        get => Identifier.ID ?? -1;
+
+        set => Identifier.ID = value;
+    }
+    
     public CreationInfo Copy()
     {
         return new CreationInfo(CreatedBy, Identifier, CreatedAt, UpdatedAt);

@@ -35,7 +35,7 @@ public class ComponentContent : IComponentContent
     }
     
     public void Add(eWorkoutComponents type, ComponentLists<IWorkoutComponent> components)
-        => AddMany(type, components);
+        => AddMany(type, components.Items);
     
     public void Add(eWorkoutComponents type, IWorkoutComponent component) 
         => Add(type,ComponentReference<IWorkoutComponent>.FromComponent(component));
@@ -136,7 +136,7 @@ public class ComponentContent : IComponentContent
         {
             
             return list.References
-                .Select(it=> it.Identifier)
+                .Select(it=> (IIdentifier)it.Identifier)
                 .ToList();
         }
 

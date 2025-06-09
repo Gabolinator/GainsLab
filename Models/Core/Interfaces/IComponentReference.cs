@@ -5,7 +5,7 @@ namespace GainsLab.Models.Core;
 public interface IComponentReference
 {
     bool IsComponentResolved { get; }
-    IIdentifier Identifier { get; }
+    Identifier Identifier { get; }
     IWorkoutComponent? AsWorkoutComponent();
  
 }

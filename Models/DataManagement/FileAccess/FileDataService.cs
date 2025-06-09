@@ -16,8 +16,9 @@ public class JsonFilesDataService  : IFileDataService
         throw new System.NotImplementedException();
     }
 
-    public Task<Dictionary<eWorkoutComponents, List<IWorkoutComponent>>> LoadAllComponentsAsync()
+    public async Task<Dictionary<eWorkoutComponents, List<IWorkoutComponent>>> LoadAllComponentsAsync()
     {
-        throw new System.NotImplementedException();
+      //todo
+      return new();
     }
 }
