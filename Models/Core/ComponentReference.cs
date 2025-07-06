@@ -1,5 +1,8 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations.Schema;
+using GainsLab.Models.App;
+using GainsLab.Models.Core.Interfaces;
+using GainsLab.Models.Logging;
 
 
 namespace GainsLab.Models.Core;
@@ -8,9 +11,10 @@ namespace GainsLab.Models.Core;
 public class ComponentReference<TComponent> : IComponentReference,  IEquatable<ComponentReference<TComponent>> where TComponent : IWorkoutComponent 
 {
     
+   
+    
     public int Id { get =>Identifier.ID ?? -1; set => Identifier.ID = value; } 
     
-   // public Func<IIdentifier, Task<TComponent?>>? ComponentResolver { get; set; }
     public Identifier Identifier { get; set; } = new EmptyIdentifier();
    
     [NotMapped]
@@ -18,15 +22,7 @@ public class ComponentReference<TComponent> : IComponentReference,  IEquatable<C
     public eWorkoutComponents ComponentType => Identifier.ComponentType;
     public bool IsComponentResolved => Component != null;
 
-    // public async Task<TComponent?> GetOrResolveComponentAsync()
-    // {
-    //     if (IsComponentResolved) return Component;
-    //     var component = await ComponentResolver!(Identifier);
-    //     AssignComponent(component);
-    //     
-    //     return component;
-    //     
-    // }
+   
 
     public void AssignComponent(TComponent? component)
     {
@@ -69,7 +65,10 @@ public class ComponentReference<TComponent> : IComponentReference,  IEquatable<C
 
     public static ComponentReference<TComponent> FromComponent(TComponent component)
     {
-        Console.WriteLine($"[FromComponent]   {typeof(TComponent).Name} ({component.Name}) to ComponentReference<{typeof(TComponent).Name}>");
+        
+        IWorkoutLogger logger = ServiceLocator.GetService<IWorkoutLogger>();
+        logger?.Log("ComponentReference - FromComponent", $" {typeof(TComponent).Name} ({component.Name}) to ComponentReference<{typeof(TComponent).Name}>");
+        
         return new ComponentReference<TComponent>
         {
             Identifier = (Identifier)component.Identifier,

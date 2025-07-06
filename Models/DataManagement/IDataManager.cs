@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GainsLab.Models.Core;
+using GainsLab.Models.Core.Interfaces;
+using GainsLab.Models.Core.LifeCycle;
 using GainsLab.Models.Core.Results;
 
 namespace GainsLab.Models.DataManagement;
@@ -8,7 +10,7 @@ namespace GainsLab.Models.DataManagement;
 public interface IDataManager
 {
 
-    Task InitializeAsync();
+    Task InitializeAsync(IAppLifeCycle lifeCycle);
 
     Task LoadAndCacheDataAsync();
     
@@ -23,5 +25,6 @@ public interface IDataManager
     Task<Result<IEnumerable<T>>> TryResolveComponentsAsync<T>(List<IIdentifier> toResolve) where T : IWorkoutComponent;
     Task<Result<TComponent>> TryResolveComponentAsync<TComponent>(IIdentifier unresolved) where TComponent : IWorkoutComponent;
     Task DeleteComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent;
-    
+
+    Task SaveAllDataToFilesAsync();
 }

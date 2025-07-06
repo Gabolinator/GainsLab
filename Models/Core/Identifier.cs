@@ -1,4 +1,5 @@
 ﻿using System;
+using GainsLab.Models.Core.Interfaces;
 
 namespace GainsLab.Models.Core;
 

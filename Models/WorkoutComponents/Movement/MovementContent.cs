@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using GainsLab.Models.Core;
-using GainsLab.Models.Core.WorkoutComponents;
+using GainsLab.Models.WorkoutComponents.Equipment;
 using GainsLab.Models.WorkoutComponents.MovementCategory;
+using GainsLab.Models.WorkoutComponents.Muscle;
 
 
 namespace GainsLab.Models.WorkoutComponents.Movement;
@@ -112,8 +113,8 @@ public class MovementContent : ComponentContent
     
     
 
-    public void AddEquipment(Equipment equipment)
-        => RequiredEquipment.Items.Add(ComponentReference<Equipment>.FromComponent(equipment));
+    public void AddEquipment(Equipment.Equipment equipment)
+        => RequiredEquipment.Items.Add(ComponentReference<Equipment.Equipment>.FromComponent(equipment));
     
     
     public void AddMovementCategory(GainsLab.Models.WorkoutComponents.MovementCategory.MovementCategory category) =>

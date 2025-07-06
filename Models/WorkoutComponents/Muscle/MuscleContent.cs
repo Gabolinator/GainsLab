@@ -1,8 +1,7 @@
 ﻿using System.Linq;
 using GainsLab.Models.Core;
-using GainsLab.Models.DataManagement;
 
-namespace GainsLab.Models.Core.WorkoutComponents;
+namespace GainsLab.Models.WorkoutComponents.Muscle;
 
 public class MuscleContent :  ComponentContent
 {

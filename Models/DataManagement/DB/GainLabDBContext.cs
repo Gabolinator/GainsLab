@@ -1,5 +1,5 @@
 ﻿using GainsLab.Models.Core;
-using GainsLab.Models.Core.WorkoutComponents;
+using GainsLab.Models.DataManagement.DB.Model.DTOs;
 using GainsLab.Models.Logging;
 using GainsLab.Models.WorkoutComponents.MovementCategory;
 using Microsoft.EntityFrameworkCore;
@@ -17,35 +17,52 @@ public class GainLabDBContext : DbContext
         _logger.Log(nameof(GainLabDBContext) , "Service intanciated");
     }
     
-    public DbSet<Equipment> Equipments => Set<Equipment>();
-    public DbSet<EquipmentList> EquipmentLists => Set<EquipmentList>();
-    public DbSet<MovementCategory> MovementCategories => Set<MovementCategory>();
+    public DbSet<EquipmentDTO> Equipments => Set<EquipmentDTO>();
+    public DbSet<ComponentDescriptorDTO> Descriptors => Set<ComponentDescriptorDTO>();
+    //public DbSet<EquipmentList> EquipmentLists => Set<EquipmentList>();
+   // public DbSet<MovementCategory> MovementCategories => Set<MovementCategory>();
  //   public DbSet<MusclesGroup> MuscleGroups => Set<MusclesGroup>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        
-        modelBuilder.Entity<Equipment>(entity =>
-        {
-            entity.OwnsOne(e => e.Descriptor);
-        });
-        
-        modelBuilder.Entity<MovementCategory>(entity =>
-        {
-            entity.OwnsOne(e => e.Descriptor);
-        });
-        
-        modelBuilder.Entity<EquipmentList>(entity =>
-        {
-            entity.OwnsOne(e => e.Descriptor);
-        });
+        CreateEquipmentTableModel(modelBuilder);
+
         
         
-        modelBuilder.Entity<EquipmentList>()
-            .HasMany(e => e.Equipments)
-            .WithMany(); 
+       
+      
+        // modelBuilder.Entity<MovementCategory>(entity =>
+        // {
+        //     entity.OwnsOne(e => e.Descriptor);
+        // });
+        //
+        // modelBuilder.Entity<EquipmentList>(entity =>
+        // {
+        //     entity.OwnsOne(e => e.Descriptor);
+        // });
+        //
+        //
+        // modelBuilder.Entity<EquipmentList>()
+        //     .HasMany(e => e.Equipments)
+        //     .WithMany(); 
+    }
+
+    private void CreateEquipmentTableModel(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<EquipmentDTO>()
+            .HasKey(e => e.Id);  
+
+        modelBuilder.Entity<EquipmentDTO>()
+            .Property(e => e.Id)
+            .HasColumnType("INTEGER")
+            .ValueGeneratedOnAdd(); 
+
+        // modelBuilder.Entity<EquipmentDTO>()
+        //     .HasOne(e => e.Descriptor)
+        //     .WithMany()
+        //     .HasForeignKey(e => e.DescriptorID);
     }
 }
     

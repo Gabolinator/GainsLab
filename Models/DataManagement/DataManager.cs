@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GainsLab.Models.Core;
+using GainsLab.Models.Core.Interfaces;
+using GainsLab.Models.Core.LifeCycle;
 using GainsLab.Models.Core.Results;
 using GainsLab.Models.DataManagement.Caching.Interface;
 using GainsLab.Models.DataManagement.DB;
@@ -26,6 +29,8 @@ public class DataManager :IDataManager
     //read and write data to files
     private readonly IFileDataService _fileDataService;
 
+    private string fileDirectory;
+    
     public DataManager(IWorkoutLogger logger, IDataProvider dataProvider, IComponentCacheRegistry cache, IFileDataService fileDataService)
     {
         _logger = logger;
@@ -35,10 +40,22 @@ public class DataManager :IDataManager
 
     }
 
-        public async Task InitializeAsync()
+        public async Task InitializeAsync(IAppLifeCycle lifeCycle)
     {
         _logger.Log(nameof(DataManager), "Initializing...");
+        //get the local direct
+        var basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GainsLab", "Files");
+            
+        //ensure path exist 
+        if (!Path.Exists(basePath))
+        {
+            _logger.LogWarning(nameof(DataManager),$" BaseFolder at path: {basePath} - Doesnt exist- creating it");
+            Directory.CreateDirectory(basePath);
+        }
         
+        fileDirectory = basePath;
+
+        lifeCycle.onAppExitAsync +=SaveAllDataToFilesAsync;
     }
 
     public async Task LoadAndCacheDataAsync()
@@ -71,18 +88,18 @@ public class DataManager :IDataManager
 
     public async Task<Result<T>> TryGetComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent
     {
-        if (id.IsEmpty()) return ResultsFactory.Failure<T>("Id is empty");
+        if (id.IsEmpty()) return Results.FailureResult<T>("Id is empty");
 
         if (_cache.TryGetComponent<T>(id, out var cached))
-            return ResultsFactory.Success(cached!);
+            return Results.SuccessResult(cached!);
 
         var dbResult = await _dataProvider.TryGetComponentAsync<T>(id);
         if (!dbResult.Success)
-            return ResultsFactory.Failure<T>("Component not found in DB.");
+            return Results.FailureResult<T>("Component not found in DB.");
 
         // store in cache
         _cache.Store(dbResult.Value!);
-        return ResultsFactory.Success(dbResult.Value!);
+        return Results.SuccessResult(dbResult.Value!);
     }
 
   
@@ -105,8 +122,8 @@ public class DataManager :IDataManager
         {
             //if no component found result failure
             return foundComponents.Count > 0
-                ? ResultsFactory.Success<IEnumerable<T>>(foundComponents)
-                : ResultsFactory.Failure<IEnumerable<T>>("No matches found");
+                ? Results.SuccessResult<IEnumerable<T>>(foundComponents)
+                : Results.FailureResult<IEnumerable<T>>("No matches found");
         }
 
         var resolveResult = await TryResolveComponentsAsync<T>(toResolve);
@@ -114,17 +131,17 @@ public class DataManager :IDataManager
         //failed to resolve components
         if (!resolveResult.Success)
             return foundComponents.Count > 0
-                ? ResultsFactory.Success<IEnumerable<T>>(foundComponents)
-                : ResultsFactory.Failure<IEnumerable<T>>("No components could be found or resolved");
+                ? Results.SuccessResult<IEnumerable<T>>(foundComponents)
+                : Results.FailureResult<IEnumerable<T>>("No components could be found or resolved");
 
         foundComponents.AddRange(resolveResult.Value!);
-        return ResultsFactory.Success<IEnumerable<T>>(foundComponents);
+        return Results.SuccessResult<IEnumerable<T>>(foundComponents);
     }
 
     public async Task<Result<T>> TryResolveComponentAsync<T>(IIdentifier unresolved) where T : IWorkoutComponent
     {
         Result<T> dbResult = await _dataProvider.TryGetComponentAsync<T>(unresolved);
-        if (!dbResult.Success || dbResult.Value is null) return ResultsFactory.Failure<T>("Could not Resolve Component");
+        if (!dbResult.Success || dbResult.Value is null) return Results.FailureResult<T>("Could not Resolve Component");
         
         //add to cache
         _cache.Store(dbResult.Value!);
@@ -143,12 +160,12 @@ public class DataManager :IDataManager
             .ToList();
 
         if (resolved.Count == 0)
-            return ResultsFactory.Failure<IEnumerable<T>>("No components were resolved");
+            return Results.FailureResult<IEnumerable<T>>("No components were resolved");
 
         var type = resolved[0].ComponentType;
         _cache.StoreAll(type, resolved);
 
-        return ResultsFactory.Success<IEnumerable<T>>(resolved);
+        return Results.SuccessResult<IEnumerable<T>>(resolved);
     }
 
     public async Task SaveComponentAsync<T>(T component) where T : IWorkoutComponent
@@ -188,4 +205,15 @@ public class DataManager :IDataManager
         await _dataProvider.DeleteComponentAsync<T>(id);
      
     }
+
+    public async Task SaveAllDataToFilesAsync()
+    {
+        //get all the data in the registry 
+        //and save it 
+        var data = await _dataProvider.GetAllComponentsAsync();
+        await _fileDataService.WriteAllComponentsAsync(data, fileDirectory, ".json");
+
+    }
+
+  
 }

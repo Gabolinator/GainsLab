@@ -1,4 +1,4 @@
-﻿namespace GainsLab.Models.Core;
+﻿namespace GainsLab.Models.Core.Descriptor;
 
 public record Notes(string? Text, Identifier Identifier)
 {

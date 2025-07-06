@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GainsLab.Models.Core;
+namespace GainsLab.Models.Core.Descriptor;
 
 public record CreationInfo(string? CreatedBy, Identifier Identifier ,DateTime? CreatedAt, DateTime? UpdatedAt = null)
 {

@@ -1,13 +1,14 @@
 ﻿
 using GainsLab.Models.Core;
-using GainsLab.Models.Core.WorkoutComponents;
 using GainsLab.Models.DataManagement;
 using GainsLab.Models.DataManagement.FileAccess;
 using GainsLab.Models.Logging;
 
 using GainsLab.Models.WorkoutComponents;
+using GainsLab.Models.WorkoutComponents.Equipment;
 using GainsLab.Models.WorkoutComponents.Movement;
 using GainsLab.Models.WorkoutComponents.MovementCategory;
+using GainsLab.Models.WorkoutComponents.Muscle;
 
 namespace GainsLab.Models.Factory;
 
@@ -30,7 +31,8 @@ public class ComponentFactory
         var jumpRope = new Equipment("Jump Rope","jumpRope");
         
         _dataManager.SaveComponentAsync(jumpRope);
-        
+        _dataManager.SaveComponentAsync(jumpRope);
+
         
         
         var quad = new Muscle("Quadriceps", "quad", eBodySection.LowerBody);

@@ -1,4 +1,4 @@
-﻿namespace GainsLab.Models.Core;
+﻿namespace GainsLab.Models.Core.Descriptor;
 
 public class Tag
 {

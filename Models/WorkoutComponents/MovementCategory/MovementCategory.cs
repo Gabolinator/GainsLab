@@ -1,4 +1,6 @@
 ﻿using GainsLab.Models.Core;
+using GainsLab.Models.Core.Descriptor;
+using GainsLab.Models.Core.Interfaces;
 
 namespace GainsLab.Models.WorkoutComponents.MovementCategory;
 

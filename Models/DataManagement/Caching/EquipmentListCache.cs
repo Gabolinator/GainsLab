@@ -1,7 +1,7 @@
 ﻿
 using GainsLab.Models.Core;
-using GainsLab.Models.Core.WorkoutComponents;
 using GainsLab.Models.Logging;
+using GainsLab.Models.WorkoutComponents.Equipment;
 
 
 namespace GainsLab.Models.DataManagement.Caching;

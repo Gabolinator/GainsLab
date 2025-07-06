@@ -1,7 +1,9 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using GainsLab.Models.Core;
-using GainsLab.Models.Core.WorkoutComponents;
+using GainsLab.Models.Core.Interfaces;
+using GainsLab.Models.WorkoutComponents.Equipment;
+using GainsLab.Models.WorkoutComponents.Muscle;
 
 namespace GainsLab.Models.DataManagement.FileAccess;
 

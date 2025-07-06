@@ -5,13 +5,20 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GainsLab.Models.App;
 
+
+/// <summary>
+/// Hosts and initializes the application, setting up dependency injection and running startup tasks.
+/// </summary>
 public class AppHost
 {
     
     private IServiceProvider _serviceProvider;
-    public Window? MainWindow => _serviceProvider.GetRequiredService<MainWindow>();
-
-
+    public IServiceProvider ServiceProvider => _serviceProvider;
+  
+    /// <summary>
+    /// Asynchronously runs the application by configuring services, initializing components, and preparing the application for use.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous run operation.</returns>
     public async Task RunAsync()
     {
         
@@ -25,7 +32,7 @@ public class AppHost
         
         //initialize
         var initializer = _serviceProvider.GetRequiredService<SystemInitializer>();
-        await initializer.InitializeAsync();
+        await initializer.InitializeAsync(_serviceProvider);
         
     }
 }

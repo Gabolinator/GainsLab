@@ -1,8 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
-using GainsLab.Models.Core.WorkoutComponents;
+using GainsLab.Models.Core.Descriptor;
+using GainsLab.Models.WorkoutComponents.Equipment;
+using GainsLab.Models.WorkoutComponents.Muscle;
 
-namespace GainsLab.Models.Core;
+namespace GainsLab.Models.Core.Interfaces;
 
 
 //basic bloc of a item part of a workout (i.e. equipment, muscles, movements etc)
@@ -16,6 +18,9 @@ public interface IWorkoutComponent
   
     
     string Name => Descriptor.Name;
+    
+    
+    
     
     eWorkoutComponents ComponentType { get;}
     ComponentDescriptor Descriptor { get; set; }

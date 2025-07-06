@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GainsLab.Models.Core.WorkoutComponents;
 
 namespace GainsLab.Models.Core;
 

@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 
 
-namespace GainsLab.Models.Core;
+namespace GainsLab.Models.Core.Interfaces;
 
 public interface IComponentContent
 {

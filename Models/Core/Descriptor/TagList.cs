@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 
-namespace GainsLab.Models.Core;
+namespace GainsLab.Models.Core.Descriptor;
 
 public class TagList : List<Tag>
 {

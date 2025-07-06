@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GainsLab.Models.Core;
+using GainsLab.Models.Core.Interfaces;
 using GainsLab.Models.Utilities;
 
 namespace GainsLab.Models.Core;

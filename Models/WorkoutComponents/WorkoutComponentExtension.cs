@@ -1,5 +1,7 @@
 ﻿using GainsLab.Models.Core;
-using GainsLab.Models.Core.WorkoutComponents;
+using GainsLab.Models.Core.Interfaces;
+using GainsLab.Models.WorkoutComponents.Equipment;
+using GainsLab.Models.WorkoutComponents.Muscle;
 
 namespace GainsLab.Models.WorkoutComponents;
 
@@ -11,17 +13,17 @@ public static class WorkoutComponentExtension
         return (T)component.Copy();
     }
     
-    public static EquipmentList ToComponentList(this Equipment equipment, params Equipment[] others)
+    public static EquipmentList ToComponentList(this Equipment.Equipment equipment, params Equipment.Equipment[] others)
     {
-        var list = new EquipmentList {Items = new(){ComponentReference<Equipment>.FromComponent(equipment)} };
+        var list = new EquipmentList {Items = new(){ComponentReference<Equipment.Equipment>.FromComponent(equipment)} };
         foreach (var other in others)
             list.AddComponent(other);
         return list;
     }
 
-    public static MuscleList ToComponentList(this Muscle muscle, params Muscle[] others)
+    public static MuscleList ToComponentList(this Muscle.Muscle muscle, params Muscle.Muscle[] others)
     {
-        var list = new MuscleList { Items = new(){ComponentReference<Muscle>.FromComponent(muscle)} };
+        var list = new MuscleList { Items = new(){ComponentReference<Muscle.Muscle>.FromComponent(muscle)} };
         foreach (var other in others)
             list.AddComponent(other);
         return list;

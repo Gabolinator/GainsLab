@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GainsLab.Models.Core;
+using GainsLab.Models.Core.Descriptor;
+using GainsLab.Models.Core.Interfaces;
 
-namespace GainsLab.Models.Core.WorkoutComponents;
+namespace GainsLab.Models.WorkoutComponents.Equipment;
 
 public class EquipmentList : ComponentLists<Equipment> , IWorkoutComponent
 {

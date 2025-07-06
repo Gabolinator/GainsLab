@@ -3,8 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using GainsLab.Models.WorkoutComponents;
+using GainsLab.Models.App;
+using GainsLab.Models.Core.Interfaces;
+using GainsLab.Models.Logging;
 
 
 namespace GainsLab.Models.Core;
@@ -13,6 +14,11 @@ public class ComponentLists<TComponent> : IComponentList
     where TComponent : IWorkoutComponent
 {
  
+    IWorkoutLogger Logger => ServiceLocator.GetService<IWorkoutLogger>();
+   // logger?.Log("ComponentReference - FromComponent", $" {typeof(TComponent).Name} ({component.Name}) to ComponentReference<{typeof(TComponent).Name}>");
+
+    
+    
     [JsonIgnore]
     public List<ComponentReference<TComponent>> Items { get; set; } = new();
     
@@ -44,7 +50,7 @@ public class ComponentLists<TComponent> : IComponentList
 
         if (ComponentsType != type)
         {
-            Console.WriteLine($"Type mismatch: expected {ComponentsType}, got {type}");
+            Logger?.LogWarning("ComponentList",$"Type mismatch: expected {ComponentsType}, got {type}");
             return true;
         }
 
@@ -62,7 +68,7 @@ public class ComponentLists<TComponent> : IComponentList
         }
         else
         {
-            Console.WriteLine($"Failed to cast to correct type {typeof(TComponent).Name}");
+            Logger?.LogWarning("ComponentList",$"Failed to cast to correct type {typeof(TComponent).Name}");
         }
     }
     
@@ -90,25 +96,26 @@ public class ComponentLists<TComponent> : IComponentList
 
     public void AddComponents(IEnumerable<TComponent> components)
     {
-        Console.WriteLine($"[ComponentLists] Adding { components.Count()} components");
+        Logger?.Log("ComponentList",$"Adding { components.Count()} components");
+        
         foreach (var comp in components) AddComponent(comp);
     }
 
     public void AddComponents(IEnumerable<IIdentifier> ids)
-    {
-        Console.WriteLine($"[ComponentLists] Adding { ids.Count()} components ids");
+    {  
+        Logger?.Log("ComponentList",$"Adding { ids.Count()} components ids");
         foreach (var id in ids) AddComponent(id);
     }
 
     public void AddComponents(IEnumerable<ComponentReference<TComponent>> refs)
     {
-        Console.WriteLine($"[ComponentLists] Adding { refs.Count()} components references of type {(refs.Any() ? refs.ElementAt(0).ComponentType : "no element in list")}");
+        Logger?.Log("ComponentList",$"Adding { refs.Count()} components references of type {(refs.Any() ? refs.ElementAt(0).ComponentType : "no element in list")}");
         foreach (var r in refs) AddComponent(r);
     }
 
     public void AddComponents(ComponentLists<TComponent> otherList)
     {
-        Console.WriteLine($"[ComponentLists] Adding {otherList.Items.Count} components of type {(otherList.Items.Any() ? otherList.Items[0].ComponentType : "no element in list")} from component list");
+        Logger?.Log("ComponentList",$"Adding {otherList.Items.Count} components of type {(otherList.Items.Any() ? otherList.Items[0].ComponentType : "no element in list")} from component list");
         foreach (var r in otherList.Items) AddComponent(r);
     }
 

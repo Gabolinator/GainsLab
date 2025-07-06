@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace GainsLab.Models.Core;
+namespace GainsLab.Models.Core.Interfaces;
 
 public interface IComponentReference
 {

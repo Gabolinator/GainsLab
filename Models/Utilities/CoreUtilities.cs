@@ -1,10 +1,12 @@
 ﻿using System;
 using GainsLab.Models.Core;
-using GainsLab.Models.Core.WorkoutComponents;
+using GainsLab.Models.Core.Interfaces;
 using GainsLab.Models.DataManagement;
 using GainsLab.Models.WorkoutComponents;
+using GainsLab.Models.WorkoutComponents.Equipment;
 using GainsLab.Models.WorkoutComponents.Movement;
 using GainsLab.Models.WorkoutComponents.MovementCategory;
+using GainsLab.Models.WorkoutComponents.Muscle;
 
 
 namespace GainsLab.Models.Utilities;

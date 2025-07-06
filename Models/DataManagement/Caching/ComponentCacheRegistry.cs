@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GainsLab.Models.Core;
+using GainsLab.Models.Core.Interfaces;
 using GainsLab.Models.DataManagement.Caching.Interface;
 using GainsLab.Models.Logging;
 using GainsLab.Models.Utilities;
@@ -44,6 +45,8 @@ public class ComponentCacheRegistry : IComponentCacheRegistry
             componentCache = typedCache;
             return true;
         }
+       
+        _logger.LogWarning(nameof(ComponentCacheRegistry), $"Could not find cache for type {type} ");
 
         componentCache = default!;
         return false;

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GainsLab.Models.Core;
+using GainsLab.Models.Core.Interfaces;
 
 namespace GainsLab.Models.DataManagement.Caching.Interface;
 

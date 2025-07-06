@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GainsLab.Models.Core;
+using GainsLab.Models.Core.Interfaces;
 using GainsLab.Models.DataManagement.Caching.Interface;
 using GainsLab.Models.Logging;
 
@@ -16,13 +17,17 @@ public abstract class BaseComponentCache<T> : IComponentCache<T> where T : IWork
     {
         if (id.IsEmpty())
         {
+            _logger.LogWarning(nameof(ComponentCacheRegistry), $"Could not find item in cache - id is empty ");
             component = default;
             return false;
         }
 
         _logger.Log("BaseComponentCache", $"Trying to get component {id.UID}  from {ComponentType} cache ");
-
-        return CachedComponents.TryGetValue(id, out component);
+        bool found = CachedComponents.TryGetValue(id, out component);
+        if(found)   _logger.Log("BaseComponentCache", $"Found component {id.UID}  in {ComponentType} cache ");
+        else  _logger.LogWarning(nameof(ComponentCacheRegistry), $"Could not find item  {id.UID} in cache");
+        
+        return found;
     }
 
     public void Store(IIdentifier id, T component)
@@ -35,7 +40,7 @@ public abstract class BaseComponentCache<T> : IComponentCache<T> where T : IWork
 
         }
         
-        else  _logger.LogWarning("BaseComponentCache", $"Adding component {component.Name}  to {ComponentType} cache Failed");
+        else  _logger.LogWarning("BaseComponentCache", $"Adding component {component.Name}  to {ComponentType} cache Failed - Element already exist in cache");
 
     }
     

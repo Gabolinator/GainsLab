@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Net.Mime;
+using GainsLab.Models.Core.Descriptor;
 
-namespace GainsLab.Models.Core;
+namespace GainsLab.Models.Core.Interfaces;
 
 public interface IComponentDescriptor
 {

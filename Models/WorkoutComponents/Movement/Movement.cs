@@ -1,6 +1,9 @@
 ﻿using GainsLab.Models.Core;
-using GainsLab.Models.Core.WorkoutComponents;
+using GainsLab.Models.Core.Descriptor;
+using GainsLab.Models.Core.Interfaces;
+using GainsLab.Models.WorkoutComponents.Equipment;
 using GainsLab.Models.WorkoutComponents.MovementCategory;
+using GainsLab.Models.WorkoutComponents.Muscle;
 
 namespace GainsLab.Models.WorkoutComponents.Movement;
 
@@ -31,7 +34,7 @@ public class Movement : ICompositeWorkoutComponent<MovementContent>
     public void AddEquipmentList(EquipmentList equipments) =>
         Content.AddEquipmentList(equipments);
     
-    public void AddEquipment(Equipment equipment) => 
+    public void AddEquipment(Equipment.Equipment equipment) => 
         Content.AddEquipment(equipment);
     
     public void AddVariantOf(Movement movement) =>

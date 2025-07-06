@@ -29,6 +29,9 @@ public readonly struct Result<T>
             : $"Failure: {ErrorMessage ?? "Unknown Error"}";
     }
 
-
+    public static implicit operator bool(Result<T> result) => result.Success;
+    
+    
+    
     
 }
