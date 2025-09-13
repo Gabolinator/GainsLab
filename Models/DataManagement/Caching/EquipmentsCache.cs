@@ -8,7 +8,7 @@ namespace GainsLab.Models.DataManagement.Caching;
 
 public class EquipmentsCache : BaseComponentCache<Equipment>
 {
-    public EquipmentsCache(IWorkoutLogger logger)
+    public EquipmentsCache(ILogger logger)
     {
         _logger = logger;
     }

@@ -9,7 +9,7 @@ namespace GainsLab.Models.Core.LifeCycle;
 
 public class AppLifecycleService  : IAppLifeCycle
 {
-    private readonly IWorkoutLogger _logger;
+    private readonly ILogger _logger;
     private IDataProvider _dataProvider;
 
     public event Action onAppStart;
@@ -17,7 +17,7 @@ public class AppLifecycleService  : IAppLifeCycle
     public event Action onAppExit;
     public event Func<Task>? onAppExitAsync;
 
-    public AppLifecycleService(IWorkoutLogger logger)
+    public AppLifecycleService(ILogger logger)
     {
         _logger = logger;
       

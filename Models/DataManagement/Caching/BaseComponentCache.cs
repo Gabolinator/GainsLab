@@ -8,7 +8,7 @@ namespace GainsLab.Models.DataManagement.Caching;
 
 public abstract class BaseComponentCache<T> : IComponentCache<T> where T : IWorkoutComponent
 {
-    protected IWorkoutLogger _logger;
+    protected ILogger _logger;
 
     public abstract eWorkoutComponents ComponentType { get; }
     public Dictionary<IIdentifier, T> CachedComponents { get; set; } = new();

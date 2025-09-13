@@ -15,13 +15,13 @@ namespace GainsLab.Models.Factory;
 public class ComponentFactory
 {
 
-    public ComponentFactory(IWorkoutLogger logger, IDataManager dataManager)
+    public ComponentFactory(ILogger logger, IDataManager dataManager)
     {
         _logger = logger;
         _dataManager = dataManager;
     }
 
-    public readonly IWorkoutLogger _logger;
+    public readonly ILogger _logger;
     public readonly IDataManager _dataManager;
  
     public void CreateTestData()

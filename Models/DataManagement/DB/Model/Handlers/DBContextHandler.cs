@@ -11,7 +11,7 @@ namespace GainsLab.Models.DataManagement.DB.Model.Handlers;
 
 public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, IDto 
 {
-    protected IdbContextHandler(DbContext context, IWorkoutLogger logger)
+    protected IdbContextHandler(DbContext context, ILogger logger)
     {
         _context = context;
         _logger = logger;
@@ -20,7 +20,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
     public abstract DbSet<TDto> DBSet { get; }
     
     protected DbContext _context;
-    protected readonly IWorkoutLogger _logger;
+    protected readonly ILogger _logger;
 
     public abstract Task<Result<TDto>> TryGetExistingDTO(string uid);
    
@@ -29,7 +29,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
         var existing = await DBSet
             .FirstOrDefaultAsync(e => e.Iid == id);
         var success = existing != null;
-        return success ?Results.SuccessResult(existing!) :  Results.FailureResult<TDto>("No existing dto found");
+        return success ?Result<TDto>.SuccessResult(existing!) :  Result<TDto>.Failure("No existing dto found");
     }
 
 
@@ -44,13 +44,13 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
             _logger.Log("DbContextHandler", $"Entity State: {_context.Entry(dto).State}");
             _logger.Log("DbContextHandler",$"Added {dto.Iuid} to db with id {dto.Iid}");
             if(dto.Iid <=0)  _logger.LogWarning("DbContextHandler",$"Added negative id to db : {dto.Iuid} with id {dto.Iid}");
-            return Results.SuccessResult<IDto>(dto);
+            return Result<IDto>.SuccessResult(dto);
 
         }
         catch (Exception e)
         {
             _logger.LogError("DbContextHandler", $"Failed to Insert DTO {dto.Iuid}: {e.Message}");
-            return Results.FailureResult<IDto>($"Database error while inserting : {e.Message}");
+            return Result<IDto>.Failure($"Database error while inserting : {e.Message}");
         }
         
       
@@ -64,12 +64,12 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
             await _context.SaveChangesAsync();
             _logger.Log("DbContextHandler",$"Updated {dto.Iuid} in db");
             if(dto.Iid <=0)  _logger.LogWarning("DbContextHandler",$"Updated negative id to db : {dto.Iuid} with id {dto.Iid}");
-            return Results.SuccessResult<IDto>(dto);
+            return Result<IDto>.SuccessResult(dto);
         }
         catch (Exception e)
         {
             _logger.LogError("DbContextHandler", $"Failed to update DTO {dto.Iuid}: {e.Message}");
-            return Results.FailureResult<IDto>($"Database error while updating: {e.Message}");
+            return Result<IDto>.Failure($"Database error while updating: {e.Message}");
         }
       
     }
@@ -83,7 +83,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
         if (dto is not TDto tdto)
         {
             _logger.LogWarning("DbContextHandler",$"Cant add or update dto {dto.Iuid} - wrong type");
-            return Results.FailureResult<IDto>("Invalid Dto type");
+            return Result<IDto>.Failure("Invalid Dto type");
         }
 
         var result =  await TryGetExistingDTO(tdto.Iuid);
@@ -98,7 +98,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
             //we dont need to update it 
             _logger.Log("DbContextHandler",$"Dont need to Update dto {dto.Iuid} - already up to date");
             
-            return Results.SuccessResult<IDto>(existingDto!);
+            return Result<IDto>.SuccessResult(existingDto!);
         }
         
         return await AddAsync(tdto);
@@ -119,13 +119,13 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
 
     public async Task<Result<IDto>> AddAsync(IDto dto)
     {
-        if (dto is not TDto tdto) return Results.FailureResult<IDto>("Invalid Dto type");
+        if (dto is not TDto tdto) return Result<IDto>.Failure("Invalid Dto type");
         return await AddAsync(tdto);
     }
 
     public async Task<Result<IDto>> UpdateAsync(IDto dto)
     {
-        if (dto is not TDto tdto) return Results.FailureResult<IDto>("Invalid Dto type");;
+        if (dto is not TDto tdto) return Result<IDto>.Failure("Invalid Dto type");;
        return await UpdateAsync(tdto);
     }
 

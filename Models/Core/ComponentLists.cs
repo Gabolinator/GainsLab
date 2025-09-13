@@ -14,7 +14,7 @@ public class ComponentLists<TComponent> : IComponentList
     where TComponent : IWorkoutComponent
 {
  
-    IWorkoutLogger Logger => ServiceLocator.GetService<IWorkoutLogger>();
+    ILogger Logger => ServiceLocator.GetService<ILogger>();
    // logger?.Log("ComponentReference - FromComponent", $" {typeof(TComponent).Name} ({component.Name}) to ComponentReference<{typeof(TComponent).Name}>");
 
     

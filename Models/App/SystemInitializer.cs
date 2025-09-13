@@ -15,7 +15,7 @@ namespace GainsLab.Models.App;
 /// </summary>
 public class SystemInitializer : ISystemInitializer
 {
-    private readonly IWorkoutLogger _workoutLogger;
+    private readonly ILogger _workoutLogger;
     private readonly IDataProvider _dataProvider;
     private readonly IComponentCacheRegistry _cacheRegistry;
     private readonly IDataManager _dataManager;
@@ -30,7 +30,7 @@ public class SystemInitializer : ISystemInitializer
     /// <param name="cacheRegistry">The component cache registry for caching components.</param>
     /// <param name="dataManager">The data manager for managing application data.</param>
     public SystemInitializer(
-        IWorkoutLogger workoutLogger, 
+        ILogger workoutLogger, 
         IDataProvider dataProvider, 
         IComponentCacheRegistry cacheRegistry, 
         IDataManager dataManager,

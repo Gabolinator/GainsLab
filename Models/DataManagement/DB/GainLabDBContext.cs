@@ -8,9 +8,9 @@ namespace GainsLab.Models.DataManagement.DB;
 
 public class GainLabDBContext : DbContext
 {
-    private readonly IWorkoutLogger _logger;
+    private readonly ILogger _logger;
     
-    public GainLabDBContext(DbContextOptions<GainLabDBContext> options, IWorkoutLogger logger)
+    public GainLabDBContext(DbContextOptions<GainLabDBContext> options, ILogger logger)
         : base(options)
     {
         _logger = logger;

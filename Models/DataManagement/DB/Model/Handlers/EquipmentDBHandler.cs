@@ -10,7 +10,7 @@ namespace GainsLab.Models.DataManagement.DB.Model.Handlers;
 
 public class EquipmentIdbHandler : IdbContextHandler<EquipmentDTO>
 {
-    public EquipmentIdbHandler(GainLabDBContext context, IWorkoutLogger logger) : base(context, logger)
+    public EquipmentIdbHandler(GainLabDBContext context, ILogger logger) : base(context, logger)
     {
      
     }
@@ -27,7 +27,7 @@ public class EquipmentIdbHandler : IdbContextHandler<EquipmentDTO>
 
             _logger.Log("DbContextHandler",$" {uid} exist in db: {success}");
 
-            return success ? Results.SuccessResult(existing!) : Results.FailureResult<EquipmentDTO>("No existing dto found");
+            return success ? Result<EquipmentDTO>.SuccessResult(existing!) : Result<EquipmentDTO>.Failure("No existing dto found");
         }
         catch (Exception ex)
         {

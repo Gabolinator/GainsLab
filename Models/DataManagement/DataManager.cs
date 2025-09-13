@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.XPath;
 using GainsLab.Models.Core;
 using GainsLab.Models.Core.Interfaces;
 using GainsLab.Models.Core.LifeCycle;
@@ -18,7 +19,7 @@ namespace GainsLab.Models.DataManagement;
 public class DataManager :IDataManager
 {
 
-    private readonly IWorkoutLogger _logger;
+    private readonly ILogger _logger;
     
     //bridge to database
     private readonly IDataProvider _dataProvider;
@@ -31,7 +32,7 @@ public class DataManager :IDataManager
 
     private string fileDirectory;
     
-    public DataManager(IWorkoutLogger logger, IDataProvider dataProvider, IComponentCacheRegistry cache, IFileDataService fileDataService)
+    public DataManager(ILogger logger, IDataProvider dataProvider, IComponentCacheRegistry cache, IFileDataService fileDataService)
     {
         _logger = logger;
         _dataProvider = dataProvider;
@@ -58,53 +59,93 @@ public class DataManager :IDataManager
         lifeCycle.onAppExitAsync +=SaveAllDataToFilesAsync;
     }
 
-    public async Task LoadAndCacheDataAsync()
+    public async Task<Result> LoadAndCacheDataAsync()
     {
+      
         
         _logger.Log(nameof(DataManager), "Loading and caching data...");
 
         //Load from files
         //not implemented
-        Dictionary<eWorkoutComponents, List<IWorkoutComponent>> fileData = await _fileDataService.LoadAllComponentsAsync();
+        Dictionary<eWorkoutComponents,  ResultList<IWorkoutComponent>> fileData = await _fileDataService.LoadAllComponentsAsync();
         
-        //batch insert all in database
+        
+        //batch insert all new loaded data in database
         //not implemented
-        await _dataProvider.BatchSaveComponentsAsync(fileData); 
-        
-        //Load from DB to cache
-        //not implemented
-        Dictionary<eWorkoutComponents, List<IWorkoutComponent>>
-            dataFromDB = await _dataProvider.GetAllComponentsAsync();
-        
-        foreach (var kvp in dataFromDB)
+        var result =  await _dataProvider.BatchSaveComponentsAsync(fileData);
+
+        var batchSaveSuccess = result.Success;
+        if (!batchSaveSuccess)
         {
-            List<IWorkoutComponent> dbComponents = kvp.Value;
-            if(dbComponents.Count == 0 ) continue;
-            _cache.StoreAll(kvp.Key, dbComponents);
+            _logger.LogWarning(nameof(DataManager), $"Could not Save loaded data to DB.{result.GetErrorMessage()}");
+            
         }
 
+
+
+        //Load from DB to cache
+        //not implemented
+        var dataFromDB = await _dataProvider.GetAllComponentsAsync();
+
+        var fromDBSuccess = dataFromDB.Success;
+        if (!fromDBSuccess || dataFromDB.Value == null)
+        {
+            _logger.LogWarning(nameof(DataManager), $"Could Load all component data from DB.{(result.GetErrorMessage())}");
+            
+        }
+
+        else CacheAllData(dataFromDB.Value);
+
+
+        bool allFailed = !fromDBSuccess && !batchSaveSuccess;
         _logger.Log(nameof(DataManager), "Finished loading and caching data.");
+        return !allFailed ? Result.SuccessResult() : Result.Failure("Loading and Retreiving datafrom database failed");
+
     }
+
+    private void CacheAllData( Dictionary<eWorkoutComponents, ResultList<IWorkoutComponent>> data)
+    {
+        foreach (var kvp in data)
+        {
+            //filter the not successfull result out 
+            var results = kvp.Value;
+            if (!results.Success || !results.TryGetSuccessValues(_logger, out var values))
+            {
+                _logger.LogWarning(nameof(DataManager),$"No valid components to cache found for {kvp.Key}");
+                continue;
+            }
+
+            CacheComponents(kvp.Key,  values.ToList());
+        }
+    }
+
+    private void CacheComponents(eWorkoutComponents componentType, List<IWorkoutComponent> components)
+    {
+        if(components == null || components.Count == 0) return;
+        
+        _cache.StoreAll(componentType, components);
+    }
+
 
     public async Task<Result<T>> TryGetComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent
     {
-        if (id.IsEmpty()) return Results.FailureResult<T>("Id is empty");
+        if (id.IsEmpty()) return Result<T>.Failure("Id is empty");
 
         if (_cache.TryGetComponent<T>(id, out var cached))
-            return Results.SuccessResult(cached!);
+            return Result<T>.SuccessResult(cached!);
 
-        var dbResult = await _dataProvider.TryGetComponentAsync<T>(id);
+        var dbResult = await _dataProvider.GetComponentAsync<T>(id);
         if (!dbResult.Success)
-            return Results.FailureResult<T>("Component not found in DB.");
+            return  Result<T>.Failure("Component not found in DB.");
 
         // store in cache
         _cache.Store(dbResult.Value!);
-        return Results.SuccessResult(dbResult.Value!);
+        return Result<T>.SuccessResult(dbResult.Value!);
     }
 
   
 
-    public async Task<Result<IEnumerable<T>>> TryGetComponentsAsync<T>(IEnumerable<IIdentifier> ids) where T : IWorkoutComponent
+    public async Task<ResultList<T>> TryGetComponentsAsync<T>(IEnumerable<IIdentifier> ids) where T : IWorkoutComponent
     {
         var foundComponents = new List<T>();
         var toResolve = new List<IIdentifier>();
@@ -120,28 +161,27 @@ public class DataManager :IDataManager
         //no components to resolve 
         if (toResolve.Count == 0)
         {
-            //if no component found result failure
-            return foundComponents.Count > 0
-                ? Results.SuccessResult<IEnumerable<T>>(foundComponents)
-                : Results.FailureResult<IEnumerable<T>>("No matches found");
+            //todo 
+            return ResultList<T>.FailureResult<T>("No  components to resolve ");
         }
 
         var resolveResult = await TryResolveComponentsAsync<T>(toResolve);
 
         //failed to resolve components
-        if (!resolveResult.Success)
-            return foundComponents.Count > 0
-                ? Results.SuccessResult<IEnumerable<T>>(foundComponents)
-                : Results.FailureResult<IEnumerable<T>>("No components could be found or resolved");
+        if (!resolveResult.Success || !resolveResult.TryGetSuccessValues(out var resolved))
+        {
+            return ResultList<T>.FailureResult<T>("Failed to resolve components");
+        }
 
-        foundComponents.AddRange(resolveResult.Value!);
-        return Results.SuccessResult<IEnumerable<T>>(foundComponents);
+        foundComponents = resolved.ToList();
+        
+        return ResultList<T>.SuccessResults(foundComponents);
     }
 
     public async Task<Result<T>> TryResolveComponentAsync<T>(IIdentifier unresolved) where T : IWorkoutComponent
     {
-        Result<T> dbResult = await _dataProvider.TryGetComponentAsync<T>(unresolved);
-        if (!dbResult.Success || dbResult.Value is null) return Results.FailureResult<T>("Could not Resolve Component");
+        Result<T> dbResult = await _dataProvider.GetComponentAsync<T>(unresolved);
+        if (!dbResult.Success || dbResult.Value is null) return Result<T>.Failure("Could not Resolve Component");
         
         //add to cache
         _cache.Store(dbResult.Value!);
@@ -150,69 +190,94 @@ public class DataManager :IDataManager
     }
 
 
-    public async Task<Result<IEnumerable<T>>> TryResolveComponentsAsync<T>(List<IIdentifier> toResolve) where T : IWorkoutComponent
+    public async Task<ResultList<T>> TryResolveComponentsAsync<T>(List<IIdentifier> toResolve) where T : IWorkoutComponent
     {
         
-        List<Result<T>> dbResults = await _dataProvider.TryGetComponentsAsync<T>(toResolve);
-        var resolved = dbResults
-            .Where(r => r.Success && r.Value is not null)
-            .Select(r => r.Value!)
-            .ToList();
+        var  dbResults = await _dataProvider.GetComponentsAsync<T>(toResolve);
+        if (!dbResults.TryGetSuccessValues(_logger, out var r))
+        {
+            return ResultList<T>.FailureResult<T>("No components were resolved");
+        }
 
-        if (resolved.Count == 0)
-            return Results.FailureResult<IEnumerable<T>>("No components were resolved");
+        var resolved = r.ToList();
+        
+        // var resolved = dbResults
+        //     .Where(r => r.Success && r.Value is not null)
+        //     .Select(r => r.Value!)
+        //     .ToList();
 
+        
         var type = resolved[0].ComponentType;
         _cache.StoreAll(type, resolved);
 
-        return Results.SuccessResult<IEnumerable<T>>(resolved);
+        return ResultList<T>.SuccessResults<T>(resolved);
     }
 
-    public async Task SaveComponentAsync<T>(T component) where T : IWorkoutComponent
+    public async Task<Result> SaveComponentAsync<T>(T component) where T : IWorkoutComponent
     {
-        if (component.Identifier.IsEmpty()) return;
+        if (component.Identifier.IsEmpty()) return Result.Failure("Identifier list empty");
 
         _logger.Log(nameof(DataManager), $"Saving component {component.Name}");
         _cache.Store(component);
         
         //save to database
-        await _dataProvider.SaveComponentAsync(component);
+       var saveResult = await _dataProvider.SaveComponentAsync(component);
+       return saveResult.Success ? Result.SuccessResult() : Result.Failure(((Result)saveResult).GetErrorMessage());
     }
 
-    public async Task SaveComponentsAsync<T>(IEnumerable<T> components) where T : IWorkoutComponent
+    public async Task<ResultList> SaveComponentsAsync<T>(IEnumerable<T> components) where T : IWorkoutComponent
     {
         var list = components.ToList();
-        if(list.Count ==0) return;
+        if(list.Count ==0) return ResultList.FailureResult("No component to save");
         
         
         _cache.StoreAll<T>(list.ToList());
         
-        //
-        // foreach (var component in list)
-        // {
-        //     if (component.Identifier.IsEmpty()) continue;
-        //     _cache.StoreAll(components);
-        // }
-        
-        await _dataProvider.SaveComponentsAsync(list[0].ComponentType,list);
+       var result = await _dataProvider.SaveComponentsAsync(list[0].ComponentType,list);
+       
+       //get all the success 
+       return result.ToBoolResultList();
     }
 
-    public async Task DeleteComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent
+    public async Task<Result> DeleteComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent
     {
-        if (id.IsEmpty()) return;
+        if (id.IsEmpty()) return Result.Failure("Failed to delete: No id ");
 
         _cache.Remove<T>(id);
-        await _dataProvider.DeleteComponentAsync<T>(id);
+        return await _dataProvider.DeleteComponentAsync<T>(id);
      
     }
 
-    public async Task SaveAllDataToFilesAsync()
+    public async Task<Result> SaveAllDataToFilesAsync()
     {
         //get all the data in the registry 
         //and save it 
         var data = await _dataProvider.GetAllComponentsAsync();
-        await _fileDataService.WriteAllComponentsAsync(data, fileDirectory, ".json");
+        if (!data.Success) return Result.Failure(data.GetErrorMessage());
 
+        var dict = new Dictionary<eWorkoutComponents, List<IWorkoutComponent>>();
+        if (!data.TryGetValue(out var values)) return Result.Failure(data.GetErrorMessage());
+        var v = values!;
+
+        foreach (var kvp in v)
+        {
+            if (!kvp.Value.TryGetSuccessValues(out var components)) continue;
+            var list = components.ToList();
+
+
+            if (!dict.TryAdd(kvp.Key, list))
+            {
+                _logger.LogWarning(nameof(DataManager),$"Trying to add duplicate for {kvp.Key}");
+            }
+        }
+            
+        if(dict.Count ==0) return  Result.Failure("No data in dictionnary");
+
+
+
+
+        return  await _fileDataService.WriteAllComponentsAsync( dict, fileDirectory, ".json");
+        
     }
 
   

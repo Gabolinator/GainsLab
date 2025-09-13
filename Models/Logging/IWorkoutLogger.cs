@@ -1,6 +1,6 @@
 ﻿namespace GainsLab.Models.Logging;
 
-public interface IWorkoutLogger
+public interface ILogger
 {
     bool Enabled { get;}
 

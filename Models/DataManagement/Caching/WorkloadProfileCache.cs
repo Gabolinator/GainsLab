@@ -7,7 +7,7 @@ namespace GainsLab.Models.DataManagement.Caching;
 
 public class WorkloadProfileCache : BaseComponentCache<WorkloadCalculationProfile>
 {
-    public WorkloadProfileCache (IWorkoutLogger logger)
+    public WorkloadProfileCache (ILogger logger)
     {
         _logger = logger;
     }

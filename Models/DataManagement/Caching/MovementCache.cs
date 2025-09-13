@@ -7,7 +7,7 @@ namespace GainsLab.Models.DataManagement.Caching;
 
 public class MovementCache : BaseComponentCache<Movement>
 {
-    public MovementCache(IWorkoutLogger logger)
+    public MovementCache(ILogger logger)
     {
         _logger = logger;
     }

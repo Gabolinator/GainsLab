@@ -28,7 +28,7 @@ public static class ServiceConfig
     public static void ConfigureServices(IServiceCollection services)
     {
 
-        services.AddSingleton<IWorkoutLogger, WorkoutLogger>(); 
+        services.AddSingleton<ILogger, WorkoutLogger>(); 
         
         services.AddDbContext<GainLabDBContext>(options =>
         {

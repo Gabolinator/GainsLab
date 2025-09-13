@@ -13,10 +13,10 @@ namespace GainsLab.Models.DataManagement.Caching;
 public class ComponentCacheRegistry : IComponentCacheRegistry
 {
 
-    private readonly IWorkoutLogger _logger;
+    private readonly ILogger _logger;
     private Dictionary<eWorkoutComponents, IComponentCacheBase> _caches = new ();
 
-    public ComponentCacheRegistry(IWorkoutLogger logger)
+    public ComponentCacheRegistry(ILogger logger)
     {
         _logger = logger;
     }

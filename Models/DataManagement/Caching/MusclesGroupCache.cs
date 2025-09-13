@@ -7,7 +7,7 @@ namespace GainsLab.Models.DataManagement.Caching;
 
 public class MusclesGroupCache : BaseComponentCache<MusclesGroup>
 {
-    public MusclesGroupCache (IWorkoutLogger logger)
+    public MusclesGroupCache (ILogger logger)
     {
         _logger = logger;
     }

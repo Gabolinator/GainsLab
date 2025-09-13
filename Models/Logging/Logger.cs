@@ -2,7 +2,7 @@
 
 namespace GainsLab.Models.Logging;
 
-public class WorkoutLogger : IWorkoutLogger
+public class WorkoutLogger : ILogger
 {
     private bool _enabled = true;
     public bool Enabled => _enabled;

@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using GainsLab.Models.Core;
 using GainsLab.Models.Core.Interfaces;
+using GainsLab.Models.Core.Results;
 using GainsLab.Models.Logging;
 
 namespace GainsLab.Models.DataManagement.FileAccess;
 
 public class JsonFilesDataService  : IFileDataService
 {
-    private readonly IWorkoutLogger _logger;
+    private readonly ILogger _logger;
 
-    public JsonFilesDataService(IWorkoutLogger logger)
+    public JsonFilesDataService(ILogger logger)
     {
         _logger = logger;
     }
@@ -23,34 +25,35 @@ public class JsonFilesDataService  : IFileDataService
         throw new System.NotImplementedException();
     }
 
-    public Task<IEnumerable<T>> LoadFromFileAsync<T>(string filePath)
+    public Task< ResultList<T>> LoadFromFileAsync<T>(string filePath)
     {
         throw new System.NotImplementedException();
     }
 
-    public async Task<Dictionary<eWorkoutComponents, List<IWorkoutComponent>>> LoadAllComponentsAsync()
+    public async Task<Dictionary<eWorkoutComponents,  ResultList<IWorkoutComponent>>> LoadAllComponentsAsync()
     {
       //todo
       return new();
     }
     
-    public async Task WriteAllComponentsAsync(Dictionary<eWorkoutComponents, List<IWorkoutComponent>> data, string filePath, string fileExtension)
+    public async Task<Result> WriteAllComponentsAsync(Dictionary<eWorkoutComponents, List<IWorkoutComponent>> data, string filePath, string fileExtension)
     {
         if (string.IsNullOrWhiteSpace(filePath) || !Directory.Exists(filePath))
         {
           
             _logger.LogWarning(nameof(JsonFilesDataService) ,$"Failed to Write all - Directory not found: {filePath}");
             // throw new DirectoryNotFoundException($"Directory not found: {filePath}");
-            return;
+            return Result.Failure("Not a valid Directory");
         }
 
         if (data == null || data.Count == 0)
         {
            // throw new ArgumentException("No components provided to write.");
             _logger.LogWarning(nameof(JsonFilesDataService) ,$"Write all - No components provided to write.");
-            return;
+            return Result.Failure("No components provided to write");
         }
 
+        int wroteComponent = 0;
         foreach (var kvp in data)
         {
             var componentType = kvp.Key;
@@ -75,8 +78,10 @@ public class JsonFilesDataService  : IFileDataService
             // Write to file asynchronously
             await File.WriteAllTextAsync(fullPath, jsonContent);
             _logger.Log(nameof(JsonFilesDataService),$"Saved {components.Count} components to {fullPath}");
-
+            wroteComponent++;
             //Console.WriteLine($"[WriteAllComponentsAsync] Saved {components.Count} components to {fullPath}");
         }
+
+        return wroteComponent != 0 ? Result.SuccessResult() : Result.Failure("Wrote 0 componenets to file");
     }
 }

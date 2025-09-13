@@ -12,19 +12,19 @@ public interface IDataManager
 
     Task InitializeAsync(IAppLifeCycle lifeCycle);
 
-    Task LoadAndCacheDataAsync();
+    Task<Result> LoadAndCacheDataAsync();
     
     Task<Result<T>> TryGetComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent;
 
-    Task<Result<IEnumerable<T>>> TryGetComponentsAsync<T>(IEnumerable<IIdentifier> ids) where T : IWorkoutComponent;
+    Task<ResultList<T>> TryGetComponentsAsync<T>(IEnumerable<IIdentifier> ids) where T : IWorkoutComponent;
 
    
-    Task SaveComponentAsync<T>(T component) where T : IWorkoutComponent;
-    Task SaveComponentsAsync<T>(IEnumerable<T> components) where T : IWorkoutComponent;
+    Task<Result> SaveComponentAsync<T>(T component) where T : IWorkoutComponent;
+    Task<ResultList> SaveComponentsAsync<T>(IEnumerable<T> components) where T : IWorkoutComponent;
 
-    Task<Result<IEnumerable<T>>> TryResolveComponentsAsync<T>(List<IIdentifier> toResolve) where T : IWorkoutComponent;
+    Task<ResultList<T>> TryResolveComponentsAsync<T>(List<IIdentifier> toResolve) where T : IWorkoutComponent;
     Task<Result<TComponent>> TryResolveComponentAsync<TComponent>(IIdentifier unresolved) where TComponent : IWorkoutComponent;
-    Task DeleteComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent;
+    Task<Result> DeleteComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent;
 
-    Task SaveAllDataToFilesAsync();
+    Task<Result> SaveAllDataToFilesAsync();
 }

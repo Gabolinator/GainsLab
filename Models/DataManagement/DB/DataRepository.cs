@@ -18,17 +18,17 @@ namespace GainsLab.Models.DataManagement.DB;
 public class DataRepository : IDataProvider
 {
     
-    private readonly IWorkoutLogger _workoutLogger;
+    private readonly ILogger _workoutLogger;
     private readonly GainLabDBContext _dbContext;
     private Dictionary<eWorkoutComponents, IDBHandler> _handlers = new();
 
-    public DataRepository(IWorkoutLogger workoutLogger, GainLabDBContext dbContext)
+    public DataRepository(ILogger workoutLogger, GainLabDBContext dbContext)
     {
         _workoutLogger = workoutLogger;
         _dbContext = dbContext;
     }
     
-    public async Task<Result<bool>> InitializeAsync()
+    public async Task<Result> InitializeAsync()
     {
 
         try
@@ -41,12 +41,12 @@ public class DataRepository : IDataProvider
             _workoutLogger.Log(nameof(DataRepository), "Database ready.");
             CreateHandlers();
 
-            return Results.SuccessResult();
+            return Result.SuccessResult();
         }
         catch (Exception e)
         {
             _workoutLogger.LogError(nameof(DataRepository), $"Error ininitalizing Data repository {e}");
-            return Results.FailureResult($"Error ininitalizing Data repository {e}");
+            return Result.Failure($"Error initializing Data repository {e}");
         }
       
         
@@ -61,56 +61,55 @@ public class DataRepository : IDataProvider
  
     }
 
-    public async Task<Result<T>> TryGetComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent
+    public async Task<Result<T>> GetComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent
     {
-        //todo
-        return Results.FailureResult<T>("Not implemented");
+        
+        return Results.NotImplementedResult<T>();
     }
 
-    public async Task<List<Result<T>>> TryGetComponentsAsync<T>(List<IIdentifier> ids) where T : IWorkoutComponent
+    public async Task<ResultList<T>> GetComponentsAsync<T>(List<IIdentifier> ids) where T : IWorkoutComponent
     {
-        return new()
-        {
-            Results.FailureResult<T>("Not implemented")
-        };
+        return Results.NotImplementedResults<T>("Not implemented : GetComponentsAsync");
     }
+    
 
-    public async Task<Result<bool>> DeleteComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent
+    public async Task<Result> DeleteComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent
     {
         //todo
         return Results.NotImplementedResult<bool>("DeleteComponentAsync");
     }
 
-    public async Task<Result<List<T>>> SaveComponentsAsync<T>(eWorkoutComponents componentType, List<T> list) where T : IWorkoutComponent
+    public async Task<ResultList<T>> SaveComponentsAsync<T>(eWorkoutComponents componentType, List<T> list) where T : IWorkoutComponent
     {
-        //todo
-        return Results.NotImplementedResult<List<T>>("SaveComponentsAsync");
+        return Results.NotImplementedResults<T>("SaveComponentsAsync");
     }
 
-    public async Task<Result<Dictionary<eWorkoutComponents, List<Result<IWorkoutComponent>>>>>  BatchSaveComponentsAsync(Dictionary<eWorkoutComponents, List<IWorkoutComponent>> fileData)
+    public async Task<Result<Dictionary<eWorkoutComponents, ResultList<IWorkoutComponent>>>> BatchSaveComponentsAsync(Dictionary<eWorkoutComponents, ResultList<IWorkoutComponent>> fileData)
     {
-        return Results.NotImplementedResult<Dictionary<eWorkoutComponents, List<Result<IWorkoutComponent>>>>("BatchSaveComponentsAsync");
+        return Results.NotImplementedResult<Dictionary<eWorkoutComponents,  ResultList<IWorkoutComponent>>>("Not yet implemented : BatchSaveComponentsAsync");
 
     }
+    
 
-    public async Task<Dictionary<eWorkoutComponents, List<IWorkoutComponent>>> GetAllComponentsAsync()
+    public async Task<Result<Dictionary<eWorkoutComponents,  ResultList<IWorkoutComponent>>>> GetAllComponentsAsync()
     {
-        //todo
-        return new();
+        return Results.NotImplementedResult<Dictionary<eWorkoutComponents,  ResultList<IWorkoutComponent>>>("Not yet implemented");
     }
 
-    public async Task<List<IWorkoutComponent>> GetAllComponentsOfTypeAsync(eWorkoutComponents type)
+
+
+    public async Task<ResultList<IWorkoutComponent>> GetAllComponentsOfTypeAsync(eWorkoutComponents type)
     {
         //todo
-        return new();
+        return Results.NotImplementedResults<IWorkoutComponent>("Not yet implemented");
     }
 
     public async Task<Result<T>> SaveComponentAsync<T>(T component) where T : IWorkoutComponent
     {
        
-        if(_handlers.Count ==0) return Results.FailureResult<T>("Failed to Save components. No Db handlers.");
+        if(_handlers.Count ==0) return Result<T>.Failure("Failed to Save components. No Db handlers.");
         
-        if(!_handlers.TryGetValue(component.ComponentType, out var handler)) return Results.FailureResult<T>($"Failed to Save component. No Db handler for type {component.ComponentType} found.");
+        if(!_handlers.TryGetValue(component.ComponentType, out var handler)) return Result<T>.Failure($"Failed to Save component. No Db handler for type {component.ComponentType} found.");
         
         _workoutLogger.Log("DataRepository",$"Saving component {component.Identifier.UID} to data base");
         IDto dto = component.ToDTO();
@@ -134,8 +133,8 @@ public class DataRepository : IDataProvider
 
        
         return result.Success
-            ? Results.SuccessResult<T>(component)
-            : Results.FailureResult<T>($"Failed to add {dto.Iuid} to data base : {result.ErrorMessage}");
+            ? Result<T>.SuccessResult(component)
+            : Result<T>.Failure($"Failed to add {dto.Iuid} to data base : {result.ErrorMessage}");
 
     }
 }

@@ -66,7 +66,7 @@ public class ComponentReference<TComponent> : IComponentReference,  IEquatable<C
     public static ComponentReference<TComponent> FromComponent(TComponent component)
     {
         
-        IWorkoutLogger logger = ServiceLocator.GetService<IWorkoutLogger>();
+        ILogger logger = ServiceLocator.GetService<ILogger>();
         logger?.Log("ComponentReference - FromComponent", $" {typeof(TComponent).Name} ({component.Name}) to ComponentReference<{typeof(TComponent).Name}>");
         
         return new ComponentReference<TComponent>

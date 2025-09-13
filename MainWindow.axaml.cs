@@ -3,16 +3,17 @@ using Avalonia.Interactivity;
 using GainsLab.Models.Factory;
 using GainsLab.Models.Logging;
 using Microsoft.Extensions.Logging;
+using ILogger = GainsLab.Models.Logging.ILogger;
 
 
 namespace GainsLab;
 
 public partial class MainWindow : Window
 {
-    private readonly IWorkoutLogger _logger;
+    private readonly ILogger _logger;
     private readonly ComponentFactory _componentFactory;
 
-    public MainWindow(IWorkoutLogger logger, ComponentFactory componentFactory)
+    public MainWindow(ILogger logger, ComponentFactory componentFactory)
     {
         _logger = logger;
         _componentFactory = componentFactory;
