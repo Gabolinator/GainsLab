@@ -28,7 +28,8 @@ public class MusclesGroup : IWorkoutComponent
 
     public eWorkoutComponents ComponentType => eWorkoutComponents.MuscleGroup;
     public ComponentDescriptor Descriptor { get; set; } = new EmptyDescriptor();
-    public Identifier Identifier { get; set; } = new EmptyIdentifier();
+    public WorkoutComponentIdentifier Identifier { get; set; } = new EmptyWorkoutComponentIdentifier();
+    public MediaInfos Medias { get; set; }
     public MuscleList MainMuscles { get; set; } = new();
     public MuscleList SecondaryMuscles { get; set; } = new();
 

@@ -41,7 +41,7 @@ public static class EquipmentMapper
     {
         return new Equipment(
             dto.Descriptor.ToDomain(),
-            new Identifier(dto.Id, dto.UID, eWorkoutComponents.Equipment)
+            new WorkoutComponentIdentifier(dto.Id, dto.UID, eWorkoutComponents.Equipment)
         );
     }
 }

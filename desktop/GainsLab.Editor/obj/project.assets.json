@@ -4547,11 +4547,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\lalib\\GainsLab\\GainsLab\\GainsLab.csproj",
+      "projectUniqueName": "C:\\Users\\lalib\\GainsLab\\GainsLab\\desktop\\GainsLab.Editor\\GainsLab.csproj",
       "projectName": "GainsLab",
-      "projectPath": "C:\\Users\\lalib\\GainsLab\\GainsLab\\GainsLab.csproj",
+      "projectPath": "C:\\Users\\lalib\\GainsLab\\GainsLab\\desktop\\GainsLab.Editor\\GainsLab.csproj",
       "packagesPath": "C:\\Users\\lalib\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\lalib\\GainsLab\\GainsLab\\obj\\",
+      "outputPath": "C:\\Users\\lalib\\GainsLab\\GainsLab\\desktop\\GainsLab.Editor\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\lalib\\AppData\\Roaming\\NuGet\\NuGet.Config",

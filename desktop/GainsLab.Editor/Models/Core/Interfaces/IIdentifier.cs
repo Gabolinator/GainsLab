@@ -1,11 +1,13 @@
-﻿namespace GainsLab.Models.Core.Interfaces;
+﻿using System;
+
+namespace GainsLab.Models.Core.Interfaces;
 
 public interface IIdentifier
 {
     int? ID { get; set; } // for database primary key
     string? UID { get; set; } // Public-friendly or shareable (e.g., "pushup-001")
 
-    public eWorkoutComponents ComponentType { get; set; }
+    Guid GUID { get; set; }
 
     public bool IsIdSet();
 

@@ -1,4 +1,5 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using GainsLab.Models.Core.Descriptor;
 using GainsLab.Models.WorkoutComponents.Equipment;
@@ -19,13 +20,20 @@ public interface IWorkoutComponent
     
     string Name => Descriptor.Name;
     
+    public Guid GUID
+    {
+        get => Identifier.GUID;
+
+        set => Identifier.GUID = value;
+    }
     
-    
-    
+    //the type of the component - exercise , 
     eWorkoutComponents ComponentType { get;}
     ComponentDescriptor Descriptor { get; set; }
-    Identifier Identifier { get; set; }
-    
+    WorkoutComponentIdentifier Identifier { get; set; }
+
+    MediaInfos Medias { get; set; }
+
     IWorkoutComponent Copy();
     
 

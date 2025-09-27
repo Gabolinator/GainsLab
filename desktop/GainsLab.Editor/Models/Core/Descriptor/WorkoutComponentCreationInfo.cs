@@ -2,11 +2,15 @@
 
 namespace GainsLab.Models.Core.Descriptor;
 
-public record CreationInfo(string? CreatedBy, Identifier Identifier ,DateTime? CreatedAt, DateTime? UpdatedAt = null)
+public record WorkoutComponentCreationInfo(
+    string? CreatedBy,
+    Identifier Identifier,
+    DateTime? CreatedAt,
+    DateTime? UpdatedAt = null) : CreationInfo(CreatedBy,Identifier, CreatedAt, UpdatedAt )
 {
     public bool IsEmpty() => string.IsNullOrWhiteSpace(CreatedBy) && Identifier.IsEmpty();
 
-    public CreationInfo(): this("", new EmptyIdentifier(), null, null)
+    public WorkoutComponentCreationInfo(): this("", new EmptyWorkoutComponentIdentifier(), null, null)
     {
         
     }
@@ -18,9 +22,9 @@ public record CreationInfo(string? CreatedBy, Identifier Identifier ,DateTime? C
         set => Identifier.ID = value;
     }
     
-    public CreationInfo Copy()
+    public WorkoutComponentCreationInfo Copy()
     {
-        return new CreationInfo(CreatedBy, Identifier, CreatedAt, UpdatedAt);
+        return new WorkoutComponentCreationInfo(CreatedBy, Identifier, CreatedAt, UpdatedAt);
     }
     
     public override string ToString()
@@ -32,13 +36,13 @@ public record CreationInfo(string? CreatedBy, Identifier Identifier ,DateTime? C
     }
 }
 
-public record EmptyCreationInfo() : CreationInfo(null, null, null, null)
+public record EmptyWorkoutComponentCreationInfo() : WorkoutComponentCreationInfo(null, null, null, null)
 {
     public override string ToString() => "CreationInfo: (empty)";
 }
 
-public record DefaultCreationInfo(eWorkoutComponents type) 
-    : CreationInfo("system", new Identifier("system", type), DateTime.Now)
+public record DefaultWorkoutComponentCreationInfo(eWorkoutComponents type) 
+    : WorkoutComponentCreationInfo("system", new WorkoutComponentIdentifier("system", type), DateTime.Now)
 {
     public override string ToString() => base.ToString() + " (default)";
 }

@@ -18,7 +18,7 @@ public class EquipmentList : ComponentLists<Equipment> , IWorkoutComponent
     
     public EquipmentList()
     {
-        Identifier = new EmptyIdentifier();
+        Identifier = new EmptyWorkoutComponentIdentifier();
         Descriptor = new ComponentDescriptor();
     }
     
@@ -54,8 +54,9 @@ public class EquipmentList : ComponentLists<Equipment> , IWorkoutComponent
     
     public eWorkoutComponents ComponentType => eWorkoutComponents.EquipmentList;
     public ComponentDescriptor Descriptor { get; set; } = new EmptyDescriptor();
-    public Identifier Identifier { get; set; } = new EmptyIdentifier();
-    
+    public WorkoutComponentIdentifier Identifier { get; set; } = new EmptyWorkoutComponentIdentifier();
+    public MediaInfos Medias { get; set; }
+
     public IWorkoutComponent Copy()
     {
         return new EquipmentList(Items);

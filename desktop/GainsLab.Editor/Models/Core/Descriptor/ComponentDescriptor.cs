@@ -25,7 +25,7 @@ public class ComponentDescriptor : IComponentDescriptor
     /// <param name="notes">The notes associated with the component.</param>
     /// <param name="description">The description of the component.</param>
     /// <param name="creationInfo">The creation info for the component.</param>
-    public ComponentDescriptor(string name, Notes notes, Description description, CreationInfo creationInfo)
+    public ComponentDescriptor(string name, Notes notes, Description description, WorkoutComponentCreationInfo creationInfo)
     {
         Name = name;
         Notes = notes;
@@ -45,7 +45,7 @@ public class ComponentDescriptor : IComponentDescriptor
         Name = name;
         Notes = new EmptyNotes();
         Description = new EmptyDescription();
-        CreationInfo = new DefaultCreationInfo(type);
+        CreationInfo = new DefaultWorkoutComponentCreationInfo(type);
         Tags  = new TagList();
     }
 
@@ -73,7 +73,7 @@ public class ComponentDescriptor : IComponentDescriptor
     /// <summary>
     /// Gets or sets the creation info of the component.
     /// </summary>
-    public CreationInfo CreationInfo { get; set; }
+    public WorkoutComponentCreationInfo CreationInfo { get; set; }
   
     /// <summary>
     /// Gets or sets the list of tags associated with the component. This property is not mapped to the database.

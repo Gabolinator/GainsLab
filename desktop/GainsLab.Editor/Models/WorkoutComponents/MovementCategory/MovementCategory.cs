@@ -15,11 +15,11 @@ public class MovementCategory : IWorkoutComponent
     
     public MovementCategory()
     {
-        Identifier = new EmptyIdentifier();
+        Identifier = new EmptyWorkoutComponentIdentifier();
         Descriptor = new ComponentDescriptor();
     }
 
-    public MovementCategory(ComponentDescriptor descriptor, Identifier identifier, eMovementCategories baseCategory)
+    public MovementCategory(ComponentDescriptor descriptor, WorkoutComponentIdentifier identifier, eMovementCategories baseCategory)
     {
         Descriptor = descriptor;
         Identifier = identifier;
@@ -29,7 +29,7 @@ public class MovementCategory : IWorkoutComponent
     public MovementCategory(string name, string stringID, eMovementCategories baseCategory)
     {
         Descriptor = new ComponentDescriptor(name, ComponentType);
-        Identifier = new Identifier(stringID, ComponentType);
+        Identifier = new WorkoutComponentIdentifier(stringID, ComponentType);
         BaseCategory = baseCategory;
     }
     
@@ -39,8 +39,9 @@ public class MovementCategory : IWorkoutComponent
 
     public eMovementCategories BaseCategory { get; set; } = eMovementCategories.undefined;
     public ComponentDescriptor Descriptor { get; set; }
-    public Identifier Identifier { get; set; }
-    
+    public WorkoutComponentIdentifier Identifier { get; set; }
+    public MediaInfos Medias { get; set; }
+
     public IWorkoutComponent Copy()
     {
         throw new System.NotImplementedException();

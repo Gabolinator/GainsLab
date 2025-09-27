@@ -90,7 +90,7 @@ public class ComponentLists<TComponent> : IComponentList
 
     public void AddComponent(IIdentifier id)
     {
-        if (IsTypeMismatch(id.ComponentType)) return;
+        if (id is not WorkoutComponentIdentifier identifier || IsTypeMismatch(identifier.ComponentType)) return;
         Items.Add(ComponentReference<TComponent>.FromIdentifier(id));
     }
 

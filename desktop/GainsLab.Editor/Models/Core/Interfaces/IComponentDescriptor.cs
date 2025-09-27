@@ -9,7 +9,7 @@ public interface IComponentDescriptor
     string Name { get; set; }
     public Notes Notes { get; set; }
     public Description Description { get; set; }
-    public CreationInfo CreationInfo { get; set; }
+    public WorkoutComponentCreationInfo CreationInfo { get; set; }
 
     public bool IsEmpty() => Notes.IsEmpty() && 
                              Description.IsEmpty() && 

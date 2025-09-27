@@ -15,7 +15,7 @@ public class ComponentReference<TComponent> : IComponentReference,  IEquatable<C
     
     public int Id { get =>Identifier.ID ?? -1; set => Identifier.ID = value; } 
     
-    public Identifier Identifier { get; set; } = new EmptyIdentifier();
+    public WorkoutComponentIdentifier Identifier { get; set; } = new EmptyWorkoutComponentIdentifier();
    
     [NotMapped]
     public TComponent? Component { get; set; }
@@ -71,7 +71,7 @@ public class ComponentReference<TComponent> : IComponentReference,  IEquatable<C
         
         return new ComponentReference<TComponent>
         {
-            Identifier = (Identifier)component.Identifier,
+            Identifier = (WorkoutComponentIdentifier)component.Identifier,
             Component = component
         };
     }
@@ -80,7 +80,7 @@ public class ComponentReference<TComponent> : IComponentReference,  IEquatable<C
     {
         return new ComponentReference<TComponent>
         {
-            Identifier = (Identifier)identifier,
+            Identifier = (WorkoutComponentIdentifier)identifier,
         };
     }
 

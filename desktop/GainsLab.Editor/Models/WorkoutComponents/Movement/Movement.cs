@@ -10,7 +10,7 @@ namespace GainsLab.Models.WorkoutComponents.Movement;
 public class Movement : ICompositeWorkoutComponent<MovementContent>
 {
     
-    public Movement(ComponentDescriptor descriptor, Identifier identifier)
+    public Movement(ComponentDescriptor descriptor, WorkoutComponentIdentifier identifier)
     {
         Descriptor = descriptor;
         Identifier = identifier;
@@ -20,15 +20,16 @@ public class Movement : ICompositeWorkoutComponent<MovementContent>
     public Movement(string name, string stringID)
     {
         Descriptor = new ComponentDescriptor(name,ComponentType);
-        Identifier = new Identifier(stringID,ComponentType);
+        Identifier = new WorkoutComponentIdentifier(stringID,ComponentType);
         Content = new MovementContent();
     }
     
     public eWorkoutComponents ComponentType => eWorkoutComponents.Movement;
     
     public ComponentDescriptor Descriptor { get; set; }
-    public Identifier Identifier { get; set; }
-    
+    public WorkoutComponentIdentifier Identifier { get; set; }
+    public MediaInfos Medias { get; set; }
+
     public MovementContent Content { get; set; }
 
     public void AddEquipmentList(EquipmentList equipments) =>

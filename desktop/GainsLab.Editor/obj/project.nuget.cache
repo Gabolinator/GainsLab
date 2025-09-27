@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "6Vm9K5Urs7Q=",
+  "dgSpecHash": "r6NgLe7i1MU=",
   "success": true,
-  "projectFilePath": "C:\\Users\\lalib\\GainsLab\\GainsLab\\GainsLab.csproj",
+  "projectFilePath": "C:\\Users\\lalib\\GainsLab\\GainsLab\\desktop\\GainsLab.Editor\\GainsLab.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\lalib\\.nuget\\packages\\avalonia\\11.2.7\\avalonia.11.2.7.nupkg.sha512",
     "C:\\Users\\lalib\\.nuget\\packages\\avalonia.angle.windows.natives\\2.1.22045.20230930\\avalonia.angle.windows.natives.2.1.22045.20230930.nupkg.sha512",

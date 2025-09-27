@@ -23,14 +23,14 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = GainsLab
-build_property.ProjectDir = C:\Users\lalib\GainsLab\GainsLab\
+build_property.ProjectDir = C:\Users\lalib\GainsLab\GainsLab\desktop\GainsLab.Editor\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/lalib/GainsLab/GainsLab/App.axaml]
+[C:/Users/lalib/GainsLab/GainsLab/desktop/GainsLab.Editor/App.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
-[C:/Users/lalib/GainsLab/GainsLab/MainWindow.axaml]
+[C:/Users/lalib/GainsLab/GainsLab/desktop/GainsLab.Editor/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml

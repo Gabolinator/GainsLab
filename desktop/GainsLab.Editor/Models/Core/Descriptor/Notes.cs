@@ -1,6 +1,6 @@
 ﻿namespace GainsLab.Models.Core.Descriptor;
 
-public record Notes(string? Text, Identifier Identifier)
+public record Notes(string? Text, WorkoutComponentIdentifier Identifier)
 {
     public bool IsEmpty() => string.IsNullOrWhiteSpace(Text) && Identifier.IsEmpty();
 
@@ -11,7 +11,7 @@ public record Notes(string? Text, Identifier Identifier)
         set => Identifier.ID = value;
     }
 
-    public Notes() : this("", new EmptyIdentifier())
+    public Notes() : this("", new EmptyWorkoutComponentIdentifier())
     {
         
     }

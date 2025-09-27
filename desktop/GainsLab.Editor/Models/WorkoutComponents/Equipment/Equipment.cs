@@ -9,11 +9,11 @@ public class Equipment : IWorkoutComponent
     
     public Equipment()
     {
-        Identifier = new EmptyIdentifier();
+        Identifier = new EmptyWorkoutComponentIdentifier();
         Descriptor = new ComponentDescriptor();
     }
 
-    public Equipment(ComponentDescriptor descriptor, Identifier identifier)
+    public Equipment(ComponentDescriptor descriptor, WorkoutComponentIdentifier identifier)
     {
         Descriptor = descriptor;
         Identifier = identifier;
@@ -22,15 +22,17 @@ public class Equipment : IWorkoutComponent
     public Equipment(string name, string stringID)
     {
         Descriptor = new ComponentDescriptor(name,ComponentType);
-        Identifier = new Identifier(stringID,ComponentType);
+        Identifier = new WorkoutComponentIdentifier(stringID,ComponentType);
     }
     
 
     public eWorkoutComponents ComponentType => eWorkoutComponents.Equipment;
     
     public ComponentDescriptor Descriptor { get; set; } 
-    public Identifier Identifier { get; set; }
+    public WorkoutComponentIdentifier Identifier { get; set; }
     
+    public MediaInfos Medias { get; set; }
+
     public int Id
     {
         get => Identifier.ID ?? -1;

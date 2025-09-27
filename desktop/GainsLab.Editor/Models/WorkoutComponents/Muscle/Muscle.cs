@@ -12,7 +12,7 @@ public class Muscle : ICompositeWorkoutComponent<MuscleContent>
     }
     
 
-    public Muscle(ComponentDescriptor descriptor, Identifier identifier, eBodySection bodySection, Muscle? antagonist)
+    public Muscle(ComponentDescriptor descriptor, WorkoutComponentIdentifier identifier, eBodySection bodySection, Muscle? antagonist)
     {
         Descriptor = descriptor;
         Identifier = identifier;
@@ -25,7 +25,7 @@ public class Muscle : ICompositeWorkoutComponent<MuscleContent>
     public Muscle(string name, string stringID, eBodySection bodySection ,Muscle? antagonist = null)
     {
         Descriptor = new ComponentDescriptor(name, ComponentType);
-        Identifier = new Identifier(stringID, ComponentType);
+        Identifier = new WorkoutComponentIdentifier(stringID, ComponentType);
         BodySection = bodySection;
         Content = new MuscleContent();
         SetAntagonist(antagonist);
@@ -35,7 +35,8 @@ public class Muscle : ICompositeWorkoutComponent<MuscleContent>
     public eWorkoutComponents ComponentType => eWorkoutComponents.Muscle;
     
     public ComponentDescriptor Descriptor { get; set; }
-    public Identifier Identifier { get; set; }
+    public WorkoutComponentIdentifier Identifier { get; set; }
+    public MediaInfos Medias { get; set; }
     public MuscleContent Content { get; set  ; } 
     
     /*--Specific members--*/
@@ -56,7 +57,7 @@ public class Muscle : ICompositeWorkoutComponent<MuscleContent>
     
     public IWorkoutComponent Copy()
     {
-        return new Muscle((ComponentDescriptor)Descriptor.Copy(),(Identifier)Identifier.Copy(), BodySection, Antagonist );
+        return new Muscle((ComponentDescriptor)Descriptor.Copy(),(WorkoutComponentIdentifier)Identifier.Copy(), BodySection, Antagonist );
         
     }
     
