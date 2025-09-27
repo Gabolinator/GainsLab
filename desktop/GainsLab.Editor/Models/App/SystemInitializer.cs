@@ -56,7 +56,7 @@ public class SystemInitializer : ISystemInitializer
        
         await _dataProvider.InitializeAsync();
         await _cacheRegistry.InitializeAsync();
-        await _dataManager.InitializeAsync(_lifeCycle);
+        await _dataManager.InitializeAsync();
         await _dataManager.LoadAndCacheDataAsync();
      
     }

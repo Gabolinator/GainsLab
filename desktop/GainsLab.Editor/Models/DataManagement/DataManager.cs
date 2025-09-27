@@ -31,17 +31,19 @@ public class DataManager :IDataManager
     private readonly IFileDataService _fileDataService;
 
     private string fileDirectory;
-    
-    public DataManager(ILogger logger, IDataProvider dataProvider, IComponentCacheRegistry cache, IFileDataService fileDataService)
+    private readonly IAppLifeCycle _lifeCycle;
+
+    public DataManager(IAppLifeCycle lifeCycle, ILogger logger, IDataProvider dataProvider, IComponentCacheRegistry cache, IFileDataService fileDataService)
     {
         _logger = logger;
         _dataProvider = dataProvider;
         _cache = cache;
         _fileDataService = fileDataService;
+        _lifeCycle = lifeCycle;
 
     }
 
-        public async Task InitializeAsync(IAppLifeCycle lifeCycle)
+        public async Task InitializeAsync()
     {
         _logger.Log(nameof(DataManager), "Initializing...");
         //get the local direct
@@ -56,8 +58,11 @@ public class DataManager :IDataManager
         
         fileDirectory = basePath;
 
-        lifeCycle.onAppExitAsync +=SaveAllDataToFilesAsync;
+        _lifeCycle.onAppExitAsync +=SaveAllDataToFilesAsync;
+       
     }
+
+        
 
     public async Task<Result> LoadAndCacheDataAsync()
     {
