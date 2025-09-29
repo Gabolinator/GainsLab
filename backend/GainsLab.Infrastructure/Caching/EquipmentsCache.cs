@@ -1,12 +1,12 @@
-﻿
+﻿using GainsLab.Core.Models.Core.Entities.Identifier;
+using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 using GainsLab.Models.Core;
+using GainsLab.Models.DataManagement.Caching;
 using GainsLab.Models.Logging;
-using GainsLab.Models.WorkoutComponents.Equipment;
 
+namespace GainsLab.Infrastructure.Caching;
 
-namespace GainsLab.Models.DataManagement.Caching;
-
-public class EquipmentsCache : BaseComponentCache<Equipment>
+public class EquipmentsCache : BaseComponentCache<EquipmentId,EquipmentEntity>
 {
     public EquipmentsCache(ILogger logger)
     {

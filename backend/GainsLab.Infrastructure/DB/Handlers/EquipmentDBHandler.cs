@@ -1,4 +1,7 @@
 ﻿
+using GainsLab.Infrastructure.DB;
+using GainsLab.Infrastructure.DB.DTOs;
+using GainsLab.Infrastructure.DB.Handlers;
 using GainsLab.Models.Core.Results;
 using GainsLab.Models.DataManagement.DB.Model.DTOs;
 using GainsLab.Models.Logging;
@@ -8,22 +11,22 @@ namespace GainsLab.Models.DataManagement.DB.Model.Handlers;
 
 public class EquipmentIdbHandler : IdbContextHandler<EquipmentDTO>
 {
-    public EquipmentIdbHandler(GainLabDBContext context, ILogger logger) : base(context, logger)
+    public EquipmentIdbHandler(GainLabSQLDBContext context, ILogger logger) : base(context, logger)
     {
      
     }
 
     public override DbSet<EquipmentDTO> DBSet 
-        => ((GainLabDBContext)_context).Equipments;
+        => ((GainLabSQLDBContext)_context).Equipments;
 
-    public override async Task<Result<EquipmentDTO>> TryGetExistingDTO(string uid)
+    public override async Task<Result<EquipmentDTO>> TryGetExistingDTO(Guid guid)
     {
         try
         {
-            var existing = await DBSet.FirstOrDefaultAsync(e => e.UID == uid);
+            var existing = await DBSet.FirstOrDefaultAsync(e => e.GUID == guid);
             var success = existing != null;
 
-            _logger.Log("DbContextHandler",$" {uid} exist in db: {success}");
+            _logger.Log("DbContextHandler",$" {guid} exist in db: {success}");
 
             return success ? Result<EquipmentDTO>.SuccessResult(existing!) : Result<EquipmentDTO>.Failure("No existing dto found");
         }

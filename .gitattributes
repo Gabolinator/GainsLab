@@ -1,2 +1,15 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# build artifacts
+bin/
+obj/
+*.user
+*.userprefs
+
+# local db files
+*.db
+
+# Rider / VS
+.idea/
+.vs/

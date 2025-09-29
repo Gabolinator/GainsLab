@@ -2,10 +2,10 @@
 
 namespace GainsLab.Models.Core.Interfaces;
 
-public interface IIdentifier
+public interface IIdentifier : IEquatable<IIdentifier>
 {
-    int? ID { get; set; } // for database primary key
-    string? UID { get; set; } // Public-friendly or shareable (e.g., "pushup-001")
+    int? DbID { get; set; } // for database primary key
+    string? Slug { get; set; } // Public-friendly or shareable (e.g., "pushup-001")
 
     Guid GUID { get; set; }
 
@@ -22,4 +22,5 @@ public interface IIdentifier
 
 
     IIdentifier Copy();
+    void WithDBId(int id);
 }

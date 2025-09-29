@@ -9,28 +9,28 @@ public class Identifier : IIdentifier
 {
     public Identifier() { } 
     
-    public Identifier(int? id, string? uid)
+    public Identifier(int? id, string? slug)
     {
-        ID = id;
-        UID = uid;
+        DbID = id;
+        Slug = slug;
         GUID = Guid.NewGuid();
     }
-    public Identifier(string uid)
+    public Identifier(string slug)
     {
-        ID = null;
-        UID = uid;
+        DbID = null;
+        Slug = slug;
         GUID = Guid.NewGuid();
     }
 
 
-    public int? ID { get; set; } = -1;
-    public string? UID { get; set; }
+    public int? DbID { get; set; } = -1;
+    public string? Slug { get; set; }
     public Guid GUID { get; set; } = Guid.Empty;
 
 
-    public bool IsIdSet() => ID != null || ID > 0;
+    public bool IsIdSet() => DbID != null || DbID > 0;
 
-    public bool IsUidSet() => !string.IsNullOrEmpty(UID);
+    public bool IsUidSet() => !string.IsNullOrEmpty(Slug);
     
     public bool IsGuidSet() => GUID != Guid.Empty;
 
@@ -39,7 +39,7 @@ public class Identifier : IIdentifier
 
     public override string ToString()
     {
-        return $" Id : {(IsIdSet() ? ID : "null")} , Uid : {(IsUidSet() ? UID : "null")} ";
+        return $" Id : {(IsIdSet() ? DbID : "null")} , Uid : {(IsUidSet() ? Slug : "null")} ";
         
     }
 
@@ -51,19 +51,23 @@ public class Identifier : IIdentifier
     public virtual bool Equals(IIdentifier other)
     {
         if (other is not Identifier identifier) return false;
-        return string.Equals(identifier.UID, identifier.UID, StringComparison.InvariantCultureIgnoreCase);
+        return string.Equals(identifier.Slug, identifier.Slug, StringComparison.InvariantCultureIgnoreCase);
     }
 
     public override int GetHashCode()
     {
-        return HashCode.Combine(UID);
+        return HashCode.Combine(Slug);
     }
 
     public virtual IIdentifier Copy()
     {
-        return new Identifier(ID, UID);
+        return new Identifier(DbID, Slug);
     }
+
+    public void WithDBId(int id) =>DbID = id;
+    
+    public void AssignNewGuid() =>GUID = new Guid();
+    
 }
 
-public class EmptyIdentifier() : Identifier(null, "Empty");
 

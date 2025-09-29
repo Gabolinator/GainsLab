@@ -1,11 +1,12 @@
-﻿
+﻿using GainsLab.Core.Models.Core.Entities.Identifier;
+using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 using GainsLab.Models.Core;
+using GainsLab.Models.DataManagement.Caching;
 using GainsLab.Models.Logging;
-using GainsLab.Models.WorkoutComponents.Movement;
 
-namespace GainsLab.Models.DataManagement.Caching;
+namespace GainsLab.Infrastructure.Caching;
 
-public class MovementCache : BaseComponentCache<Movement>
+public class MovementCache : BaseComponentCache<MovementId, MovementEntity>
 {
     public MovementCache(ILogger logger)
     {

@@ -1,8 +1,7 @@
-﻿using System.Threading.Tasks;
-using GainsLab.Models.Core.Results;
+﻿using GainsLab.Models.Core.Results;
 using GainsLab.Models.DataManagement.DB.Model.DTOs;
 
-namespace GainsLab.Models.DataManagement.DB.Model.Handlers;
+namespace GainsLab.Infrastructure.DB.Handlers;
 
 public interface IDBHandler
 {

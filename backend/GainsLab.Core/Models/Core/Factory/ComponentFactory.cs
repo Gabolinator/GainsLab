@@ -27,36 +27,36 @@ public class ComponentFactory
     {
 
         
-        var jumpRope = new Equipment("Jump Rope","jumpRope");
-        
-        _dataManager.SaveComponentAsync(jumpRope);
-        _dataManager.SaveComponentAsync(jumpRope);
-
-        
-        
-        var quad = new Muscle("Quadriceps", "quad", eBodySection.LowerBody);
-        
-        var harmstring = new Muscle("Harmstring", "harmstring",  eBodySection.LowerBody);
-        Muscle.SetAsAntagonists(quad, harmstring);
-     
-        var muscleGroups = new MusclesGroup(quad.ToComponentList(), harmstring.ToComponentList());
-        
-        var bodyweight = new MovementCategory("BodyWeight", "bodyweight", eMovementCategories.BodyWeight);
-
-        var squat = new Movement("Squat", "squat");
-
-        var weightReps =
-            new WorkloadCalculationProfile("Weight x Reps", "weightReps", eWorkloadCalculationType.Weight_Reps);
-
-        
-      //  _logger.Log(nameof(ComponentFactory),jumpRope.ToComponentList().ToString());
-     
-        squat.AddMusclesGroup(muscleGroups);
-        squat.AddMovementCategory(bodyweight);
-        squat.AddWorkloadCalculationProfile(weightReps);
-        squat.AddEquipmentList(jumpRope.ToComponentList());
-      
-       // _logger.Log(nameof(ComponentFactory),squat.ToString());
+      //   var jumpRope = new Equipment("Jump Rope","jumpRope");
+      //   
+      //   _dataManager.SaveComponentAsync(jumpRope);
+      //   _dataManager.SaveComponentAsync(jumpRope);
+      //
+      //   
+      //   
+      //   var quad = new Muscle("Quadriceps", "quad", eBodySection.LowerBody);
+      //   
+      //   var harmstring = new Muscle("Harmstring", "harmstring",  eBodySection.LowerBody);
+      //   Muscle.SetAsAntagonists(quad, harmstring);
+      //
+      //   var muscleGroups = new MusclesGroup(quad.ToComponentList(), harmstring.ToComponentList());
+      //   
+      //   var bodyweight = new MovementCategory("BodyWeight", "bodyweight", eMovementCategories.BodyWeight);
+      //
+      //   var squat = new Movement("Squat", "squat");
+      //
+      //   var weightReps =
+      //       new WorkloadCalculationProfile("Weight x Reps", "weightReps", eWorkloadCalculationType.Weight_Reps);
+      //
+      //   
+      // //  _logger.Log(nameof(ComponentFactory),jumpRope.ToComponentList().ToString());
+      //
+      //   squat.AddMusclesGroup(muscleGroups);
+      //   squat.AddMovementCategory(bodyweight);
+      //   squat.AddWorkloadCalculationProfile(weightReps);
+      //   squat.AddEquipmentList(jumpRope.ToComponentList());
+      //
+      //  // _logger.Log(nameof(ComponentFactory),squat.ToString());
 
        
 

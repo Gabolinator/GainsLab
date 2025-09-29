@@ -1,32 +1,13 @@
 ﻿namespace GainsLab.Models.Core.Descriptor;
 
-public record Notes(string? Text, WorkoutComponentIdentifier Identifier)
+public record Notes(string? Text)
 {
-    public bool IsEmpty() => string.IsNullOrWhiteSpace(Text) && Identifier.IsEmpty();
-
-    public int Id
-    {
-        get => Identifier.ID ?? -1;
-
-        set => Identifier.ID = value;
-    }
-
-    public Notes() : this("", new EmptyWorkoutComponentIdentifier())
-    {
-        
-    }
-
     public Notes Copy()
     {
-        return new Notes(Text, Identifier);
+        return new Notes(Text);
     }
 
-    public override string ToString()
-        => $"Notes: {(string.IsNullOrWhiteSpace(Text) ? "None" : Text)}"
-           + (Identifier != null ? $", ID: {Identifier}" : "");
+    public override string ToString() =>
+        string.IsNullOrWhiteSpace(Text) ? "Notes: None" : $"Notes: {Text}";
 }
 
-public record EmptyNotes() : Notes(null, null) 
-{
-    public override string ToString() => "Notes: (empty)";
-}

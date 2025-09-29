@@ -1,9 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using GainsLab.Models.Core.Descriptor;
 
-namespace GainsLab.Models.Core.Descriptor;
+namespace GainsLab.Core.Models.Core.Descriptor;
 
-public class TagList : List<Tag>
+public class TagList : IEnumerable<Tag>
 {
+
+    public int DbId { get; private set; }
+    public List<Tag> Tags { get; set; } = new();
 
     public TagList()
     {
@@ -14,19 +18,32 @@ public class TagList : List<Tag>
     {
         foreach (var tag in tags)
         {
-           Add(tag);
+           AddTag(tag);
         }
     }
+
+    public void AddTag(Tag tag) =>Tags.Add(tag);
+    
+        
+    
 
     public TagList Copy()
     {
         return new TagList(this);
     }
 
+    public IEnumerator<Tag> GetEnumerator() => Tags.GetEnumerator();
+
+
     public override string ToString()
     {
-        if (this.Count == 0) return "Tags: (none)";
+        if (this.Count() == 0) return "Tags: (none)";
         return $"Tags: [{string.Join(", ", this)}]";
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
     }
 }
 

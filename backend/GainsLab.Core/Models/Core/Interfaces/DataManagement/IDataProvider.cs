@@ -9,14 +9,14 @@ namespace GainsLab.Models.DataManagement.DB;
 public interface IDataProvider
 {
     Task<Result> InitializeAsync();
-    Task<Result<T>> GetComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent;
-    Task<ResultList<T>> GetComponentsAsync<T>(List<IIdentifier> ids) where T : IWorkoutComponent;
+    Task<Result <TEntity>> GetComponentAsync <TId,TEntity>(TId id)  ;
+    Task<ResultList <TEntity>> GetComponentsAsync <TId,TEntity>(List<TId> ids)  ;
     
-    Task<Result> DeleteComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent;
-    Task<ResultList<T>> SaveComponentsAsync<T>(eWorkoutComponents componentType, List<T> list) where T : IWorkoutComponent;
-    Task<Result<Dictionary<eWorkoutComponents, ResultList<IWorkoutComponent>>>> BatchSaveComponentsAsync(Dictionary<eWorkoutComponents, ResultList<IWorkoutComponent>> fileData);
-    Task<Result<Dictionary<eWorkoutComponents,ResultList<IWorkoutComponent>>>> GetAllComponentsAsync();
-    Task<ResultList<IWorkoutComponent>> GetAllComponentsOfTypeAsync(eWorkoutComponents type);
+    Task<Result> DeleteComponentAsync <TId,TEntity>(TId id)  ;
+    Task<ResultList <TEntity>> SaveComponentsAsync <TId,TEntity>(eWorkoutComponents componentType, List <TEntity> list)  ;
+    Task<Result<Dictionary<eWorkoutComponents, ResultList< TEntity>>>> BatchSaveComponentsAsync<TEntity>(Dictionary<eWorkoutComponents, ResultList< TEntity>> fileData);
+    Task<Result<Dictionary<eWorkoutComponents,ResultList< TEntity>>>> GetAllComponentsAsync<TEntity>();
+    Task<ResultList<TEntity>> GetAllComponentsOfTypeAsync<TEntity>();
     
-    Task<Result<T>> SaveComponentAsync<T>(T component) where T : IWorkoutComponent;
+    Task<Result <TEntity>> SaveComponentAsync <TEntity>(TEntity component)  ;
 }

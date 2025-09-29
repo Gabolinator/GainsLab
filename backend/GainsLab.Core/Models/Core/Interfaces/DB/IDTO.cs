@@ -5,5 +5,5 @@ namespace GainsLab.Models.DataManagement.DB.Model.DTOs;
 public interface IDto
 {
     public int Iid { get; }
-    public string Iuid { get;  }
+    public Guid  Iguid { get;  }
 }

@@ -1,6 +1,6 @@
-﻿using System;
+﻿using GainsLab.Models.Logging;
 
-namespace GainsLab.Models.Logging;
+namespace GainsLab.Core.Models.Logging;
 
 public class WorkoutLogger : ILogger
 {

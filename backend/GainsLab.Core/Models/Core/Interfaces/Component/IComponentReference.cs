@@ -2,10 +2,10 @@
 
 namespace GainsLab.Models.Core.Interfaces;
 
-public interface IComponentReference
-{
-    bool IsComponentResolved { get; }
-    WorkoutComponentIdentifier Identifier { get; }
-    IWorkoutComponent? AsWorkoutComponent();
- 
-}
+// public interface IComponentReference
+// {
+//     bool IsComponentResolved { get; }
+//     WorkoutComponentIdentifier Identifier { get; }
+//     IWorkoutComponent? AsWorkoutComponent();
+//  
+// }

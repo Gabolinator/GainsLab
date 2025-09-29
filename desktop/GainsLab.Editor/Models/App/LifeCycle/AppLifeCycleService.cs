@@ -1,11 +1,11 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
+using GainsLab.Models.Core.LifeCycle;
 using GainsLab.Models.DataManagement.DB;
 using GainsLab.Models.Logging;
 
-namespace GainsLab.Models.Core.LifeCycle;
+namespace GainsLab.Models.App.LifeCycle;
 
 public class AppLifecycleService  : IAppLifeCycle
 {

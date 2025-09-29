@@ -1,6 +1,25 @@
 ﻿namespace GainsLab.Models.Core;
 
 
+public enum EntityType
+{
+    User,
+    Equipment,
+    Descriptor,
+    EquipmentList,
+    MovementCategory,
+    Muscle,
+    MuscleGroup,
+    Movement,
+    WorkloadProfile,
+    Exercise,
+    ExerciseBlock,
+    WorkoutBlock,
+    Workout,
+    Program,
+    unidentified
+}
+
     public enum eWorkoutComponents
     {
         Equipment,

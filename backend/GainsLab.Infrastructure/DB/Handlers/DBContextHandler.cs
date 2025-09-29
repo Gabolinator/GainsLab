@@ -1,11 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using GainsLab.Models.Core.Results;
+﻿using GainsLab.Models.Core.Results;
 using GainsLab.Models.DataManagement.DB.Model.DTOs;
+using GainsLab.Models.DataManagement.DB.Model.Handlers;
 using GainsLab.Models.Logging;
 using Microsoft.EntityFrameworkCore;
 
-namespace GainsLab.Models.DataManagement.DB.Model.Handlers;
+namespace GainsLab.Infrastructure.DB.Handlers;
 
 public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, IDto 
 {
@@ -20,7 +19,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
     protected DbContext _context;
     protected readonly ILogger _logger;
 
-    public abstract Task<Result<TDto>> TryGetExistingDTO(string uid);
+    public abstract Task<Result<TDto>> TryGetExistingDTO(Guid guid);
    
     public async Task<Result<TDto>> TryGetExistingDTO(int id)
     {
@@ -40,14 +39,14 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
             await _context.Entry(dto).ReloadAsync();
             _logger.Log("DbContextHandler", $"After SaveChanges: {dto.Iid}");
             _logger.Log("DbContextHandler", $"Entity State: {_context.Entry(dto).State}");
-            _logger.Log("DbContextHandler",$"Added {dto.Iuid} to db with id {dto.Iid}");
-            if(dto.Iid <=0)  _logger.LogWarning("DbContextHandler",$"Added negative id to db : {dto.Iuid} with id {dto.Iid}");
+            _logger.Log("DbContextHandler",$"Added {dto.Iguid} to db with id {dto.Iid}");
+            if(dto.Iid <=0)  _logger.LogWarning("DbContextHandler",$"Added negative id to db : {dto.Iguid} with id {dto.Iid}");
             return Result<IDto>.SuccessResult(dto);
 
         }
         catch (Exception e)
         {
-            _logger.LogError("DbContextHandler", $"Failed to Insert DTO {dto.Iuid}: {e.Message}");
+            _logger.LogError("DbContextHandler", $"Failed to Insert DTO {dto.Iguid}: {e.Message}");
             return Result<IDto>.Failure($"Database error while inserting : {e.Message}");
         }
         
@@ -60,13 +59,13 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
         {
             DBSet.Update(dto);
             await _context.SaveChangesAsync();
-            _logger.Log("DbContextHandler",$"Updated {dto.Iuid} in db");
-            if(dto.Iid <=0)  _logger.LogWarning("DbContextHandler",$"Updated negative id to db : {dto.Iuid} with id {dto.Iid}");
+            _logger.Log("DbContextHandler",$"Updated {dto.Iguid} in db");
+            if(dto.Iid <=0)  _logger.LogWarning("DbContextHandler",$"Updated negative id to db : {dto.Iguid} with id {dto.Iid}");
             return Result<IDto>.SuccessResult(dto);
         }
         catch (Exception e)
         {
-            _logger.LogError("DbContextHandler", $"Failed to update DTO {dto.Iuid}: {e.Message}");
+            _logger.LogError("DbContextHandler", $"Failed to update DTO {dto.Iguid}: {e.Message}");
             return Result<IDto>.Failure($"Database error while updating: {e.Message}");
         }
       
@@ -75,16 +74,16 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
 
     public async Task<Result<IDto>> AddOrUpdateAsync(IDto dto)
     {
-        _logger.Log("DbContextHandler",$"Trying to add or update dto {dto.Iuid}");
+        _logger.Log("DbContextHandler",$"Trying to add or update dto {dto.Iguid}");
 
         
         if (dto is not TDto tdto)
         {
-            _logger.LogWarning("DbContextHandler",$"Cant add or update dto {dto.Iuid} - wrong type");
+            _logger.LogWarning("DbContextHandler",$"Cant add or update dto {dto.Iguid} - wrong type");
             return Result<IDto>.Failure("Invalid Dto type");
         }
 
-        var result =  await TryGetExistingDTO(tdto.Iuid);
+        var result =  await TryGetExistingDTO(tdto.Iguid);
 
         if (result.Success)
         {
@@ -94,7 +93,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
             if(NeedUpdate(existingDto , tdto)) return await UpdateAsync(tdto);
             
             //we dont need to update it 
-            _logger.Log("DbContextHandler",$"Dont need to Update dto {dto.Iuid} - already up to date");
+            _logger.Log("DbContextHandler",$"Dont need to Update dto {dto.Iguid} - already up to date");
             
             return Result<IDto>.SuccessResult(existingDto!);
         }
@@ -126,9 +125,5 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
         if (dto is not TDto tdto) return Result<IDto>.Failure("Invalid Dto type");;
        return await UpdateAsync(tdto);
     }
-
-    // public async Task Update(IDto dto)
-    // {
-    //     
-    // }
+    
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using GainsLab.Core.Models.Core.Interfaces.Caching;
 using GainsLab.Models.Core.LifeCycle;
 using GainsLab.Models.DataManagement;
 using GainsLab.Models.DataManagement.Caching.Interface;

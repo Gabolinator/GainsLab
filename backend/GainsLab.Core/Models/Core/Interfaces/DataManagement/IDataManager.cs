@@ -13,17 +13,17 @@ public interface IDataManager
 
     Task<Result> LoadAndCacheDataAsync();
     
-    Task<Result<T>> TryGetComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent;
+    Task<Result<TEntity>> TryGetEntityAsync<TId, TEntity>(TId id);
 
-    Task<ResultList<T>> TryGetComponentsAsync<T>(IEnumerable<IIdentifier> ids) where T : IWorkoutComponent;
+    Task<ResultList<TEntity>> TryGetComponentsAsync<TId, TEntity>(IEnumerable<TId> ids);
 
    
-    Task<Result> SaveComponentAsync<T>(T component) where T : IWorkoutComponent;
-    Task<ResultList> SaveComponentsAsync<T>(IEnumerable<T> components) where T : IWorkoutComponent;
+    Task<Result> SaveComponentAsync<TEntity>(TEntity component) ;
+    Task<ResultList> SaveComponentsAsync<TEntity>(IEnumerable<TEntity> components);
 
-    Task<ResultList<T>> TryResolveComponentsAsync<T>(List<IIdentifier> toResolve) where T : IWorkoutComponent;
-    Task<Result<TComponent>> TryResolveComponentAsync<TComponent>(IIdentifier unresolved) where TComponent : IWorkoutComponent;
-    Task<Result> DeleteComponentAsync<T>(IIdentifier id) where T : IWorkoutComponent;
+    Task<ResultList<TEntity>> TryResolveComponentsAsync<TId,TEntity>(List<TId> toResolve);
+    Task<Result<TEntity>> TryResolveComponentAsync<TId,TEntity>(TId unresolved);
+    Task<Result> DeleteComponentAsync<TEntity>(TEntity entity);
 
     Task<Result> SaveAllDataToFilesAsync();
 }

@@ -1,5 +1,9 @@
 ﻿using System;
 using System.IO;
+using GainsLab.Core.Models.Core.Interfaces.Caching;
+using GainsLab.Core.Models.Logging;
+using GainsLab.Infrastructure.DB;
+using GainsLab.Models.App.LifeCycle;
 using GainsLab.Models.Core.LifeCycle;
 using GainsLab.Models.DataManagement;
 using GainsLab.Models.DataManagement.Caching;
@@ -30,8 +34,9 @@ public static class ServiceConfig
 
         services.AddSingleton<ILogger, WorkoutLogger>(); 
         
-        services.AddDbContext<GainLabDBContext>(options =>
+        services.AddDbContext<GainLabSQLDBContext>(options =>
         {
+            //for local db
             var basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GainsLab");
             
             //ensure path exist 
@@ -41,12 +46,12 @@ public static class ServiceConfig
                 Directory.CreateDirectory(basePath);
             }
 
-            var dbPath = Path.Combine(basePath,"gainslab.db");
+            var dbPath = Path.Combine(basePath,"local_gainslab.db");
             
             
             Console.WriteLine($"[ServiceConfig.ConfigureServices] Db path: {dbPath}");
             options.UseSqlite($"Data Source={dbPath}");
-           // options.UseSqlite("Data Source=gainlab.db");
+           
         }, ServiceLifetime.Singleton); // Singleton to match other services
 
         
