@@ -1,5 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using GainsLab.Core.Models.Core.Factory;
 using GainsLab.Models.Factory;
 using GainsLab.Models.Logging;
 using Microsoft.Extensions.Logging;
@@ -11,12 +12,11 @@ namespace GainsLab;
 public partial class MainWindow : Window
 {
     private readonly ILogger _logger;
-    private readonly ComponentFactory _componentFactory;
+   
 
-    public MainWindow(ILogger logger, ComponentFactory componentFactory)
+    public MainWindow(ILogger logger)
     {
         _logger = logger;
-        _componentFactory = componentFactory;
         InitializeComponent();
         this.Show();      // Forces the window to show
         this.Activate();  // Brings it to front
@@ -31,6 +31,5 @@ public partial class MainWindow : Window
     private void OnButtonClick(object? sender, RoutedEventArgs e)
     {
         MessageText.Text = "You clicked the button!";
-        _componentFactory.CreateTestData();
     }
 }

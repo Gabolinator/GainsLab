@@ -22,4 +22,8 @@ public static class Results
     // {
     //     return ResultList<T>.FailureResult<T>($"No implemented Result : {message}");
     // }
+    public static object Ok()
+    {
+        throw new NotImplementedException();
+    }
 }

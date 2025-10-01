@@ -1,4 +1,7 @@
-﻿namespace GainsLab.Core.Models.Core.CreationInfo;
+﻿using GainsLab.Models.Core.Interfaces;
+using GainsLab.Models.Utilities;
+
+namespace GainsLab.Core.Models.Core.CreationInfo;
 
 public sealed record AuditedInfo(
     DateTimeOffset CreatedAtUtc,
@@ -11,11 +14,14 @@ public sealed record AuditedInfo(
     string? DeletedBy = null
 ) 
 {
-    public static AuditedInfo New(string name) =>
-        new(DateTimeOffset.UtcNow, name);
+    
+ 
+    
+    public static AuditedInfo New( DateTimeOffset time, string name) =>
+        new(time, name);
 
-    public AuditedInfo Touch(string updatedBy) =>
-        this with { UpdatedAtUtc = DateTimeOffset.UtcNow, UpdatedBy = updatedBy, Version = Version + 1 };
+    public AuditedInfo Touch( DateTimeOffset time, string updatedBy) =>
+        this with { UpdatedAtUtc = time, UpdatedBy = updatedBy, Version = Version + 1 };
 }
 
 public sealed record BaseAuditedInfo(
@@ -27,11 +33,23 @@ public sealed record BaseAuditedInfo(
     DateTimeOffset? DeletedAt = null
 )
 {
+
+    //todo - create 
+    public static IClock Clock => CoreUtilities.Clock;
+
+
     public static BaseAuditedInfo New() =>
-        new(DateTimeOffset.UtcNow);
+        new(Clock.UtcNow);
 
     public BaseAuditedInfo Touch(string updatedBy) =>
-        this with { UpdatedAtUtc = DateTimeOffset.UtcNow, UpdatedBy = updatedBy, Version = Version + 1 };
+        this with { UpdatedAtUtc = Clock.UtcNow, UpdatedBy = updatedBy, Version = Version + 1 };
+
+    
+    public static BaseAuditedInfo New( DateTimeOffset time) =>
+        new(time);
+
+    public BaseAuditedInfo Touch( DateTimeOffset time,string updatedBy) =>
+        this with { UpdatedAtUtc = time, UpdatedBy = updatedBy, Version = Version + 1 };
 
     public BaseAuditedInfo Copy()
     {

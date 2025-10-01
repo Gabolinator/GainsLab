@@ -4,7 +4,11 @@ public record Description(string? Text)
 {
     public override string ToString() =>
         string.IsNullOrWhiteSpace(Text) ? "Notes: None" : $"Notes: {Text}";
-    
+
+    public static Description New(string descriptionText)
+    {
+        return new Description(descriptionText);
+    }
 }
 // {
 //     public bool IsEmpty() => string.IsNullOrWhiteSpace(Text) && Identifier.IsEmpty();

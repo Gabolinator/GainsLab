@@ -3,7 +3,7 @@ using GainsLab.Models.DataManagement.DB.Model.DTOs;
 using GainsLab.Models.Logging;
 using Microsoft.EntityFrameworkCore;
 
-namespace GainsLab.Infrastructure.DB;
+namespace GainsLab.Infrastructure.DB.Context;
 
 public class GainLabSQLDBContext : DbContext
 {

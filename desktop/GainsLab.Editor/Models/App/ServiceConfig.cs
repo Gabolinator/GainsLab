@@ -1,8 +1,11 @@
 ﻿using System;
 using System.IO;
+using GainsLab.Core.Models.Core.Factory;
 using GainsLab.Core.Models.Core.Interfaces.Caching;
 using GainsLab.Core.Models.Logging;
 using GainsLab.Infrastructure.DB;
+using GainsLab.Infrastructure.DB.Context;
+using GainsLab.Infrastructure.DB.Outbox;
 using GainsLab.Models.App.LifeCycle;
 using GainsLab.Models.Core.LifeCycle;
 using GainsLab.Models.DataManagement;
@@ -34,25 +37,35 @@ public static class ServiceConfig
 
         services.AddSingleton<ILogger, WorkoutLogger>(); 
         
-        services.AddDbContext<GainLabSQLDBContext>(options =>
+        // services.AddDbContext<GainLabSQLDBContext>(options =>
+        // {
+        //     //for local db
+        //     var basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GainsLab");
+        //     
+        //     //ensure path exist 
+        //     if (!Path.Exists(basePath))
+        //     {
+        //         Console.WriteLine($"[ServiceConfig.ConfigureServices] BaseFolder at path: {basePath} - Doesnt exist- creating it");
+        //         Directory.CreateDirectory(basePath);
+        //     }
+        //
+        //     var dbPath = Path.Combine(basePath,"local_gainslab.db");
+        //     
+        //     
+        //     Console.WriteLine($"[ServiceConfig.ConfigureServices] Db path: {dbPath}");
+        //     options.UseSqlite($"Data Source={dbPath}");
+        //    
+        // }, ServiceLifetime.Singleton); // Singleton to match other services
+        //
+        // // Device app
+        
+        services.AddDbContext<GainLabSQLDBContext>(o =>
         {
-            //for local db
-            var basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GainsLab");
-            
-            //ensure path exist 
-            if (!Path.Exists(basePath))
-            {
-                Console.WriteLine($"[ServiceConfig.ConfigureServices] BaseFolder at path: {basePath} - Doesnt exist- creating it");
-                Directory.CreateDirectory(basePath);
-            }
-
-            var dbPath = Path.Combine(basePath,"local_gainslab.db");
-            
-            
-            Console.WriteLine($"[ServiceConfig.ConfigureServices] Db path: {dbPath}");
-            options.UseSqlite($"Data Source={dbPath}");
-           
-        }, ServiceLifetime.Singleton); // Singleton to match other services
+            o.UseSqlite($"Data Source={Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "GainsLab", "local_gainslab.db")}");
+            o.AddInterceptors(new OutboxInterceptor());
+        });
 
         
         services.AddSingleton<IAppLifeCycle,AppLifecycleService>();
@@ -61,7 +74,7 @@ public static class ServiceConfig
         services.AddSingleton<IFileDataService, JsonFilesDataService>();
         services.AddSingleton<IDataManager, DataManager>();
         
-        services.AddSingleton<ComponentFactory>();
+       // services.AddSingleton<EntityFactory>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<SystemInitializer>();
      

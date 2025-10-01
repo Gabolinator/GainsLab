@@ -1,0 +1,51 @@
+﻿using GainsLab.Core.Models.Core.CreationInfo;
+using GainsLab.Core.Models.Core.Descriptor;
+using GainsLab.Core.Models.Core.Entities.Descriptor;
+using GainsLab.Core.Models.Core.Entities.Identifier;
+using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
+using GainsLab.Core.Models.Core.Interfaces.Factory;
+using GainsLab.Models.Core.Descriptor;
+using GainsLab.Models.Core.Interfaces;
+
+namespace GainsLab.Core.Models.Core.Factory;
+
+public class DescriptiorCreationConfig
+{
+
+    public DescriptorId? Id { get; init; }
+
+    public AuditedInfo? Audit { get; init; }
+
+    public BaseDescriptorContent Content { get; init; } = default!;
+
+    public string GetCreatedBy() => 
+        Audit !=null ? 
+            Audit.CreatedBy : !string.IsNullOrWhiteSpace(CreatedBy) ? 
+                CreatedBy : "system";
+
+    public string? CreatedBy { get; set; }
+}
+
+public class DescriptorFactory : IEntityFactory<BaseDescriptorEntity, DescriptiorCreationConfig>
+{
+    
+    private readonly IClock _clock;              
+    private readonly IDescriptorService<BaseDescriptorEntity> _descSvc;
+    
+    public BaseDescriptorEntity Create(DescriptiorCreationConfig cfg)
+    {
+        if (cfg.Content is null) throw new ArgumentNullException(nameof(cfg.Content));
+        var content = cfg.Content.Validate(); 
+
+        var id = cfg.Id ?? DescriptorId.New();
+        
+        var audit = cfg.Audit ?? AuditedInfo.New(_clock.UtcNow, cfg.GetCreatedBy());
+
+        var descriptor = new BaseDescriptorEntity(id,content ,audit);
+        
+        _descSvc.Update(descriptor);
+
+        return descriptor;
+    }
+}
+

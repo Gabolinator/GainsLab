@@ -1,5 +1,6 @@
 ﻿
 using GainsLab.Infrastructure.DB;
+using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.DTOs;
 using GainsLab.Infrastructure.DB.Handlers;
 using GainsLab.Models.Core.Results;

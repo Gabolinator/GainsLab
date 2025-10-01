@@ -17,28 +17,33 @@ public class BaseDescriptorContent
     /// <summary>
     /// Gets or sets the notes associated with the entity.
     /// </summary>
-    public Notes Notes { get; private set; } = new(null);
+    public Notes? Notes { get; private set; } = new(null);
     
     /// <summary>
     /// Gets or sets the description of the entity.
     /// </summary>
-    public Description Description { get; set; }
+    public Description? Description { get; set; }
     
     /// <summary>
     /// Gets or sets the Medias object of the entity.
     /// </summary>
-    public MediaInfos Medias { get; set; }
+    public MediaInfos? Medias { get; set; }
 
     /// <summary>
     /// Gets or sets the list of tags associated with the entity. This property is not mapped to the database.
     /// </summary>
     [NotMapped]
-    public TagList Tags { get; set; }
+    public TagList? Tags { get; set; }
     
     
     public void UpdateDescription(string? text) => Description = new Description(text);
     public void UpdateNotes(string? text) => Notes = new Notes(text);
-    
+
+    public BaseDescriptorContent Validate()
+    {
+        //todo
+        return this;
+    }
 }
 
 

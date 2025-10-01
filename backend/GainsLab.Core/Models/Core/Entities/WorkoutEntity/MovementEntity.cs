@@ -29,11 +29,11 @@ public sealed record MovementContent(
         public BaseDescriptorEntity Descriptor { get; private set; }
 
        
-        public MovementEntity(MovementContent content, string createdBy, BaseDescriptorEntity? descriptor = null, int dbId = -1)
-            : base(MovementId.New(), content.Validate(), AuditedInfo.New(createdBy), dbId)
-        {
-            Descriptor = descriptor ?? new BaseDescriptorEntity();
-        }
+        // public MovementEntity(MovementContent content, string createdBy, BaseDescriptorEntity? descriptor = null, int dbId = -1)
+        //     : base(MovementId.New(), content.Validate(), AuditedInfo.New(createdBy), dbId)
+        // {
+        //     Descriptor = descriptor ?? new BaseDescriptorEntity();
+        // }
 
         public override EntityType Type => EntityType.Movement;
         private MovementEntity() { Descriptor = new BaseDescriptorEntity(); }

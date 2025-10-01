@@ -1,6 +1,7 @@
 ﻿using System;
 using GainsLab.Core.Models.Logging;
 using GainsLab.Infrastructure.DB;
+using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Models.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;

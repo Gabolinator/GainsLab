@@ -16,6 +16,8 @@ public static class CoreUtilities
 {
     
     
+    
+    
     // public static eWorkoutComponents GetComponentTypeFromGeneric<T>() where T : IWorkoutComponent
     // {
     //     var type = typeof(T);
@@ -40,5 +42,10 @@ public static class CoreUtilities
     // }
     //
 
-    public static WorkoutLogger Logger = new WorkoutLogger();
+    public static WorkoutLogger? _logger;
+    
+    public static WorkoutLogger Logger => _logger ?? new WorkoutLogger();
+
+    private static IClock? _clock;
+    public static IClock Clock => _clock ?? new Clock();
 }

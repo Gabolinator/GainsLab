@@ -1,5 +1,5 @@
 ﻿using System.Text.Json;
-using GainsLab.Core.Models.Core.Interfaces.Entity;
+using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.DTOs;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;

@@ -33,11 +33,11 @@ public class EquipmentEntity : EntityBase<EquipmentId, EquipmentContent, Audited
          Descriptor = descriptor;
     }
     
-    public  EquipmentEntity(EquipmentContent content, string createdBy, BaseDescriptorEntity? descriptor = null, int dbId = -1)
-        : base(EquipmentId.New(), content.Validate(), AuditedInfo.New(createdBy), dbId)
-    {
-        Descriptor = descriptor ?? new BaseDescriptorEntity();
-    }
+    // public  EquipmentEntity(EquipmentContent content, string createdBy, BaseDescriptorEntity? descriptor = null, int dbId = -1)
+    //     : base(EquipmentId.New(), content.Validate(), AuditedInfo.New(createdBy), dbId)
+    // {
+    //     Descriptor = descriptor ?? new BaseDescriptorEntity();
+    // }
     
     public override EntityType Type => EntityType.Equipment;
     public BaseDescriptorEntity Descriptor { get; }
