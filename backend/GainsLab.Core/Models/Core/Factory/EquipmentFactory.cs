@@ -2,6 +2,7 @@
 using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Identifier;
 using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
+using GainsLab.Core.Models.Core.Interfaces;
 using GainsLab.Core.Models.Core.Interfaces.Factory;
 using GainsLab.Models.Core.Interfaces;
 
@@ -26,6 +27,12 @@ public sealed class EquipmentCreationConfig
 
 public class EquipmentFactory : IEntityFactory<EquipmentEntity, EquipmentCreationConfig>
 {
+    public EquipmentFactory(IClock clock, IDescriptorService<BaseDescriptorEntity> descSvc)
+    {
+        _clock = clock;
+        _descSvc = descSvc;
+    }
+    
     private readonly IClock _clock;              
     private readonly IDescriptorService<BaseDescriptorEntity> _descSvc;
     
@@ -42,7 +49,6 @@ public class EquipmentFactory : IEntityFactory<EquipmentEntity, EquipmentCreatio
 
             return new EquipmentEntity(content, id, audit, descriptor);
         }
-    
 
-
+        
 }

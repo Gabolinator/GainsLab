@@ -2,7 +2,7 @@
 using System.IO;
 using GainsLab.Core.Models.Core.Factory;
 using GainsLab.Core.Models.Core.Interfaces.Caching;
-using GainsLab.Core.Models.Logging;
+using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.Outbox;
@@ -35,7 +35,7 @@ public static class ServiceConfig
     public static void ConfigureServices(IServiceCollection services)
     {
 
-        services.AddSingleton<ILogger, WorkoutLogger>(); 
+        services.AddSingleton<ILogger, GainsLabLogger>(); 
         
         // services.AddDbContext<GainLabSQLDBContext>(options =>
         // {

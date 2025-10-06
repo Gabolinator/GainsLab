@@ -3,7 +3,9 @@ using GainsLab.Core.Models.Core.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Identifier;
 using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
+using GainsLab.Core.Models.Core.Interfaces;
 using GainsLab.Models.Core.Interfaces;
+using GainsLab.Models.Logging;
 using GainsLab.Models.Utilities;
 
 namespace GainsLab.Core.Models.Core.Factory;
@@ -11,20 +13,27 @@ namespace GainsLab.Core.Models.Core.Factory;
 public class EntityFactory
 {
 
+    public EntityFactory(IClock clock, ILogger logger, IDescriptorService<BaseDescriptorEntity> descriptorService)
+    {
+        _logger = logger;
+        _clock = clock;
+        _equipmentFactory = new EquipmentFactory(clock, descriptorService );
+        _descriptorFactory = new DescriptorFactory(clock, descriptorService );
 
-    private readonly EquipmentFactory _equipmentFactory = new();
-    private readonly DescriptorFactory _descriptorFactory = new();
-    private IClock Clock => CoreUtilities.Clock;
-    
-    
-  
+    }
+
+    private readonly ILogger _logger;
+    private readonly EquipmentFactory _equipmentFactory;
+    private readonly DescriptorFactory _descriptorFactory;
+    private readonly IClock _clock;
+
 
     public List<EquipmentEntity> CreateBaseEquipments()
     {
-
+        
         var equipments = new List<EquipmentEntity>();
         
-        var auditInfo = AuditedInfo.New(Clock.UtcNow, "system");
+        var auditInfo = AuditedInfo.New(_clock.UtcNow, "system");
 
         var jumpRope = _equipmentFactory.Create(new EquipmentCreationConfig
         {
@@ -47,5 +56,7 @@ public class EntityFactory
 
         return equipments;
     }
+
+  
 }
 

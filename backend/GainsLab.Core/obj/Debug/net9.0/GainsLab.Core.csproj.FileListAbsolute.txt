@@ -1,0 +1,12 @@
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Core\bin\Debug\net9.0\GainsLab.Core.deps.json
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Core\bin\Debug\net9.0\GainsLab.Core.dll
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Core\bin\Debug\net9.0\GainsLab.Core.pdb
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Core\obj\Debug\net9.0\GainsLab.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Core\obj\Debug\net9.0\GainsLab.Core.AssemblyInfoInputs.cache
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Core\obj\Debug\net9.0\GainsLab.Core.AssemblyInfo.cs
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Core\obj\Debug\net9.0\GainsLab.Core.csproj.CoreCompileInputs.cache
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Core\obj\Debug\net9.0\GainsLab.Core.sourcelink.json
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Core\obj\Debug\net9.0\GainsLab.Core.dll
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Core\obj\Debug\net9.0\refint\GainsLab.Core.dll
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Core\obj\Debug\net9.0\GainsLab.Core.pdb
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Core\obj\Debug\net9.0\ref\GainsLab.Core.dll

@@ -1,5 +1,5 @@
 ﻿using System;
-using GainsLab.Core.Models.Logging;
+using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Models.Logging;
@@ -16,7 +16,7 @@ public class GainLabDBContextFactory : IDesignTimeDbContextFactory<GainLabSQLDBC
         optionsBuilder.UseSqlite("Data Source=gainlab.db");
 
         // Logger is optional for design-time; provide a dummy
-        var dummyLogger = new WorkoutLogger();
+        var dummyLogger = new GainsLabLogger();
 
         return new GainLabSQLDBContext(optionsBuilder.Options, dummyLogger);
     }

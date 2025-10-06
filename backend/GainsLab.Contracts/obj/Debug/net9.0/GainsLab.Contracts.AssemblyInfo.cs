@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GainsLab.Contracts")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+925915473b3514d032468ec3c7536d7d3dd87db5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6a3c9ed818b6f8069f2f6c9500134f1739585cc3")]
 [assembly: System.Reflection.AssemblyProductAttribute("GainsLab.Contracts")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GainsLab.Contracts")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,7 +1,4 @@
-﻿using GainsLab.Core.Models.Core.Entities.Descriptor;
-using GainsLab.Core.Models.Core.Entities.Identifier;
-
-namespace GainsLab.Core.Models;
+﻿namespace GainsLab.Core.Models.Core.Interfaces;
 
 public interface IDescriptorService<TDescriptor>
 {

@@ -1,5 +1,5 @@
 ﻿using System;
-using GainsLab.Core.Models.Logging;
+using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Models.Core;
 using GainsLab.Models.Core.Interfaces;
 using GainsLab.Models.Logging;
@@ -42,9 +42,9 @@ public static class CoreUtilities
     // }
     //
 
-    public static WorkoutLogger? _logger;
+    public static GainsLabLogger? _logger;
     
-    public static WorkoutLogger Logger => _logger ?? new WorkoutLogger();
+    public static GainsLabLogger Logger => _logger ?? new GainsLabLogger();
 
     private static IClock? _clock;
     public static IClock Clock => _clock ?? new Clock();

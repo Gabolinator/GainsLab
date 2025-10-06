@@ -1,0 +1,23 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {
+      "GainsLab.Core/1.0.0": {
+        "runtime": {
+          "GainsLab.Core.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "GainsLab.Core/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
