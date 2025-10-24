@@ -1,5 +1,8 @@
-﻿namespace GainsLab.Models.Logging;
+﻿namespace GainsLab.Core.Models.Core.Utilities.Logging;
 
+/// <summary>
+/// Logging abstraction used throughout GainsLab services.
+/// </summary>
 public interface ILogger
 {
     bool Enabled { get;}

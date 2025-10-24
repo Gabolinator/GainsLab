@@ -5,11 +5,11 @@ using System.Linq;
 using System.Text.Json.Serialization;
 
 using GainsLab.Models.Core.Interfaces;
-using GainsLab.Models.Logging;
-using GainsLab.Models.Utilities;
 
 
 namespace GainsLab.Models.Core;
+
+// OUTDATED: Legacy ComponentLists implementation retained for later refactor.
 
 // public class ComponentLists<TComponent> : IComponentList
 //     where TComponent : IWorkoutComponent

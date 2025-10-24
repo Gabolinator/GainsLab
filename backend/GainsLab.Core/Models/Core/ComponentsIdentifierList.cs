@@ -4,6 +4,8 @@ using System.Linq;
 
 namespace GainsLab.Models.Core;
 
+// OUTDATED: Legacy ComponentsIdentifierList implementation retained for later refactor.
+
 // public class ComponentsIdentifierList : List<IIdentifier> //where TComponentList : List<TComponent> where TComponent : IWorkoutComponent
 // {
 //     public  ComponentsIdentifierList() { }

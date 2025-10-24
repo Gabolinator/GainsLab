@@ -2,6 +2,8 @@
 
 namespace GainsLab.Models.Core.Descriptor;
 
+// OUTDATED: Legacy WorkoutComponentCreationInfo records retained for later refactor.
+
 // public record WorkoutComponentCreationInfo(
 //     string? CreatedBy,
 //     Identifier Identifier,

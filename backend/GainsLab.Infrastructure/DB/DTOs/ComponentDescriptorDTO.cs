@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using GainsLab.Core.Models.Core.Interfaces.DB;
 
 namespace GainsLab.Models.DataManagement.DB.Model.DTOs;
 

@@ -6,6 +6,8 @@ using System.Collections.Generic;
 
 namespace GainsLab.Models.Core.Interfaces;
 
+// OUTDATED: Legacy IComponentContent contract retained for later refactor.
+
 // public interface IComponentContent
 // {
 //     Dictionary<eWorkoutComponents, IComponentList> Items { get; set; }

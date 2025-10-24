@@ -2,6 +2,9 @@
 
 namespace GainsLab.Core.Models.Core.Entities.User;
 
+/// <summary>
+/// Captures role and subscription information for a user account.
+/// </summary>
 public class AccountInfos
 {
     public AccountInfos(UserRole role, SubscriptionInfos infos)
@@ -20,6 +23,9 @@ public class AccountInfos
 
 }
 
+/// <summary>
+/// Stores the subscription tier assigned to a user.
+/// </summary>
 public class SubscriptionInfos
 {
     public SubscriptionInfos(SubscriptionType type)

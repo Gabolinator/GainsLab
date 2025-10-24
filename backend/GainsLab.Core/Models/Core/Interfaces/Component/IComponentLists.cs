@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 
 namespace GainsLab.Models.Core.Interfaces;
 
+// OUTDATED: Legacy IComponentList contract retained for later refactor.
+
 // public interface IComponentList
 // {
 //     eWorkoutComponents ComponentsType { get; }

@@ -2,6 +2,7 @@
 using System.IO;
 using GainsLab.Core.Models.Core.Factory;
 using GainsLab.Core.Models.Core.Interfaces.Caching;
+using GainsLab.Core.Models.Core.Interfaces.DataManagement;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB;
 using GainsLab.Infrastructure.DB.Context;
@@ -14,7 +15,6 @@ using GainsLab.Models.DataManagement.Caching.Interface;
 using GainsLab.Models.DataManagement.DB;
 using GainsLab.Models.DataManagement.FileAccess;
 using GainsLab.Models.Factory;
-using GainsLab.Models.Logging;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

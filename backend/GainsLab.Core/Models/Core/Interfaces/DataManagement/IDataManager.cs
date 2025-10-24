@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using GainsLab.Models.Core;
-using GainsLab.Models.Core.Interfaces;
-using GainsLab.Models.Core.Results;
+﻿using GainsLab.Core.Models.Core.Results;
 
-namespace GainsLab.Models.DataManagement;
+namespace GainsLab.Core.Models.Core.Interfaces.DataManagement;
 
+/// <summary>
+/// Coordinates loading, caching, and persistence of component data.
+/// </summary>
 public interface IDataManager
 {
 

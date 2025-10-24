@@ -1,4 +1,5 @@
-﻿using GainsLab.Core.Models.Core.CreationInfo;
+﻿using System;
+using GainsLab.Core.Models.Core.CreationInfo;
 using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Identifier;
 using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
@@ -9,6 +10,9 @@ using GainsLab.Models.Core.Interfaces;
 namespace GainsLab.Core.Models.Core.Factory;
 
 
+/// <summary>
+/// Configuration payload used when creating equipment entities.
+/// </summary>
 public sealed class EquipmentCreationConfig
 {
     public EquipmentId? Id { get; init; }
@@ -25,6 +29,9 @@ public sealed class EquipmentCreationConfig
     
 }
 
+/// <summary>
+/// Builds equipment entities and wires up descriptor dependencies.
+/// </summary>
 public class EquipmentFactory : IEntityFactory<EquipmentEntity, EquipmentCreationConfig>
 {
     public EquipmentFactory(IClock clock, IDescriptorService<BaseDescriptorEntity> descSvc)
@@ -35,8 +42,10 @@ public class EquipmentFactory : IEntityFactory<EquipmentEntity, EquipmentCreatio
     
     private readonly IClock _clock;              
     private readonly IDescriptorService<BaseDescriptorEntity> _descSvc;
-    
-    
+
+        /// <summary>
+        /// Creates an equipment entity from the supplied configuration.
+        /// </summary>
         public EquipmentEntity Create(EquipmentCreationConfig cfg)
         {
             // Validate early

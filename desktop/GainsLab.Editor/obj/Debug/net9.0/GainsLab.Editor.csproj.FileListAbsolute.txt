@@ -198,6 +198,5 @@ C:\Users\lalib\GainsLab\GainsLab\desktop\GainsLab.Editor\obj\Debug\net9.0\refint
 C:\Users\lalib\GainsLab\GainsLab\desktop\GainsLab.Editor\obj\Debug\net9.0\GainsLab.24EC3EF5.Up2Date
 C:\Users\lalib\GainsLab\GainsLab\desktop\GainsLab.Editor\obj\Debug\net9.0\GainsLab.Editor.genruntimeconfig.cache
 C:\Users\lalib\GainsLab\GainsLab\desktop\GainsLab.Editor\obj\Debug\net9.0\ref\GainsLab.Editor.dll
-C:\Users\lalib\GainsLab\GainsLab\desktop\GainsLab.Editor\obj\Debug\net9.0\GainsLab.Editor.dll
-C:\Users\lalib\GainsLab\GainsLab\desktop\GainsLab.Editor\obj\Debug\net9.0\refint\GainsLab.Editor.dll
-C:\Users\lalib\GainsLab\GainsLab\desktop\GainsLab.Editor\obj\Debug\net9.0\GainsLab.Editor.pdb
+C:\Users\lalib\GainsLab\GainsLab\desktop\GainsLab.Editor\bin\Debug\net9.0\Npgsql.dll
+C:\Users\lalib\GainsLab\GainsLab\desktop\GainsLab.Editor\bin\Debug\net9.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll

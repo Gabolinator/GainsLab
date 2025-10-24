@@ -4,6 +4,7 @@ using GainsLab.Models.Core.Interfaces;
 namespace GainsLab.Models.Core.Descriptor;
 
 
+// OUTDATED: Legacy ComponentDescriptor implementation retained for later refactor.
 // /// <summary>
 // /// Represents a descriptor for a workout component, containing metadata such as name, notes, description, creation info, and tags.
 // /// </summary>

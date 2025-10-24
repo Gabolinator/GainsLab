@@ -1,4 +1,5 @@
-﻿using GainsLab.Core.Models.Core.CreationInfo;
+﻿using System;
+using GainsLab.Core.Models.Core.CreationInfo;
 using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Identifier;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
@@ -9,6 +10,9 @@ namespace GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 
 
 
+/// <summary>
+/// Immutable data required to describe a single equipment item.
+/// </summary>
 public record EquipmentContent( string Name) : IEntityContent<EquipmentContent>
 {
     
@@ -19,6 +23,9 @@ public record EquipmentContent( string Name) : IEntityContent<EquipmentContent>
     }
 }
 
+/// <summary>
+/// Aggregate root for equipment including descriptor metadata.
+/// </summary>
 public class EquipmentEntity : EntityBase<EquipmentId, EquipmentContent, AuditedInfo>, IDescribed<BaseDescriptorEntity>
 {
     

@@ -12,6 +12,7 @@ namespace GainsLab.Models.Core.Interfaces;
 
 //basic bloc of a item part of a workout (i.e. equipment, muscles, movements etc)
 //could be also implementing IExecutableComponent 
+// OUTDATED: Legacy IWorkoutComponent contract retained for later refactor.
 // [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 // [JsonDerivedType(typeof(Equipment), "equipment")]
 // [JsonDerivedType(typeof(Muscle), "muscle")]

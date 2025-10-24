@@ -1,6 +1,5 @@
 ﻿
 using GainsLab.Models.Core;
-using GainsLab.Models.Logging;
 using GainsLab.Models.WorkoutComponents;
 
 namespace GainsLab.Models.DataManagement.Caching;

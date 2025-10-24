@@ -1,7 +1,8 @@
-﻿using System;
+﻿namespace GainsLab.Core.Models.Core.Interfaces;
 
-namespace GainsLab.Models.Core.Interfaces;
-
+/// <summary>
+/// Shared contract for identifiers that support equality and cloning semantics.
+/// </summary>
 public interface IIdentifier : IEquatable<IIdentifier>
 {
     int? DbID { get; set; } // for database primary key

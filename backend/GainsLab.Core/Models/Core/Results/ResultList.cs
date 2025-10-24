@@ -1,13 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Linq;
-using GainsLab.Models.Logging;
+using GainsLab.Core.Models.Core.Utilities.Logging;
 
-namespace GainsLab.Models.Core.Results;
+namespace GainsLab.Core.Models.Core.Results;
 
 
+/// <summary>
+/// Common surface for result collections.
+/// </summary>
 public interface IResultList
 {
     public bool Success{ get; }
@@ -28,6 +30,9 @@ public interface IResultList
     
 }
 
+/// <summary>
+/// Aggregates non-generic results while tracking errors.
+/// </summary>
 public class ResultList : IResultList,IResult, IEnumerable<Result>
 {
     
@@ -110,6 +115,9 @@ public class ResultList : IResultList,IResult, IEnumerable<Result>
     }
 }
 
+/// <summary>
+/// Aggregates typed results while tracking errors.
+/// </summary>
 public class ResultList<T> :  IResultList,IResult, IEnumerable<Result<T>> 
 {
     

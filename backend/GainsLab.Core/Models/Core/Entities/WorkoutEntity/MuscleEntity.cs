@@ -1,4 +1,6 @@
-﻿using GainsLab.Core.Models.Core.CreationInfo;
+﻿using System;
+using System.Collections.Generic;
+using GainsLab.Core.Models.Core.CreationInfo;
 using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Identifier;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
@@ -9,6 +11,9 @@ using GainsLab.Models.Core.Interfaces;
 namespace GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 
 
+/// <summary>
+/// Mutable content describing a muscle and additional metadata.
+/// </summary>
 public class MuscleContent : IEntityContent<MuscleContent>
 {
     public string Name { get; set; }
@@ -20,9 +25,9 @@ public class MuscleContent : IEntityContent<MuscleContent>
         return this;
     }
 }
-
- 
-
+/// <summary>
+/// Aggregate root representing a muscle along with descriptor data and antagonists.
+/// </summary>
 public class MuscleEntity :  EntityBase<MuscleId, MuscleContent, AuditedInfo>, IDescribed<BaseDescriptorEntity>
 {
     
@@ -48,6 +53,9 @@ public class MuscleEntity :  EntityBase<MuscleId, MuscleContent, AuditedInfo>, I
     public AuditedInfo CreationInfo { get; }
     public BaseDescriptorEntity Descriptor { get; }
 
+    /// <summary>
+    /// Returns a copy with the provided set of antagonist identifiers.
+    /// </summary>
     public MuscleEntity WithAntagonists(IEnumerable<MuscleId>? ids)
     {
         var muscle = new MuscleEntity(Content, Id, CreationInfo, Descriptor ,ids, DbId);

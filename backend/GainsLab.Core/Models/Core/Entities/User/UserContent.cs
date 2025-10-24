@@ -1,5 +1,10 @@
-﻿namespace GainsLab.Models.Core.User;
+﻿using System;
 
+namespace GainsLab.Models.Core.User;
+
+/// <summary>
+/// Immutable snapshot of personal information kept for a user.
+/// </summary>
 public sealed record UserContent(string PseudoName, DateTime? DateBirth= null, float? Weight = null, float?  Height = null) 
 {
     

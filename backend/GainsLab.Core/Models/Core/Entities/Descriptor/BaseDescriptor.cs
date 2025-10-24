@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using GainsLab.Core.Models.Core.CreationInfo;
 using GainsLab.Core.Models.Core.Descriptor;
@@ -10,6 +11,9 @@ using GainsLab.Models.Core.Descriptor;
 
 namespace GainsLab.Core.Models.Core.Entities.Descriptor;
 
+/// <summary>
+/// Container for descriptive metadata fields maintained separately from entity identity.
+/// </summary>
 public class BaseDescriptorContent
 {
     
@@ -35,10 +39,18 @@ public class BaseDescriptorContent
     [NotMapped]
     public TagList? Tags { get; set; }
     
-    
+    /// <summary>
+    /// Replaces the description with a new value.
+    /// </summary>
     public void UpdateDescription(string? text) => Description = new Description(text);
+    /// <summary>
+    /// Replaces the notes with a new value.
+    /// </summary>
     public void UpdateNotes(string? text) => Notes = new Notes(text);
 
+    /// <summary>
+    /// Performs validation of descriptor content and returns the current instance.
+    /// </summary>
     public BaseDescriptorContent Validate()
     {
         //todo
@@ -46,8 +58,9 @@ public class BaseDescriptorContent
     }
 }
 
-
-
+/// <summary>
+/// Aggregate root that couples descriptor identity, content, and audit metadata.
+/// </summary>
 public class BaseDescriptorEntity : EntityBase<DescriptorId,BaseDescriptorContent, AuditedInfo> , IEquatable<BaseDescriptorEntity>
 {
     public BaseDescriptorEntity()

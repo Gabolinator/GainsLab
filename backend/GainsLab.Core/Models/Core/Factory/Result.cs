@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GainsLab.Models.Core.Interfaces;
-using GainsLab.Models.Core.Results;
 
 namespace GainsLab.Models.Factory;
 

@@ -2,6 +2,8 @@
 
 namespace GainsLab.Models.Core.Descriptor;
 
+// OUTDATED: Legacy CreationInfo records retained for later refactor.
+
 // public record CreationInfo(string? CreatedBy, Identifier Identifier ,DateTime? CreatedAt, DateTime? UpdatedAt = null)
 // {
 //     public bool IsEmpty() => string.IsNullOrWhiteSpace(CreatedBy) && Identifier.IsEmpty();

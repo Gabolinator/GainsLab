@@ -1,13 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using GainsLab.Core.Models.Core.Interfaces.Entity;
+﻿using GainsLab.Core.Models.Core.Interfaces.Entity;
+using GainsLab.Core.Models.Core.Results;
 using GainsLab.Models.Core;
-using GainsLab.Models.Core.Interfaces;
-using GainsLab.Models.Core.Results;
 
-namespace GainsLab.Models.DataManagement.FileAccess;
+namespace GainsLab.Core.Models.Core.Interfaces.DataManagement;
 
+/// <summary>
+/// Handles serialization of components to and from file storage.
+/// </summary>
 public interface IFileDataService
 {
     

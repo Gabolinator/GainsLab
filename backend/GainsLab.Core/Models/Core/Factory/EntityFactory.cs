@@ -1,15 +1,18 @@
-﻿using GainsLab.Core.Models.Core.CreationInfo;
+﻿using System.Collections.Generic;
+using GainsLab.Core.Models.Core.CreationInfo;
 using GainsLab.Core.Models.Core.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Identifier;
 using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 using GainsLab.Core.Models.Core.Interfaces;
+using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Models.Core.Interfaces;
-using GainsLab.Models.Logging;
-using GainsLab.Models.Utilities;
 
 namespace GainsLab.Core.Models.Core.Factory;
 
+/// <summary>
+/// Coordinates creation of core domain entities and their descriptors.
+/// </summary>
 public class EntityFactory
 {
 
@@ -28,6 +31,9 @@ public class EntityFactory
     private readonly IClock _clock;
 
 
+    /// <summary>
+    /// Generates the seeded equipment entities required for a new deployment.
+    /// </summary>
     public List<EquipmentEntity> CreateBaseEquipments()
     {
         

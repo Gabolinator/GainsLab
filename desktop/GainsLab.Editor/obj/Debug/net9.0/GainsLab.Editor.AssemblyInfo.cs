@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GainsLab.Editor")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6a3c9ed818b6f8069f2f6c9500134f1739585cc3")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2146d0c6a567827d4620025d6523b3154419f33c")]
 [assembly: System.Reflection.AssemblyProductAttribute("GainsLab.Editor")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GainsLab.Editor")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

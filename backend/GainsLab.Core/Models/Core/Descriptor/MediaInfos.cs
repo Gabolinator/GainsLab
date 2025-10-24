@@ -1,12 +1,18 @@
-﻿namespace GainsLab.Core.Models.Core;
+﻿using System.Collections.Generic;
 
+namespace GainsLab.Core.Models.Core;
 
+/// <summary>
+/// Represents a media element (image, video, etc.) linked to a descriptor.
+/// </summary>
 public class MediaItem
 {
     
 }
 
-//will hold images or videos urls
+/// <summary>
+/// Collection of media assets attached to workout content.
+/// </summary>
 public class MediaInfos
 {
     public int DbId { get; private set; }

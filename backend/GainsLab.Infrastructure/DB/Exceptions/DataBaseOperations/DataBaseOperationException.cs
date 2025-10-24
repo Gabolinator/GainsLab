@@ -1,5 +1,5 @@
 ﻿using System;
-using GainsLab.Models.Logging;
+using GainsLab.Core.Models.Core.Utilities.Logging;
 
 namespace GainsLab.Models.Core.Exceptions.DataBaseOperations;
 

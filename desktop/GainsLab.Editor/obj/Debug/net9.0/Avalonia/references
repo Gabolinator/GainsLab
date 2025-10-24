@@ -48,6 +48,8 @@ C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\Microso
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Win32.Registry.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\mscorlib.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\netstandard.dll
+C:\Users\lalib\.nuget\packages\npgsql\9.0.3\lib\net8.0\Npgsql.dll
+C:\Users\lalib\.nuget\packages\npgsql.entityframeworkcore.postgresql\9.0.4\lib\net8.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 C:\Users\lalib\.nuget\packages\skiasharp\2.88.9\lib\net6.0\SkiaSharp.dll
 C:\Users\lalib\.nuget\packages\sqlitepclraw.bundle_e_sqlite3\2.1.10\lib\netstandard2.0\SQLitePCLRaw.batteries_v2.dll
 C:\Users\lalib\.nuget\packages\sqlitepclraw.core\2.1.10\lib\netstandard2.0\SQLitePCLRaw.core.dll

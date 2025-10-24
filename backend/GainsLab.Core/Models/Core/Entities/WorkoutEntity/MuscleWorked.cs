@@ -1,26 +1,40 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using GainsLab.Core.Models.Core.Entities.Identifier;
 
 namespace GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 
+/// <summary>
+/// Describes the primary and secondary muscles engaged by a movement.
+/// </summary>
 public class MuscleWorked
 {
     public MuscleIdList MainMuscles { get; set; }
     public MuscleIdList SecondaryMuscles { get; set; }
 }
 
+/// <summary>
+/// Maintains a unique collection of muscle identifiers.
+/// </summary>
 public class MuscleIdList : IEnumerable<MuscleId>
 {
     public List<MuscleId> Ids { get; set; } = new();
 
     public IEnumerator<MuscleId> GetEnumerator() => Ids.GetEnumerator();
 
+    /// <summary>
+    /// Adds a single identifier when it is not already present.
+    /// </summary>
     public void AddUnique(MuscleId id)
     {
         if (!Ids.Contains(id))
             Ids.Add(id);
     }
     
+    /// <summary>
+    /// Adds distinct identifiers from the supplied sequence.
+    /// </summary>
     public void AddUniques(IEnumerable<MuscleId>? ids)
     {
         if (ids is null) return;

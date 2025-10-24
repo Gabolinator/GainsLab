@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace GainsLab.Models.Core;
 
+// OUTDATED: Legacy ComponentListBuilder implementation retained for later refactor.
+
 // public class ComponentListBuilder<TComponent> where TComponent : IWorkoutComponent
 // {
 //     private readonly ComponentLists<TComponent> _list;

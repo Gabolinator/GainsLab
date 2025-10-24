@@ -1,14 +1,20 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace GainsLab.Models.Core.Results;
+namespace GainsLab.Core.Models.Core.Results;
 
 
+/// <summary>
+/// Represents the outcome of an operation without exposing typed values.
+/// </summary>
 public interface IResult
 {
     bool Success { get; }
     string? ErrorMessage { get; }
 }
 
+/// <summary>
+/// Basic success/failure result with optional error messaging.
+/// </summary>
 public class Result : IResult
 {
     public bool Success { get;}
@@ -32,6 +38,9 @@ public class Result : IResult
     public virtual string GetErrorMessage() => HasError ? ErrorMessage! : string.Empty;
 }
 
+/// <summary>
+/// Success/failure result that can optionally carry a value of type <typeparamref name="T"/>.
+/// </summary>
 public class Result<T> : Result
 {
     public T? Value { get; }

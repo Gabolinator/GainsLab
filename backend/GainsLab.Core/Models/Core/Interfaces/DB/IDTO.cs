@@ -1,6 +1,4 @@
-﻿using GainsLab.Models.Core;
-
-namespace GainsLab.Models.DataManagement.DB.Model.DTOs;
+﻿namespace GainsLab.Core.Models.Core.Interfaces.DB;
 
 public interface IDto
 {

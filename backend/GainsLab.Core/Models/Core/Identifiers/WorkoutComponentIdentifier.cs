@@ -1,8 +1,12 @@
 ﻿using System;
+using GainsLab.Core.Models.Core.Interfaces;
 using GainsLab.Models.Core.Interfaces;
 
 namespace GainsLab.Models.Core;
 
+/// <summary>
+/// Identifier specialized for workout components, including their component type.
+/// </summary>
 public class WorkoutComponentIdentifier : Identifier
 {
     public WorkoutComponentIdentifier() { } 
@@ -16,7 +20,9 @@ public class WorkoutComponentIdentifier : Identifier
         ComponentType = type;
     }
 
-    
+    /// <summary>
+    /// Gets or sets the type of workout component represented.
+    /// </summary>
     public eWorkoutComponents ComponentType { get; set; }
     
     
@@ -48,5 +54,8 @@ public class WorkoutComponentIdentifier : Identifier
     }
 }
 
+/// <summary>
+/// Placeholder identifier used when a workout component is not known.
+/// </summary>
 public class EmptyWorkoutComponentIdentifier() : WorkoutComponentIdentifier(null, "Empty", eWorkoutComponents.unidentified);
 

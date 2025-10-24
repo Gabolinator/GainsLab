@@ -1,11 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using GainsLab.Core.Models.Core.Results;
 using GainsLab.Models.Core;
-using GainsLab.Models.Core.Interfaces;
-using GainsLab.Models.Core.Results;
 
-namespace GainsLab.Models.DataManagement.DB;
+namespace GainsLab.Core.Models.Core.Interfaces.DataManagement;
 
+/// <summary>
+/// Defines data-access operations for reading and writing workout components.
+/// </summary>
 public interface IDataProvider
 {
     Task<Result> InitializeAsync();

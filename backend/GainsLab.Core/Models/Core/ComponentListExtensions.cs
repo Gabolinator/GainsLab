@@ -5,6 +5,8 @@ using GainsLab.Models.Core.Interfaces;
 
 namespace GainsLab.Models.Core;
 
+// OUTDATED: Legacy ComponentListExtensions implementation retained for later refactor.
+
 // public static class ComponentListExtensions
 // {
 //     

@@ -1,10 +1,14 @@
 ﻿using System;
+using GainsLab.Core.Models.Core.Interfaces;
 using GainsLab.Models.Core.Interfaces;
 
 namespace GainsLab.Models.Core;
 
 
 //used only for data base - and general object identification
+/// <summary>
+/// Provides a general-purpose identifier implementation for persisted components.
+/// </summary>
 public class Identifier : IIdentifier
 {
     public Identifier() { } 
@@ -28,6 +32,9 @@ public class Identifier : IIdentifier
     public Guid GUID { get; set; } = Guid.Empty;
 
 
+    /// <summary>
+    /// Indicates whether the database-generated identifier is populated.
+    /// </summary>
     public bool IsIdSet() => DbID != null || DbID > 0;
 
     public bool IsUidSet() => !string.IsNullOrEmpty(Slug);
@@ -64,8 +71,14 @@ public class Identifier : IIdentifier
         return new Identifier(DbID, Slug);
     }
 
+    /// <summary>
+    /// Assigns the primary key value produced by the database.
+    /// </summary>
     public void WithDBId(int id) =>DbID = id;
     
+    /// <summary>
+    /// Replaces the GUID with a newly generated value.
+    /// </summary>
     public void AssignNewGuid() =>GUID = new Guid();
     
 }

@@ -1,7 +1,6 @@
-﻿using GainsLab.Models.Core.Results;
-using GainsLab.Models.DataManagement.DB.Model.DTOs;
+﻿using GainsLab.Core.Models.Core.Results;
 
-namespace GainsLab.Infrastructure.DB.Handlers;
+namespace GainsLab.Core.Models.Core.Interfaces.DB;
 
 public interface IDBHandler
 {

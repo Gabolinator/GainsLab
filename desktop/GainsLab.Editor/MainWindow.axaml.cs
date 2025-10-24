@@ -2,9 +2,8 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using GainsLab.Core.Models.Core.Factory;
 using GainsLab.Models.Factory;
-using GainsLab.Models.Logging;
 using Microsoft.Extensions.Logging;
-using ILogger = GainsLab.Models.Logging.ILogger;
+using ILogger = GainsLab.Core.Models.Core.Utilities.Logging.ILogger;
 
 
 namespace GainsLab;

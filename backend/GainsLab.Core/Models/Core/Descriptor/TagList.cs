@@ -1,8 +1,13 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using GainsLab.Models.Core.Descriptor;
 
 namespace GainsLab.Core.Models.Core.Descriptor;
 
+/// <summary>
+/// Provides collection semantics for descriptor tags while retaining database metadata.
+/// </summary>
 public class TagList : IEnumerable<Tag>
 {
 

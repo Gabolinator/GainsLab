@@ -1,8 +1,10 @@
 ﻿using System.Runtime.CompilerServices;
-using GainsLab.Models.Logging;
 
 namespace GainsLab.Core.Models.Core.Utilities.Logging;
 
+/// <summary>
+/// Console-based logger with colored output for GainsLab components.
+/// </summary>
 public class GainsLabLogger : ILogger
 {
     public GainsLabLogger()

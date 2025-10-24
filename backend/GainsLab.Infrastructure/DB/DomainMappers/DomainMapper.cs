@@ -1,6 +1,7 @@
 ﻿using System;
 using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
+using GainsLab.Core.Models.Core.Interfaces.DB;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Infrastructure.DB.DomainMappers;
 using GainsLab.Models.Core;

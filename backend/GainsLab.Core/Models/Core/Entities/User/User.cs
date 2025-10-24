@@ -1,4 +1,5 @@
-﻿using GainsLab.Core.Models.Core.CreationInfo;
+﻿using System;
+using GainsLab.Core.Models.Core.CreationInfo;
 using GainsLab.Core.Models.Core.Entities.Identifier;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Models.Core;
@@ -9,7 +10,9 @@ namespace GainsLab.Core.Models.Core.Entities.User;
 
 
 
-
+/// <summary>
+/// Aggregate root representing a GainsLab user with content, audit info, and account state.
+/// </summary>
 public class User : EntityBase<UserId,UserContent, BaseAuditedInfo> , IEquatable<User>
 {
     
@@ -74,9 +77,15 @@ public class User : EntityBase<UserId,UserContent, BaseAuditedInfo> , IEquatable
      
 
 }
-
-
-
+/// <summary>
+/// Convenience type for creating coach accounts with default permissions.
+/// </summary>
 public class Coach(string name) : User(name, new AccountInfos(new UserRole.CoachRole(), new SubscriptionInfos.Free()));
+/// <summary>
+/// Convenience type for creating athlete accounts with default permissions.
+/// </summary>
 public class  Athlete(string name) : User(name, new AccountInfos(new UserRole.AthleteRole(),new SubscriptionInfos.Free()));
+/// <summary>
+/// Convenience type for creating admin accounts with default permissions.
+/// </summary>
 public class Admin(string name) : User(name, new AccountInfos(new UserRole.AdminRole(),new SubscriptionInfos.Paid()));

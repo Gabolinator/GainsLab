@@ -1,4 +1,5 @@
-﻿using GainsLab.Core.Models.Core.CreationInfo;
+﻿using System;
+using GainsLab.Core.Models.Core.CreationInfo;
 using GainsLab.Core.Models.Core.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Identifier;
@@ -10,6 +11,9 @@ using GainsLab.Models.Core.Interfaces;
 
 namespace GainsLab.Core.Models.Core.Factory;
 
+/// <summary>
+/// Configuration payload used when creating descriptor entities.
+/// </summary>
 public class DescriptiorCreationConfig
 {
 
@@ -27,6 +31,9 @@ public class DescriptiorCreationConfig
     public string? CreatedBy { get; set; }
 }
 
+/// <summary>
+/// Builds descriptor entities while coordinating audit metadata and persistence hooks.
+/// </summary>
 public class DescriptorFactory : IEntityFactory<BaseDescriptorEntity, DescriptiorCreationConfig>
 {
     public  DescriptorFactory(IClock clock, IDescriptorService<BaseDescriptorEntity> descSvc)
@@ -39,6 +46,9 @@ public class DescriptorFactory : IEntityFactory<BaseDescriptorEntity, Descriptio
     private readonly IClock _clock;              
     private readonly IDescriptorService<BaseDescriptorEntity> _descSvc;
     
+    /// <summary>
+    /// Creates and persists a descriptor from the supplied configuration.
+    /// </summary>
     public BaseDescriptorEntity Create(DescriptiorCreationConfig cfg)
     {
         if (cfg.Content is null) throw new ArgumentNullException(nameof(cfg.Content));

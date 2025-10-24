@@ -1,6 +1,6 @@
-﻿using GainsLab.Infrastructure.DB.DTOs;
+﻿using GainsLab.Core.Models.Core.Utilities.Logging;
+using GainsLab.Infrastructure.DB.DTOs;
 using GainsLab.Models.DataManagement.DB.Model.DTOs;
-using GainsLab.Models.Logging;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB.Context;

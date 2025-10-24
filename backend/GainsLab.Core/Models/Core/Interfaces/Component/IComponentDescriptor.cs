@@ -6,6 +6,8 @@ using GainsLab.Models.Core.Descriptor;
 
 namespace GainsLab.Models.Core.Interfaces;
 
+// OUTDATED: Legacy IComponentDescriptor contract retained for later refactor.
+
 // public interface IComponentDescriptor
 // {
 //     string Name { get; set; }

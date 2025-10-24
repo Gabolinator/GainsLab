@@ -1,19 +1,30 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace GainsLab.Core.Models.Core.Entities.Identifier;
 
+/// <summary>
+/// Maintains a unique set of equipment identifiers for relationship tracking.
+/// </summary>
 public class EquipmentIdList : IEnumerable<EquipmentId>
 {
     public List<EquipmentId> Ids { get; set; } = new();
 
     public IEnumerator<EquipmentId> GetEnumerator() => Ids.GetEnumerator();
 
+    /// <summary>
+    /// Adds a single identifier when it is not already present.
+    /// </summary>
     public void AddUnique(EquipmentId id)
     {
         if (!Ids.Contains(id))
             Ids.Add(id);
     }
     
+    /// <summary>
+    /// Adds distinct identifiers from the supplied sequence.
+    /// </summary>
     public void AddUniques(IEnumerable<EquipmentId>? ids)
     {
         if (ids is null) return;

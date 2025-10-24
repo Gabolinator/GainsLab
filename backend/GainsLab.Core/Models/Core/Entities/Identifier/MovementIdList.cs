@@ -1,19 +1,30 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace GainsLab.Core.Models.Core.Entities.Identifier;
 
+/// <summary>
+/// Maintains a unique set of movement identifiers for relationship tracking.
+/// </summary>
 public class MovementIdList  : IEnumerable<MovementId>
 {
     public List<MovementId> Ids { get; set; } = new();
 
     public IEnumerator<MovementId> GetEnumerator() => Ids.GetEnumerator();
 
+    /// <summary>
+    /// Adds a single identifier when it is not already present.
+    /// </summary>
     public void AddUnique(MovementId id)
     {
         if (!Ids.Contains(id))
             Ids.Add(id);
     }
     
+    /// <summary>
+    /// Adds distinct identifiers from the supplied sequence.
+    /// </summary>
     public void AddUniques(IEnumerable<MovementId>? ids)
     {
         if (ids is null) return;

@@ -1,4 +1,5 @@
-﻿using GainsLab.Core.Models.Core.CreationInfo;
+﻿using System;
+using GainsLab.Core.Models.Core.CreationInfo;
 using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Identifier;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
@@ -6,6 +7,9 @@ using GainsLab.Models.Core;
 
 namespace GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 
+/// <summary>
+/// Immutable details describing a movement category and its base categorizations.
+/// </summary>
 public record MovementCategoryContent(string Name , params eMovementCategories[] BaseCategories) : IEntityContent<MovementCategoryContent>
 {
     public MovementCategoryContent Validate()
@@ -14,8 +18,9 @@ public record MovementCategoryContent(string Name , params eMovementCategories[]
         return this;
     }
 }
-
-
+/// <summary>
+/// Aggregate root for grouping movements under a shared category.
+/// </summary>
 public class MovementCategoryEntity : EntityBase<MovementCategoryId, MovementCategoryContent, AuditedInfo>,
     IDescribed<BaseDescriptorEntity>
 {
@@ -32,6 +37,9 @@ public class MovementCategoryEntity : EntityBase<MovementCategoryId, MovementCat
 
     public BaseDescriptorEntity Descriptor { get; }
     
+    /// <summary>
+    /// Returns a copy with base movement categories replaced by the supplied set.
+    /// </summary>
     public MovementCategoryEntity WithBaseCategories (params eMovementCategories[] baseCategories)
     {
         var content = new MovementCategoryContent(Content.Name, baseCategories);

@@ -1,5 +1,8 @@
-﻿namespace GainsLab.Models.Core.Interfaces;
+﻿namespace GainsLab.Core.Models.Core.Interfaces;
 
+/// <summary>
+/// Abstraction over time retrieval to enable deterministic testing.
+/// </summary>
 public interface IClock
 {
     DateTimeOffset UtcNow { get;}

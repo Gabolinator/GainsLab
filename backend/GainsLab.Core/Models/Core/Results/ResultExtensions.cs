@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using GainsLab.Models.Logging;
+using GainsLab.Core.Models.Core.Utilities.Logging;
 
-namespace GainsLab.Models.Core.Results;
+namespace GainsLab.Core.Models.Core.Results;
 
+/// <summary>
+/// Helper methods for extracting data from result collections.
+/// </summary>
 public static class ResultExtensions
 {
 

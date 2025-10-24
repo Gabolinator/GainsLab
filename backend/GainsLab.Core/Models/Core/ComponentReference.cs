@@ -2,11 +2,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
 using GainsLab.Models.Core.Interfaces;
-using GainsLab.Models.Logging;
-using GainsLab.Models.Utilities;
 
 
 namespace GainsLab.Models.Core;
+
+// OUTDATED: Legacy ComponentReference implementation retained for later refactor.
 
 // [NotMapped] 
 // public class ComponentReference<TComponent> : IComponentReference,  IEquatable<ComponentReference<TComponent>> where TComponent : IWorkoutComponent 

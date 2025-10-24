@@ -1,17 +1,11 @@
-﻿using System;
+﻿using GainsLab.Core.Models.Core.Interfaces;
 using GainsLab.Core.Models.Core.Utilities.Logging;
-using GainsLab.Models.Core;
-using GainsLab.Models.Core.Interfaces;
-using GainsLab.Models.Logging;
-using GainsLab.Models.WorkoutComponents;
-using GainsLab.Models.WorkoutComponents.Equipment;
-using GainsLab.Models.WorkoutComponents.Movement;
-using GainsLab.Models.WorkoutComponents.MovementCategory;
-using GainsLab.Models.WorkoutComponents.Muscle;
 
+namespace GainsLab.Core.Models.Core.Utilities;
 
-namespace GainsLab.Models.Utilities;
-
+/// <summary>
+/// Provides shared singletons and helpers used across core domain code.
+/// </summary>
 public static class CoreUtilities
 {
     
@@ -44,8 +38,14 @@ public static class CoreUtilities
 
     public static GainsLabLogger? _logger;
     
+    /// <summary>
+    /// Lazily initialized logger used when no explicit logger is provided.
+    /// </summary>
     public static GainsLabLogger Logger => _logger ?? new GainsLabLogger();
 
     private static IClock? _clock;
+    /// <summary>
+    /// Lazily initialized clock abstraction for consistent time access.
+    /// </summary>
     public static IClock Clock => _clock ?? new Clock();
 }

@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GainsLab.Core.Models.Core.Interfaces.Caching;
+using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.Caching;
 using GainsLab.Models.Core;
 using GainsLab.Models.Core.Interfaces;
 using GainsLab.Models.DataManagement.Caching.Interface;
-using GainsLab.Models.Logging;
-using GainsLab.Models.Utilities;
 
 namespace GainsLab.Models.DataManagement.Caching;
 

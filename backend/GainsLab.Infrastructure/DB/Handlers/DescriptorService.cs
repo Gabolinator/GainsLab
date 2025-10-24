@@ -3,7 +3,6 @@ using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Identifier;
 using GainsLab.Core.Models.Core.Interfaces;
 using GainsLab.Models.Core.Interfaces;
-using GainsLab.Models.Utilities;
 
 namespace GainsLab.Infrastructure.DB.Handlers;
 

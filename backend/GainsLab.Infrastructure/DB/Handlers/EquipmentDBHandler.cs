@@ -1,11 +1,11 @@
 ﻿
+using GainsLab.Core.Models.Core.Results;
+using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.DTOs;
 using GainsLab.Infrastructure.DB.Handlers;
-using GainsLab.Models.Core.Results;
 using GainsLab.Models.DataManagement.DB.Model.DTOs;
-using GainsLab.Models.Logging;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Models.DataManagement.DB.Model.Handlers;

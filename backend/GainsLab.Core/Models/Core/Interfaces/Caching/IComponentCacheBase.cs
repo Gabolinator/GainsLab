@@ -3,6 +3,9 @@
 namespace GainsLab.Models.DataManagement.Caching.Interface;
 
 
+/// <summary>
+/// Base contract for component caches regardless of identifier type.
+/// </summary>
 public interface IComponentCacheBase
 {
         

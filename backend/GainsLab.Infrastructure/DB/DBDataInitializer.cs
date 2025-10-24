@@ -1,23 +1,34 @@
 ﻿using GainsLab.Core.Models.Core.Factory;
+using GainsLab.Core.Models.Core.Utilities;
+using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.DTOs;
 using GainsLab.Infrastructure.DB.Handlers;
 using GainsLab.Models.DataManagement.DB.Model.DomainMappers;
-using GainsLab.Models.Logging;
-using GainsLab.Models.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB;
 
+/// <summary>
+/// Seeds required baseline data into the GainsLab database so the application can run with defaults.
+/// </summary>
 public class DBDataInitializer
 {
     private readonly ILogger _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DBDataInitializer"/> class.
+    /// </summary>
+    /// <param name="logger">Logger used to record the seeding workflow.</param>
     public DBDataInitializer(ILogger logger)
     {
         _logger = logger;
     }
 
+    /// <summary>
+    /// Ensures that core reference entities exist in the database.
+    /// </summary>
+    /// <param name="db">The Postgres context used for querying and persisting entities.</param>
     public async Task CreateBaseEntities(GainLabPgDBContext db)
     {
 
@@ -31,6 +42,11 @@ public class DBDataInitializer
         
     }
 
+    /// <summary>
+    /// Populates the database with the default set of equipment records when none exist.
+    /// </summary>
+    /// <param name="db">Database context used to check and persist equipment records.</param>
+    /// <param name="entityFactory">Factory responsible for creating baseline equipment domain entities.</param>
     private async Task CreateBaseEquipments(GainLabPgDBContext db, EntityFactory entityFactory)
     {
         var anyPresent = await db.Equipments.AnyAsync();

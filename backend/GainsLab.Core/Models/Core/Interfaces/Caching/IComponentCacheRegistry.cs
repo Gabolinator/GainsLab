@@ -2,6 +2,9 @@
 
 namespace GainsLab.Core.Models.Core.Interfaces.Caching
 {
+    /// <summary>
+    /// Coordinates registration and retrieval of component caches for different entity types.
+    /// </summary>
     public interface IComponentCacheRegistry
     {
         public Task InitializeAsync();
