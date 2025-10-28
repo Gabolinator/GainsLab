@@ -53,7 +53,15 @@ public class HttpDataProvider: IRemoteProvider
         var url = $"/sync/descriptor?ts={Uri.EscapeDataString(cursor.ITs.ToString("o"))}&seq={cursor.ISeq}&take={take}";
         using var res = await _http.GetAsync(url, ct);
         res.EnsureSuccessStatusCode();
+
+        _logger.Log(nameof(HttpDataProvider), $"Pull Descriptor page - take {take} - {res.Content}" );
+        
         var payload = await res.Content.ReadFromJsonAsync<SyncPage<DescriptorSyncDto>>(cancellationToken: ct);
+        
+        _logger.Log(nameof(HttpDataProvider), $"Pull Descriptor page - take {take} - payload items count: {payload?.Items.Count ?? 0} payload items[0] {(payload?.Items.Count>0 ?payload?.Items[0] : "none" )} " );
+
+        
+        
         return payload ?? new SyncPage<DescriptorSyncDto>(DateTimeOffset.UtcNow, null, Array.Empty<DescriptorSyncDto>());
 
     }
@@ -68,7 +76,13 @@ public class HttpDataProvider: IRemoteProvider
         var url = $"/sync/equipment?ts={Uri.EscapeDataString(cursor.ITs.ToString("o"))}&seq={cursor.ISeq}&take={take}";
         using var res = await _http.GetAsync(url, ct);
         res.EnsureSuccessStatusCode();
+        
+        _logger.Log(nameof(HttpDataProvider), $"Pull Equipment page - take {take} - {res.Content}" );
+
         var payload = await res.Content.ReadFromJsonAsync<SyncPage<EquipmentSyncDto>>(cancellationToken: ct);
+        
+        _logger.Log(nameof(HttpDataProvider), $"Pull Equipment page - take {take} - payload items count: {payload?.Items.Count ?? 0} payload items[0] {(payload?.Items.Count>0 ?payload?.Items[0] : "none" )} " );
+
         return payload ?? new SyncPage<EquipmentSyncDto>(DateTimeOffset.UtcNow, null, Array.Empty<EquipmentSyncDto>());
     }
     

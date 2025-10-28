@@ -104,6 +104,13 @@ namespace GainsLab.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_descriptors_GUID",
+                schema: "public",
+                table: "descriptors",
+                column: "GUID",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_descriptors_updated_at_utc_updated_seq",
                 schema: "public",
                 table: "descriptors",
@@ -114,6 +121,13 @@ namespace GainsLab.Infrastructure.Migrations
                 schema: "public",
                 table: "equipments",
                 column: "DescriptorID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_equipments_GUID",
+                schema: "public",
+                table: "equipments",
+                column: "GUID",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_equipments_updated_at_utc_updated_seq",

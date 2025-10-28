@@ -12,7 +12,7 @@ public interface ISyncService
 {
     EntityType EntityType { get; }
     Task PushAsync(CancellationToken ct = default);
-    Task<SyncPage<ISyncDto>> PullAsync(SyncCursor cur, int take, CancellationToken ct);
+    Task<object> PullBoxedAsync(SyncCursor cur, int take, CancellationToken ct); // returns concrete SyncPage<T>
 }
 
 public interface ISyncService<T> : ISyncService where T : ISyncDto

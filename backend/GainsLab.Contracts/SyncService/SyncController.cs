@@ -27,7 +27,7 @@ public class SyncController : ControllerBase
         var cursor = new SyncCursor(ts ?? DateTimeOffset.MinValue, seq ?? 0);
         take = Math.Clamp(take, 1, 500);
 
-        var page = await svc.PullAsync(cursor, take, ct); // non-generic call
+        var page = await svc.PullBoxedAsync(cursor, take, ct);
         return Ok(page);
     }
 

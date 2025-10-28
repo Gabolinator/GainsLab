@@ -21,8 +21,8 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
                     Content = table.Column<string>(type: "TEXT", nullable: false),
                     CreatedAtUtc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
                     CreatedBy = table.Column<string>(type: "TEXT", nullable: false),
-                    updated_at_utc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
-                    updated_seq = table.Column<long>(type: "INTEGER", nullable: false, defaultValue: 0L),
+                    updated_at_utc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "now()"),
+                    updated_seq = table.Column<long>(type: "INTEGER", nullable: false),
                     UpdatedBy = table.Column<string>(type: "TEXT", nullable: true),
                     is_deleted = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
                     DeletedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
@@ -85,6 +85,12 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_descriptors_GUID",
+                table: "descriptors",
+                column: "GUID",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_descriptors_updated_at_utc_updated_seq",
                 table: "descriptors",
                 columns: new[] { "updated_at_utc", "updated_seq" });
@@ -93,6 +99,12 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
                 name: "IX_equipments_DescriptorID",
                 table: "equipments",
                 column: "DescriptorID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_equipments_GUID",
+                table: "equipments",
+                column: "GUID",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_equipments_updated_at_utc_updated_seq",

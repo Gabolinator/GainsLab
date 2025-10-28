@@ -64,6 +64,10 @@ public class GainLabSQLDBContext : DbContext
                 .HasForeignKey(x => x.DescriptorID)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            // GUID unique index
+            e.HasIndex(x => x.GUID).IsUnique();
+
+            
             e.Property(x => x.UpdatedAtUtc)
                 .IsRequired()
                 .HasColumnName("updated_at_utc")
@@ -91,19 +95,22 @@ public class GainLabSQLDBContext : DbContext
 
             d.Property(x => x.Content).IsRequired();
 
+            // GUID unique index
+            d.HasIndex(x => x.GUID).IsUnique();
+
+            // timestamps & sequence
             d.Property(x => x.UpdatedAtUtc)
                 .IsRequired()
                 .HasColumnName("updated_at_utc")
-                .HasDefaultValueSql("CURRENT_TIMESTAMP"); // SQLite
+                .HasDefaultValueSql("now()");
 
             d.Property(x => x.UpdatedSeq)
                 .HasColumnName("updated_seq")
-                .HasDefaultValue(0); // or manage via code/trigger
+                .UseIdentityByDefaultColumn();
 
             d.Property(x => x.IsDeleted)
                 .HasColumnName("is_deleted")
                 .HasDefaultValue(false);
-            
 
             d.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
         });

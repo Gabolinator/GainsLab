@@ -88,6 +88,9 @@ namespace GainsLab.Infrastructure.Migrations
 
                     b.HasIndex("DescriptorID");
 
+                    b.HasIndex("GUID")
+                        .IsUnique();
+
                     b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
 
                     b.ToTable("equipments", "public");
@@ -215,6 +218,9 @@ namespace GainsLab.Infrastructure.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GUID")
+                        .IsUnique();
 
                     b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
 

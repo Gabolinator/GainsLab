@@ -3,6 +3,7 @@
 using GainsLab.Contracts.Interface;
 using GainsLab.Contracts.SyncDto;
 using GainsLab.Contracts.SyncService;
+using GainsLab.Core.Models.Core.Utilities;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB;
 using GainsLab.Infrastructure.DB.Context;
@@ -11,7 +12,7 @@ using Results = Microsoft.AspNetCore.Http.Results;
 
 
 var logger = new GainsLabLogger("BACKEND");
-
+var clock = new Clock();
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
@@ -40,6 +41,7 @@ if (string.IsNullOrWhiteSpace(cs))
 services.AddDbContext<GainLabPgDBContext>(o =>
     o.UseNpgsql(cs, npgsql => npgsql.EnableRetryOnFailure()));
 
+services.AddSingleton<GainsLab.Core.Models.Core.Utilities.Logging.ILogger>(logger);
 
 services.AddScoped<ISyncService<EquipmentSyncDto>, EquipmentSyncService>();
 services.AddScoped<ISyncService<DescriptorSyncDto>, DescriptorSyncService>();
@@ -74,6 +76,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<GainLabPgDBContext>();
     db.AddLogger(logger);
+    db.AddClock(clock);
     
     logger.Log("Migrating DB");
     await db.Database.MigrateAsync();
@@ -90,7 +93,7 @@ using (var scope = app.Services.CreateScope())
     logger.Log("Database provider: " + db.Database.ProviderName);
     logger.Log("Connection string hash (for sanity): " + db.Database.GetDbConnection().ConnectionString.GetHashCode());
     
-    var dbInitializer = new DBDataInitializer(logger);
+    var dbInitializer = new DBDataInitializer(logger, clock);
 
   
     logger.Log("Initializing DB");

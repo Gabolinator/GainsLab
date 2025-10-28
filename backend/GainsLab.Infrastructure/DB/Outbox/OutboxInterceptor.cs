@@ -28,7 +28,7 @@ public class OutboxInterceptor : SaveChangesInterceptor
         var saveId = ctx.ContextId.InstanceId;
 
         _logger?.Log(nameof(OutboxInterceptor),
-            $"Intercepting saved changes for instance {ctx.ContextId.InstanceId}\n{Environment.StackTrace}");
+            $"Intercepting saved changes for instance {ctx.ContextId.InstanceId}");
 
         // If EF restarts the pipeline in the same SaveChanges call, skip the second pass
         if (!_activeSaves.Add(saveId))

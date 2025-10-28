@@ -11,9 +11,9 @@ namespace GainsLab.Contracts.SyncService;
 public class EquipmentSyncService : ISyncService<EquipmentSyncDto>
 {
     private readonly GainLabPgDBContext _db;      // server-side
-    private readonly ILogger<EquipmentSyncService> _log;
+    private readonly GainsLab.Core.Models.Core.Utilities.Logging.ILogger _log;
 
-    public EquipmentSyncService(GainLabPgDBContext db, ILogger<EquipmentSyncService> log)
+    public EquipmentSyncService(GainLabPgDBContext db, GainsLab.Core.Models.Core.Utilities.Logging.ILogger log)
     {
         _db = db; _log = log;
     }
@@ -22,12 +22,16 @@ public class EquipmentSyncService : ISyncService<EquipmentSyncDto>
     public EntityType EntityType => EntityType.Equipment;
     public Task PushAsync(CancellationToken ct = default) { /* ... */ return Task.CompletedTask; }
    
-    async Task<SyncPage<ISyncDto>> ISyncService.PullAsync(SyncCursor cur, int take, CancellationToken ct)
-    {
-        var page = await PullAsync(cur, take, ct); // generic one
-        return new SyncPage<ISyncDto>(page.Time, page.Next , page.Items.Cast<ISyncDto>().ToList());
-    }
-
+    // async Task<SyncPage<ISyncDto>> ISyncService.PullAsync(SyncCursor cur, int take, CancellationToken ct)
+    // {
+    //     var page = await PullAsync(cur, take, ct); // generic one
+    //     return new SyncPage<ISyncDto>(page.Time, page.Next , page.Items.Cast<ISyncDto>().ToList());
+    // }
+    //
+    //
+    async Task<object> ISyncService.PullBoxedAsync(SyncCursor cur, int take, CancellationToken ct)
+        => await PullAsync(cur, take, ct); // returns SyncPage<EquipmentSyncDto>
+    
     public async Task<SyncPage<EquipmentSyncDto>> PullAsync(SyncCursor cur, int take, CancellationToken ct)
     {
         var serverTime = DateTimeOffset.UtcNow;

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GainsLab.Infrastructure.Migrations
 {
     [DbContext(typeof(GainLabPgDBContext))]
-    [Migration("20251027150124_Initial")]
+    [Migration("20251028092817_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -90,6 +90,9 @@ namespace GainsLab.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DescriptorID");
+
+                    b.HasIndex("GUID")
+                        .IsUnique();
 
                     b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
 
@@ -218,6 +221,9 @@ namespace GainsLab.Infrastructure.Migrations
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GUID")
+                        .IsUnique();
 
                     b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
 

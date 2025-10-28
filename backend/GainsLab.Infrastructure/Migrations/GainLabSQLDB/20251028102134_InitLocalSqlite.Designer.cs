@@ -5,13 +5,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
 {
     [DbContext(typeof(GainLabSQLDBContext))]
-    [Migration("20251027081935_InitLocalSqlite")]
+    [Migration("20251028102134_InitLocalSqlite")]
     partial class InitLocalSqlite
     {
         /// <inheritdoc />
@@ -81,6 +82,9 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
                     b.HasKey("Id");
 
                     b.HasIndex("DescriptorID");
+
+                    b.HasIndex("GUID")
+                        .IsUnique();
 
                     b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
 
@@ -167,21 +171,23 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasColumnName("updated_at_utc")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("now()");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("TEXT");
 
                     b.Property<long>("UpdatedSeq")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
-                        .HasDefaultValue(0L)
-                        .HasColumnName("updated_seq");
+                        .HasColumnName("updated_seq")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<long>("Version")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("GUID")
+                        .IsUnique();
 
                     b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
 

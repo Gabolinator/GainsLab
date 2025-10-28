@@ -10,19 +10,21 @@ namespace GainsLab.Contracts.SyncService;
 public class DescriptorSyncService :  ISyncService<DescriptorSyncDto>
 {
     private readonly GainLabPgDBContext _db;
-    private readonly ILogger<DescriptorSyncService> _log;
+    private readonly Core.Models.Core.Utilities.Logging.ILogger _logger;
 
-    public DescriptorSyncService(GainLabPgDBContext db, ILogger<DescriptorSyncService> log)
-    { _db = db; _log = log; }
+    public DescriptorSyncService(GainLabPgDBContext db, Core.Models.Core.Utilities.Logging.ILogger log)
+    { _db = db; _logger = log; }
 
     public EntityType EntityType => EntityType.Descriptor;
     public Task PushAsync(CancellationToken ct = default) => Task.CompletedTask;
-    
-    async Task<SyncPage<ISyncDto>> ISyncService.PullAsync(SyncCursor cur, int take, CancellationToken ct)
-    {
-        var page = await PullAsync(cur, take, ct); // generic one
-        return new SyncPage<ISyncDto>(page.Time, page.Next , page.Items.Cast<ISyncDto>().ToList());
-    }
+    async Task<object> ISyncService.PullBoxedAsync(SyncCursor cur, int take, CancellationToken ct)
+        => await PullAsync(cur, take, ct); // returns SyncPage<DescriptorSyncDto>
+
+    // async Task<SyncPage<ISyncDto>> ISyncService.PullAsync(SyncCursor cur, int take, CancellationToken ct)
+    // {
+    //     var page = await PullAsync(cur, take, ct); // generic one
+    //     return new SyncPage<ISyncDto>(page.Time, page.Next , page.Items.Cast<ISyncDto>().ToList());
+    // }
 
     public async Task<SyncPage<DescriptorSyncDto>> PullAsync(SyncCursor cur, int take, CancellationToken ct)
     {
@@ -44,6 +46,11 @@ public class DescriptorSyncService :  ISyncService<DescriptorSyncDto>
             d.IsDeleted
         )).ToListAsync(ct);
 
+        _logger.Log(nameof(DescriptorSyncService), $"Pull Descriptor Async- take {take} - items count: {items.Count} items[0] {(items.Count>0 ?items[0] : "none" )} " );
+
+        
+        
+        
         SyncCursor? next = items.Count < take
             ? null
             : new SyncCursor(items[^1].UpdatedAtUtc, items[^1].UpdatedSeq);

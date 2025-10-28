@@ -1,5 +1,5 @@
 ﻿using GainsLab.Core.Models.Core.Factory;
-using GainsLab.Core.Models.Core.Utilities;
+using GainsLab.Core.Models.Core.Interfaces;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.DTOs;
@@ -15,14 +15,16 @@ namespace GainsLab.Infrastructure.DB;
 public class DBDataInitializer
 {
     private readonly ILogger _logger;
+    private readonly IClock _clock;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="DBDataInitializer"/> class.
     /// </summary>
     /// <param name="logger">Logger used to record the seeding workflow.</param>
-    public DBDataInitializer(ILogger logger)
+    public DBDataInitializer(ILogger logger, IClock clock)
     {
         _logger = logger;
+        _clock = clock;
     }
 
     /// <summary>
@@ -31,16 +33,22 @@ public class DBDataInitializer
     /// <param name="db">The Postgres context used for querying and persisting entities.</param>
     public async Task CreateBaseEntities(GainLabPgDBContext db)
     {
-
         
-        var descriptionService = new BaseDescriptorService(CoreUtilities.Clock);
+        var descriptionService = new BaseDescriptorService(_clock);
         
-        var entityFactory = new EntityFactory(CoreUtilities.Clock,_logger, descriptionService);
+        var entityFactory = new EntityFactory(_clock,_logger, descriptionService);
         
         _logger.Log(nameof(DBDataInitializer),"Initializing Equipments");
-        await CreateBaseEquipments(db, entityFactory);
+        var addedEquipment = await CreateBaseEquipments(db, entityFactory);
         
-        await db.SaveChangesAsync();
+        
+        bool addedAny = addedEquipment;
+
+        if (addedAny)
+        {
+            _logger.Log(nameof(DBDataInitializer),$"Initializing Base Entities - Saving Changes");
+            await db.SaveChangesAsync();
+        }
         
     }
 
@@ -49,7 +57,7 @@ public class DBDataInitializer
     /// </summary>
     /// <param name="db">Database context used to check and persist equipment records.</param>
     /// <param name="entityFactory">Factory responsible for creating baseline equipment domain entities.</param>
-    private async Task CreateBaseEquipments(GainLabPgDBContext db, EntityFactory entityFactory)
+    private async Task<bool> CreateBaseEquipments(GainLabPgDBContext db, EntityFactory entityFactory)
     {
         var anyPresent = await db.Equipments.AnyAsync();
         _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Any Present: { anyPresent}");
@@ -57,7 +65,7 @@ public class DBDataInitializer
         if (anyPresent)
         {
             _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Dont add base equipments");
-           return; 
+           return false; 
         }
         
         _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Create Base Equipments");
@@ -85,13 +93,12 @@ public class DBDataInitializer
             _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Adding {equipmentDtos.Count()} Base Equipments");
 
              
-            db.Descriptors.AddRange(descriptions);
-            _logger.Log(nameof(DBDataInitializer),$"Initializing Descriptions - {descriptions.Count()} items");
+          //  db.Descriptors.AddRange(descriptions);
+          //  _logger.Log(nameof(DBDataInitializer),$"Initializing Descriptions - {descriptions.Count()} items");
 
             db.Equipments.AddRange(equipmentDtos);
-            _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Saving Equipments Changes");
-
-           
-        }
+         
+            return true;
+    }
     }
 

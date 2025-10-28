@@ -58,11 +58,13 @@ public async Task<Result> ApplyAsync(IReadOnlyList<ISyncDto> items, ILocalReposi
         var descriptorCache = new Dictionary<Guid, DescriptorDTO>();
 
         
-        
         foreach (var dto in typed)
         {
             ct.ThrowIfCancellationRequested();
 
+            _logger?.Log(nameof(EquipmentSyncProcessor), $"Applying Async for {nameof(EquipmentSyncDto)} : {dto.Name} | {dto.GUID} | {(dto.DescriptorGUID == null? "null descriptor guid" :dto.DescriptorGUID) }");
+
+            
             // Resolve without saving here
             var descriptor = await ResolveDescriptorAsync(dbContext, dto.DescriptorGUID, descriptorCache, ct)
                 .ConfigureAwait(false);
