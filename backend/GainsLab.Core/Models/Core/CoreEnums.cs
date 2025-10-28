@@ -1,13 +1,13 @@
-﻿namespace GainsLab.Models.Core;
+﻿namespace GainsLab.Core.Models.Core;
 
 /// <summary>
 /// Identifies the high-level domain entity represented within the system.
 /// </summary>
 public enum EntityType
 {
-    User,
-    Equipment,
+    User, 
     Descriptor,
+    Equipment,
     EquipmentList,
     MovementCategory,
     Muscle,
@@ -21,6 +21,9 @@ public enum EntityType
     Program,
     unidentified
 }
+
+
+
 
 /// <summary>
 /// Lists the workout-oriented component categories that can appear in programs.

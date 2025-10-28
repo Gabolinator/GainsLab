@@ -18,7 +18,9 @@ namespace GainsLab.Models.App;
 public class SystemInitializer : ISystemInitializer
 {
     private readonly ILogger _workoutLogger;
-    private readonly IDataProvider _dataProvider;
+   
+    
+    
     private readonly IComponentCacheRegistry _cacheRegistry;
     private readonly IDataManager _dataManager;
     private readonly IAppLifeCycle _lifeCycle;
@@ -28,18 +30,15 @@ public class SystemInitializer : ISystemInitializer
     /// Initializes a new instance of the <see cref="SystemInitializer"/> class.
     /// </summary>
     /// <param name="workoutLogger">The workout logger for logging activities.</param>
-    /// <param name="dataProvider">The data provider for initializing data.</param>
     /// <param name="cacheRegistry">The component cache registry for caching components.</param>
     /// <param name="dataManager">The data manager for managing application data.</param>
     public SystemInitializer(
         ILogger workoutLogger, 
-        IDataProvider dataProvider, 
         IComponentCacheRegistry cacheRegistry, 
         IDataManager dataManager,
         IAppLifeCycle lifeCycle)
     {
         _workoutLogger = workoutLogger;
-        _dataProvider = dataProvider;
         _cacheRegistry = cacheRegistry;
         _dataManager = dataManager;
         _lifeCycle = lifeCycle;
@@ -55,8 +54,7 @@ public class SystemInitializer : ISystemInitializer
     {
         
         _workoutLogger.Log(nameof(SystemInitializer),"Initializing system...");
-       
-        await _dataProvider.InitializeAsync();
+        
         await _cacheRegistry.InitializeAsync();
         await _dataManager.InitializeAsync();
         await _dataManager.LoadAndCacheDataAsync();

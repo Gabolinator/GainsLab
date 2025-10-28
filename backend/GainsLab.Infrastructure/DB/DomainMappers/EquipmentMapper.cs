@@ -2,6 +2,8 @@
 using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Identifier;
 using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
+using GainsLab.Core.Models.Core.Interfaces;
+using GainsLab.Core.Models.Core.Utilities;
 using GainsLab.Infrastructure.DB.DTOs;
 using GainsLab.Models.DataManagement.DB.Model.DomainMappers;
 
@@ -29,13 +31,13 @@ namespace GainsLab.Infrastructure.DB.DomainMappers;
              CreatedAtUtc = domain.CreationInfo.CreatedAtUtc, // do i set to todays date ? 
              CreatedBy = domain.CreationInfo.CreatedBy,
             
-             UpdatedAtUtc = domain.CreationInfo.UpdatedAtUtc, // do i set to todays date ? 
+             UpdatedAtUtc = domain.CreationInfo.UpdatedAtUtc?? CoreUtilities.Clock.UtcNow, // do i set to todays date ? 
              UpdatedBy = domain.CreationInfo.UpdatedBy,
              Version = domain.CreationInfo.Version,
              
-             IsDeleted = false,
-             DeletedAt = null,
-             DeletedBy = null,
+             IsDeleted = domain.CreationInfo.IsDeleted,
+             DeletedAt = domain.CreationInfo.DeletedAt,
+             DeletedBy = domain.CreationInfo.DeletedBy,
             
              
          };
@@ -53,7 +55,7 @@ namespace GainsLab.Infrastructure.DB.DomainMappers;
              IsDeleted = domain.CreationInfo.IsDeleted,
              DeletedAt = domain.CreationInfo.DeletedAt,
              DeletedBy = domain.CreationInfo.DeletedBy,
-             UpdatedAtUtc = domain.CreationInfo.UpdatedAtUtc, // do i set to todays date ? 
+             UpdatedAtUtc = domain.CreationInfo.UpdatedAtUtc?? CoreUtilities.Clock.UtcNow, // do i set to todays date ? 
              UpdatedBy = domain.CreationInfo.UpdatedBy,
              Version = domain.CreationInfo.Version,
              

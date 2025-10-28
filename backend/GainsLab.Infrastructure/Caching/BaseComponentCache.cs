@@ -1,4 +1,5 @@
 ﻿
+using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.Caching;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Models.Core;

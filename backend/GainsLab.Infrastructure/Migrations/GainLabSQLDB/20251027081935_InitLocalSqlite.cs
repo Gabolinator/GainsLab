@@ -1,0 +1,121 @@
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
+
+#nullable disable
+
+namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
+{
+    /// <inheritdoc />
+    public partial class InitLocalSqlite : Migration
+    {
+        /// <inheritdoc />
+        protected override void Up(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.CreateTable(
+                name: "descriptors",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    GUID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Content = table.Column<string>(type: "TEXT", nullable: false),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", nullable: false),
+                    updated_at_utc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    updated_seq = table.Column<long>(type: "INTEGER", nullable: false, defaultValue: 0L),
+                    UpdatedBy = table.Column<string>(type: "TEXT", nullable: true),
+                    is_deleted = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    DeletedBy = table.Column<string>(type: "TEXT", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "BLOB", rowVersion: true, nullable: true),
+                    Version = table.Column<long>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_descriptors", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "outbox_changes",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Entity = table.Column<string>(type: "TEXT", nullable: false),
+                    EntityGuid = table.Column<Guid>(type: "TEXT", nullable: false),
+                    ChangeType = table.Column<int>(type: "INTEGER", nullable: false),
+                    PayloadJson = table.Column<string>(type: "TEXT", nullable: false),
+                    occurred_at = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    sent = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_outbox_changes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "equipments",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    GUID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    DescriptorID = table.Column<int>(type: "INTEGER", nullable: false),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", nullable: false),
+                    updated_at_utc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    updated_seq = table.Column<long>(type: "INTEGER", nullable: false, defaultValue: 0L),
+                    UpdatedBy = table.Column<string>(type: "TEXT", nullable: true),
+                    is_deleted = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    DeletedBy = table.Column<string>(type: "TEXT", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "BLOB", rowVersion: true, nullable: true),
+                    Version = table.Column<long>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_equipments", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_equipments_descriptors_DescriptorID",
+                        column: x => x.DescriptorID,
+                        principalTable: "descriptors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_descriptors_updated_at_utc_updated_seq",
+                table: "descriptors",
+                columns: new[] { "updated_at_utc", "updated_seq" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_equipments_DescriptorID",
+                table: "equipments",
+                column: "DescriptorID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_equipments_updated_at_utc_updated_seq",
+                table: "equipments",
+                columns: new[] { "updated_at_utc", "updated_seq" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_outbox_changes_sent",
+                table: "outbox_changes",
+                column: "sent");
+        }
+
+        /// <inheritdoc />
+        protected override void Down(MigrationBuilder migrationBuilder)
+        {
+            migrationBuilder.DropTable(
+                name: "equipments");
+
+            migrationBuilder.DropTable(
+                name: "outbox_changes");
+
+            migrationBuilder.DropTable(
+                name: "descriptors");
+        }
+    }
+}

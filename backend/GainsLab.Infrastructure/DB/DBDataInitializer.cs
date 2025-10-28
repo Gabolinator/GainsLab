@@ -40,6 +40,8 @@ public class DBDataInitializer
         _logger.Log(nameof(DBDataInitializer),"Initializing Equipments");
         await CreateBaseEquipments(db, entityFactory);
         
+        await db.SaveChangesAsync();
+        
     }
 
     /// <summary>
@@ -72,13 +74,24 @@ public class DBDataInitializer
             {
                 _logger.Log(equipmentDto.ToString());
             }
+            
+            var descriptions = equipmentDtos.Select(e => e.Descriptor).Where(d => d != null).Select(d=>d!);
 
+            foreach (var description in descriptions)
+            {
+                _logger.Log(description.ToString());
+            }
+            
             _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Adding {equipmentDtos.Count()} Base Equipments");
 
-              db.Equipments.AddRange(equipmentDtos);
-              _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Saving Equipments Changes");
+             
+            db.Descriptors.AddRange(descriptions);
+            _logger.Log(nameof(DBDataInitializer),$"Initializing Descriptions - {descriptions.Count()} items");
 
-              await db.SaveChangesAsync();
+            db.Equipments.AddRange(equipmentDtos);
+            _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Saving Equipments Changes");
+
+           
         }
     }
 

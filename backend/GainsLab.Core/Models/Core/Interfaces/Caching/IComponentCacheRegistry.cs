@@ -18,7 +18,7 @@ namespace GainsLab.Core.Models.Core.Interfaces.Caching
         void Store<TEntity>(TEntity component);
         void StoreAll<TEntity>(List<TEntity> components);
 
-        public void StoreAll<TEntity>(eWorkoutComponents type, List<TEntity> components);
+        public void StoreAll<TEntity>(EntityType type, List<TEntity> components);
         
         void Remove<TId, TEntity>(TId id) ;
         void RemoveAll<TId, TEntity>(List<TId> ids);

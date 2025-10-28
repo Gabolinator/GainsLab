@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using GainsLab.Contracts;
 using GainsLab.Core.Models.Core.Factory;
 using GainsLab.Core.Models.Core.Interfaces.Caching;
 using GainsLab.Core.Models.Core.Interfaces.DataManagement;
@@ -15,6 +16,7 @@ using GainsLab.Models.DataManagement.Caching.Interface;
 using GainsLab.Models.DataManagement.DB;
 using GainsLab.Models.DataManagement.FileAccess;
 using GainsLab.Models.Factory;
+using GainsLab.Models.DataManagement.Sync;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,49 +38,61 @@ public static class ServiceConfig
     {
 
         services.AddSingleton<ILogger, GainsLabLogger>(); 
+        services.AddScoped<OutboxInterceptor>();
+       
+
+        var dbDir = Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+            "GainsLab");
+
+        Directory.CreateDirectory(dbDir); 
+
+        var dbPath = Path.Combine(dbDir, "local_gainslab.db");
         
-        // services.AddDbContext<GainLabSQLDBContext>(options =>
-        // {
-        //     //for local db
-        //     var basePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "GainsLab");
-        //     
-        //     //ensure path exist 
-        //     if (!Path.Exists(basePath))
-        //     {
-        //         Console.WriteLine($"[ServiceConfig.ConfigureServices] BaseFolder at path: {basePath} - Doesnt exist- creating it");
-        //         Directory.CreateDirectory(basePath);
-        //     }
-        //
-        //     var dbPath = Path.Combine(basePath,"local_gainslab.db");
-        //     
-        //     
-        //     Console.WriteLine($"[ServiceConfig.ConfigureServices] Db path: {dbPath}");
-        //     options.UseSqlite($"Data Source={dbPath}");
-        //    
-        // }, ServiceLifetime.Singleton); // Singleton to match other services
-        //
-        // // Device app
-        
-        services.AddDbContext<GainLabSQLDBContext>(o =>
+        void ConfigureSqlite(IServiceProvider sp, DbContextOptionsBuilder options)
         {
-            o.UseSqlite($"Data Source={Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "GainsLab", "local_gainslab.db")}");
-            o.AddInterceptors(new OutboxInterceptor());
-        });
+            options
+                .UseSqlite($"Data Source={dbPath}")
+                .EnableDetailedErrors()
+                .EnableSensitiveDataLogging();
+
+            var interceptor = sp.GetRequiredService<OutboxInterceptor>();
+            options.AddInterceptors(interceptor);
+        }
+
+        
+        services.AddDbContext<GainLabSQLDBContext>(ConfigureSqlite);
+        services.AddDbContextFactory<GainLabSQLDBContext>(ConfigureSqlite);
 
         
         services.AddSingleton<IAppLifeCycle,AppLifecycleService>();
-        services.AddSingleton<IDataProvider, DataRepository>();
+        services.AddSingleton<ILocalRepository, DataRepository>();
+        
+        services.AddHttpClient<IRemoteProvider, HttpDataProvider>(client =>
+        {
+            var baseUrl = Environment.GetEnvironmentVariable("GAINS_SYNC_BASE_URL");
+            if (string.IsNullOrWhiteSpace(baseUrl))
+            {
+                baseUrl = "https://localhost:5001/";
+            }
+
+            if (!baseUrl.EndsWith("/")) baseUrl += "/";
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+        
         services.AddSingleton<IComponentCacheRegistry, ComponentCacheRegistry>();
         services.AddSingleton<IFileDataService, JsonFilesDataService>();
         services.AddSingleton<IDataManager, DataManager>();
+        services.AddSingleton<ISyncCursorStore, FileSyncCursorStore>();
+        services.AddSingleton<IOutboxDispatcher, OutboxDispatcher>();
+        services.AddSingleton<ISyncEntityProcessor, EquipmentSyncProcessor>();
+        services.AddSingleton<ISyncEntityProcessor, DescriptorSyncProcessor>();
+        services.AddSingleton<ISyncOrchestrator, SyncOrchestrator>();
         
        // services.AddSingleton<EntityFactory>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<SystemInitializer>();
      
-
-
     }
 }

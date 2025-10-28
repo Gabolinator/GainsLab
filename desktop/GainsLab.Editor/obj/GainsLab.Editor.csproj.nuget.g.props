@@ -21,6 +21,7 @@
     <Import Project="$(NuGetPackageRoot)avalonia\11.2.7\buildTransitive\Avalonia.props" Condition="Exists('$(NuGetPackageRoot)avalonia\11.2.7\buildTransitive\Avalonia.props')" />
   </ImportGroup>
   <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
+    <PkgMicrosoft_Extensions_ApiDescription_Server Condition=" '$(PkgMicrosoft_Extensions_ApiDescription_Server)' == '' ">C:\Users\lalib\.nuget\packages\microsoft.extensions.apidescription.server\9.0.0</PkgMicrosoft_Extensions_ApiDescription_Server>
     <PkgMicrosoft_CodeAnalysis_Analyzers Condition=" '$(PkgMicrosoft_CodeAnalysis_Analyzers)' == '' ">C:\Users\lalib\.nuget\packages\microsoft.codeanalysis.analyzers\3.3.4</PkgMicrosoft_CodeAnalysis_Analyzers>
     <PkgMicrosoft_EntityFrameworkCore_Tools Condition=" '$(PkgMicrosoft_EntityFrameworkCore_Tools)' == '' ">C:\Users\lalib\.nuget\packages\microsoft.entityframeworkcore.tools\9.0.5</PkgMicrosoft_EntityFrameworkCore_Tools>
     <PkgAvalonia_BuildServices Condition=" '$(PkgAvalonia_BuildServices)' == '' ">C:\Users\lalib\.nuget\packages\avalonia.buildservices\0.0.31</PkgAvalonia_BuildServices>

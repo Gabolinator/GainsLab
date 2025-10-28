@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GainsLab.Api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2146d0c6a567827d4620025d6523b3154419f33c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+62d451bb56f9a80ad0cb434a4d84b8363dcfe693")]
 [assembly: System.Reflection.AssemblyProductAttribute("GainsLab.Api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GainsLab.Api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

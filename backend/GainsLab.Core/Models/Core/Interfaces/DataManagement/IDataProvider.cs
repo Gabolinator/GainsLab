@@ -1,5 +1,7 @@
 ﻿using GainsLab.Core.Models.Core.Results;
 using GainsLab.Models.Core;
+using GainsLab.Core.Models.Core.Interfaces.DB;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GainsLab.Core.Models.Core.Interfaces.DataManagement;
 
@@ -19,4 +21,6 @@ public interface IDataProvider
     Task<ResultList<TEntity>> GetAllComponentsOfTypeAsync<TEntity>();
     
     Task<Result <TEntity>> SaveComponentAsync <TEntity>(TEntity component)  ;
+
+    Task<ISyncPage<ISyncDto>> PullAsync(EntityType type,DateTimeOffset since, int take = 200, CancellationToken ct = default);
 }

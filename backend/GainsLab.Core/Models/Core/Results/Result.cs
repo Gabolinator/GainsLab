@@ -50,7 +50,7 @@ public class Result<T> : Result
     [MemberNotNullWhen(true, nameof(Value))]
     public bool HasValue => Value is not null;
 
-    private Result(bool success, T? value, string? errorMessage)
+    public Result(bool success, T? value, string? errorMessage)
         : base(success, errorMessage)
     {
         Value = value;

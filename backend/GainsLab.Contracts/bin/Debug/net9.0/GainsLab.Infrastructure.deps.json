@@ -13,7 +13,8 @@
           "Microsoft.EntityFrameworkCore.Design": "9.0.5",
           "Microsoft.EntityFrameworkCore.Sqlite": "9.0.5",
           "Microsoft.EntityFrameworkCore.Tools": "9.0.5",
-          "Npgsql.EntityFrameworkCore.PostgreSQL": "9.0.4"
+          "Npgsql.EntityFrameworkCore.PostgreSQL": "9.0.4",
+          "Microsoft.AspNetCore.Mvc.Core": "9.0.0.0"
         },
         "runtime": {
           "GainsLab.Infrastructure.dll": {}
@@ -808,6 +809,238 @@
             "fileVersion": "1.0.0.0"
           }
         }
+      },
+      "Microsoft.AspNetCore.Mvc.Core/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Mvc.Core.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Mvc.Abstractions/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Mvc.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Authorization/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Authorization.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Routing/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Routing.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Hosting.Abstractions/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Hosting.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Http.Abstractions/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Http.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Http.Features/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Http.Features.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.Net.Http.Headers/9.0.0.0": {
+        "runtime": {
+          "Microsoft.Net.Http.Headers.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Http.Extensions/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Http.Extensions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Routing.Abstractions/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Routing.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Authentication.Abstractions/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Authentication.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Http/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Http.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.Extensions.FileProviders.Abstractions/9.0.0.0": {
+        "runtime": {
+          "Microsoft.Extensions.FileProviders.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        }
+      },
+      "Microsoft.Extensions.Features/9.0.0.0": {
+        "runtime": {
+          "Microsoft.Extensions.Features.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Metadata/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Metadata.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Authorization.Policy/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Authorization.Policy.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Authentication.Core/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Authentication.Core.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.Extensions.Hosting.Abstractions/9.0.0.0": {
+        "runtime": {
+          "Microsoft.Extensions.Hosting.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.WebUtilities/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.WebUtilities.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.OutputCaching/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.OutputCaching.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.ResponseCaching.Abstractions/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.ResponseCaching.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.Extensions.ObjectPool/9.0.0.0": {
+        "runtime": {
+          "Microsoft.Extensions.ObjectPool.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.Extensions.Diagnostics/9.0.0.0": {
+        "runtime": {
+          "Microsoft.Extensions.Diagnostics.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Hosting.Server.Abstractions/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Hosting.Server.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.AspNetCore.Connections.Abstractions/9.0.0.0": {
+        "runtime": {
+          "Microsoft.AspNetCore.Connections.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16403"
+          }
+        }
+      },
+      "Microsoft.Extensions.Diagnostics.Abstractions/9.0.0.0": {
+        "runtime": {
+          "Microsoft.Extensions.Diagnostics.Abstractions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        }
+      },
+      "Microsoft.Extensions.Configuration/9.0.0.0": {
+        "runtime": {
+          "Microsoft.Extensions.Configuration.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        }
+      },
+      "Microsoft.Extensions.Options.ConfigurationExtensions/9.0.0.0": {
+        "runtime": {
+          "Microsoft.Extensions.Options.ConfigurationExtensions.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        }
+      },
+      "Microsoft.Extensions.Configuration.Binder/9.0.0.0": {
+        "runtime": {
+          "Microsoft.Extensions.Configuration.Binder.dll": {
+            "assemblyVersion": "9.0.0.0",
+            "fileVersion": "9.0.425.16305"
+          }
+        }
       }
     }
   },
@@ -1169,6 +1402,151 @@
     },
     "GainsLab.Core/1.0.0": {
       "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Mvc.Core/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Mvc.Abstractions/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Authorization/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Routing/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Hosting.Abstractions/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Http.Abstractions/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Http.Features/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Net.Http.Headers/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Http.Extensions/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Routing.Abstractions/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Authentication.Abstractions/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Http/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Extensions.FileProviders.Abstractions/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Extensions.Features/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Metadata/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Authorization.Policy/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Authentication.Core/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Extensions.Hosting.Abstractions/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.WebUtilities/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.OutputCaching/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.ResponseCaching.Abstractions/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Extensions.ObjectPool/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Extensions.Diagnostics/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Hosting.Server.Abstractions/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.AspNetCore.Connections.Abstractions/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Extensions.Diagnostics.Abstractions/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Extensions.Configuration/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Extensions.Options.ConfigurationExtensions/9.0.0.0": {
+      "type": "reference",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Microsoft.Extensions.Configuration.Binder/9.0.0.0": {
+      "type": "reference",
       "serviceable": false,
       "sha512": ""
     }

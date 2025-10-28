@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Avalonia.Controls;
+using GainsLab.Core.Models.Core.Utilities.Logging;
+using GainsLab.Infrastructure.DB.Context;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace GainsLab.Models.App;
@@ -27,8 +30,21 @@ public class AppHost
         ServiceConfig.ConfigureServices(services);
         _serviceProvider = services.BuildServiceProvider();
         
+        
+        
         //configure the service locator pattern (just in case)
         ServiceLocator.Configure(_serviceProvider);
+        
+        
+        using (var scope = services.BuildServiceProvider().CreateScope())
+        {
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger>();
+            var factory = scope.ServiceProvider.GetRequiredService<IDbContextFactory<GainLabSQLDBContext>>();
+
+            await using var db = await factory.CreateDbContextAsync();
+            logger.Log("DbInit", $"SQLite path: {db.Database.GetDbConnection().DataSource}");
+            await db.Database.MigrateAsync();
+        }
         
         //initialize
         var initializer = _serviceProvider.GetRequiredService<SystemInitializer>();

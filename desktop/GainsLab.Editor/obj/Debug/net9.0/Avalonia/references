@@ -22,10 +22,99 @@ C:\Users\lalib\.nuget\packages\avalonia.themes.simple\11.2.7\lib\net8.0\Avalonia
 C:\Users\lalib\.nuget\packages\avalonia\11.2.7\ref\net8.0\Avalonia.Vulkan.dll
 C:\Users\lalib\.nuget\packages\avalonia.win32\11.2.7\lib\net8.0\Avalonia.Win32.dll
 C:\Users\lalib\.nuget\packages\avalonia.x11\11.2.7\lib\net8.0\Avalonia.X11.dll
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Api\obj\Debug\net9.0\ref\GainsLab.Api.dll
+C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Contracts\obj\Debug\net9.0\ref\GainsLab.Contracts.dll
 C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Core\obj\Debug\net9.0\ref\GainsLab.Core.dll
 C:\Users\lalib\GainsLab\GainsLab\backend\GainsLab.Infrastructure\obj\Debug\net9.0\ref\GainsLab.Infrastructure.dll
 C:\Users\lalib\.nuget\packages\harfbuzzsharp\7.3.0.3\lib\net6.0\HarfBuzzSharp.dll
 C:\Users\lalib\.nuget\packages\microcom.runtime\0.11.0\lib\net5.0\MicroCom.Runtime.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Antiforgery.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Authentication.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Authentication.BearerToken.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Authentication.Cookies.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Authentication.Core.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Authentication.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Authentication.OAuth.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Authorization.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Authorization.Policy.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Components.Authorization.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Components.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Components.Endpoints.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Components.Forms.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Components.Server.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Components.Web.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Connections.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.CookiePolicy.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Cors.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Cryptography.Internal.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.DataProtection.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.DataProtection.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.DataProtection.Extensions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Diagnostics.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Diagnostics.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Diagnostics.HealthChecks.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.HostFiltering.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Hosting.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Hosting.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Hosting.Server.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Html.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Http.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Http.Connections.Common.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Http.Connections.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Http.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Http.Extensions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Http.Features.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Http.Results.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.HttpLogging.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.HttpOverrides.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.HttpsPolicy.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Identity.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Localization.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Localization.Routing.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Metadata.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Mvc.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Mvc.ApiExplorer.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Mvc.Core.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Mvc.Cors.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Mvc.DataAnnotations.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Mvc.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Mvc.Formatters.Json.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Mvc.Formatters.Xml.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Mvc.Localization.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Mvc.Razor.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Mvc.RazorPages.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Mvc.TagHelpers.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Mvc.ViewFeatures.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.OutputCaching.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.RateLimiting.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Razor.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Razor.Runtime.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.RequestDecompression.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.ResponseCaching.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.ResponseCaching.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.ResponseCompression.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Rewrite.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Routing.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Routing.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Server.HttpSys.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Server.IIS.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Server.IISIntegration.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Server.Kestrel.Core.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Server.Kestrel.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Server.Kestrel.Transport.NamedPipes.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Server.Kestrel.Transport.Quic.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.Session.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.SignalR.Common.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.SignalR.Core.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.SignalR.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.SignalR.Protocols.Json.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.StaticAssets.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.StaticFiles.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.WebSockets.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.AspNetCore.WebUtilities.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\Microsoft.CSharp.dll
 C:\Users\lalib\.nuget\packages\microsoft.data.sqlite.core\9.0.5\lib\net8.0\Microsoft.Data.Sqlite.dll
 C:\Users\lalib\.nuget\packages\microsoft.entityframeworkcore.abstractions\9.0.5\lib\net8.0\Microsoft.EntityFrameworkCore.Abstractions.dll
@@ -35,13 +124,53 @@ C:\Users\lalib\.nuget\packages\microsoft.entityframeworkcore.sqlite.core\9.0.5\l
 C:\Users\lalib\.nuget\packages\microsoft.extensions.caching.abstractions\9.0.5\lib\net9.0\Microsoft.Extensions.Caching.Abstractions.dll
 C:\Users\lalib\.nuget\packages\microsoft.extensions.caching.memory\9.0.5\lib\net9.0\Microsoft.Extensions.Caching.Memory.dll
 C:\Users\lalib\.nuget\packages\microsoft.extensions.configuration.abstractions\9.0.5\lib\net9.0\Microsoft.Extensions.Configuration.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Configuration.Binder.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Configuration.CommandLine.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Configuration.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Configuration.EnvironmentVariables.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Configuration.FileExtensions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Configuration.Ini.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Configuration.Json.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Configuration.KeyPerFile.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Configuration.UserSecrets.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Configuration.Xml.dll
 C:\Users\lalib\.nuget\packages\microsoft.extensions.dependencyinjection.abstractions\10.0.0-preview.4.25258.110\lib\net9.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
 C:\Users\lalib\.nuget\packages\microsoft.extensions.dependencyinjection\10.0.0-preview.4.25258.110\lib\net9.0\Microsoft.Extensions.DependencyInjection.dll
 C:\Users\lalib\.nuget\packages\microsoft.extensions.dependencymodel\9.0.5\lib\net9.0\Microsoft.Extensions.DependencyModel.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Diagnostics.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Diagnostics.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Diagnostics.HealthChecks.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Diagnostics.HealthChecks.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Features.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.FileProviders.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.FileProviders.Composite.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.FileProviders.Embedded.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.FileProviders.Physical.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.FileSystemGlobbing.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Hosting.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Hosting.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Http.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Identity.Core.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Identity.Stores.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Localization.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Localization.dll
 C:\Users\lalib\.nuget\packages\microsoft.extensions.logging.abstractions\9.0.5\lib\net9.0\Microsoft.Extensions.Logging.Abstractions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Logging.Configuration.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Logging.Console.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Logging.Debug.dll
 C:\Users\lalib\.nuget\packages\microsoft.extensions.logging\9.0.5\lib\net9.0\Microsoft.Extensions.Logging.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Logging.EventLog.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Logging.EventSource.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Logging.TraceSource.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.ObjectPool.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Options.ConfigurationExtensions.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.Options.DataAnnotations.dll
 C:\Users\lalib\.nuget\packages\microsoft.extensions.options\9.0.5\lib\net9.0\Microsoft.Extensions.Options.dll
 C:\Users\lalib\.nuget\packages\microsoft.extensions.primitives\9.0.5\lib\net9.0\Microsoft.Extensions.Primitives.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Extensions.WebEncoders.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.JSInterop.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Net.Http.Headers.dll
+C:\Users\lalib\.nuget\packages\microsoft.openapi\1.6.25\lib\netstandard2.0\Microsoft.OpenApi.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\Microsoft.VisualBasic.Core.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\Microsoft.VisualBasic.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\Microsoft.Win32.Primitives.dll
@@ -54,6 +183,9 @@ C:\Users\lalib\.nuget\packages\skiasharp\2.88.9\lib\net6.0\SkiaSharp.dll
 C:\Users\lalib\.nuget\packages\sqlitepclraw.bundle_e_sqlite3\2.1.10\lib\netstandard2.0\SQLitePCLRaw.batteries_v2.dll
 C:\Users\lalib\.nuget\packages\sqlitepclraw.core\2.1.10\lib\netstandard2.0\SQLitePCLRaw.core.dll
 C:\Users\lalib\.nuget\packages\sqlitepclraw.provider.e_sqlite3\2.1.10\lib\net6.0\SQLitePCLRaw.provider.e_sqlite3.dll
+C:\Users\lalib\.nuget\packages\swashbuckle.aspnetcore.swagger\9.0.5\lib\net9.0\Swashbuckle.AspNetCore.Swagger.dll
+C:\Users\lalib\.nuget\packages\swashbuckle.aspnetcore.swaggergen\9.0.5\lib\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+C:\Users\lalib\.nuget\packages\swashbuckle.aspnetcore.swaggerui\9.0.5\lib\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.AppContext.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Buffers.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Collections.Concurrent.dll
@@ -76,6 +208,7 @@ C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Diagnostics.Contracts.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Diagnostics.Debug.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Diagnostics.DiagnosticSource.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\System.Diagnostics.EventLog.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Diagnostics.FileVersionInfo.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Diagnostics.Process.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Diagnostics.StackTrace.dll
@@ -173,6 +306,7 @@ C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Security.Cryptography.OpenSsl.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Security.Cryptography.Primitives.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Security.Cryptography.X509Certificates.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\System.Security.Cryptography.Xml.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Security.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Security.Principal.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Security.Principal.Windows.dll
@@ -188,6 +322,7 @@ C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Threading.Channels.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Threading.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Threading.Overlapped.dll
+C:\Program Files\dotnet\packs\Microsoft.AspNetCore.App.Ref\9.0.4\ref\net9.0\System.Threading.RateLimiting.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Threading.Tasks.Dataflow.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Threading.Tasks.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.4\ref\net9.0\System.Threading.Tasks.Extensions.dll

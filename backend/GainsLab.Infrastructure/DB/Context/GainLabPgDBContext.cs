@@ -22,8 +22,9 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
         base.OnModelCreating(modelBuilder);
         _logger?.Log("GainLabPgDBContext", "Model Creating");
         modelBuilder.HasDefaultSchema("public");
-    
+        CreateDescriptorTableModel(modelBuilder);
         CreateEquipmentTableModel(modelBuilder);
+        
        // CreateUserTableModel(modelBuilder);
        
     }
@@ -52,25 +53,92 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
         {
             e.ToTable("equipments");
             e.HasKey(x => x.Id);
+
             e.Property(x => x.Name).IsRequired();
+
             e.HasOne(x => x.Descriptor)
                 .WithMany()
                 .HasForeignKey(x => x.DescriptorID);
+
+           //timestamps & sequence
+           e.Property(x => x.UpdatedAtUtc)
+               .IsRequired()
+               .HasColumnName("updated_at_utc")
+               .HasDefaultValueSql("now()"); // Postgres current timestamp (with timezone)
+
+            // This generates a BIGINT identity column in PostgreSQL
+            e.Property(x => x.UpdatedSeq)
+                .HasColumnName("updated_seq")
+                .UseIdentityByDefaultColumn();   // Npgsql identity
+
+            // Optional tombstone
+            e.Property(x => x.IsDeleted)
+                .HasColumnName("is_deleted")
+                .HasDefaultValue(false);
+
+            // Performance: support keyset pagination
+            e.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
         });
         
-    }
         
-        // b.Entity<Exercise>().HasKey(x => x.Id);
-        // b.Entity<Workout>().HasKey(x => x.Id);
-        // b.Entity<Set>().HasKey(x => x.Id);
-        // b.Entity<Workout>().HasMany(w => w.Sets).WithOne().HasForeignKey(s => s.WorkoutId);
-        // // simple optimistic concurrency
-        // b.Entity<Exercise>().Property(x => x.Version).IsConcurrencyToken();
-        // b.Entity<Workout>().Property(x => x.Version).IsConcurrencyToken();
-        // b.Entity<Set>().Property(x => x.Version).IsConcurrencyToken();
+        
+    }
 
-        public void AddLogger(ILogger logger)
+    private void CreateDescriptorTableModel(ModelBuilder modelBuilder)
+    {
+
+        _logger?.Log("GainLabPgDBContext", "Creating Descriptor Table");
+        modelBuilder.Entity<DescriptorDTO>(d =>
+        {
+            d.ToTable("descriptors");
+            d.HasKey(x => x.Id);
+
+            d.Property(x => x.Content).IsRequired();
+            
+            //timestamps & sequence
+            d.Property(x => x.UpdatedAtUtc)
+                .IsRequired()
+                .HasColumnName("updated_at_utc")
+                .HasDefaultValueSql("now()"); // Postgres current timestamp (with timezone)
+
+            // This generates a BIGINT identity column in PostgreSQL
+            d.Property(x => x.UpdatedSeq)
+                .HasColumnName("updated_seq")
+                .UseIdentityByDefaultColumn(); // Npgsql identity
+
+            // Optional tombstone
+            d.Property(x => x.IsDeleted)
+                .HasColumnName("is_deleted")
+                .HasDefaultValue(false);
+
+            // Performance: support keyset pagination
+            d.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
+        });
+    }
+
+    public void AddLogger(ILogger logger)
         {
             _logger = logger;
         }
+        
+        //todo 
+        
+        public override Task<int> SaveChangesAsync(CancellationToken ct = default)
+        {
+            var now = DateTimeOffset.UtcNow;
+
+            foreach (var entry in ChangeTracker.Entries<BaseDto>())
+            {
+                if (entry.State is EntityState.Added or EntityState.Modified)
+                {
+                    entry.Entity.UpdatedAtUtc = now;
+                    // if you track CreatedAtUtc too:
+                    if (entry.State == EntityState.Added && entry.Entity.CreatedAtUtc == default)
+                        entry.Entity.CreatedAtUtc = now;
+                }
+            }
+
+            return base.SaveChangesAsync(ct);
+        }
+        
 }

@@ -13,9 +13,9 @@ public interface IFileDataService
     Task SaveToFileAsync<T>(IEnumerable<T> data, string filePath, string fileExtension);
     Task<ResultList<T>> LoadFromFileAsync<T>(string filePath);
 
-    Task<Dictionary<eWorkoutComponents, ResultList<IEntity>>> LoadAllComponentsAsync(); 
+    Task<Dictionary<EntityType, ResultList<IEntity>>> LoadAllComponentsAsync(); 
 
-    public Task<Result> WriteAllComponentsAsync(Dictionary<eWorkoutComponents, List<IEntity>> data, string filePath, string fileExtension);
+    public Task<Result> WriteAllComponentsAsync(Dictionary<EntityType, List<IEntity>> data, string filePath, string fileExtension);
 
 
 }

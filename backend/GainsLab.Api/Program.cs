@@ -1,6 +1,7 @@
 ﻿
 
 using GainsLab.Contracts.Interface;
+using GainsLab.Contracts.SyncDto;
 using GainsLab.Contracts.SyncService;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB;
@@ -40,12 +41,19 @@ services.AddDbContext<GainLabPgDBContext>(o =>
     o.UseNpgsql(cs, npgsql => npgsql.EnableRetryOnFailure()));
 
 
+services.AddScoped<ISyncService<EquipmentSyncDto>, EquipmentSyncService>();
+services.AddScoped<ISyncService<DescriptorSyncDto>, DescriptorSyncService>();
 
-services.AddScoped<ISyncService, SyncService>();
+// Also expose as non-generic so the controller can enumerate:
+services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<EquipmentSyncDto>>());
+services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<DescriptorSyncDto>>());
+
+
 // Optional CORS for your client app
 // services.AddCors(o => o.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
 var app = builder.Build();
+
 
 if (app.Environment.IsDevelopment())
 {
@@ -84,7 +92,11 @@ using (var scope = app.Services.CreateScope())
     
     var dbInitializer = new DBDataInitializer(logger);
 
+  
     logger.Log("Initializing DB");
     await dbInitializer.CreateBaseEntities(db);
     logger.Log("Initialize DB - completed");
+    
+    await app.RunAsync();
+    
 }

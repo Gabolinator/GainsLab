@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.DataManagement;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Core.Models.Core.Results;
@@ -32,12 +33,13 @@ public class JsonFilesDataService  : IFileDataService
         throw new System.NotImplementedException();
     }
 
-    public Task<Dictionary<eWorkoutComponents, ResultList<IEntity>>> LoadAllComponentsAsync()
+    public async Task<Dictionary<EntityType, ResultList<IEntity>>> LoadAllComponentsAsync()
     {
-        throw new NotImplementedException();
+      //todo
+      return new();
     }
 
-    public Task<Result> WriteAllComponentsAsync(Dictionary<eWorkoutComponents, List<IEntity>> data, string filePath, string fileExtension)
+    public Task<Result> WriteAllComponentsAsync(Dictionary<EntityType, List<IEntity>> data, string filePath, string fileExtension)
     {
         throw new NotImplementedException();
     }

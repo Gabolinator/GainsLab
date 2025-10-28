@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.Caching;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.Caching;
@@ -15,7 +16,7 @@ public class ComponentCacheRegistry : IComponentCacheRegistry
 {
 
     private readonly ILogger _logger;
-    private Dictionary<eWorkoutComponents, IComponentCacheBase> _caches = new ();
+    private Dictionary<EntityType, IComponentCacheBase> _caches = new ();
 
     public ComponentCacheRegistry(ILogger logger)
     {
@@ -25,12 +26,12 @@ public class ComponentCacheRegistry : IComponentCacheRegistry
     public async Task InitializeAsync()
     {
         //create all components cache
-        _caches[eWorkoutComponents.Equipment] = new EquipmentsCache(_logger);
+        _caches[EntityType.Equipment] = new EquipmentsCache(_logger);
       //  _caches[eWorkoutComponents.EquipmentList] = new EquipmentListCache(_logger);
-        _caches[eWorkoutComponents.Muscle] = new MusclesCache(_logger);
+        _caches[EntityType.Muscle] = new MusclesCache(_logger);
         //_caches[eWorkoutComponents.MuscleGroup] = new MusclesGroupCache(_logger);
-        _caches[eWorkoutComponents.MovementCategory] = new MovementCategoryCache(_logger);
-        _caches[eWorkoutComponents.Movement] = new MovementCache(_logger);
+        _caches[EntityType.MovementCategory] = new MovementCategoryCache(_logger);
+        _caches[EntityType.Movement] = new MovementCache(_logger);
        // _caches[eWorkoutComponents.WorkloadProfile] = new WorkloadProfileCache(_logger);
         
     }
@@ -60,7 +61,7 @@ public class ComponentCacheRegistry : IComponentCacheRegistry
         throw new NotImplementedException();
     }
 
-    public void StoreAll<TEntity>(eWorkoutComponents type, List<TEntity> components)
+    public void StoreAll<TEntity>(EntityType type, List<TEntity> components)
     {
         throw new NotImplementedException();
     }

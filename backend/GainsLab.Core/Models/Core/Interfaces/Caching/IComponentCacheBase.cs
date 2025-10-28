@@ -1,4 +1,5 @@
-﻿using GainsLab.Models.Core;
+﻿using GainsLab.Core.Models.Core;
+using GainsLab.Models.Core;
 
 namespace GainsLab.Models.DataManagement.Caching.Interface;
 

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GainsLab.Infrastructure.Migrations
 {
     [DbContext(typeof(GainLabPgDBContext))]
-    [Migration("20251005125901_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251027150124_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -54,7 +54,10 @@ namespace GainsLab.Infrastructure.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -65,11 +68,21 @@ namespace GainsLab.Infrastructure.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("bytea");
 
-                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
-                        .HasColumnType("timestamp with time zone");
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc")
+                        .HasDefaultValueSql("now()");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
+
+                    b.Property<long>("UpdatedSeq")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_seq");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("UpdatedSeq"));
 
                     b.Property<long>("Version")
                         .HasColumnType("bigint");
@@ -77,6 +90,8 @@ namespace GainsLab.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("DescriptorID");
+
+                    b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
 
                     b.ToTable("equipments", "public");
                 });
@@ -127,11 +142,14 @@ namespace GainsLab.Infrastructure.Migrations
                     b.Property<int>("SubscriptionType")
                         .HasColumnType("integer");
 
-                    b.Property<DateTimeOffset?>("UpdatedAtUtc")
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
+
+                    b.Property<long>("UpdatedSeq")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("Version")
                         .HasColumnType("bigint");
@@ -149,12 +167,61 @@ namespace GainsLab.Infrastructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text");
+
                     b.Property<Guid>("GUID")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<long>("UpdatedSeq")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_seq");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("UpdatedSeq"));
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Descriptors", "public");
+                    b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
+
+                    b.ToTable("descriptors", "public");
                 });
 
             modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.EquipmentDTO", b =>

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "mJybW/oCNL8A5BQBamUpUD13vLKp7cn2i3Oir8hqN6Q=",
+  "Hash": "qt+wxvIu7wBMgX7O1J3eO90bHLcMwSk8mq7Qz8xDdiA=",
   "Source": "GainsLab.Api",
   "BasePath": "_content/GainsLab.Api",
   "Mode": "Default",
@@ -11,10 +11,10 @@
       "Version": 2,
       "Source": "GainsLab.Contracts",
       "GetPublishAssetsTargets": "ComputeReferencedStaticWebAssetsPublishManifest;GetCurrentProjectPublishStaticWebAssetItems",
-      "AdditionalPublishProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalPublishProperties": "",
       "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework",
       "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
-      "AdditionalBuildProperties": "Configuration=Debug;Platform=AnyCPU",
+      "AdditionalBuildProperties": "",
       "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework"
     }
   ],

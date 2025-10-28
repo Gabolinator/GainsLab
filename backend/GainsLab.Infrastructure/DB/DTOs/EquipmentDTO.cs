@@ -14,7 +14,7 @@ public class EquipmentDTO : BaseDto
     public Guid GUID { get; set; }
     public int DescriptorID { get; set; } //from descriptor dto
     
-    public DescriptorDTO Descriptor { get; set; } = null!;
+    public DescriptorDTO? Descriptor { get; set; } = null!;
     
 
     public override int Iid => Id;
@@ -32,8 +32,8 @@ public class EquipmentDTO : BaseDto
 
     public override string ToString()
     {
-        return $"Equipment DTO - " +
-               $"Name: {Name}" +
+        return $"{nameof(EquipmentDTO)} - " +
+               $"Name: {Name} |" +
                $"ID : {Id} | " +
                $"Guid :{GUID} ";
     }
