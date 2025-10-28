@@ -1,11 +1,13 @@
-﻿using GainsLab.Core.Models.Core;
+﻿using System.Diagnostics;
+using GainsLab.Core.Models.Core;
+using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 using GainsLab.Core.Models.Core.Interfaces.DataManagement;
 using GainsLab.Core.Models.Core.Interfaces.DB;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Core.Models.Core.Results;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB.Context;
-using GainsLab.Models.DataManagement.DB.Model.Handlers;
+using GainsLab.Infrastructure.DB.Handlers;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB;
@@ -54,7 +56,7 @@ public class DataRepository : ILocalRepository
         throw new NotImplementedException();
     }
 
-    public Task<ResultList<TEntity>> GetComponentsAsync<TId, TEntity>(List<TId> ids)
+    public Task<IReadOnlyList<TEntity>> GetComponentsAsync<TId, TEntity>(List<TId> ids)
     {
         throw new NotImplementedException();
     }
@@ -64,24 +66,40 @@ public class DataRepository : ILocalRepository
         throw new NotImplementedException();
     }
 
-    public Task<ResultList<TEntity>> SaveComponentsAsync<TId, TEntity>(EntityType componentType, List<TEntity> list)
+    public Task<IReadOnlyList<TEntity>> SaveComponentsAsync<TId, TEntity>(EntityType componentType, List<TEntity> list)
     {
         throw new NotImplementedException();
     }
 
-
-    public async Task<Result<Dictionary<EntityType, ResultList<TEntity>>>> BatchSaveComponentsAsync<TEntity>(Dictionary<EntityType, ResultList<TEntity>> fileData)
+    public async Task<Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>> BatchSaveComponentsAsync(Dictionary<EntityType, IReadOnlyList<IEntity>> fileData)
     {
-        //todo
-        return new Result<Dictionary<EntityType, ResultList<TEntity>>>(true, new(), "none");
+       return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure("Not emplemented");
     }
 
-    public async Task<Result<Dictionary<EntityType, ResultList<TEntity>>>> GetAllComponentsAsync<TEntity>()
+    public async Task<Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>> GetAllComponentsAsync()
     {
-        //todo
-        return new Result<Dictionary<EntityType, ResultList<TEntity>>>(true, new(), "none");
+        if (!_handlers.Any()) return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure("No handlers");
 
+        var dict = new Dictionary<EntityType, IReadOnlyList<IEntity>>();
+        foreach (var kvp in _handlers)
+        {
+            var entities = await kvp.Value.GetAllEntityAsync();
+            _workoutLogger.Log(nameof(DataRepository),$"Found {entities.Count} entities of type {kvp.Key}");
+            if(entities.Count ==0) continue;
+
+            dict.TryAdd(kvp.Key, entities);
+            
+        }
+        
+        return dict.Count >0 ? Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.SuccessResult(dict) : Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure("No entity found");
     }
+
+
+    Task<IReadOnlyList<TEntity>> ILocalRepository.GetAllComponentsOfTypeAsync<TEntity>()
+    {
+        throw new NotImplementedException();
+    }
+
 
     public Task<ResultList<TEntity>> GetAllComponentsOfTypeAsync<TEntity>()
     {
@@ -93,7 +111,7 @@ public class DataRepository : ILocalRepository
         throw new NotImplementedException();
     }
 
-    public Task<Dictionary<EntityType, ResultList<IEntity>>> GetAllAsync(CancellationToken ct)
+    public Task<Dictionary<EntityType, IReadOnlyList<IEntity>>> GetAllAsync(CancellationToken ct)
     {
         throw new NotImplementedException();
     }

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Entities.User;
 using GainsLab.Models.Core.User;
 using GainsLab.Models.DataManagement.DB.Model.DTOs;
@@ -24,8 +25,9 @@ public class UserDto : BaseDto
 
      public override int Iid => Id;
      public override  Guid Iguid => GUID;
-    
-    public override bool Equals(object? obj)
+     public override EntityType Type => EntityType.User;
+
+     public override bool Equals(object? obj)
     {
         if (obj is not EquipmentDTO other) return false;
         return Guid.Equals(GUID,other.GUID);

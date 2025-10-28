@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.DB;
 
 
@@ -9,7 +10,8 @@ public abstract class BaseDto : IDto
     
     public abstract int Iid { get;} 
     public abstract Guid  Iguid { get; }
-    
+    public abstract EntityType Type { get; }
+
     public DateTimeOffset CreatedAtUtc  { get; set; } = DateTimeOffset.UtcNow;
     public string CreatedBy { get; set; } = "system";
     public DateTimeOffset UpdatedAtUtc { get; set; } = DateTimeOffset.UtcNow;

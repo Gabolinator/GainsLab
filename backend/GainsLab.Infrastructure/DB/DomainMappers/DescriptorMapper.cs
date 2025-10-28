@@ -31,8 +31,13 @@ public static class DescriptorMapper
         };
     }
 
-    public static BaseDescriptorEntity ToDomain(this DescriptorDTO dto)
+    public static BaseDescriptorEntity? ToDomain(this DescriptorDTO? dto)
     {
+        if (dto == null)
+        {
+            return null;
+        }
+
         var description = new Description(dto.Content);
         
         return new BaseDescriptorEntity(new DescriptorId(dto.GUID), new BaseDescriptorContent{Description = description}, new AuditedInfo(DateTimeOffset.UtcNow, "unknown" ));

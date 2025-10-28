@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.DB;
 using GainsLab.Infrastructure.DB.DTOs;
 
@@ -17,6 +18,7 @@ public class DescriptorDTO : BaseDto
 
     public override int Iid => Id;
     public override Guid Iguid => GUID;
+    public override EntityType Type => EntityType.Descriptor;
 
     public override string ToString()
     {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.Caching;
+using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.Caching;
 using GainsLab.Models.Core;
@@ -61,9 +62,9 @@ public class ComponentCacheRegistry : IComponentCacheRegistry
         throw new NotImplementedException();
     }
 
-    public void StoreAll<TEntity>(EntityType type, List<TEntity> components)
+    public void StoreAll(EntityType type, List<IEntity> components)
     {
-        throw new NotImplementedException();
+        //todo
     }
 
     public void Remove<TId, TEntity>(TId id)

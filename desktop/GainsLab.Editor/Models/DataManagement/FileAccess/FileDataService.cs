@@ -33,7 +33,7 @@ public class JsonFilesDataService  : IFileDataService
         throw new System.NotImplementedException();
     }
 
-    public async Task<Dictionary<EntityType, ResultList<IEntity>>> LoadAllComponentsAsync()
+    public async Task<Dictionary<EntityType, IReadOnlyList<IEntity>>> LoadAllComponentsAsync()
     {
       //todo
       return new();

@@ -62,8 +62,10 @@ namespace GainsLab.Infrastructure.DB.DomainMappers;
          };
      }
 
-     public static EquipmentEntity ToDomain(EquipmentDTO dto)
+     public static EquipmentEntity? ToDomain(EquipmentDTO? dto)
      {
+         if (dto == null) return null;
+         
          return new EquipmentEntity(
              new EquipmentContent(dto.Name),
              new EquipmentId(dto.GUID), 

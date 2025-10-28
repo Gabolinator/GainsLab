@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using GainsLab.Core.Models.Core;
 using GainsLab.Models.DataManagement.DB.Model.DTOs;
 
 namespace GainsLab.Infrastructure.DB.DTOs;
@@ -19,7 +20,8 @@ public class EquipmentDTO : BaseDto
 
     public override int Iid => Id;
     public override Guid Iguid => GUID;
-    
+    public override EntityType Type => EntityType.Equipment;
+
     public override bool Equals(object? obj)
     {
         if (obj is not EquipmentDTO other) return false;

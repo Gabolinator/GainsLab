@@ -22,7 +22,7 @@ public interface ILocalRepository
     /// <summary>
     /// Retrieves a set of components matching the supplied identifiers.
     /// </summary>
-    Task<ResultList<TEntity>> GetComponentsAsync<TId, TEntity>(List<TId> ids);
+    Task<IReadOnlyList<TEntity>> GetComponentsAsync<TId, TEntity>(List<TId> ids);
 
     /// <summary>
     /// Deletes a component from the local store.
@@ -32,23 +32,23 @@ public interface ILocalRepository
     /// <summary>
     /// Persists a batch of components for a single entity type.
     /// </summary>
-    Task<ResultList<TEntity>> SaveComponentsAsync<TId, TEntity>(EntityType componentType, List<TEntity> list);
+    Task<IReadOnlyList<TEntity>> SaveComponentsAsync<TId, TEntity>(EntityType componentType, List<TEntity> list);
 
     /// <summary>
     /// Saves the provided file payloads to the local store in bulk.
     /// </summary>
-    Task<Result<Dictionary<EntityType, ResultList<TEntity>>>> BatchSaveComponentsAsync<TEntity>(
-        Dictionary<EntityType, ResultList<TEntity>> fileData);
+    Task<Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>> BatchSaveComponentsAsync(
+        Dictionary<EntityType, IReadOnlyList<IEntity>> fileData);
 
     /// <summary>
     /// Retrieves all components grouped by entity type.
     /// </summary>
-    Task<Result<Dictionary<EntityType, ResultList<TEntity>>>> GetAllComponentsAsync<TEntity>();
+    Task<Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>> GetAllComponentsAsync();
 
     /// <summary>
     /// Retrieves all components of a specific entity type.
     /// </summary>
-    Task<ResultList<TEntity>> GetAllComponentsOfTypeAsync<TEntity>();
+    Task<IReadOnlyList<TEntity>> GetAllComponentsOfTypeAsync<TEntity>();
 
     /// <summary>
     /// Persists a single component and returns the saved instance.
@@ -58,7 +58,7 @@ public interface ILocalRepository
     /// <summary>
     /// Retrieves all components grouped by type, honoring the provided cancellation token.
     /// </summary>
-    Task<Dictionary<EntityType, ResultList<IEntity>>> GetAllAsync(CancellationToken ct);
+    Task<Dictionary<EntityType, IReadOnlyList<IEntity>>> GetAllAsync(CancellationToken ct);
 
     /// <summary>
     /// Marks a component as deleted without removing its record.

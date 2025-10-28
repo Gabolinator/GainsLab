@@ -22,7 +22,7 @@ public interface IFileDataService
     /// <summary>
     /// Loads all component data associated with the application.
     /// </summary>
-    Task<Dictionary<EntityType, ResultList<IEntity>>> LoadAllComponentsAsync(); 
+    Task<Dictionary<EntityType, IReadOnlyList<IEntity>>> LoadAllComponentsAsync(); 
 
     /// <summary>
     /// Writes all components to disk using the provided destination and file format details.

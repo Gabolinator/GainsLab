@@ -1,14 +1,14 @@
-﻿
+﻿using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
+using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Core.Models.Core.Results;
 using GainsLab.Core.Models.Core.Utilities.Logging;
-using GainsLab.Infrastructure.DB;
 using GainsLab.Infrastructure.DB.Context;
+using GainsLab.Infrastructure.DB.DomainMappers;
 using GainsLab.Infrastructure.DB.DTOs;
-using GainsLab.Infrastructure.DB.Handlers;
-using GainsLab.Models.DataManagement.DB.Model.DTOs;
+using GainsLab.Models.DataManagement.DB.Model.DomainMappers;
 using Microsoft.EntityFrameworkCore;
 
-namespace GainsLab.Models.DataManagement.DB.Model.Handlers;
+namespace GainsLab.Infrastructure.DB.Handlers;
 
 public class EquipmentIdbHandler : IdbContextHandler<EquipmentDTO>
 {
@@ -38,4 +38,22 @@ public class EquipmentIdbHandler : IdbContextHandler<EquipmentDTO>
         } 
 
     }
+
+    public override async Task<IReadOnlyList<IEntity>> GetAllEntityAsync(CancellationToken ct = default)
+    {
+        var dtos = await DBSet
+            .AsNoTracking()
+            .ToListAsync(ct); // single round-trip
+
+        // Map in memory; no translation issues.
+        var entities = dtos
+            .Select(d => EquipmentMapper.ToDomain(d)) // specific mapper
+            .Where(e => e is not null)
+            .Cast<IEntity>()
+            .ToList();
+
+        return entities;
+    }
+
+   
 }

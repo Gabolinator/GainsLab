@@ -5,6 +5,7 @@ using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 using GainsLab.Core.Models.Core.Interfaces.DB;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Infrastructure.DB.DomainMappers;
+using GainsLab.Infrastructure.DB.DTOs;
 using GainsLab.Models.Core;
 using GainsLab.Models.DataManagement.DB.Model.DTOs;
 
@@ -29,6 +30,21 @@ public static class EntityDomainMapper
         };
         
     }
+    
+    public static IEntity? ToDomain(this IDto? dto)
+    {
+        if (dto == null) return null;
+        
+        return (dto.Type) switch
+        {
+            EntityType.Equipment => EquipmentMapper.ToDomain(dto as EquipmentDTO),
+            EntityType.Descriptor => DescriptorMapper.ToDomain(dto as DescriptorDTO),
+            //to eventually implement others
+            _ => throw new ArgumentOutOfRangeException()
+        };
+        
+    }
+    
     
     
     

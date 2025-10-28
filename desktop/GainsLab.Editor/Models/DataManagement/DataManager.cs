@@ -13,6 +13,7 @@ using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure;
 using GainsLab.Models.Core.LifeCycle;
 using GainsLab.Models.DataManagement.Sync;
+using GainsLab.Models.Utilities;
 
 namespace GainsLab.Models.DataManagement;
 
@@ -90,11 +91,16 @@ public class DataManager : IDataManager
         fileDirectory = basePath;
 
         _lifeCycle.onAppExitAsync +=SaveAllDataToFilesAsync;
-       
-        //kick off a full seed the first time we spin up so caches stay in sync
-       // bool didInitialSeed = await DoInitialSeed();
 
+        await _local.InitializeAsync();
         
+       if (!await HasInternetConnection())
+       {
+           _logger.LogWarning(nameof(DataManager),"No internet connection");
+           return;
+       } 
+       
+       //kick off a full seed the first time we spin up so caches stay in sync
         _seedTask ??= DoInitialSeed();
 
        
@@ -107,6 +113,9 @@ public class DataManager : IDataManager
 
         
     }
+
+    private Task<bool> HasInternetConnection() => NetworkChecker.HasInternetAsync(_logger);
+  
 
     /// <summary>
     /// Checks the remote source for new updates and schedules a delta sync when required.
@@ -124,8 +133,9 @@ public class DataManager : IDataManager
     private async Task<bool> DoInitialSeed()
     {
         _logger.Log(nameof(DataManager), "Seed Initial data...");
-       
+
       
+
         var state = await LoadOrCreateSyncStateAsync();
         if (state.SeedCompleted)
         {
@@ -185,7 +195,7 @@ public class DataManager : IDataManager
         
         //Load from files
         //not implemented
-        Dictionary<EntityType,  ResultList<IEntity>> fileData = await _fileDataService.LoadAllComponentsAsync();
+        Dictionary<EntityType, IReadOnlyList<IEntity>> fileData = await _fileDataService.LoadAllComponentsAsync();
         
         
         //batch insert all new loaded data in database
@@ -208,12 +218,12 @@ public class DataManager : IDataManager
 
         //Load from DB to cache
         //not implemented
-        var dataFromDB = await _local.GetAllComponentsAsync<IEntity>();
+        var dataFromDB = await _local.GetAllComponentsAsync();
         
         var fromDBSuccess = dataFromDB.Success;
         if (!fromDBSuccess || dataFromDB.Value == null)
         {
-            _logger.LogWarning(nameof(DataManager), $"Could Load all component data from DB.{(result.GetErrorMessage())}");
+            _logger.LogWarning(nameof(DataManager), $"Could not Load all component data from DB. { dataFromDB.GetErrorMessage()}");
             
         }
 
@@ -293,23 +303,25 @@ public class DataManager : IDataManager
     /// <summary>
     /// Stores every successful component payload in the cache registry under its entity type.
     /// </summary>
-    private void CacheAllData(Dictionary<EntityType, ResultList<IEntity>> data)
+    private void CacheAllData(Dictionary<EntityType, IReadOnlyList<IEntity>> data)
     {
         if (data.Count == 0)
         {
             _logger.LogWarning(nameof(DataManager),"No data to cache");
             return;
         }
+        
+      
 
         foreach (var kvp in data)
         {
             //filter the not successfull result out 
-            var results = kvp.Value;
-            if (!results.Success || !results.TryGetSuccessValues(_logger, out var values))
-            {
-                _logger.LogWarning(nameof(DataManager),$"No valid components to cache found for {kvp.Key}");
-                continue;
-            }
+            var  values = kvp.Value;
+            // if (!results.Success || !results.TryGetSuccessValues(_logger, out var values))
+            // {
+            //     _logger.LogWarning(nameof(DataManager),$"No valid components to cache found for {kvp.Key}");
+            //     continue;
+            // }
 
             CacheComponents(kvp.Key,  values.ToList());
         }

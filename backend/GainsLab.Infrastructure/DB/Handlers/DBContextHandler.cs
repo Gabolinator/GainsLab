@@ -1,13 +1,13 @@
 ﻿using GainsLab.Core.Models.Core.Interfaces.DB;
+using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Core.Models.Core.Results;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Models.DataManagement.DB.Model.DTOs;
-using GainsLab.Models.DataManagement.DB.Model.Handlers;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB.Handlers;
 
-public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, IDto 
+public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, IDto
 {
     protected IdbContextHandler(DbContext context, ILogger logger)
     {
@@ -126,5 +126,8 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
         if (dto is not TDto tdto) return Result<IDto>.Failure("Invalid Dto type");;
        return await UpdateAsync(tdto);
     }
-    
+
+    public abstract Task<IReadOnlyList<IEntity>> GetAllEntityAsync(CancellationToken ct = default);
+
+
 }

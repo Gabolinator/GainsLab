@@ -1,4 +1,5 @@
-﻿using GainsLab.Models.Core;
+﻿using GainsLab.Core.Models.Core.Interfaces.Entity;
+using GainsLab.Models.Core;
 
 namespace GainsLab.Core.Models.Core.Interfaces.Caching
 {
@@ -41,7 +42,7 @@ namespace GainsLab.Core.Models.Core.Interfaces.Caching
         /// <summary>
         /// Inserts or overwrites a list of components under the supplied entity type.
         /// </summary>
-        public void StoreAll<TEntity>(EntityType type, List<TEntity> components);
+        public void StoreAll(EntityType type, List<IEntity> components);
 
         /// <summary>
         /// Removes a component from cache by identifier.
