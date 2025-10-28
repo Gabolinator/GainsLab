@@ -54,6 +54,24 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
                 });
 
             migrationBuilder.CreateTable(
+                name: "SyncStates",
+                columns: table => new
+                {
+                    Partition = table.Column<string>(type: "TEXT", nullable: false),
+                    SeedCompleted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    SeedVersion = table.Column<int>(type: "INTEGER", nullable: false),
+                    LastSeedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    SeedInProgress = table.Column<bool>(type: "INTEGER", nullable: false),
+                    LastDeltaAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    UpstreamSnapshot = table.Column<string>(type: "TEXT", nullable: true),
+                    CursorsJson = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SyncStates", x => x.Partition);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "equipments",
                 columns: table => new
                 {
@@ -125,6 +143,9 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
 
             migrationBuilder.DropTable(
                 name: "outbox_changes");
+
+            migrationBuilder.DropTable(
+                name: "SyncStates");
 
             migrationBuilder.DropTable(
                 name: "descriptors");

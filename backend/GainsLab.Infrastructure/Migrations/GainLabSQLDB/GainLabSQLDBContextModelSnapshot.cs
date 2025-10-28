@@ -127,6 +127,38 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
                     b.ToTable("outbox_changes", (string)null);
                 });
 
+            modelBuilder.Entity("GainsLab.Infrastructure.SyncState", b =>
+                {
+                    b.Property<string>("Partition")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CursorsJson")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset?>("LastDeltaAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset?>("LastSeedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("SeedCompleted")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("SeedInProgress")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("SeedVersion")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("UpstreamSnapshot")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Partition");
+
+                    b.ToTable("SyncStates", (string)null);
+                });
+
             modelBuilder.Entity("GainsLab.Models.DataManagement.DB.Model.DTOs.DescriptorDTO", b =>
                 {
                     b.Property<int>("Id")

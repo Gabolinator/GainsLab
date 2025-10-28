@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using GainsLab.Contracts.SyncDto;
 using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.Caching;
 using GainsLab.Core.Models.Core.Interfaces.DataManagement;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Core.Models.Core.Results;
 using GainsLab.Core.Models.Core.Utilities.Logging;
+using GainsLab.Infrastructure;
 using GainsLab.Models.Core.LifeCycle;
 using GainsLab.Models.DataManagement.Sync;
 
@@ -38,6 +40,7 @@ public class DataManager :IDataManager
 
     private string fileDirectory;
     private readonly IAppLifeCycle _lifeCycle;
+    private Task<bool>? _seedTask;
 
     public DataManager(
         IAppLifeCycle lifeCycle,
@@ -79,29 +82,83 @@ public class DataManager :IDataManager
         _lifeCycle.onAppExitAsync +=SaveAllDataToFilesAsync;
        
         //kick off a full seed the first time we spin up so caches stay in sync
-        _logger.Log(nameof(DataManager), "Seed Initial data...");
-        var seedResult = await _syncOrchestrator.SeedAsync();
-        if (!seedResult.Success)
-        {
-            _logger.LogError(nameof(DataManager),
-                $"Initial sync failed: {seedResult.GetErrorMessage()}");
-        }
+       // bool didInitialSeed = await DoInitialSeed();
+
         
-        //we check if there is any data out of sync
-        //if there is changes not pulled => we update in local db 
-        //if there is changes not pushed => we update in remote db 
+        _seedTask ??= DoInitialSeed();
+
+       
+        bool didInitialSeed =await _seedTask;
+        
+        if (!didInitialSeed)
+        {
+            CheckForUpdatesFromUpstream();
+        }
+
         
     }
 
-        
+    private void CheckForUpdatesFromUpstream()
+    {
+        //todo check if any updates to pull
+        _logger.Log(nameof(DataManager), "Check for upstream updates...NOT IMPLEMENTED");
+    }
+
+    private async Task<bool> DoInitialSeed()
+    {
+        _logger.Log(nameof(DataManager), "Seed Initial data...");
+       
+      
+        var state = await LoadOrCreateSyncStateAsync();
+        if (state.SeedCompleted)
+        {
+            _logger.Log(nameof(DataManager), "Initial sync already done");
+            return false;
+        }
+
+        if (!state.SeedInProgress)
+        {
+            state.SeedInProgress = true;
+            await _local.SaveSyncStateAsync(state);
+        }
+
+        var seed = await _syncOrchestrator.SeedAsync();
+        if (!seed.Success)
+        {
+            _logger.LogError(nameof(DataManager), $"Initial sync failed: {seed.GetErrorMessage()}");
+            state.SeedInProgress = false; // allow retry
+            await _local.SaveSyncStateAsync(state);
+            return false;
+        }
+
+        // persist snapshot + cursors from the payload
+        state.SeedCompleted    = true;
+        state.SeedInProgress   = false;
+        state.LastSeedAt       = DateTimeOffset.UtcNow;
+        state.UpstreamSnapshot = seed.Value?.SnapshotVersion;
+        state.CursorsJson      = System.Text.Json.JsonSerializer.Serialize(seed.Value?.Cursors);
+        await _local.SaveSyncStateAsync(state);
+        return true;
+    }
+
+    private async Task<SyncState> LoadOrCreateSyncStateAsync()
+    {
+        var state = await _local.GetSyncStateAsync("global"); 
+       
+        if (state is null)
+        {
+            state = new SyncState { Partition = "global" };
+            await _local.SaveSyncStateAsync(state);
+        }
+        return (SyncState)state;
+    }
+    
 
     public async Task<Result> LoadAndCacheDataAsync()
     {
-      
-       
-        
-        _logger.Log(nameof(DataManager), "Loading and caching data...");
 
+        _logger.Log(nameof(DataManager), "Loading and caching data...");
+        
         //Load from files
         //not implemented
         Dictionary<EntityType,  ResultList<IEntity>> fileData = await _fileDataService.LoadAllComponentsAsync();
@@ -115,9 +172,14 @@ public class DataManager :IDataManager
         if (!batchSaveSuccess)
         {
             _logger.LogWarning(nameof(DataManager), $"Could not Save loaded data to DB.{result.GetErrorMessage()}");
-            
         }
 
+
+        // If a seed is in-flight (or needed), wait for it here.
+        if (_seedTask is not null)
+        {
+            try { await _seedTask; } catch { /* seed failure already logged; continue */ }
+        }
 
 
         //Load from DB to cache

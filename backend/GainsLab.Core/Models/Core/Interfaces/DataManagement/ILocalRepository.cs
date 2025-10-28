@@ -25,6 +25,8 @@ public interface ILocalRepository
     Task<Dictionary<EntityType, ResultList<IEntity>>> GetAllAsync(CancellationToken ct);
     
     Task MarkDeletedAsync(EntityType type, Guid id, CancellationToken ct);
+    Task<ISyncState> GetSyncStateAsync(string s);
+    Task SaveSyncStateAsync(ISyncState state);
 }
 
   

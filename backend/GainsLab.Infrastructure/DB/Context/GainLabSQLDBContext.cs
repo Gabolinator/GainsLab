@@ -17,6 +17,7 @@ public class GainLabSQLDBContext : DbContext
         _logger.Log(nameof(GainLabSQLDBContext), "Service intanciated");
     }
 
+    public DbSet<SyncState> SyncStates => Set<SyncState>();
     DbSet<OutboxChangeDto> OutboxChanges => Set<OutboxChangeDto>();
     public DbSet<EquipmentDTO> Equipments => Set<EquipmentDTO>();
     public DbSet<DescriptorDTO> Descriptors => Set<DescriptorDTO>();
@@ -26,9 +27,20 @@ public class GainLabSQLDBContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        CreateSyncStateTable_Sqlite(modelBuilder);
         CreateOutBoxTable_Sqlite(modelBuilder);
         CreateEquipmentTableModel_Sqlite(modelBuilder);
         CreateDescriptorTableModel_Sqlite(modelBuilder);
+    }
+
+    private void CreateSyncStateTable_Sqlite(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<SyncState>(b =>
+        {
+            b.ToTable("SyncStates");
+            b.HasKey(x => x.Partition);
+            b.Property(x => x.CursorsJson).HasColumnType("TEXT"); 
+        });
     }
 
     private void CreateOutBoxTable_Sqlite(ModelBuilder modelBuilder)
@@ -116,3 +128,5 @@ public class GainLabSQLDBContext : DbContext
         });
     }
 }
+
+

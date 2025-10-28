@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB;
 
-//bridge to do database
+//bridge to do local database
 public class DataRepository : ILocalRepository
 {
     
@@ -102,7 +102,55 @@ public class DataRepository : ILocalRepository
     {
         throw new NotImplementedException();
     }
-    
+
+    public async Task<ISyncState> GetSyncStateAsync(string partition)
+    {
+        _workoutLogger.Log(nameof(DataRepository), "Get Sync State");
+        
+        if (string.IsNullOrWhiteSpace(partition))
+            partition = "global";
+
+        var row = await _sqldbContext.SyncStates
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x => x.Partition == partition);
+        
+        _workoutLogger.Log(nameof(DataRepository), $"Sync State : {(row != null? row.Partition: "none")}");
+
+        
+        return row ?? new SyncState
+        {
+            Partition   = partition,
+            SeedVersion = 1,
+            CursorsJson = "{}"
+        };
+    }
+
+    public async Task SaveSyncStateAsync(ISyncState state)
+    {
+        if (state is null) throw new ArgumentNullException(nameof(state));
+
+        if(state is not SyncState syncState) throw new ArgumentNullException(nameof(state));
+        
+        _workoutLogger.Log(nameof(DataRepository), $"Save Sync State ");
+
+        
+        var existing = await _sqldbContext.SyncStates
+            .FirstOrDefaultAsync(x => x.Partition == syncState.Partition);
+
+        if (existing is null)
+        {
+            var toAdd = SyncState.From(syncState);
+            _sqldbContext.SyncStates.Add(toAdd);
+        }
+        else
+        {
+            SyncState.Copy(syncState, existing);
+            _sqldbContext.SyncStates.Update(existing);
+        }
+
+        await _sqldbContext.SaveChangesAsync();
+    }
+
 
     private void CreateHandlers()
     {
