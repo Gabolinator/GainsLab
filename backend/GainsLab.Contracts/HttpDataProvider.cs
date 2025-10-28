@@ -48,6 +48,9 @@ public class HttpDataProvider: IRemoteProvider
 
     }
 
+    /// <summary>
+    /// Invokes the descriptor sync endpoint and materializes a page of DTOs.
+    /// </summary>
     private async Task<ISyncPage<ISyncDto>> PullDescriptorPageAsync(ISyncCursor cursor, int take, CancellationToken ct)
     {
         var url = $"/sync/descriptor?ts={Uri.EscapeDataString(cursor.ITs.ToString("o"))}&seq={cursor.ISeq}&take={take}";
@@ -87,5 +90,4 @@ public class HttpDataProvider: IRemoteProvider
     }
     
 }
-
 

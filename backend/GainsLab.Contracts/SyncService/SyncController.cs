@@ -6,17 +6,32 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GainsLab.Contracts.SyncService;
 
+/// <summary>
+/// ASP.NET Core controller that exposes sync endpoints for consuming clients.
+/// </summary>
 [ApiController]
 [Route("sync")]
 public class SyncController : ControllerBase
 {
     private readonly IReadOnlyDictionary<EntityType, ISyncService> _services;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="SyncController"/> class using the registered sync services.
+    /// </summary>
+    /// <param name="services">The collection of entity-specific sync services provided by DI.</param>
     public SyncController(IEnumerable<ISyncService> services)
         => _services = services.ToDictionary(s => s.EntityType);
 
-    
-    // GET /sync/{entity}?ts=...&seq=...&take=...
+    /// <summary>
+    /// Retrieves a page of synchronization data for the requested entity type.
+    /// </summary>
+    /// <param name="entity">Name of the entity type (case-insensitive).</param>
+    /// <param name="ts">Timestamp component of the cursor; defaults to the minimum value.</param>
+    /// <param name="seq">Sequence component of the cursor; defaults to zero.</param>
+    /// <param name="take">Maximum number of items to retrieve; clamped to a safe range.</param>
+    /// <param name="ct">Cancellation token propagated from the caller.</param>
+    /// <returns>HTTP 200 with the page payload when successful, or HTTP 404 if the entity is unknown.</returns>
+    /// <remarks>GET /sync/&lt;entity&gt;?ts=...&amp;seq=...&amp;take=...</remarks>
     [HttpGet("{entity}")]
     public async Task<IActionResult> Pull(
         string entity, [FromQuery] DateTimeOffset? ts, [FromQuery] long? seq, [FromQuery] int take = 200, CancellationToken ct = default)
@@ -30,37 +45,4 @@ public class SyncController : ControllerBase
         var page = await svc.PullBoxedAsync(cursor, take, ct);
         return Ok(page);
     }
-
-
-
-    // GET /sync/equipment?ts=2025-10-01T00:00:00Z&id=00000000-0000-0000-0000-000000000000&take=200
-    // [HttpGet("equipment")]
-    // public async Task<ActionResult<SyncPage<EquipmentSyncDto>>> PullEquipment(
-    //     [FromQuery] DateTimeOffset? ts,
-    //     [FromQuery] long? seq,
-    //     [FromQuery] int take = 200,
-    //     CancellationToken ct = default)
-    // {
-    //     var cursor = new SyncCursor(ts ?? DateTimeOffset.MinValue, seq ?? 0);
-    //     take = Math.Clamp(take, 1, 500);
-    //
-    //     var page = await _equipment.PullAsync(cursor, take, ct);
-    //     return Ok(page);
-    // }
-    //
-    // [HttpGet("descriptor")]
-    // public async Task<ActionResult<SyncPage<DescriptorSyncDto>>> PullDescriptor(
-    //     [FromQuery] DateTimeOffset? ts,
-    //     [FromQuery] long? seq,
-    //     [FromQuery] int take = 200,
-    //     CancellationToken ct = default)
-    // {
-    //     var cursor = new SyncCursor(ts ?? DateTimeOffset.MinValue, seq ?? 0);
-    //     take = Math.Clamp(take, 1, 500);
-    //
-    //     var page = await _descriptor.PullAsync(cursor, take, ct);
-    //     return Ok(page);
-    // }
-    
-    
 }

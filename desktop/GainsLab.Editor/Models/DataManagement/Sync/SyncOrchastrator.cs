@@ -24,6 +24,9 @@ public interface ISyncOrchestrator
     /// Forces a full re-sync for every registered entity, ignoring saved cursors.
     /// </summary>
     Task<Result<SeedOutcome>>  SeedAsync(CancellationToken ct = default);
+    /// <summary>
+    /// Pulls incremental changes for all entities using either provided or persisted cursors.
+    /// </summary>
     Task<Result<DeltaOutcome>> PullDeltasAsync(
         IReadOnlyDictionary<string, string> cursors,
         CancellationToken ct = default);

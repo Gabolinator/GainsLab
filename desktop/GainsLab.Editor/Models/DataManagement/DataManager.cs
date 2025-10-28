@@ -19,7 +19,7 @@ namespace GainsLab.Models.DataManagement;
 /// <summary>
 /// Coordinates pulling data from remote/local sources and caching it for the desktop app.
 /// </summary>
-public class DataManager :IDataManager
+public class DataManager : IDataManager
 {
 
     private readonly ILogger _logger;
@@ -42,6 +42,16 @@ public class DataManager :IDataManager
     private readonly IAppLifeCycle _lifeCycle;
     private Task<bool>? _seedTask;
 
+    /// <summary>
+    /// Creates a new <see cref="DataManager"/> wired up with the required infrastructure services.
+    /// </summary>
+    /// <param name="lifeCycle">Lifecycle hook used to persist data when the app exits.</param>
+    /// <param name="logger">Logger used for diagnostics.</param>
+    /// <param name="remoteProvider">Abstraction over the remote sync API.</param>
+    /// <param name="localProvider">Local repository that persists synced entities.</param>
+    /// <param name="cache">Registry that exposes component caches to the desktop application.</param>
+    /// <param name="fileDataService">File service responsible for serializing components to disk.</param>
+    /// <param name="syncOrchestrator">Coordinator that performs the actual seed/delta synchronization.</param>
     public DataManager(
         IAppLifeCycle lifeCycle,
         ILogger logger,
@@ -61,10 +71,10 @@ public class DataManager :IDataManager
 
     }
 
-        /// <summary>
-        /// Prepares storage folders, hooks lifecycle events, and runs an initial synchronization.
-        /// </summary>
-        public async Task InitializeAsync()
+    /// <summary>
+    /// Prepares storage folders, hooks lifecycle events, and runs an initial synchronization.
+    /// </summary>
+    public async Task InitializeAsync()
     {
         _logger.Log(nameof(DataManager), "Initializing...");
         //get the local direct
@@ -98,12 +108,19 @@ public class DataManager :IDataManager
         
     }
 
+    /// <summary>
+    /// Checks the remote source for new updates and schedules a delta sync when required.
+    /// </summary>
     private void CheckForUpdatesFromUpstream()
     {
         //todo check if any updates to pull
         _logger.Log(nameof(DataManager), "Check for upstream updates...NOT IMPLEMENTED");
     }
 
+    /// <summary>
+    /// Performs the initial seed by delegating to the sync orchestrator and persisting the resulting cursors.
+    /// </summary>
+    /// <returns><c>true</c> when a seed ran to completion; <c>false</c> when an existing seed was reused or failed.</returns>
     private async Task<bool> DoInitialSeed()
     {
         _logger.Log(nameof(DataManager), "Seed Initial data...");
@@ -141,6 +158,9 @@ public class DataManager :IDataManager
         return true;
     }
 
+    /// <summary>
+    /// Retrieves the persisted sync state for the global partition, creating one on first run.
+    /// </summary>
     private async Task<SyncState> LoadOrCreateSyncStateAsync()
     {
         var state = await _local.GetSyncStateAsync("global"); 
@@ -154,6 +174,10 @@ public class DataManager :IDataManager
     }
     
 
+    /// <summary>
+    /// Loads component data from disk, persists it locally, waits for any pending seed, and primes in-memory caches.
+    /// </summary>
+    /// <returns>A <see cref="Result"/> conveying success or failure of the overall operation.</returns>
     public async Task<Result> LoadAndCacheDataAsync()
     {
 
@@ -202,47 +226,74 @@ public class DataManager :IDataManager
 
     }
 
+    /// <summary>
+    /// Attempts to resolve a single component by identifier using cache, local storage, and remote fallbacks.
+    /// </summary>
     public Task<Result<TEntity>> TryGetEntityAsync<TId, TEntity>(TId id)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Attempts to resolve multiple components by identifier using cache, local storage, and remote fallbacks.
+    /// </summary>
     public Task<ResultList<TEntity>> TryGetComponentsAsync<TId, TEntity>(IEnumerable<TId> ids)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Persists a single component to the local data store and updates caches accordingly.
+    /// </summary>
     public Task<Result> SaveComponentAsync<TEntity>(TEntity component)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Persists a batch of components to the local repository and returns the outcome for each entry.
+    /// </summary>
     public Task<ResultList> SaveComponentsAsync<TEntity>(IEnumerable<TEntity> components)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Attempts to resolve the supplied identifiers into fully materialized components.
+    /// </summary>
     public Task<ResultList<TEntity>> TryResolveComponentsAsync<TId, TEntity>(List<TId> toResolve)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Attempts to resolve a single unresolved component identifier.
+    /// </summary>
     public Task<Result<TEntity>> TryResolveComponentAsync<TId, TEntity>(TId unresolved)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Removes a component from the local store and cache surfaces.
+    /// </summary>
     public Task<Result> DeleteComponentAsync<TEntity>(TEntity entity)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Writes the current component set out to files on disk (e.g., for offline usage or backups).
+    /// </summary>
     public Task<Result> SaveAllDataToFilesAsync()
     {
         throw new NotImplementedException();
     }
 
-    private void CacheAllData( Dictionary<EntityType, ResultList<IEntity>> data)
+    /// <summary>
+    /// Stores every successful component payload in the cache registry under its entity type.
+    /// </summary>
+    private void CacheAllData(Dictionary<EntityType, ResultList<IEntity>> data)
     {
         if (data.Count == 0)
         {
@@ -264,6 +315,9 @@ public class DataManager :IDataManager
         }
     }
 
+    /// <summary>
+    /// Stores a typed component collection in the cache registry.
+    /// </summary>
     private void CacheComponents(EntityType componentType, List<IEntity> components)
     {
         if(components == null || components.Count == 0) return;

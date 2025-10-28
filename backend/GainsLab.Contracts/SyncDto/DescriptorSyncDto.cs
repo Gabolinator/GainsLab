@@ -2,12 +2,17 @@
 
 namespace GainsLab.Contracts.SyncDto;
 
-public record DescriptorSyncDto( 
-    Guid GUID ,
+/// <summary>
+/// Synchronization DTO for descriptor entities exposed by the remote API.
+/// </summary>
+/// <param name="GUID">The stable identifier of the descriptor.</param>
+/// <param name="DescriptionContent">The serialized descriptor payload.</param>
+/// <param name="UpdatedAtUtc">Server timestamp for the last mutation.</param>
+/// <param name="UpdatedSeq">Sequence number used to break ties when timestamps are equal.</param>
+/// <param name="IsDeleted">Flag indicating whether the descriptor represents a tombstone.</param>
+public record DescriptorSyncDto(
+    Guid GUID,
     string DescriptionContent,
     DateTimeOffset UpdatedAtUtc,
-    long UpdatedSeq,              // monotonic tie-breaker
-    bool IsDeleted = false) : ISyncDto
-{
-   
-}
+    long UpdatedSeq,
+    bool IsDeleted = false) : ISyncDto;
