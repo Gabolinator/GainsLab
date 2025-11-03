@@ -25,7 +25,8 @@ public class EquipmentDTO : BaseDto
     public override bool Equals(object? obj)
     {
         if (obj is not EquipmentDTO other) return false;
-        return Guid.Equals(GUID,other.GUID) 
+        return (Guid.Equals(GUID,other.GUID) 
+                || string.Equals(Name, other.Name, StringComparison.InvariantCultureIgnoreCase)) 
                && (DescriptorID == other.DescriptorID);
     }
 

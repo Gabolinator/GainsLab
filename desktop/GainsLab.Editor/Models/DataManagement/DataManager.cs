@@ -100,6 +100,8 @@ public class DataManager : IDataManager
            return;
        } 
        
+       
+        
        //kick off a full seed the first time we spin up so caches stay in sync
         _seedTask ??= DoInitialSeed();
 
@@ -255,9 +257,27 @@ public class DataManager : IDataManager
     /// <summary>
     /// Persists a single component to the local data store and updates caches accordingly.
     /// </summary>
-    public Task<Result> SaveComponentAsync<TEntity>(TEntity component)
+    public async Task<Result> SaveComponentAsync<TEntity>(TEntity component)
     {
-        throw new NotImplementedException();
+       //check if component is valid 
+       if (component is not IEntity entity)
+       {
+           _logger.LogWarning(nameof(DataManager),"Component to save is not valid");
+           return Result.Failure("Invalid type");
+       }
+
+       var result = await _local.SaveComponentAsync(entity);
+       if (!result.Success)
+       {
+           return Result.Failure(result.GetErrorMessage());
+       }
+       
+       _cache.Store(entity);
+
+       return Result.SuccessResult();
+       //add it to local db
+       //if needs to be intercepted and synced up to backend
+       //then add it to cache
     }
 
     /// <summary>

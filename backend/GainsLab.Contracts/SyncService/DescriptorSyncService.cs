@@ -28,8 +28,11 @@ public class DescriptorSyncService : ISyncService<DescriptorSyncDto>
     /// <inheritdoc />
     public EntityType EntityType => EntityType.Descriptor;
 
+    public Type DtoType => typeof(DescriptorSyncDto);
+
     /// <inheritdoc />
-    public Task PushAsync(CancellationToken ct = default) => Task.CompletedTask;
+    Task<PushResult> ISyncService.PushBoxedAsync(IEnumerable<ISyncDto> dtos, CancellationToken ct)
+        => PushAsync(dtos.Cast<DescriptorSyncDto>(), ct);
 
     /// <inheritdoc />
     async Task<object> ISyncService.PullBoxedAsync(SyncCursor cur, int take, CancellationToken ct)
@@ -69,5 +72,10 @@ public class DescriptorSyncService : ISyncService<DescriptorSyncDto>
             : new SyncCursor(items[^1].UpdatedAtUtc, items[^1].UpdatedSeq);
 
         return new SyncPage<DescriptorSyncDto>(serverTime, next, items);
+    }
+
+    public Task<PushResult> PushAsync(IEnumerable<DescriptorSyncDto> items, CancellationToken ct)
+    {
+        throw new NotImplementedException();
     }
 }

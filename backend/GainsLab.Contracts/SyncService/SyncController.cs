@@ -1,4 +1,5 @@
-﻿using GainsLab.Contracts.Interface;
+﻿using System.Text.Json;
+using GainsLab.Contracts.Interface;
 using GainsLab.Contracts.SyncDto;
 using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.DB;
@@ -44,5 +45,32 @@ public class SyncController : ControllerBase
 
         var page = await svc.PullBoxedAsync(cursor, take, ct);
         return Ok(page);
+    }
+    
+    
+    
+    [HttpPost("{entity}")]
+    public async Task<IActionResult> Push(
+        string entity,
+        [FromBody] SyncPushEnvelope body,
+        CancellationToken ct = default)
+    {
+        if (!Enum.TryParse<EntityType>(entity, true, out var t) || !_services.TryGetValue(t, out var svc))
+            return NotFound($"Unknown entity '{entity}'.");
+
+        // Deserialize each item to the service’s TSyncDto
+        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        var typedItems = new List<ISyncDto>(body.Items.Count);
+
+        foreach (var el in body.Items)
+        {
+            var dto = (ISyncDto?)JsonSerializer.Deserialize(el, svc.DtoType, options);
+            if (dto is null)
+                return BadRequest($"Invalid item payload for '{entity}'.");
+            typedItems.Add(dto);
+        }
+
+        var result = await svc.PushBoxedAsync(typedItems, ct);
+        return Ok(result);
     }
 }

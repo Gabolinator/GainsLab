@@ -14,11 +14,13 @@ public interface ISyncService
     /// </summary>
     EntityType EntityType { get; }
 
+    Type DtoType { get; }
+    
     /// <summary>
     /// Pushes local changes upstream using the configured transport, if supported.
     /// </summary>
     /// <param name="ct">Cancellation token propagated from the caller.</param>
-    Task PushAsync(CancellationToken ct = default);
+    Task<PushResult> PushBoxedAsync(IEnumerable<ISyncDto> dtos, CancellationToken ct);
 
     /// <summary>
     /// Retrieves a boxed page of DTOs for the associated entity type.
@@ -41,5 +43,8 @@ public interface ISyncService<T> : ISyncService where T : ISyncDto
     /// <param name="cur">Cursor describing the starting point.</param>
     /// <param name="take">Maximum number of items to include.</param>
     /// <param name="ct">Cancellation token propagated from the caller.</param>
-    new Task<SyncPage<T>> PullAsync(SyncCursor cur, int take, CancellationToken ct);
+    Task<SyncPage<T>> PullAsync(SyncCursor cur, int take, CancellationToken ct);
+    
+    // strongly-typed push
+    Task<PushResult> PushAsync(IEnumerable<T> items, CancellationToken ct);
 }

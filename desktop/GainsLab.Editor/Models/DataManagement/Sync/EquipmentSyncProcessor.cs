@@ -87,6 +87,8 @@ public async Task<Result> ApplyAsync(IReadOnlyList<ISyncDto> items, ILocalReposi
                 await dbContext.Equipments.AddAsync(entity, ct).ConfigureAwait(false);
             }
 
+            
+            
             entity.Name = dto.Name;
 
             // Set the relationship; EF will handle DescriptorID
