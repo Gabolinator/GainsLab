@@ -12,9 +12,17 @@ using GainsLab.Models.DataManagement.DB.Model.DTOs;
 
 namespace GainsLab.Models.DataManagement.DB.Model.DomainMappers;
 
+/// <summary>
+/// Converts between domain entities and their persistence DTO representations.
+/// </summary>
 public static class EntityDomainMapper
 {
 
+    /// <summary>
+    /// Maps a domain entity to its corresponding DTO when supported.
+    /// </summary>
+    /// <param name="domain">Domain entity to convert.</param>
+    /// <returns>The DTO representation or <c>null</c> when the type is unsupported.</returns>
     public static IDto? ToDTO(this IEntity? domain)
     {
         if (domain == null) return null;
@@ -31,6 +39,11 @@ public static class EntityDomainMapper
         
     }
     
+    /// <summary>
+    /// Maps a DTO to its corresponding domain entity when supported.
+    /// </summary>
+    /// <param name="dto">DTO to convert.</param>
+    /// <returns>The domain entity representation or <c>null</c> when the type is unsupported.</returns>
     public static IEntity? ToDomain(this IDto? dto)
     {
         if (dto == null) return null;

@@ -7,8 +7,12 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace GainsLab.Models.DataManagement.DB;
 
+/// <summary>
+/// Design-time factory used by EF Core tooling to create the SQLite context.
+/// </summary>
 public class GainLabDBContextFactory : IDesignTimeDbContextFactory<GainLabSQLDBContext>
 {
+    /// <inheritdoc />
     public GainLabSQLDBContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<GainLabSQLDBContext>();

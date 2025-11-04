@@ -1,37 +1,49 @@
-﻿
-using GainsLab.Core.Models.Core;
+﻿using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.Caching;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Models.Core;
 
 namespace GainsLab.Models.DataManagement.Caching;
 
+/// <summary>
+/// Provides a skeletal implementation for component caches backed by an in-memory dictionary.
+/// </summary>
 public abstract class BaseComponentCache<Tid, TEntity> : IComponentCache<Tid, TEntity> 
 {
     protected ILogger _logger;
+
+    /// <inheritdoc />
     public abstract eWorkoutComponents ComponentType { get; }
+
+    /// <inheritdoc />
     public Dictionary<Tid, TEntity> CachedComponents { get; set; } = new();
+
+    /// <inheritdoc />
     public void Clear()
     {
         throw new NotImplementedException();
     }
 
 
+    /// <inheritdoc />
     public bool TryGet(Tid id, out TEntity? component)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public void Store(TEntity entity)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public void StoreOrReplace(Tid id, TEntity component)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public void Remove(Tid id)
     {
         throw new NotImplementedException();

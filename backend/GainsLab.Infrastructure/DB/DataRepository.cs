@@ -13,7 +13,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB;
 
-//bridge to do local database
+/// <summary>
+/// SQLite-backed repository that persists domain entities locally for the desktop application.
+/// </summary>
 public class DataRepository : ILocalRepository
 {
     
@@ -22,12 +24,18 @@ public class DataRepository : ILocalRepository
     private Dictionary<EntityType, IDBHandler> _handlers = new();
     
     
+    /// <summary>
+    /// Initializes a new instance of the <see cref="DataRepository"/> class.
+    /// </summary>
+    /// <param name="logger">Logger used to emit diagnostic messages.</param>
+    /// <param name="sqldbContext">EF Core context used to access the local database.</param>
     public DataRepository(ILogger logger, GainLabSQLDBContext sqldbContext)
     {
         _logger = logger;
         _sqldbContext = sqldbContext;
     }
     
+    /// <inheritdoc />
     public async Task<Result> InitializeAsync()
     {
 
@@ -72,6 +80,7 @@ public class DataRepository : ILocalRepository
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public async Task<Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>> BatchSaveComponentsAsync(
     Dictionary<EntityType, IReadOnlyList<IEntity>> entities,
     CancellationToken ct = default)
@@ -198,6 +207,7 @@ public class DataRepository : ILocalRepository
     
 }
 
+    /// <inheritdoc />
     public async Task<Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>> GetAllComponentsAsync()
     {
         if (!_handlers.Any()) return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure("No handlers");
@@ -228,21 +238,25 @@ public class DataRepository : ILocalRepository
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public Task<Result<TEntity>> SaveComponentAsync<TEntity>(TEntity component)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public Task<Dictionary<EntityType, IReadOnlyList<IEntity>>> GetAllAsync(CancellationToken ct)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public Task MarkDeletedAsync(EntityType type, Guid id, CancellationToken ct)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public async Task<ISyncState> GetSyncStateAsync(string partition)
     {
         _logger.Log(nameof(DataRepository), "Get Sync State");
@@ -292,6 +306,9 @@ public class DataRepository : ILocalRepository
     }
 
 
+    /// <summary>
+    /// Builds the mapping between entity types and their concrete database handlers.
+    /// </summary>
     private void CreateHandlers()
     {
         _handlers = new();

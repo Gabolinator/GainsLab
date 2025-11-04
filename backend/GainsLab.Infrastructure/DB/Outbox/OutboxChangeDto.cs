@@ -3,9 +3,15 @@
 namespace GainsLab.Infrastructure.DB.Outbox;
 
 
+/// <summary>
+/// Enumerates the mutation types captured in the outbox table.
+/// </summary>
 public enum ChangeType { Insert, Update, Delete }
 
 
+/// <summary>
+/// Represents a single outbox record queued for upstream dispatch.
+/// </summary>
 public class OutboxChangeDto
 {
     [Key]

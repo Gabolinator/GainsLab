@@ -10,6 +10,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace GainsLab;
 
+/// <summary>
+/// Avalonia application bootstrapper responsible for initializing the editor and wiring startup logic.
+/// </summary>
 public partial class App : Application
 {
     
@@ -20,11 +23,17 @@ public partial class App : Application
 
    
     
+    /// <summary>
+    /// Loads the XAML resources for the application.
+    /// </summary>
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
     }
 
+    /// <summary>
+    /// Runs after Avalonia finishes initializing and triggers application startup logic.
+    /// </summary>
     public override async void OnFrameworkInitializationCompleted()
     {
         
@@ -36,7 +45,9 @@ public partial class App : Application
     }
 
    
-
+    /// <summary>
+    /// Configures dependency injection, resolves the main window, and invokes lifecycle hooks.
+    /// </summary>
     private  async Task OnAppStart()
     {
         // Initialize AppHost and its dependencies

@@ -6,10 +6,14 @@ using GainsLab.Models.Core.Interfaces;
 
 namespace GainsLab.Infrastructure.DB.Handlers;
 
+/// <summary>
+/// Minimal descriptor service used during seeding and domain construction.
+/// </summary>
 public class BaseDescriptorService(IClock clock) : IDescriptorService<BaseDescriptorEntity>
 {
     
   
+    /// <inheritdoc />
     public BaseDescriptorEntity CreateFor(Guid guid)
     {
         //todo
@@ -19,6 +23,7 @@ public class BaseDescriptorService(IClock clock) : IDescriptorService<BaseDescri
 
     }
 
+    /// <inheritdoc />
     public void Update(BaseDescriptorEntity descriptor)
     {
         //todo

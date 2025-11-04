@@ -8,22 +8,34 @@ using GainsLab.Models.DataManagement.DB;
 
 namespace GainsLab.Models.App.LifeCycle;
 
+/// <summary>
+/// Default lifecycle implementation that coordinates startup and shutdown events for the desktop host.
+/// </summary>
 public class AppLifecycleService  : IAppLifeCycle
 {
     private readonly ILogger _logger;
     private IDataProvider _dataProvider;
 
+    /// <inheritdoc />
     public event Action onAppStart;
+    /// <inheritdoc />
     public event Func<Task>? onAppStartAsync;
+    /// <inheritdoc />
     public event Action onAppExit;
+    /// <inheritdoc />
     public event Func<Task>? onAppExitAsync;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="AppLifecycleService"/> class.
+    /// </summary>
+    /// <param name="logger">Logger used to record lifecycle events.</param>
     public AppLifecycleService(ILogger logger)
     {
         _logger = logger;
       
     }
 
+    /// <inheritdoc />
     public async Task InitializeAsync( IServiceProvider serviceProvider, IApplicationLifetime? lifetime)
     {
         if (lifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -35,6 +47,9 @@ public class AppLifecycleService  : IAppLifeCycle
         
     }
 
+    /// <summary>
+    /// Handles shutdown requests by executing the asynchronous exit pipeline synchronously.
+    /// </summary>
     private void OnShutdownResquested(object? sender, ShutdownRequestedEventArgs e)
     {
        
@@ -47,6 +62,7 @@ public class AppLifecycleService  : IAppLifeCycle
     }
 
 
+    /// <inheritdoc />
     public async Task OnStartAppAsync()
     {
         _logger.Log("AppLifecycle", "Application has started.");
@@ -55,6 +71,7 @@ public class AppLifecycleService  : IAppLifeCycle
         await Task.CompletedTask;
     }
 
+    /// <inheritdoc />
     public async Task OnExitAppAsync()
     {
         _logger.Log("AppLifecycle", "Application is shutting down...");

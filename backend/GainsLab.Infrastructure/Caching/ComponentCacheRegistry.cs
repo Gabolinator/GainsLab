@@ -13,17 +13,25 @@ using GainsLab.Models.DataManagement.Caching.Interface;
 
 namespace GainsLab.Models.DataManagement.Caching;
 
+/// <summary>
+/// Provides a central registry for component caches keyed by <see cref="EntityType"/>.
+/// </summary>
 public class ComponentCacheRegistry : IComponentCacheRegistry
 {
 
     private readonly ILogger _logger;
     private Dictionary<EntityType, IComponentCacheBase> _caches = new ();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ComponentCacheRegistry"/> class.
+    /// </summary>
+    /// <param name="logger">Logger used to emit cache diagnostics.</param>
     public ComponentCacheRegistry(ILogger logger)
     {
         _logger = logger;
     }
 
+    /// <inheritdoc />
     public async Task InitializeAsync()
     {
         //create all components cache
@@ -37,26 +45,37 @@ public class ComponentCacheRegistry : IComponentCacheRegistry
         
     }
 
+    /// <summary>
+    /// Attempts to retrieve a strongly-typed cache registered for the specified entity.
+    /// </summary>
     public bool TryGetCache<TId, TEntity>(out IComponentCache<TId, TEntity> componentCache)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Attempts to resolve a single component from cache.
+    /// </summary>
     public bool TryGetComponent<TId, TEntity>(TId id, out TEntity? component)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Attempts to resolve multiple components from cache.
+    /// </summary>
     public bool TryGetComponents<TId, TEntity>(List<TId> ids, out List<TEntity>? components)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public void Store<TEntity>(TEntity component)  where TEntity :IEntity
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public void StoreAll<TEntity>(IReadOnlyList<TEntity> components) where TEntity : IEntity
     {
       //todo
@@ -73,21 +92,27 @@ public class ComponentCacheRegistry : IComponentCacheRegistry
         
     }
     
+    /// <inheritdoc />
     public void Remove<TId, TEntity>(TId id)
     {
         throw new NotImplementedException();
     }
 
+    /// <summary>
+    /// Removes a batch of components from cache via their identifiers.
+    /// </summary>
     public void RemoveAll<TId, TEntity>(List<TId> ids)
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public void ClearCache<TEntity>() where TEntity : IEntity
     {
         throw new NotImplementedException();
     }
 
+    /// <inheritdoc />
     public void ClearAllCaches()
     {
         throw new NotImplementedException();

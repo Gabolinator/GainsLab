@@ -16,6 +16,10 @@ public class AppHost
 {
     
     private IServiceProvider _serviceProvider;
+
+    /// <summary>
+    /// Gets the configured service provider after <see cref="RunAsync"/> completes.
+    /// </summary>
     public IServiceProvider ServiceProvider => _serviceProvider;
   
     /// <summary>

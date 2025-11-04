@@ -7,21 +7,38 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB.Handlers;
 
+/// <summary>
+/// Base EF Core handler that implements common add/update logic for DTO repositories.
+/// </summary>
 public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, IDto
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="IdbContextHandler{TDto}"/> class.
+    /// </summary>
+    /// <param name="context">EF Core context used to interact with the underlying database.</param>
+    /// <param name="logger">Logger used for diagnostic output.</param>
     protected IdbContextHandler(DbContext context, ILogger logger)
     {
         _context = context;
         _logger = logger;
     }
 
+    /// <summary>
+    /// Gets the <see cref="DbSet{TEntity}"/> used to query and persist DTOs.
+    /// </summary>
     public abstract DbSet<TDto> DBSet { get; }
     
     protected DbContext _context;
     protected readonly ILogger _logger;
 
+    /// <summary>
+    /// Attempts to load an existing DTO by GUID.
+    /// </summary>
     public abstract Task<Result<TDto>> TryGetExistingDTO(Guid guid);
    
+    /// <summary>
+    /// Attempts to load an existing DTO by integer identifier.
+    /// </summary>
     public async Task<Result<TDto>> TryGetExistingDTO(int id)
     {
         var existing = await DBSet
@@ -31,6 +48,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
     }
 
 
+    /// <inheritdoc />
     public async Task<Result<IDto>> AddAsync(IDto dto, bool save, CancellationToken ct = default)
     {
         if (dto is not TDto tdto)
@@ -53,6 +71,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
         }
     }
 
+    /// <inheritdoc />
     public async Task<Result<IDto>> UpdateAsync(IDto dto, bool save, CancellationToken ct = default)
     {
         if (dto is not TDto tdto)
@@ -91,6 +110,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
     }
 
 
+    /// <inheritdoc />
     public async Task<Result<IReadOnlyList<IDto>>> AddOrUpdateAsync(
         IReadOnlyList<IDto> dtos, bool save = true, CancellationToken ct = default)
     {
@@ -149,6 +169,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
         }
     }
 
+    /// <inheritdoc />
     public async Task<Result<IDto>> AddOrUpdateAsync(IDto dto, bool save, CancellationToken ct = default)
     {
         _logger.Log("DbContextHandler", $"Trying to add or update dto {dto.Iguid}");

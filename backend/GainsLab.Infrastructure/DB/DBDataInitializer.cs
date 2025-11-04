@@ -21,6 +21,7 @@ public class DBDataInitializer
     /// Initializes a new instance of the <see cref="DBDataInitializer"/> class.
     /// </summary>
     /// <param name="logger">Logger used to record the seeding workflow.</param>
+    /// <param name="clock">Clock used for timestamping seeded entities.</param>
     public DBDataInitializer(ILogger logger, IClock clock)
     {
         _logger = logger;

@@ -6,10 +6,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB.Context;
 
+/// <summary>
+/// SQLite-backed DbContext used by the desktop application for local persistence.
+/// </summary>
 public class GainLabSQLDBContext : DbContext
 {
     private readonly ILogger _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GainLabSQLDBContext"/> class.
+    /// </summary>
+    /// <param name="options">Entity Framework options configured for SQLite.</param>
+    /// <param name="logger">Logger used to emit diagnostic events.</param>
     public GainLabSQLDBContext(DbContextOptions<GainLabSQLDBContext> options, ILogger logger)
         : base(options)
     {
@@ -17,12 +25,25 @@ public class GainLabSQLDBContext : DbContext
         _logger.Log(nameof(GainLabSQLDBContext), "Service intanciated");
     }
 
+    /// <summary>
+    /// Gets the table that stores global synchronization state.
+    /// </summary>
     public DbSet<SyncState> SyncStates => Set<SyncState>();
+
     DbSet<OutboxChangeDto> OutboxChanges => Set<OutboxChangeDto>();
+
+    /// <summary>
+    /// Gets the table that stores equipment records.
+    /// </summary>
     public DbSet<EquipmentDTO> Equipments => Set<EquipmentDTO>();
+
+    /// <summary>
+    /// Gets the table that stores descriptor records.
+    /// </summary>
     public DbSet<DescriptorDTO> Descriptors => Set<DescriptorDTO>();
 
 
+    /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -33,6 +54,9 @@ public class GainLabSQLDBContext : DbContext
         CreateDescriptorTableModel_Sqlite(modelBuilder);
     }
 
+    /// <summary>
+    /// Configures the schema for the sync state table when using SQLite.
+    /// </summary>
     private void CreateSyncStateTable_Sqlite(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<SyncState>(b =>
@@ -43,6 +67,9 @@ public class GainLabSQLDBContext : DbContext
         });
     }
 
+    /// <summary>
+    /// Configures the schema for the outbox table when using SQLite.
+    /// </summary>
     private void CreateOutBoxTable_Sqlite(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<OutboxChangeDto>(b =>                                                                                                                        
@@ -62,6 +89,9 @@ public class GainLabSQLDBContext : DbContext
         });                                                
     }
 
+    /// <summary>
+    /// Configures the schema for the equipment table when using SQLite.
+    /// </summary>
     private void CreateEquipmentTableModel_Sqlite(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<EquipmentDTO>(e =>
@@ -98,6 +128,9 @@ public class GainLabSQLDBContext : DbContext
         });
     }
 
+    /// <summary>
+    /// Configures the schema for the descriptor table when using SQLite.
+    /// </summary>
     private void CreateDescriptorTableModel_Sqlite(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<DescriptorDTO>(d =>

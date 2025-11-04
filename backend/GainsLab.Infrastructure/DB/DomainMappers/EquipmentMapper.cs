@@ -9,8 +9,14 @@ using GainsLab.Models.DataManagement.DB.Model.DomainMappers;
 
 namespace GainsLab.Infrastructure.DB.DomainMappers;
 
+ /// <summary>
+ /// Converts equipment domain entities to and from DTOs used by the data layer.
+ /// </summary>
  public static class EquipmentMapper
  {
+     /// <summary>
+     /// Maps an equipment entity into a DTO for persistence.
+     /// </summary>
      public static EquipmentDTO ToDTO(EquipmentEntity domain)
      {
          //if id is negative - likely not yet inserted in db, dont keep id 
@@ -18,6 +24,9 @@ namespace GainsLab.Infrastructure.DB.DomainMappers;
          return domain.DbId <= 0 ? ToInsertDTO(domain) : ToUpdateDTO(domain);
      }
      
+     /// <summary>
+     /// Builds a DTO configured for insertion of a new equipment record.
+     /// </summary>
      public static EquipmentDTO ToInsertDTO(EquipmentEntity domain)
      {
 
@@ -42,6 +51,9 @@ namespace GainsLab.Infrastructure.DB.DomainMappers;
              
          };
      }
+     /// <summary>
+     /// Builds a DTO configured to update an existing equipment record.
+     /// </summary>
      public static EquipmentDTO ToUpdateDTO(EquipmentEntity domain)
      {
          return new EquipmentDTO
@@ -62,6 +74,9 @@ namespace GainsLab.Infrastructure.DB.DomainMappers;
          };
      }
 
+     /// <summary>
+     /// Converts an equipment DTO into its corresponding domain entity.
+     /// </summary>
      public static EquipmentEntity? ToDomain(EquipmentDTO? dto)
      {
          if (dto == null) return null;

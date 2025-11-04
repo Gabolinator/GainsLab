@@ -10,16 +10,26 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB.Handlers;
 
+/// <summary>
+/// Database handler that manages equipment DTO persistence inside the local SQLite database.
+/// </summary>
 public class EquipmentIdbHandler : IdbContextHandler<EquipmentDTO>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="EquipmentIdbHandler"/> class.
+    /// </summary>
+    /// <param name="context">EF Core context used for data access.</param>
+    /// <param name="logger">Logger used for diagnostic output.</param>
     public EquipmentIdbHandler(GainLabSQLDBContext context, ILogger logger) : base(context, logger)
     {
      
     }
 
+    /// <inheritdoc />
     public override DbSet<EquipmentDTO> DBSet 
         => ((GainLabSQLDBContext)_context).Equipments;
 
+    /// <inheritdoc />
     public override async Task<Result<EquipmentDTO>> TryGetExistingDTO(Guid guid)
     {
         try
@@ -42,6 +52,7 @@ public class EquipmentIdbHandler : IdbContextHandler<EquipmentDTO>
         }
     }
 
+    /// <inheritdoc />
     public override async Task<IReadOnlyList<IEntity>> GetAllEntityAsync(CancellationToken ct = default)
     {
         var dtos = await DBSet

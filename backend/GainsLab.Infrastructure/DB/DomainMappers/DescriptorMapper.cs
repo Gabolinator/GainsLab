@@ -9,8 +9,16 @@ using GainsLab.Models.DataManagement.DB.Model.DTOs;
 
 namespace GainsLab.Models.DataManagement.DB.Model.DomainMappers;
 
+/// <summary>
+/// Converts descriptor aggregates to and from their DTO representations.
+/// </summary>
 public static class DescriptorMapper
 {
+    /// <summary>
+    /// Projects a descriptor domain entity into a DTO suitable for persistence.
+    /// </summary>
+    /// <param name="domain">Descriptor entity to convert.</param>
+    /// <returns>A DTO containing descriptor fields.</returns>
     public static DescriptorDTO ToDTO(this BaseDescriptorEntity domain)
     {
         return new DescriptorDTO
@@ -31,6 +39,11 @@ public static class DescriptorMapper
         };
     }
 
+    /// <summary>
+    /// Projects a descriptor DTO into the corresponding domain entity.
+    /// </summary>
+    /// <param name="dto">DTO retrieved from storage.</param>
+    /// <returns>The reconstructed domain entity or <c>null</c> when the DTO is absent.</returns>
     public static BaseDescriptorEntity? ToDomain(this DescriptorDTO? dto)
     {
         if (dto == null)

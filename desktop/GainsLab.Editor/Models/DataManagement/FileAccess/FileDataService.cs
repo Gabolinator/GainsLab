@@ -14,10 +14,17 @@ using GainsLab.Models.Core.Interfaces;
 
 namespace GainsLab.Models.DataManagement.FileAccess;
 
+/// <summary>
+/// File-based persistence service that will serialize components to JSON for offline storage.
+/// </summary>
 public class JsonFilesDataService  : IFileDataService
 {
     private readonly ILogger _logger;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="JsonFilesDataService"/> class.
+    /// </summary>
+    /// <param name="logger">Logger used to emit diagnostic messages while reading or writing files.</param>
     public JsonFilesDataService(ILogger logger)
     {
         _logger = logger;
