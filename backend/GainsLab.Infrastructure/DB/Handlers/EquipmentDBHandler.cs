@@ -24,19 +24,22 @@ public class EquipmentIdbHandler : IdbContextHandler<EquipmentDTO>
     {
         try
         {
-            var existing = await DBSet.FirstOrDefaultAsync(e => e.GUID == guid);
+            var existing = await DBSet
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.GUID == guid);
+
             var success = existing != null;
+            _logger.Log("DbContextHandler", $"{guid} exists in db: {success}");
 
-            _logger.Log("DbContextHandler",$" {guid} exist in db: {success}");
-
-            return success ? Result<EquipmentDTO>.SuccessResult(existing!) : Result<EquipmentDTO>.Failure("No existing dto found");
+            return success
+                ? Result<EquipmentDTO>.SuccessResult(existing!)
+                : Result<EquipmentDTO>.Failure("No existing dto found");
         }
         catch (Exception ex)
         {
             _logger.LogError("DbContextHandler", $"Exception in TryGetExistingDTO: {ex.Message}");
-            throw;
-        } 
-
+            return Result<EquipmentDTO>.Failure($"Error getting DTO: {ex.GetBaseException().Message}");
+        }
     }
 
     public override async Task<IReadOnlyList<IEntity>> GetAllEntityAsync(CancellationToken ct = default)

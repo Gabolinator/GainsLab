@@ -38,7 +38,7 @@ public interface ILocalRepository
     /// Saves the provided file payloads to the local store in bulk.
     /// </summary>
     Task<Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>> BatchSaveComponentsAsync(
-        Dictionary<EntityType, IReadOnlyList<IEntity>> fileData);
+        Dictionary<EntityType, IReadOnlyList<IEntity>> entities, CancellationToken ct = default);
 
     /// <summary>
     /// Retrieves all components grouped by entity type.

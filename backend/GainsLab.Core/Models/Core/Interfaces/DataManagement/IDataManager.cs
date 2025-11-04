@@ -1,4 +1,5 @@
-﻿using GainsLab.Core.Models.Core.Results;
+﻿using GainsLab.Core.Models.Core.Interfaces.Entity;
+using GainsLab.Core.Models.Core.Results;
 
 namespace GainsLab.Core.Models.Core.Interfaces.DataManagement;
 
@@ -12,16 +13,16 @@ public interface IDataManager
 
     Task<Result> LoadAndCacheDataAsync();
     
-    Task<Result<TEntity>> TryGetEntityAsync<TId, TEntity>(TId id);
-
-    Task<ResultList<TEntity>> TryGetComponentsAsync<TId, TEntity>(IEnumerable<TId> ids);
+    // Task<Result<TEntity>> TryGetEntityAsync<TId, TEntity>(TId id);
+    //
+    // Task<Result<IReadOnlyList<TEntity>>> TryGetComponentsAsync<TId, TEntity>(IEnumerable<TId> ids);
 
    
-    Task<Result> SaveComponentAsync<TEntity>(TEntity component) ;
-    Task<ResultList> SaveComponentsAsync<TEntity>(IEnumerable<TEntity> components);
+    Task<Result> SaveComponentAsync<TEntity>(TEntity component, bool syncUp = false) where TEntity : IEntity ;
+    Task<Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>> SaveComponentsAsync<TEntity>(IEnumerable<TEntity> components, bool syncUp = false) where TEntity : IEntity;
 
-    Task<ResultList<TEntity>> TryResolveComponentsAsync<TId,TEntity>(List<TId> toResolve);
-    Task<Result<TEntity>> TryResolveComponentAsync<TId,TEntity>(TId unresolved);
+   // Task<Result<IReadOnlyList<TEntity>>> TryResolveComponentsAsync<TId,TEntity>(List<TId> toResolve);
+   // Task<Result<TEntity>> TryResolveComponentAsync<TId,TEntity>(TId unresolved);
     Task<Result> DeleteComponentAsync<TEntity>(TEntity entity);
 
     Task<Result> SaveAllDataToFilesAsync();

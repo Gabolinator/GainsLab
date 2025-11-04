@@ -31,101 +31,182 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
     }
 
 
-    public async Task<Result<IDto>> AddAsync(TDto dto)
+    public async Task<Result<IDto>> AddAsync(IDto dto, bool save, CancellationToken ct = default)
     {
+        if (dto is not TDto tdto)
+            return Result<IDto>.Failure("Invalid Dto type");
+
         try
         {
-            await DBSet.AddAsync(dto);
-            await _context.SaveChangesAsync();
-            await _context.Entry(dto).ReloadAsync();
-            _logger.Log("DbContextHandler", $"After SaveChanges: {dto.Iid}");
-            _logger.Log("DbContextHandler", $"Entity State: {_context.Entry(dto).State}");
-            _logger.Log("DbContextHandler",$"Added {dto.Iguid} to db with id {dto.Iid}");
-            if(dto.Iid <=0)  _logger.LogWarning("DbContextHandler",$"Added negative id to db : {dto.Iguid} with id {dto.Iid}");
-            return Result<IDto>.SuccessResult(dto);
+            // Optionally stamp server fields here if needed
+            DBSet.Add(tdto); // tracked as Added
 
+            if (save)
+                await _context.SaveChangesAsync(ct);
+
+            return Result<IDto>.SuccessResult(tdto);
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            _logger.LogError("DbContextHandler", $"Failed to Insert DTO {dto.Iguid}: {e.Message}");
-            return Result<IDto>.Failure($"Database error while inserting : {e.Message}");
+            _logger.LogError("DbContextHandler", $"Add failed for {dto.Iguid}: {ex.GetBaseException().Message}");
+            return Result<IDto>.Failure(ex.GetBaseException().Message);
         }
-        
-      
     }
 
-    public async Task<Result<IDto>> UpdateAsync(TDto dto)
+    public async Task<Result<IDto>> UpdateAsync(IDto dto, bool save, CancellationToken ct = default)
     {
+        if (dto is not TDto tdto)
+            return Result<IDto>.Failure("Invalid Dto type");
+
         try
         {
-            DBSet.Update(dto);
-            await _context.SaveChangesAsync();
-            _logger.Log("DbContextHandler",$"Updated {dto.Iguid} in db");
-            if(dto.Iid <=0)  _logger.LogWarning("DbContextHandler",$"Updated negative id to db : {dto.Iguid} with id {dto.Iid}");
-            return Result<IDto>.SuccessResult(dto);
+            // Ensure we’re not double-tracking the same key
+            var local = await DBSet.AsNoTracking().FirstOrDefaultAsync(x => x.Iguid == tdto.Iguid, ct);
+            if (local is null)
+                return Result<IDto>.Failure("DTO to update not found");
+
+            // Attach and mark modified (full replace pattern)
+            _context.Attach(tdto);
+            _context.Entry(tdto).State = EntityState.Modified;
+
+            // If you want partial updates instead (safer), copy fields:
+            // _context.Attach(localEntity);
+            // localEntity.Name = tdto.Name; ... then Save (state stays Unchanged, EF detects changed members)
+
+            if (save)
+                await _context.SaveChangesAsync(ct);
+
+            return Result<IDto>.SuccessResult(tdto);
         }
-        catch (Exception e)
+        catch (DbUpdateConcurrencyException cex)
         {
-            _logger.LogError("DbContextHandler", $"Failed to update DTO {dto.Iguid}: {e.Message}");
-            return Result<IDto>.Failure($"Database error while updating: {e.Message}");
+            _logger.LogError("DbContextHandler", $"Concurrency on update {dto.Iguid}: {cex.GetBaseException().Message}");
+            return Result<IDto>.Failure("Concurrency conflict");
         }
-      
+        catch (Exception ex)
+        {
+            _logger.LogError("DbContextHandler", $"Update failed for {dto.Iguid}: {ex.GetBaseException().Message}");
+            return Result<IDto>.Failure(ex.GetBaseException().Message);
+        }
     }
 
 
-    public async Task<Result<IDto>> AddOrUpdateAsync(IDto dto)
+    public async Task<Result<IReadOnlyList<IDto>>> AddOrUpdateAsync(
+        IReadOnlyList<IDto> dtos, bool save = true, CancellationToken ct = default)
     {
-        _logger.Log("DbContextHandler",$"Trying to add or update dto {dto.Iguid}");
+        if (dtos is null || dtos.Count == 0)
+            return Result<IReadOnlyList<IDto>>.Failure("No dtos");
 
-        
+        var saved = new List<IDto>(dtos.Count);
+
+        // Only create a transaction when we intend to save
+        await using var tx = save ? await _context.Database.BeginTransactionAsync(ct) : null;
+
+        // Speed up large batches
+        var originalAutoDetect = _context.ChangeTracker.AutoDetectChangesEnabled;
+        _context.ChangeTracker.AutoDetectChangesEnabled = false;
+
+        try
+        {
+            foreach (var dto in dtos)
+            {
+                ct.ThrowIfCancellationRequested();
+                
+                var r = await AddOrUpdateAsync(dto, save: false, ct);
+                if (!r.Success || r.Value is null)
+                {
+                    // Fail fast -> rollback whole batch for atomicity
+                    var reason = r.ErrorMessage ?? "Unknown error";
+                    return Result<IReadOnlyList<IDto>>.Failure($"Failed on DTO {dto.GetType().Name}: {reason}");
+                }
+
+                saved.Add(r.Value);
+            }
+
+            if (save)
+            {
+                // run a final detect & persist once
+                _context.ChangeTracker.DetectChanges();
+                await  _context.SaveChangesAsync(ct);
+                await tx!.CommitAsync(ct);
+            }
+
+            return Result<IReadOnlyList<IDto>>.SuccessResult(saved);
+        }
+        catch (OperationCanceledException)
+        {
+            if (save && tx is not null) await tx.RollbackAsync(CancellationToken.None);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            if (save && tx is not null) await tx.RollbackAsync(CancellationToken.None);
+            return Result<IReadOnlyList<IDto>>.Failure($"Batch add/update failed: {ex.GetBaseException().Message}");
+        }
+        finally
+        {
+            _context.ChangeTracker.AutoDetectChangesEnabled = originalAutoDetect;
+        }
+    }
+
+    public async Task<Result<IDto>> AddOrUpdateAsync(IDto dto, bool save, CancellationToken ct = default)
+    {
+        _logger.Log("DbContextHandler", $"Trying to add or update dto {dto.Iguid}");
+
         if (dto is not TDto tdto)
         {
-            _logger.LogWarning("DbContextHandler",$"Cant add or update dto {dto.Iguid} - wrong type");
+            _logger.LogWarning("DbContextHandler", $"Cant add or update dto {dto.Iguid} - wrong type");
             return Result<IDto>.Failure("Invalid Dto type");
         }
 
-        var result =  await TryGetExistingDTO(tdto.Iguid);
-
-        if (result.Success)
+    
+        var existingResult = await TryGetExistingDTO(tdto.Iguid);
+        if (existingResult.Success && existingResult.Value is TDto existing)
         {
-            var existingDto = result.Value; 
-            
-            //we need to update the dto 
-            if(NeedUpdate(existingDto , tdto)) return await UpdateAsync(tdto);
-            
-            //we dont need to update it 
-            _logger.Log("DbContextHandler",$"Dont need to Update dto {dto.Iguid} - already up to date");
-            
-            return Result<IDto>.SuccessResult(existingDto!);
+            if (!NeedUpdate(existing, tdto))
+            {
+                _logger.Log("DbContextHandler", $"No update needed for {dto.Iguid}");
+                return Result<IDto>.SuccessResult(existing);
+            }
+
+            return await UpdateAsync(tdto, save, ct);
         }
-        
-        return await AddAsync(tdto);
-        
-       
+
+        // Not found, add
+        return await AddAsync(tdto, save, ct);
     }
 
-    private bool NeedUpdate(TDto? existingDto, TDto newDto)
+    /// <summary>
+    /// Return true if 'incoming' should overwrite 'existing'.
+    /// Prefer server-authoritative stamps like UpdatedAtUtc/UpdatedSeq.
+    /// </summary>
+    private bool NeedUpdate(TDto existingDto, TDto incomingDto)
     {
-        
-        
-        if (existingDto == null) return true;
+        // if versioned DTOs
+        if (existingDto is IVersionedDto ex && incomingDto is IVersionedDto inc)
+        {
+            // incoming is newer if timestamp is greater or same ts with higher seq
+            return inc.UpdatedAtUtc > ex.UpdatedAtUtc
+                   || (inc.UpdatedAtUtc == ex.UpdatedAtUtc && inc.UpdatedSeq > ex.UpdatedSeq);
+        }
 
-        
-        return existingDto.Equals(newDto);
+        //deep equality means no update
+        if (existingDto.Equals(incomingDto)) return false;
 
+        // Fallback: consider any difference as needing update
+        return true;
     }
+    // public async Task<Result<IDto>> AddAsync(IDto dto, bool save,CancellationToken ct = default)
+    // {
+    //     if (dto is not TDto tdto) return Result<IDto>.Failure("Invalid Dto type");
+    //     return await AddAsync(tdto, save);
+    // }
 
-    public async Task<Result<IDto>> AddAsync(IDto dto)
-    {
-        if (dto is not TDto tdto) return Result<IDto>.Failure("Invalid Dto type");
-        return await AddAsync(tdto);
-    }
-
-    public async Task<Result<IDto>> UpdateAsync(IDto dto)
-    {
-        if (dto is not TDto tdto) return Result<IDto>.Failure("Invalid Dto type");;
-       return await UpdateAsync(tdto);
-    }
+    // public async Task<Result<IDto>> UpdateAsync(IDto dto, bool save, CancellationToken ct = default)
+    // {
+    //     if (dto is not TDto tdto) return Result<IDto>.Failure("Invalid Dto type");;
+    //    return await UpdateAsync(tdto, save, ct);
+    // }
 
     public abstract Task<IReadOnlyList<IEntity>> GetAllEntityAsync(CancellationToken ct = default);
 

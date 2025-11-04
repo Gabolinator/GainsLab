@@ -1,11 +1,12 @@
 ﻿using System.Text.Json;
-using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.DTOs;
+using GainsLab.Infrastructure.DB.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using ILogger = GainsLab.Core.Models.Core.Utilities.Logging.ILogger;
 
-namespace GainsLab.Infrastructure.DB.Outbox;
+namespace GainsLab.Contracts.Outbox;
 
 public class OutboxInterceptor : SaveChangesInterceptor
 {

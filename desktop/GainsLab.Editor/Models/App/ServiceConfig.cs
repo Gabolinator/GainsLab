@@ -17,6 +17,8 @@ using GainsLab.Models.DataManagement.DB;
 using GainsLab.Models.DataManagement.FileAccess;
 using GainsLab.Models.Factory;
 using GainsLab.Models.DataManagement.Sync;
+using System.Net.Http;
+using GainsLab.Contracts.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -68,7 +70,7 @@ public static class ServiceConfig
         services.AddSingleton<IAppLifeCycle,AppLifecycleService>();
         services.AddSingleton<ILocalRepository, DataRepository>();
         
-        services.AddHttpClient<IRemoteProvider, HttpDataProvider>(client =>
+        void ConfigureSyncClient(HttpClient client)
         {
             var baseUrl = Environment.GetEnvironmentVariable("GAINS_SYNC_BASE_URL");
             if (string.IsNullOrWhiteSpace(baseUrl))
@@ -79,13 +81,23 @@ public static class ServiceConfig
             if (!baseUrl.EndsWith("/")) baseUrl += "/";
             client.BaseAddress = new Uri(baseUrl);
             client.Timeout = TimeSpan.FromSeconds(30);
-        });
+        }
+
+        services.AddHttpClient<IRemoteProvider, HttpDataProvider>(ConfigureSyncClient);
+        services.AddHttpClient("SyncApi", ConfigureSyncClient);
         
         services.AddSingleton<IComponentCacheRegistry, ComponentCacheRegistry>();
         services.AddSingleton<IFileDataService, JsonFilesDataService>();
         services.AddSingleton<IDataManager, DataManager>();
         services.AddSingleton<ISyncCursorStore, FileSyncCursorStore>();
-        services.AddSingleton<IOutboxDispatcher, OutboxDispatcher>();
+        services.AddSingleton<IOutboxDispatcher>(sp =>
+        {
+            var factory = sp.GetRequiredService<IDbContextFactory<GainLabSQLDBContext>>();
+            var logger = sp.GetRequiredService<ILogger>();
+            var httpFactory = sp.GetRequiredService<IHttpClientFactory>();
+            var client = httpFactory.CreateClient("SyncApi");
+            return new OutboxDispatcher(factory, logger, client);
+        });
         services.AddSingleton<ISyncEntityProcessor, EquipmentSyncProcessor>();
         services.AddSingleton<ISyncEntityProcessor, DescriptorSyncProcessor>();
         services.AddSingleton<ISyncOrchestrator, SyncOrchestrator>();

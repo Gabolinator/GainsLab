@@ -5,7 +5,7 @@ using GainsLab.Core.Models.Core.Interfaces.DB;
 
 namespace GainsLab.Infrastructure.DB.DTOs;
 
-public abstract class BaseDto : IDto
+public abstract class BaseDto : IDto, IVersionedDto
 {
     
     public abstract int Iid { get;} 

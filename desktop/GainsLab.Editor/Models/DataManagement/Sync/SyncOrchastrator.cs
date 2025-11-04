@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using GainsLab.Contracts.Outbox;
 using GainsLab.Contracts.SyncService;
 using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.DataManagement;

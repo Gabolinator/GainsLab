@@ -1,6 +1,6 @@
 ﻿using GainsLab.Core.Models.Core.Results;
 
-namespace GainsLab.Infrastructure.DB.Outbox;
+namespace GainsLab.Contracts.Outbox;
 
 public interface IOutboxDispatcher
 {

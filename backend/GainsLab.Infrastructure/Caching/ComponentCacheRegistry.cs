@@ -52,21 +52,27 @@ public class ComponentCacheRegistry : IComponentCacheRegistry
         throw new NotImplementedException();
     }
 
-    public void Store<TEntity>(TEntity component)
+    public void Store<TEntity>(TEntity component)  where TEntity :IEntity
     {
         throw new NotImplementedException();
     }
 
-    public void StoreAll<TEntity>(List<TEntity> components)
+    public void StoreAll<TEntity>(IReadOnlyList<TEntity> components) where TEntity : IEntity
     {
-        throw new NotImplementedException();
+      //todo
     }
 
-    public void StoreAll(EntityType type, List<IEntity> components)
+    
+    public void StoreAll(EntityType type, IReadOnlyList<IEntity> components)
     {
         //todo
     }
 
+    public void StoreAll(Dictionary<EntityType, IReadOnlyList<IEntity>> map)
+    {
+        
+    }
+    
     public void Remove<TId, TEntity>(TId id)
     {
         throw new NotImplementedException();
@@ -77,7 +83,7 @@ public class ComponentCacheRegistry : IComponentCacheRegistry
         throw new NotImplementedException();
     }
 
-    public void ClearCache<TEntity>()
+    public void ClearCache<TEntity>() where TEntity : IEntity
     {
         throw new NotImplementedException();
     }

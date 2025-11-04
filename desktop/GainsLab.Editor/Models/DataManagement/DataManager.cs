@@ -196,12 +196,12 @@ public class DataManager : IDataManager
         _logger.Log(nameof(DataManager), "Loading and caching data...");
         
         //Load from files
-        //not implemented
+        //todo - not implemented
         Dictionary<EntityType, IReadOnlyList<IEntity>> fileData = await _fileDataService.LoadAllComponentsAsync();
         
         
         //batch insert all new loaded data in database
-        //not implemented
+        //todo - not implemented
         var result =  await _local.BatchSaveComponentsAsync(fileData);
 
         var batchSaveSuccess = result.Success;
@@ -219,7 +219,7 @@ public class DataManager : IDataManager
 
 
         //Load from DB to cache
-        //not implemented
+        //todo - not implemented
         var dataFromDB = await _local.GetAllComponentsAsync();
         
         var fromDBSuccess = dataFromDB.Success;
@@ -229,7 +229,8 @@ public class DataManager : IDataManager
             
         }
 
-        else CacheAllData(dataFromDB.Value);
+        //cache all
+        else  _cache.StoreAll(dataFromDB.Value);
 
 
         bool allFailed = !fromDBSuccess && !batchSaveSuccess;
@@ -237,124 +238,122 @@ public class DataManager : IDataManager
         return !allFailed ? Result.SuccessResult() : Result.Failure("Loading and Retreiving datafrom database failed");
 
     }
-
+    
     /// <summary>
-    /// Attempts to resolve a single component by identifier using cache, local storage, and remote fallbacks.
+    /// Persists a single component locally, primes the cache, and optionally dispatches the outbox upstream.
     /// </summary>
-    public Task<Result<TEntity>> TryGetEntityAsync<TId, TEntity>(TId id)
+    /// <param name="component">The component to store in the local repository.</param>
+    /// <param name="syncUp">When true, triggers an outbox dispatch after the local save succeeds.</param>
+    public async Task<Result> SaveComponentAsync<TEntity>(TEntity component, bool syncUp = false) where TEntity : IEntity
     {
-        throw new NotImplementedException();
+        if (component is null) throw new ArgumentNullException(nameof(component));
+
+        var saveResult = await _local.SaveComponentAsync(component);
+        if (!saveResult.Success || saveResult.Value is null)
+        {
+            var message = saveResult.GetErrorMessage() ?? "Failed to save component locally.";
+            _logger.LogError(nameof(DataManager), message);
+            return Result.Failure(message);
+        }
+
+        _cache.Store(saveResult.Value);
+
+        if (!syncUp)
+            return Result.SuccessResult();
+
+        var pushResult = await _syncOrchestrator.SyncUpAsync();
+        if (!pushResult.Success)
+        {
+            var message = pushResult.GetErrorMessage() ?? "Failed to push changes upstream.";
+            _logger.LogError(nameof(DataManager), message);
+            return Result.Failure(message);
+        }
+
+        return Result.SuccessResult();
     }
 
     /// <summary>
-    /// Attempts to resolve multiple components by identifier using cache, local storage, and remote fallbacks.
+    /// Persists a batch of components, updates caches, and optionally dispatches the outbox upstream.
     /// </summary>
-    public Task<ResultList<TEntity>> TryGetComponentsAsync<TId, TEntity>(IEnumerable<TId> ids)
+    /// <param name="components">The components to persist grouped by their entity type.</param>
+    /// <param name="syncUp">When true, dispatches pending outbox items after the batch completes.</param>
+    public async Task<Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>> SaveComponentsAsync<TEntity>(IEnumerable<TEntity> components, bool syncUp = false) where TEntity : IEntity
     {
-        throw new NotImplementedException();
+        if (components is null) throw new ArgumentNullException(nameof(components));
+
+        var grouped = components
+            .GroupBy(e => e.Type)
+            .ToDictionary(
+                g => g.Key,
+                g => (IReadOnlyList<IEntity>)g.Cast<IEntity>().ToList());
+
+        if (grouped.Count == 0)
+            return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure("No components to save.");
+
+        var saveResult = await _local.BatchSaveComponentsAsync(grouped);
+        if (!saveResult.Success || saveResult.Value is null)
+        {
+            var message = saveResult.GetErrorMessage() ?? "Failed to persist component batch.";
+            _logger.LogError(nameof(DataManager), message);
+            return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure(message);
+        }
+
+        _cache.StoreAll(saveResult.Value);
+
+        if (!syncUp)
+            return saveResult;
+
+        var pushResult = await _syncOrchestrator.SyncUpAsync();
+        if (!pushResult.Success)
+        {
+            var message = pushResult.GetErrorMessage() ?? "Failed to push batched changes upstream.";
+            _logger.LogError(nameof(DataManager), message);
+            return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure(message);
+        }
+
+        return saveResult;
     }
-
+ 
     /// <summary>
-    /// Persists a single component to the local data store and updates caches accordingly.
-    /// </summary>
-    public async Task<Result> SaveComponentAsync<TEntity>(TEntity component)
-    {
-       //check if component is valid 
-       if (component is not IEntity entity)
-       {
-           _logger.LogWarning(nameof(DataManager),"Component to save is not valid");
-           return Result.Failure("Invalid type");
-       }
-
-       var result = await _local.SaveComponentAsync(entity);
-       if (!result.Success)
-       {
-           return Result.Failure(result.GetErrorMessage());
-       }
-       
-       _cache.Store(entity);
-
-       return Result.SuccessResult();
-       //add it to local db
-       //if needs to be intercepted and synced up to backend
-       //then add it to cache
-    }
-
-    /// <summary>
-    /// Persists a batch of components to the local repository and returns the outcome for each entry.
-    /// </summary>
-    public Task<ResultList> SaveComponentsAsync<TEntity>(IEnumerable<TEntity> components)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// Attempts to resolve the supplied identifiers into fully materialized components.
-    /// </summary>
-    public Task<ResultList<TEntity>> TryResolveComponentsAsync<TId, TEntity>(List<TId> toResolve)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// Attempts to resolve a single unresolved component identifier.
-    /// </summary>
-    public Task<Result<TEntity>> TryResolveComponentAsync<TId, TEntity>(TId unresolved)
-    {
-        throw new NotImplementedException();
-    }
-
-    /// <summary>
-    /// Removes a component from the local store and cache surfaces.
+    /// Removes a component from the local store and cache surfaces. Currently returns failure until delete semantics are defined.
     /// </summary>
     public Task<Result> DeleteComponentAsync<TEntity>(TEntity entity)
     {
-        throw new NotImplementedException();
+        _logger.LogWarning(nameof(DataManager),
+            $"Delete requested for {typeof(TEntity).Name}, but delete semantics are not implemented.");
+        return Task.FromResult(Result.Failure("Delete operations are not implemented."));
     }
 
     /// <summary>
     /// Writes the current component set out to files on disk (e.g., for offline usage or backups).
     /// </summary>
-    public Task<Result> SaveAllDataToFilesAsync()
+    public async Task<Result> SaveAllDataToFilesAsync()
     {
-        throw new NotImplementedException();
-    }
+        if (string.IsNullOrWhiteSpace(fileDirectory))
+            return Result.Failure("Data manager has not been initialized.");
 
-    /// <summary>
-    /// Stores every successful component payload in the cache registry under its entity type.
-    /// </summary>
-    private void CacheAllData(Dictionary<EntityType, IReadOnlyList<IEntity>> data)
-    {
-        if (data.Count == 0)
+        var dataResult = await _local.GetAllComponentsAsync();
+        if (!dataResult.Success || dataResult.Value is null || dataResult.Value.Count == 0)
         {
-            _logger.LogWarning(nameof(DataManager),"No data to cache");
-            return;
+            var message = dataResult.GetErrorMessage() ?? "No data available to persist.";
+            _logger.LogWarning(nameof(DataManager), message);
+            return Result.Failure(message);
         }
-        
-      
 
-        foreach (var kvp in data)
+        var mutable = dataResult.Value.ToDictionary(
+            kvp => kvp.Key,
+            kvp => kvp.Value.ToList());
+
+        var writeResult = await _fileDataService.WriteAllComponentsAsync(mutable, fileDirectory, ".json");
+        if (!writeResult.Success)
         {
-            //filter the not successfull result out 
-            var  values = kvp.Value;
-            // if (!results.Success || !results.TryGetSuccessValues(_logger, out var values))
-            // {
-            //     _logger.LogWarning(nameof(DataManager),$"No valid components to cache found for {kvp.Key}");
-            //     continue;
-            // }
-
-            CacheComponents(kvp.Key,  values.ToList());
+            var message = writeResult.GetErrorMessage() ?? "Failed to write data to disk.";
+            _logger.LogError(nameof(DataManager), message);
+            return Result.Failure(message);
         }
+
+        return Result.SuccessResult();
     }
 
-    /// <summary>
-    /// Stores a typed component collection in the cache registry.
-    /// </summary>
-    private void CacheComponents(EntityType componentType, List<IEntity> components)
-    {
-        if(components == null || components.Count == 0) return;
-        
-        _cache.StoreAll(componentType, components);
-    }
-    
+   
 }
