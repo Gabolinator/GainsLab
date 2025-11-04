@@ -7,16 +7,27 @@ namespace GainsLab.Core.Models.Core.Utilities.Logging;
 /// </summary>
 public class GainsLabLogger : ILogger
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GainsLabLogger"/> class using the default name.
+    /// </summary>
     public GainsLabLogger()
     {
-        
     }
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GainsLabLogger"/> class with a custom name.
+    /// </summary>
+    /// <param name="name">The label displayed in logging output.</param>
     public GainsLabLogger(string name)
     {
         LoggerName = name;
     }
     
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GainsLabLogger"/> class with custom name and color.
+    /// </summary>
+    /// <param name="name">The label displayed in logging output.</param>
+    /// <param name="colorHeader">ANSI color code applied to the logger header.</param>
     public GainsLabLogger(string name, string colorHeader)
     {
         LoggerName = name;
@@ -24,8 +35,12 @@ public class GainsLabLogger : ILogger
     }
 
     private bool _enabled = true;
+    /// <inheritdoc />
     public bool Enabled => _enabled;
 
+    /// <summary>
+    /// Gets the display name of the logger.
+    /// </summary>
     public readonly string LoggerName = "Logger";
     
     private const string ColorReset = "\u001b[0m";
@@ -37,12 +52,14 @@ public class GainsLabLogger : ILogger
     private const string ColorErrorText = "\u001b[31m";   // Red
     private const string ColorErrorHeader = "\u001b[31m";   // Red
     
+    /// <inheritdoc />
     public void ToggleLogging(bool state)
     {
         Console.WriteLine($"{ColorHeader}[{LoggerName}] Toggled logging {state}");
         _enabled = state;
     }
 
+    /// <inheritdoc />
     public void Log(string message)
     {
         if (!Enabled) return;
@@ -50,6 +67,7 @@ public class GainsLabLogger : ILogger
         Console.WriteLine($"{ColorHeader}[{LoggerName}] {ColorInfo}{message}{ColorReset}");
     }
 
+    /// <inheritdoc />
     public void Log(string context, string message)
     {
         if (!Enabled) return;
@@ -57,6 +75,7 @@ public class GainsLabLogger : ILogger
         Console.WriteLine($"{ColorHeader}[{LoggerName}] - {ColorContext}[{context}] {ColorInfo}{message}{ColorReset}");
     }
 
+    /// <inheritdoc />
     public void LogWarning(string context, string message)
     {
         if (!Enabled) return;
@@ -64,6 +83,7 @@ public class GainsLabLogger : ILogger
         Console.WriteLine($"{ColorWarningHeader}[{LoggerName}]-WARNING - {ColorContext}[{context}] {ColorWarningText}{message}{ColorReset}");
     }
 
+    /// <inheritdoc />
     public void LogError(string context, string message)
     {
         if (!Enabled) return;

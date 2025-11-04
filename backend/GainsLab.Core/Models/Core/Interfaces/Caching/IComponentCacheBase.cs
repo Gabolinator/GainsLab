@@ -9,9 +9,13 @@ namespace GainsLab.Models.DataManagement.Caching.Interface;
 /// </summary>
 public interface IComponentCacheBase
 {
-        
+    /// <summary>
+    /// Clears all cached entries maintained by the current cache instance.
+    /// </summary>
     void Clear();
-        
+
+    /// <summary>
+    /// Gets the workout component type associated with items stored in this cache.
+    /// </summary>
     eWorkoutComponents ComponentType { get; }
-    
 }
