@@ -1,4 +1,5 @@
 ﻿using System.Text.Json;
+using GainsLab.Contracts.SyncService;
 using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Results;
 using GainsLab.Infrastructure.DB.Context;
@@ -20,6 +21,9 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
     /// <summary>
     /// Creates an outbox dispatcher that uses the supplied services to read pending changes and reach the API.
     /// </summary>
+    /// <param name="dbContextFactory">Factory used to create scoped database contexts.</param>
+    /// <param name="logger">Logger used for diagnostic output.</param>
+    /// <param name="httpClient">HTTP client configured to point at the sync API.</param>
     public OutboxDispatcher(
         IDbContextFactory<GainLabSQLDBContext> dbContextFactory,
         ILogger logger,
@@ -72,6 +76,8 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
     /// <summary>
     /// Builds HTTP push requests grouped by entity type from the pending outbox rows.
     /// </summary>
+    /// <param name="pending">The outbox records that still need to be dispatched.</param>
+    /// <param name="ct">Cancellation token propagated from the caller.</param>
     private async Task<IReadOnlyList<PushRequest>> BuildPushRequestsAsync(
         IReadOnlyList<OutboxChangeDto> pending,
         CancellationToken ct)
@@ -116,6 +122,8 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
     /// <summary>
     /// Issues the HTTP POST for a single push request and updates outbox flags based on the response.
     /// </summary>
+    /// <param name="request">The grouped payload to dispatch.</param>
+    /// <param name="ct">Cancellation token propagated from the caller.</param>
     private async Task DispatchRequestAsync(PushRequest request, CancellationToken ct)
     {
         try
@@ -157,6 +165,8 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
     /// <summary>
     /// Marks outbox rows as sent when the server successfully processes them.
     /// </summary>
+    /// <param name="items">The outbox items that were submitted.</param>
+    /// <param name="pushResult">Server response describing the outcome of each item.</param>
     private void MarkDispatched(IReadOnlyList<OutboxItem> items, PushResult pushResult)
     {
         var resultLookup = pushResult.Items.ToDictionary(i => i.Id, i => i);
@@ -190,6 +200,8 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
     /// <summary>
     /// Attempts to derive the <see cref="EntityType"/> from the serialized payload.
     /// </summary>
+    /// <param name="change">The outbox change containing the serialized payload.</param>
+    /// <param name="entityType">Populated with the resolved entity type when successful.</param>
     private bool TryResolveEntityType(OutboxChangeDto change, out EntityType entityType)
     {
         try

@@ -19,6 +19,8 @@ public class HttpDataProvider: IRemoteProvider
     /// <summary>
     /// Creates a provider that uses the supplied <see cref="HttpClient"/> (preconfigured via DI).
     /// </summary>
+    /// <param name="http">The HTTP client configured with the sync API base address.</param>
+    /// <param name="logger">Logger used to capture diagnostic information.</param>
     public HttpDataProvider(HttpClient http, Core.Models.Core.Utilities.Logging.ILogger logger)
     {
         _http = http;
@@ -51,6 +53,9 @@ public class HttpDataProvider: IRemoteProvider
     /// <summary>
     /// Invokes the descriptor sync endpoint and materializes a page of DTOs.
     /// </summary>
+    /// <param name="cursor">Cursor describing where to resume the descriptor stream.</param>
+    /// <param name="take">Maximum number of records to request.</param>
+    /// <param name="ct">Cancellation token propagated from the caller.</param>
     private async Task<ISyncPage<ISyncDto>> PullDescriptorPageAsync(ISyncCursor cursor, int take, CancellationToken ct)
     {
         var url = $"/sync/descriptor?ts={Uri.EscapeDataString(cursor.ITs.ToString("o"))}&seq={cursor.ISeq}&take={take}";
@@ -73,6 +78,9 @@ public class HttpDataProvider: IRemoteProvider
     /// <summary>
     /// Invokes the equipment sync endpoint and materializes a page of DTOs.
     /// </summary>
+    /// <param name="cursor">Cursor describing where to resume the equipment stream.</param>
+    /// <param name="take">Maximum number of records to request.</param>
+    /// <param name="ct">Cancellation token propagated from the caller.</param>
     public async Task<SyncPage<EquipmentSyncDto>> PullEquipmentPageAsync(
         ISyncCursor cursor, int take = 200, CancellationToken ct = default)
     {
@@ -90,4 +98,3 @@ public class HttpDataProvider: IRemoteProvider
     }
     
 }
-

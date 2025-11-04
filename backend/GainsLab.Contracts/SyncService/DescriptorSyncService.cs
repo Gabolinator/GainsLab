@@ -28,6 +28,9 @@ public class DescriptorSyncService : ISyncService<DescriptorSyncDto>
     /// <inheritdoc />
     public EntityType EntityType => EntityType.Descriptor;
 
+    /// <summary>
+    /// Gets the DTO type handled by this service.
+    /// </summary>
     public Type DtoType => typeof(DescriptorSyncDto);
 
     /// <inheritdoc />
@@ -74,6 +77,12 @@ public class DescriptorSyncService : ISyncService<DescriptorSyncDto>
         return new SyncPage<DescriptorSyncDto>(serverTime, next, items);
     }
 
+    /// <summary>
+    /// Processes descriptor mutations pushed from clients.
+    /// </summary>
+    /// <param name="items">Incoming descriptor payloads.</param>
+    /// <param name="ct">Cancellation token propagated from the caller.</param>
+    /// <returns>A push result describing the outcome for each item.</returns>
     public Task<PushResult> PushAsync(IEnumerable<DescriptorSyncDto> items, CancellationToken ct)
     {
         throw new NotImplementedException();

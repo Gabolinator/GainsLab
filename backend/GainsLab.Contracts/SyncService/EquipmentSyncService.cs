@@ -18,6 +18,9 @@ public class EquipmentSyncService : ISyncService<EquipmentSyncDto>
     private readonly GainsLab.Core.Models.Core.Utilities.Logging.ILogger _log;
     private const string SyncActor = "sync";
     
+    /// <summary>
+    /// Gets the DTO type handled by this service.
+    /// </summary>
     Type ISyncService.DtoType => typeof(EquipmentSyncDto);
     
     /// <summary>
@@ -68,6 +71,12 @@ public class EquipmentSyncService : ISyncService<EquipmentSyncDto>
         return new SyncPage<EquipmentSyncDto>(serverTime, next, items);
     }
 
+    /// <summary>
+    /// Processes equipment mutations pushed from clients.
+    /// </summary>
+    /// <param name="items">Incoming equipment payloads.</param>
+    /// <param name="ct">Cancellation token propagated from the caller.</param>
+    /// <returns>A push result describing how each item was handled.</returns>
     public async Task<PushResult> PushAsync(IEnumerable<EquipmentSyncDto> items, CancellationToken ct)
     {
         var now = DateTimeOffset.UtcNow;
@@ -184,6 +193,10 @@ public class EquipmentSyncService : ISyncService<EquipmentSyncDto>
         }
     }
     
+    /// <summary>
+    /// Obtains the next sequence number used to order equipment updates.
+    /// </summary>
+    /// <param name="ct">Cancellation token propagated from the caller.</param>
     private async Task<long> NextUpdateSeqAsync(CancellationToken ct)
     {
         // Postgres: SELECT nextval('update_seq');

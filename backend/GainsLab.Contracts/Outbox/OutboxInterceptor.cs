@@ -8,18 +8,25 @@ using ILogger = GainsLab.Core.Models.Core.Utilities.Logging.ILogger;
 
 namespace GainsLab.Contracts.Outbox;
 
+/// <summary>
+/// SaveChanges interceptor that captures entity mutations and persists outbox entries.
+/// </summary>
 public class OutboxInterceptor : SaveChangesInterceptor
 {
-    
-      private readonly ILogger _logger;
+    private readonly ILogger _logger;
 
     // Track active save cycles per DbContext instance
     private readonly HashSet<Guid> _activeSaves = new();
     // Dedup per *save*, not per interceptor lifetime
     private readonly Dictionary<Guid, HashSet<(string, Guid, int)>> _saveEmitted = new();
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="OutboxInterceptor"/> class.
+    /// </summary>
+    /// <param name="logger">Logger used to emit diagnostic details.</param>
     public OutboxInterceptor(ILogger logger) => _logger = logger;
 
+    /// <inheritdoc />
     public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
@@ -87,12 +94,14 @@ public class OutboxInterceptor : SaveChangesInterceptor
         return base.SavingChangesAsync(eventData, result, ct);
     }
 
+    /// <inheritdoc />
     public override ValueTask<int> SavedChangesAsync(SaveChangesCompletedEventData eventData, int result, CancellationToken ct = default)
     {
         ClearPerSaveState(eventData);
         return base.SavedChangesAsync(eventData, result, ct);
     }
 
+    /// <inheritdoc />
     public override Task SaveChangesFailedAsync(
         DbContextErrorEventData eventData,
         CancellationToken cancellationToken = default)
@@ -106,6 +115,9 @@ public class OutboxInterceptor : SaveChangesInterceptor
         return Task.CompletedTask;
     }
 
+    /// <summary>
+    /// Clears interception state associated with the given EF Core context.
+    /// </summary>
     private void ClearPerSaveState(DbContextEventData eventData)
     {
         if (eventData.Context is null) return;

@@ -47,8 +47,13 @@ public class SyncController : ControllerBase
         return Ok(page);
     }
     
-    
-    
+    /// <summary>
+    /// Accepts a batch of synchronization payloads and forwards them to the appropriate service.
+    /// </summary>
+    /// <param name="entity">Name of the entity type being pushed.</param>
+    /// <param name="body">Envelope containing the client-submitted payloads.</param>
+    /// <param name="ct">Cancellation token propagated from the caller.</param>
+    /// <returns>HTTP 200 with the push result when successful, or an error status otherwise.</returns>
     [HttpPost("{entity}")]
     public async Task<IActionResult> Push(
         string entity,
