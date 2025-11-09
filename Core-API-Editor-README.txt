@@ -85,6 +85,12 @@ Data Flow Summary
 4. **ILocalRepository** persists data locally and tracks `SyncState` so seeds/deltas can resume.
 5. **DataManager** waits for seeding, loads persisted data, populates caches, and exposes CRUD helpers to the Avalonia UI.
 
+Ownership & Conflict Prevention
+-------------------------------
+- Every synced entity now includes a `DataAuthority` flag (`Upstream`, `Downstream`, `Bidirectional`). Servers can reject pushes originating from tiers that do not own the row, while the editor can visually lock upstream-owned entries.
+- Server-side sync services compare incoming timestamps (`UpdatedAtUtc`/`UpdatedSeq`) and enforce `DataAuthority` before inserting or updating rows. Inserts default to `Bidirectional` unless explicitly changed.
+- The outbox interceptor normalizes payloads (ignoring columns such as `UpdatedAtUtc`, `UpdatedSeq`, `RowVersion`, `Version`, and `Iid`) to avoid queuing redundant rows when only server-stamped metadata changes.
+
 
 Development Tips
 ----------------

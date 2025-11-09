@@ -9,6 +9,7 @@ that power the GainsLab editor and API. The project targets .NET 9 and exposes t
 - Audit/value objects (`Models/Core/CreationInfo`, `Models/Core/Descriptor`).
 - Service contracts used across the solution (`Models/Core/Interfaces`).
 - Result helpers, logging, and singleton utilities (`Models/Core/Results`, `Models/Core/Utilities`).
+- `DataAuthority`, the enum that now accompanies every synced DTO to describe whether rows are editable upstream, downstream, or both.
 
 Other projects (editor, infrastructure, contracts) reference this library to share
 domain definitions and infrastructure abstractions.
@@ -40,7 +41,8 @@ Guidance for Contributors
 1. Keep XML documentation up to date when introducing or changing public APIs.
 2. Prefer immutable records for DTOs and value types; use factories for aggregate creation.
 3. When extending the domain, add identifiers/descriptors alongside aggregates to maintain parity.
-4. Avoid referencing platform-specific dependencies—this project should remain portable.
+4. Update `DataAuthority` or related contracts whenever new sync ownership rules are introduced.
+5. Avoid referencing platform-specific dependencies—this project should remain portable.
 
 Prerequisites
 -------------
