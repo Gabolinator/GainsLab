@@ -3,9 +3,9 @@ using GainsLab.Core.Models.Core.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Identifier;
 using GainsLab.Core.Models.Core.Utilities;
+using GainsLab.Infrastructure.DB.DTOs;
 using GainsLab.Models.Core;
 using GainsLab.Models.Core.Descriptor;
-using GainsLab.Models.DataManagement.DB.Model.DTOs;
 
 namespace GainsLab.Models.DataManagement.DB.Model.DomainMappers;
 

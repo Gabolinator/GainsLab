@@ -64,13 +64,13 @@ public class HttpDataProvider: IRemoteProvider
 
         _logger.Log(nameof(HttpDataProvider), $"Pull Descriptor page - take {take} - {res.Content}" );
         
-        var payload = await res.Content.ReadFromJsonAsync<SyncPage<DescriptorSyncDto>>(cancellationToken: ct);
+        var payload = await res.Content.ReadFromJsonAsync<SyncPage<DescriptorSyncDTO>>(cancellationToken: ct);
         
         _logger.Log(nameof(HttpDataProvider), $"Pull Descriptor page - take {take} - payload items count: {payload?.Items.Count ?? 0} payload items[0] {(payload?.Items.Count>0 ?payload?.Items[0] : "none" )} " );
 
         
         
-        return payload ?? new SyncPage<DescriptorSyncDto>(DateTimeOffset.UtcNow, null, Array.Empty<DescriptorSyncDto>());
+        return payload ?? new SyncPage<DescriptorSyncDTO>(DateTimeOffset.UtcNow, null, Array.Empty<DescriptorSyncDTO>());
 
     }
 
@@ -81,7 +81,7 @@ public class HttpDataProvider: IRemoteProvider
     /// <param name="cursor">Cursor describing where to resume the equipment stream.</param>
     /// <param name="take">Maximum number of records to request.</param>
     /// <param name="ct">Cancellation token propagated from the caller.</param>
-    public async Task<SyncPage<EquipmentSyncDto>> PullEquipmentPageAsync(
+    public async Task<SyncPage<EquipmentSyncDTO>> PullEquipmentPageAsync(
         ISyncCursor cursor, int take = 200, CancellationToken ct = default)
     {
         var url = $"/sync/equipment?ts={Uri.EscapeDataString(cursor.ITs.ToString("o"))}&seq={cursor.ISeq}&take={take}";
@@ -90,11 +90,11 @@ public class HttpDataProvider: IRemoteProvider
         
         _logger.Log(nameof(HttpDataProvider), $"Pull Equipment page - take {take} - {res.Content}" );
 
-        var payload = await res.Content.ReadFromJsonAsync<SyncPage<EquipmentSyncDto>>(cancellationToken: ct);
+        var payload = await res.Content.ReadFromJsonAsync<SyncPage<EquipmentSyncDTO>>(cancellationToken: ct);
         
         _logger.Log(nameof(HttpDataProvider), $"Pull Equipment page - take {take} - payload items count: {payload?.Items.Count ?? 0} payload items[0] {(payload?.Items.Count>0 ?payload?.Items[0] : "none" )} " );
 
-        return payload ?? new SyncPage<EquipmentSyncDto>(DateTimeOffset.UtcNow, null, Array.Empty<EquipmentSyncDto>());
+        return payload ?? new SyncPage<EquipmentSyncDTO>(DateTimeOffset.UtcNow, null, Array.Empty<EquipmentSyncDTO>());
     }
     
 }

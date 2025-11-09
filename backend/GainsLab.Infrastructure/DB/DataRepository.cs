@@ -82,130 +82,130 @@ public class DataRepository : ILocalRepository
 
     /// <inheritdoc />
     public async Task<Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>> BatchSaveComponentsAsync(
-    Dictionary<EntityType, IReadOnlyList<IEntity>> entities,
-    CancellationToken ct = default)
-{
-    if (entities is null || entities.Count == 0)
-        return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure("No entities to save.");
+        Dictionary<EntityType, IReadOnlyList<IEntity>> entities,
+        CancellationToken ct = default)
+    {
+        if (entities is null || entities.Count == 0)
+            return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure("No entities to save.");
 
-    // Make sure all handlers exist up front (fail fast)
-    var missingHandlers = entities.Keys.Where(k => !_handlers.ContainsKey(k)).ToList();
+        // Make sure all handlers exist up front (fail fast)
+        var missingHandlers = entities.Keys.Where(k => !_handlers.ContainsKey(k)).ToList();
     
-    if (missingHandlers.Count > 0)
-    {
-        foreach (var t in missingHandlers)
-            _logger.LogWarning(nameof(DataRepository), $"No handler registered for {t}.");
-        return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure(
-            $"Missing handlers for: {string.Join(", ", missingHandlers)}");
-    }
-
-    var successes = new Dictionary<EntityType, IReadOnlyList<IEntity>>(entities.Count);
-    var errors = new List<string>();
-
-    await using var tx = await _sqldbContext.Database.BeginTransactionAsync(ct);
-    try
-    {
-        foreach (var kvp in entities)
+        if (missingHandlers.Count > 0)
         {
-            var type = kvp.Key;
-            var items = kvp.Value;
+            foreach (var t in missingHandlers)
+                _logger.LogWarning(nameof(DataRepository), $"No handler registered for {t}.");
+            return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure(
+                $"Missing handlers for: {string.Join(", ", missingHandlers)}");
+        }
+
+        var successes = new Dictionary<EntityType, IReadOnlyList<IEntity>>(entities.Count);
+        var errors = new List<string>();
+
+        await using var tx = await _sqldbContext.Database.BeginTransactionAsync(ct);
+        try
+        {
+            foreach (var kvp in entities)
+            {
+                var type = kvp.Key;
+                var items = kvp.Value;
 
            
-            var dtos = new List<IDto>(items.Count);
-            foreach (var e in items)
-            {
-                var dto = e.ToDTO();
-                if (dto is null)
+                var dtos = new List<IDto>(items.Count);
+                foreach (var e in items)
                 {
-                    var msg = $"Mapping to DTO returned null for entity type {type} .";
-                    _logger.LogWarning(nameof(DataRepository), msg);
-                    errors.Add(msg);
-                    continue; // skip this item; you can choose to fail the whole batch instead
+                    var dto = e.ToDTO();
+                    if (dto is null)
+                    {
+                        var msg = $"Mapping to DTO returned null for entity type {type} .";
+                        _logger.LogWarning(nameof(DataRepository), msg);
+                        errors.Add(msg);
+                        continue; // skip this item; you can choose to fail the whole batch instead
+                    }
+                    dtos.Add(dto);
                 }
-                dtos.Add(dto);
-            }
             
-            if (dtos.Count == 0)
-            {
-                errors.Add($"No valid DTOs produced for type {type}.");
-                continue;
-            }
+                if (dtos.Count == 0)
+                {
+                    errors.Add($"No valid DTOs produced for type {type}.");
+                    continue;
+                }
 
            
-            var handler = _handlers[type];
-            Result<IReadOnlyList<IDto>> handlerResult;
-            try
-            {
-                //we add or update but dont let the handler save
-                handlerResult = await handler.AddOrUpdateAsync(dtos, save : false ,ct);
-            }
-            catch (Exception ex)
-            {
-                var baseMsg = ex.GetBaseException().Message;
-                _logger.LogError(nameof(DataRepository), $"Handler for {type} threw: {baseMsg}");
-                errors.Add($"Handler for {type} failed: {baseMsg}");
-                continue;
-            }
-
-            if (!handlerResult.Success || handlerResult.Value is null)
-            {
-                var msg = $"Handler for {type} returned failure: {handlerResult.ErrorMessage ?? "unknown error"}.";
-                _logger.LogWarning(nameof(DataRepository), msg);
-                errors.Add(msg);
-                continue;
-            }
-            
-            var saved = new List<IEntity>(handlerResult.Value.Count);
-            foreach (var savedDto in handlerResult.Value)
-            {
-                var domain = savedDto.ToDomain();
-                if (domain is null)
+                var handler = _handlers[type];
+                Result<IReadOnlyList<IDto>> handlerResult;
+                try
                 {
-                    var msg = $"DTO->Domain mapping returned null for type {type} (DTO: {savedDto.GetType().Name}).";
+                    //we add or update but dont let the handler save
+                    handlerResult = await handler.AddOrUpdateAsync(dtos, save : false ,ct);
+                }
+                catch (Exception ex)
+                {
+                    var baseMsg = ex.GetBaseException().Message;
+                    _logger.LogError(nameof(DataRepository), $"Handler for {type} threw: {baseMsg}");
+                    errors.Add($"Handler for {type} failed: {baseMsg}");
+                    continue;
+                }
+
+                if (!handlerResult.Success || handlerResult.Value is null)
+                {
+                    var msg = $"Handler for {type} returned failure: {handlerResult.ErrorMessage ?? "unknown error"}.";
                     _logger.LogWarning(nameof(DataRepository), msg);
                     errors.Add(msg);
                     continue;
                 }
-                saved.Add(domain);
-            }
+            
+                var saved = new List<IEntity>(handlerResult.Value.Count);
+                foreach (var savedDto in handlerResult.Value)
+                {
+                    var domain = savedDto.ToDomain();
+                    if (domain is null)
+                    {
+                        var msg = $"DTO->Domain mapping returned null for type {type} (DTO: {savedDto.GetType().Name}).";
+                        _logger.LogWarning(nameof(DataRepository), msg);
+                        errors.Add(msg);
+                        continue;
+                    }
+                    saved.Add(domain);
+                }
 
-            if (saved.Count == 0)
+                if (saved.Count == 0)
+                {
+                    errors.Add($"No domain entities produced after save for type {type}.");
+                    continue;
+                }
+
+                successes[type] = saved;
+            }
+        
+        
+            if (successes.Count == entities.Count && errors.Count == 0)
             {
-                errors.Add($"No domain entities produced after save for type {type}.");
-                continue;
+                await _sqldbContext.SaveChangesAsync(ct);
+                await tx.CommitAsync(ct);
+                return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.SuccessResult(successes);
             }
+            else
+            {
+                // All-or-nothing: rollback if any type failed
+                await tx.RollbackAsync(ct);
 
-            successes[type] = saved;
+                var reason = errors.Count == 0
+                    ? "Unknown error while saving entities."
+                    : string.Join(" | ", errors);
+
+                return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure(reason);
+            }
         }
-        
-        
-        if (successes.Count == entities.Count && errors.Count == 0)
+        catch (Exception ex)
         {
-            await _sqldbContext.SaveChangesAsync(ct);
-            await tx.CommitAsync(ct);
-            return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.SuccessResult(successes);
-        }
-        else
-        {
-            // All-or-nothing: rollback if any type failed
             await tx.RollbackAsync(ct);
-
-            var reason = errors.Count == 0
-                ? "Unknown error while saving entities."
-                : string.Join(" | ", errors);
-
-            return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure(reason);
+            var msg = ex.GetBaseException().Message;
+            _logger.LogError(nameof(DataRepository), $"Batch save failed: {msg}");
+            return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure($"Batch save failed: {msg}");
         }
-    }
-    catch (Exception ex)
-    {
-        await tx.RollbackAsync(ct);
-        var msg = ex.GetBaseException().Message;
-        _logger.LogError(nameof(DataRepository), $"Batch save failed: {msg}");
-        return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure($"Batch save failed: {msg}");
-    }
     
-}
+    }
 
     /// <inheritdoc />
     public async Task<Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>> GetAllComponentsAsync()
@@ -239,9 +239,9 @@ public class DataRepository : ILocalRepository
     }
 
     /// <inheritdoc />
-    public Task<Result<TEntity>> SaveComponentAsync<TEntity>(TEntity component)
+    public async Task<Result<TEntity>> SaveComponentAsync<TEntity>(TEntity component)
     {
-        throw new NotImplementedException();
+        return Result<TEntity>.Failure("Not Implemented");
     }
 
     /// <inheritdoc />
@@ -311,10 +311,13 @@ public class DataRepository : ILocalRepository
     /// </summary>
     private void CreateHandlers()
     {
+        var descriptorHandler = new DescriptorIdbHandler(_sqldbContext, _logger);
+        
         _handlers = new();
+        
         //todo for each EntityType 
-        _handlers[EntityType.Equipment] = new EquipmentIdbHandler(_sqldbContext, _logger);
- 
+        _handlers[EntityType.Equipment] = new EquipmentIdbHandler(_sqldbContext, descriptorHandler , _logger);
+        _handlers[EntityType.Descriptor] = descriptorHandler;
     }
     
 }

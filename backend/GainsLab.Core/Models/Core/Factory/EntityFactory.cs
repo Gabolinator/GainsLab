@@ -38,31 +38,39 @@ public class EntityFactory
     {
         
         var equipments = new List<EquipmentEntity>();
+
+        var jumpRope =CreateEquipment("Jump Rope", "Some description for jump rope");
         
-        var auditInfo = AuditedInfo.New(_clock.UtcNow, "system");
-
-        var jumpRope = _equipmentFactory.Create(new EquipmentCreationConfig
-        {
-            Id = EquipmentId.New(),
-            Content = new EquipmentContent("Jump Rope"),
-            Audit = auditInfo,
-            Descriptor = _descriptorFactory.Create(new DescriptiorCreationConfig
-            {
-               Id = DescriptorId.New(),
-               Content = new BaseDescriptorContent
-               {
-                   Description = Description.New("Some description for jump rope")
-               },
-               Audit = auditInfo
-            })
-        });
-
+       
 
         equipments.Add(jumpRope);
 
         return equipments;
     }
 
-  
+
+    public EquipmentEntity CreateEquipment(string name, string description ,string creator = "system")
+    {
+        var auditInfo = AuditedInfo.New(_clock.UtcNow, creator);
+
+        var jumpRope = _equipmentFactory.Create(new EquipmentCreationConfig
+        {
+            Id = EquipmentId.New(),
+            Content = new EquipmentContent(name),
+            Audit = auditInfo,
+            Descriptor = _descriptorFactory.Create(new DescriptiorCreationConfig
+            {
+                Id = DescriptorId.New(),
+                Content = new BaseDescriptorContent
+                {
+                    Description = Description.New(description)
+                },
+                Audit = auditInfo
+            })
+        });
+
+        return jumpRope;
+    }
+
 }
 

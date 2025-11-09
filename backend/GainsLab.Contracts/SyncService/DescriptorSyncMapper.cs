@@ -1,31 +1,27 @@
 ﻿using GainsLab.Contracts.SyncDto;
+using GainsLab.Core.Models.Core.Utilities;
 using GainsLab.Infrastructure.DB.DTOs;
 
 namespace GainsLab.Contracts.SyncService;
 
-/// <summary>
-/// Converts between sync DTOs and EF Core DTOs for equipment entities.
-/// </summary>
-public static class EquipmentSyncMapper
+public static class DescriptorSyncMapper
 {
     /// <summary>
-    /// Maps an equipment sync DTO into an EF Core DTO ready for persistence.
+    /// Maps an descriptor sync DTO into an EF Core DTO ready for persistence.
     /// </summary>
-    /// <param name="dto">The upstream DTO representing the equipment.</param>
-    /// <param name="descriptor">Optional descriptor DTO already tracked by EF Core.</param>
+    /// <param name="dto">The upstream DTO representing the descriptor.</param>
     /// <param name="syncActor">Identifier used to stamp audit metadata.</param>
-    /// <returns>An EF Core DTO representing the incoming equipment.</returns>
-    public static EquipmentDTO FromSyncDTO(EquipmentSyncDTO dto, DescriptorDTO? descriptor ,string syncActor)
+    /// <returns>An EF Core DTO representing the incoming descriptor.</returns>
+    public static DescriptorDTO FromSyncDTO(DescriptorSyncDTO dto,string syncActor)
     {
-        var entity = new EquipmentDTO();
+        var entity = new DescriptorDTO();
         
-        entity.Name = dto.Name;
+        CoreUtilities.Logger.Log(nameof(DescriptorSyncMapper), $"mapping desc sync dto {dto.DescriptionContent} - {dto.GUID}");
+        
+        entity.Content = dto.DescriptionContent;
         entity.GUID = dto.GUID;
-
-        // Set the relationship; EF will handle DescriptorID
-        entity.Descriptor = descriptor;
         entity.Authority = dto.Authority;
-
+        
         entity.UpdatedAtUtc = dto.UpdatedAtUtc;
         entity.UpdatedSeq = dto.UpdatedSeq;
         entity.UpdatedBy = syncActor;
@@ -42,12 +38,11 @@ public static class EquipmentSyncMapper
     /// </summary>
     /// <param name="e">The EF Core DTO retrieved from the database.</param>
     /// <returns>A sync DTO suitable for transmission to clients.</returns>
-    public static EquipmentSyncDTO ToSyncDTO(EquipmentDTO e)
+    public static DescriptorSyncDTO ToSyncDTO(DescriptorDTO e)
     {
-        return new EquipmentSyncDTO(
+        return new DescriptorSyncDTO(
             e.Iguid,
-            e.Name,
-            e.Descriptor == null ? null : e.Descriptor.GUID,
+            e.Content,
             e.UpdatedAtUtc,
             e.UpdatedSeq,
             e.IsDeleted,

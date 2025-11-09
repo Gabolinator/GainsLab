@@ -7,7 +7,6 @@ using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Infrastructure.DB.DomainMappers;
 using GainsLab.Infrastructure.DB.DTOs;
 using GainsLab.Models.Core;
-using GainsLab.Models.DataManagement.DB.Model.DTOs;
 
 
 namespace GainsLab.Models.DataManagement.DB.Model.DomainMappers;

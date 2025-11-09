@@ -5,12 +5,16 @@ using System.Linq;
 using System.Threading.Tasks;
 using GainsLab.Contracts.SyncDto;
 using GainsLab.Core.Models.Core;
+using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
+using GainsLab.Core.Models.Core.Factory;
 using GainsLab.Core.Models.Core.Interfaces.Caching;
 using GainsLab.Core.Models.Core.Interfaces.DataManagement;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Core.Models.Core.Results;
+using GainsLab.Core.Models.Core.Utilities;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure;
+using GainsLab.Infrastructure.DB.Handlers;
 using GainsLab.Models.Core.LifeCycle;
 using GainsLab.Models.DataManagement.Sync;
 using GainsLab.Models.Utilities;
@@ -184,7 +188,28 @@ public class DataManager : IDataManager
         }
         return (SyncState)state;
     }
-    
+
+
+    /// <summary>
+    /// To test seeding remote db
+    /// </summary>
+    /// <returns></returns>
+    public async Task<Result> CreateLocalDataAsync()
+    {
+        var clock = CoreUtilities.Clock;
+        
+        //create a test equipment and send it to the remote
+        var descriptionService = new BaseDescriptorService(clock);
+        var entityFactory = new EntityFactory(clock,_logger, descriptionService);
+        
+        var db = entityFactory.CreateEquipment("Dumbbell", "some description for dumbbell 2 - should be added", "editor test");
+
+        var list = new List<EquipmentEntity> {db};
+        
+        //save to local db and sync up
+        return  await SaveComponentsAsync(list, true);
+        
+    }
 
     /// <summary>
     /// Loads component data from disk, persists it locally, waits for any pending seed, and primes in-memory caches.

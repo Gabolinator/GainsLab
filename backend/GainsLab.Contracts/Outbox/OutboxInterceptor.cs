@@ -1,4 +1,12 @@
-﻿using System.Text.Json;
+﻿using System.Buffers;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using GainsLab.Contracts.SyncDto;
+using GainsLab.Contracts.SyncService;
+using GainsLab.Core.Models.Core;
+using GainsLab.Core.Models.Core.Interfaces.DB;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.DTOs;
 using GainsLab.Infrastructure.DB.Outbox;
@@ -19,6 +27,20 @@ public class OutboxInterceptor : SaveChangesInterceptor
     private readonly HashSet<Guid> _activeSaves = new();
     // Dedup per *save*, not per interceptor lifetime
     private readonly Dictionary<Guid, HashSet<(string, Guid, int)>> _saveEmitted = new();
+    private static readonly HashSet<string> DedupIgnoredProperties =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            "Iid",
+            "UpdatedAtUtc",
+            "UpdatedSeq",
+            "UpdatedBy",
+            "CreatedAtUtc",
+            "CreatedBy",
+            "DeletedAt",
+            "DeletedBy",
+            "RowVersion",
+            "Version"
+        };
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OutboxInterceptor"/> class.
@@ -27,7 +49,7 @@ public class OutboxInterceptor : SaveChangesInterceptor
     public OutboxInterceptor(ILogger logger) => _logger = logger;
 
     /// <inheritdoc />
-    public override ValueTask<InterceptionResult<int>> SavingChangesAsync(
+    public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
         CancellationToken ct = default)
@@ -43,7 +65,7 @@ public class OutboxInterceptor : SaveChangesInterceptor
         {
             _logger?.LogWarning(nameof(OutboxInterceptor),
                 $"Already Intercepted saved changes for instance {ctx.ContextId.InstanceId}");
-            return base.SavingChangesAsync(eventData, result, ct);
+            return await base.SavingChangesAsync(eventData, result, ct);
         }
 
 
@@ -66,17 +88,40 @@ public class OutboxInterceptor : SaveChangesInterceptor
                               : ChangeType.Update;
 
             _logger?.Log(nameof(OutboxInterceptor),
-                $"Intercepting saved changes on entry {e.Entity} - ChangeType: {changeType}");
+                $"Intercepting saved changes on entry {e.Entity} - with id: {e.Entity.Iid} ChangeType: {changeType}");
 
             var key = (e.Entity.GetType().Name, e.Entity.Iguid, (int)changeType);
+
+            var requiresPersistedId = e.State is EntityState.Modified or EntityState.Deleted;
+            if (requiresPersistedId && e.Entity.Iid <= 0)
+            {
+                _logger?.LogWarning(nameof(OutboxInterceptor), $"Invalid entity ID (primary key) {e.Entity.Iid} for {e.Entity.Type}");
+                continue;
+            }
+
             if (emitted.Add(key)) // only once per *save*
             {
+                if (!TrySerializeSyncPayload(e.Entity, out var payloadJson))
+                {
+                    _logger?.LogWarning(nameof(OutboxInterceptor),
+                        $"Unable to serialize sync payload for {e.Entity.Type}. Entry skipped.");
+                    continue;
+                }
+
+                var normalizedPayload = NormalizePayloadForDedup(payloadJson);
+                if (await HasDuplicateOutboxEntryAsync(ctx, key.Item1, key.Item2, normalizedPayload, changeType, ct))
+                {
+                    _logger?.LogWarning(nameof(OutboxInterceptor),
+                        $"Duplicate outbox entry ignored for {key.Item1} ({key.Item2}) change {changeType}.");
+                    continue;
+                }
+
                 envelopes.Add(new OutboxChangeDto
                 {
                     Entity = key.Item1,
                     EntityGuid = key.Item2,
                     ChangeType = changeType,
-                    PayloadJson = JsonSerializer.Serialize(e.Entity)
+                    PayloadJson = payloadJson
                 });
             }
         }
@@ -91,7 +136,7 @@ public class OutboxInterceptor : SaveChangesInterceptor
             ctx.AddRange(envelopes);
         }
 
-        return base.SavingChangesAsync(eventData, result, ct);
+        return await base.SavingChangesAsync(eventData, result, ct);
     }
 
     /// <inheritdoc />
@@ -127,5 +172,92 @@ public class OutboxInterceptor : SaveChangesInterceptor
 
         _activeSaves.Remove(saveId);
         _saveEmitted.Remove(saveId);
+    }
+
+    private static async Task<bool> HasDuplicateOutboxEntryAsync(
+        GainLabSQLDBContext context,
+        string entity,
+        Guid entityGuid,
+        string normalizedPayloadJson,
+        ChangeType changeType,
+        CancellationToken ct)
+    {
+        var candidates = await context.OutboxChanges
+            .AsNoTracking()
+            .Where(o =>
+                o.Entity == entity &&
+                o.EntityGuid == entityGuid &&
+                o.ChangeType == changeType)
+            .Select(o => o.PayloadJson)
+            .ToListAsync(ct);
+
+        foreach (var candidate in candidates)
+        {
+           if (NormalizePayloadForDedup(candidate) == normalizedPayloadJson)
+                return true;
+        }
+
+        return false;
+    }
+
+    private static string NormalizePayloadForDedup(string payloadJson)
+    {
+        if (string.IsNullOrWhiteSpace(payloadJson))
+            return string.Empty;
+
+        try
+        {
+            using var doc = JsonDocument.Parse(payloadJson);
+            var buffer = new ArrayBufferWriter<byte>();
+            using (var writer = new Utf8JsonWriter(buffer))
+            {
+                writer.WriteStartObject();
+                var orderedProperties = doc.RootElement
+                    .EnumerateObject()
+                    .Where(property => !DedupIgnoredProperties.Contains(property.Name))
+                    .OrderBy(property => property.Name, StringComparer.OrdinalIgnoreCase);
+
+                foreach (var property in orderedProperties)
+                {
+                    property.WriteTo(writer);
+                }
+
+                writer.WriteEndObject();
+            }
+
+            return Encoding.UTF8.GetString(buffer.WrittenSpan);
+        }
+        catch (JsonException)
+        {
+            // If payload is invalid JSON, fall back to raw string to avoid blocking persistence.
+            return payloadJson;
+        }
+    }
+
+    private static bool TrySerializeSyncPayload(BaseDto entity, out string payloadJson)
+    {
+        payloadJson = string.Empty;
+        if (!TryConvertToSyncDto(entity, out var syncDto))
+            return false;
+
+        payloadJson = JsonSerializer.Serialize(syncDto, syncDto.GetType());
+        return true;
+    }
+
+    private static bool TryConvertToSyncDto(BaseDto entity, out ISyncDto? syncDto)
+    {
+        syncDto = null;
+
+        switch (entity.Type)
+        {
+            case EntityType.Descriptor when entity is DescriptorDTO descriptor:
+                syncDto = DescriptorSyncMapper.ToSyncDTO(descriptor);
+                return true;
+            case EntityType.Equipment when entity is EquipmentDTO equipment:
+                syncDto = EquipmentSyncMapper.ToSyncDTO(equipment);
+                return true;
+            default:
+                return false;
+        }
     }
 }

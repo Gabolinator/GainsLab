@@ -11,6 +11,13 @@ public interface ILogger
     bool Enabled { get;}
 
     /// <summary>
+    /// Enable or disable color decoration
+    /// </summary>
+    /// <param name="state"> to toggle the decoration</param>
+    /// <returns></returns>
+    void ToggleDecoration(bool state);
+
+    /// <summary>
     /// Enables or disables the logger.
     /// </summary>
     /// <param name="state"><c>true</c> to enable logging; <c>false</c> to suppress output.</param>

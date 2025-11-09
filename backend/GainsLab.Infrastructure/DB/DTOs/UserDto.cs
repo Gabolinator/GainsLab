@@ -2,7 +2,6 @@
 using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Entities.User;
 using GainsLab.Models.Core.User;
-using GainsLab.Models.DataManagement.DB.Model.DTOs;
 
 namespace GainsLab.Infrastructure.DB.DTOs;
 
@@ -21,7 +20,12 @@ public class UserDto : BaseDto
 
     public SubscriptionInfos.SubscriptionType SubscriptionType { get; set; }
 
-    
+    public override string? GetContent()
+    {
+        //make sure we capture the proper information so we dont duplicate entry
+        //right now just return the name 
+        return Name;
+    }
 
      public override int Iid => Id;
      public override  Guid Iguid => GUID;

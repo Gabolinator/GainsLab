@@ -1,4 +1,5 @@
-﻿using GainsLab.Core.Models.Core.Interfaces.DB;
+﻿using GainsLab.Core.Models.Core;
+using GainsLab.Core.Models.Core.Interfaces.DB;
 
 namespace GainsLab.Contracts.SyncDto;
 
@@ -11,10 +12,12 @@ namespace GainsLab.Contracts.SyncDto;
 /// <param name="UpdatedAtUtc">Server timestamp representing the last modification moment.</param>
 /// <param name="UpdatedSeq">Sequence number used to break ties when timestamps are equal.</param>
 /// <param name="IsDeleted">Flag indicating whether the equipment represents a tombstone.</param>
-public record EquipmentSyncDto(
+/// <param name="Authority">Indicates which tier owns the record.</param>
+public record EquipmentSyncDTO(
     Guid GUID,
     string Name,
     Guid? DescriptorGUID,
     DateTimeOffset UpdatedAtUtc,
     long UpdatedSeq,
-    bool IsDeleted = false) : ISyncDto;
+    bool IsDeleted = false,
+    DataAuthority Authority = DataAuthority.Bidirectional) : ISyncDto;

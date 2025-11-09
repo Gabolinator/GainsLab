@@ -1,8 +1,8 @@
 ﻿
+using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB.DTOs;
-using GainsLab.Models.DataManagement.DB.Model.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB.Context;
@@ -80,6 +80,11 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
                 .HasColumnName("is_deleted")
                 .HasDefaultValue(false);
 
+            e.Property(x => x.Authority)
+                .HasColumnName("authority")
+                .HasConversion<int>()
+                .HasDefaultValue(DataAuthority.Bidirectional);
+
             e.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });;
         });
         
@@ -114,6 +119,11 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
             d.Property(x => x.IsDeleted)
                 .HasColumnName("is_deleted")
                 .HasDefaultValue(false);
+
+            d.Property(x => x.Authority)
+                .HasColumnName("authority")
+                .HasConversion<int>()
+                .HasDefaultValue(DataAuthority.Bidirectional);
 
             d.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
         });

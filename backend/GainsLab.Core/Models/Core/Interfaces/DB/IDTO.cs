@@ -19,6 +19,8 @@ public interface IDto
     /// Gets the entity type emitted by the DTO.
     /// </summary>
     EntityType Type { get; }
+
+    string? GetContent();
 }
 
 /// <summary>

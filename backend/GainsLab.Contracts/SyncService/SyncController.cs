@@ -3,6 +3,7 @@ using GainsLab.Contracts.Interface;
 using GainsLab.Contracts.SyncDto;
 using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.DB;
+using GainsLab.Core.Models.Core.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GainsLab.Contracts.SyncService;
@@ -63,6 +64,8 @@ public class SyncController : ControllerBase
         if (!Enum.TryParse<EntityType>(entity, true, out var t) || !_services.TryGetValue(t, out var svc))
             return NotFound($"Unknown entity '{entity}'.");
 
+        CoreUtilities.Logger.Log(nameof(SyncController), $"deserialize entity {t}- {svc.DtoType}" );
+        
         // Deserialize each item to the service’s TSyncDto
         var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         var typedItems = new List<ISyncDto>(body.Items.Count);

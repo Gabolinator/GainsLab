@@ -10,7 +10,13 @@ namespace GainsLab.Contracts.SyncService;
 public sealed record SyncPushEnvelope(
     DateTimeOffset ClientTime,
     IReadOnlyList<JsonElement> Items // raw; each service will deserialize to its TSyncDto
-);
+)
+{
+    public string GetString()
+    {
+        return string.Join(',', Items);
+    }
+};
 
 /// <summary>
 /// Enumerates the possible outcomes for an individual push item.

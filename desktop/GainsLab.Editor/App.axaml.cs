@@ -4,9 +4,13 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using GainsLab.Core.Models.Core.Interfaces.DataManagement;
+using GainsLab.Core.Models.Core.Results;
 using GainsLab.Models.App;
 using GainsLab.Models.Core.LifeCycle;
+using GainsLab.Models.DataManagement;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql.Replication.TestDecoding;
 
 namespace GainsLab;
 
@@ -59,6 +63,12 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             mainWindow = desktop.MainWindow = _appHost.ServiceProvider.GetRequiredService<MainWindow>();
+            if (mainWindow is MainWindow main)
+            {
+
+                var dataManager = _appHost.ServiceProvider.GetRequiredService<IDataManager>();
+                main.SetOnClick(dataManager.CreateLocalDataAsync);
+            }
         }
 
         await _lifecycle.InitializeAsync(_appHost.ServiceProvider, ApplicationLifetime);

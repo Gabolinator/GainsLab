@@ -1,5 +1,20 @@
 ﻿namespace GainsLab.Core.Models.Core;
 
+
+public static class TypeConverter
+{
+    public static EntityType GetEntityTye(this DTOEntityType dto)
+    {
+        return dto switch
+        {
+            DTOEntityType.UserDTO =>  EntityType.User,
+            DTOEntityType.DescriptorDTO =>  EntityType.Descriptor,
+            DTOEntityType.EquipmentDTO => EntityType.Equipment,
+            _ => EntityType.unidentified
+        };
+    }
+}
+
 /// <summary>
 /// Identifies the high-level domain entity represented within the system.
 /// </summary>
@@ -19,6 +34,22 @@ public enum EntityType
     WorkoutBlock,
     Workout,
     Program,
+    unidentified
+}
+
+public enum DTOEntityType
+{
+    UserDTO, 
+    DescriptorDTO,
+    EquipmentDTO,
+    unidentified
+}
+
+public enum SyncDTOType
+{
+    UserSyncDTO, 
+    DescriptorSyncDTO,
+    EquipmentSyncDTO,
     unidentified
 }
 

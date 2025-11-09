@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.DB;
+using GainsLab.Core.Models.Core;
 
 
 namespace GainsLab.Infrastructure.DB.DTOs;
@@ -10,6 +11,7 @@ public abstract class BaseDto : IDto, IVersionedDto
     
     public abstract int Iid { get;} 
     public abstract Guid  Iguid { get; }
+    public abstract string? GetContent(); 
     public abstract EntityType Type { get; }
 
     public DateTimeOffset CreatedAtUtc  { get; set; } = DateTimeOffset.UtcNow;
@@ -26,4 +28,6 @@ public abstract class BaseDto : IDto, IVersionedDto
     public byte[]? RowVersion { get; set; }
     
     public long Version { get; set; } = 0;
+    
+    public DataAuthority Authority { get; set; } = DataAuthority.Bidirectional;
 }

@@ -1,8 +1,9 @@
-﻿using GainsLab.Core.Models.Core.Interfaces.DB;
+﻿using System.Linq;
+using System.Reflection;
+using GainsLab.Core.Models.Core.Interfaces.DB;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Core.Models.Core.Results;
 using GainsLab.Core.Models.Core.Utilities.Logging;
-using GainsLab.Models.DataManagement.DB.Model.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB.Handlers;
@@ -30,21 +31,38 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
     
     protected DbContext _context;
     protected readonly ILogger _logger;
-
+    
+    /// <summary>
+    /// Gives derived handlers a chance to attach/ensure related entities before persisting.
+    /// </summary>
+    protected virtual Task PrepareRelatedEntitiesAsync(TDto dto, CancellationToken ct) =>
+        Task.CompletedTask;
+    private static readonly string GuidPropertyName = ResolveGuidPropertyName();
+    private static readonly string IdPropertyName = ResolveIdPropertyName();
+    private static readonly PropertyInfo GuidPropertyInfo = typeof(TDto).GetProperty(GuidPropertyName)
+        ?? throw new InvalidOperationException($"Type {typeof(TDto).Name} must expose a public GUID property.");
+    private static readonly PropertyInfo IdPropertyInfo = typeof(TDto).GetProperty(IdPropertyName)
+        ?? throw new InvalidOperationException($"Type {typeof(TDto).Name} must expose a public int ID property.");
+    
     /// <summary>
     /// Attempts to load an existing DTO by GUID.
     /// </summary>
-    public abstract Task<Result<TDto>> TryGetExistingDTO(Guid guid);
+    public abstract Task<Result<TDto>> TryGetExistingDTO(Guid guid, string? content);
    
     /// <summary>
     /// Attempts to load an existing DTO by integer identifier.
     /// </summary>
-    public async Task<Result<TDto>> TryGetExistingDTO(int id)
+    public async Task<Result<TDto>> TryGetExistingDTO(int id, string? content)
     {
-        var existing = await DBSet
-            .FirstOrDefaultAsync(e => e.Iid == id);
-        var success = existing != null;
-        return success ?Result<TDto>.SuccessResult(existing!) :  Result<TDto>.Failure("No existing dto found");
+        if (id <= 0)
+            return Result<TDto>.Failure("Invalid dto id");
+
+        var existing = await FilterById(DBSet.AsNoTracking(), id)
+            .FirstOrDefaultAsync(CancellationToken.None);
+        var success = existing is not null;
+        return success
+            ? Result<TDto>.SuccessResult(existing!)
+            : Result<TDto>.Failure("No existing dto found");
     }
 
 
@@ -56,6 +74,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
 
         try
         {
+            await PrepareRelatedEntitiesAsync(tdto, ct).ConfigureAwait(false);
             // Optionally stamp server fields here if needed
             DBSet.Add(tdto); // tracked as Added
 
@@ -79,10 +98,13 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
 
         try
         {
+            await PrepareRelatedEntitiesAsync(tdto, ct).ConfigureAwait(false);
             // Ensure we’re not double-tracking the same key
-            var local = await DBSet.AsNoTracking().FirstOrDefaultAsync(x => x.Iguid == tdto.Iguid, ct);
-            if (local is null)
+            var existing = await LocateExistingAsync(tdto, ct);
+            if (existing is null)
                 return Result<IDto>.Failure("DTO to update not found");
+
+            EnsurePersistentKeyValues(tdto, existing);
 
             // Attach and mark modified (full replace pattern)
             _context.Attach(tdto);
@@ -109,6 +131,8 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
         }
     }
 
+ 
+
 
     /// <inheritdoc />
     public async Task<Result<IReadOnlyList<IDto>>> AddOrUpdateAsync(
@@ -131,7 +155,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
             foreach (var dto in dtos)
             {
                 ct.ThrowIfCancellationRequested();
-                
+
                 var r = await AddOrUpdateAsync(dto, save: false, ct);
                 if (!r.Success || r.Value is null)
                 {
@@ -147,7 +171,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
             {
                 // run a final detect & persist once
                 _context.ChangeTracker.DetectChanges();
-                await  _context.SaveChangesAsync(ct);
+                await _context.SaveChangesAsync(ct);
                 await tx!.CommitAsync(ct);
             }
 
@@ -169,6 +193,89 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
         }
     }
 
+    /// <summary>
+    /// Filters the given queryable to match the provided GUID using the mapped store column.
+    /// </summary>
+    protected virtual IQueryable<TDto> FilterByGuid(IQueryable<TDto> query, Guid guid) =>
+        query.Where(dto => EF.Property<Guid>(dto, GuidPropertyName) == guid);
+
+    /// <summary>
+    /// Filters the given queryable to match the provided integer identifier using the mapped store column.
+    /// </summary>
+    protected virtual IQueryable<TDto> FilterById(IQueryable<TDto> query, int id) =>
+        query.Where(dto => EF.Property<int>(dto, IdPropertyName) == id);
+    
+    private static string ResolveGuidPropertyName()
+    {
+        var guidProp = typeof(TDto).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            .FirstOrDefault(p => p.PropertyType == typeof(Guid) &&
+                                 (string.Equals(p.Name, "GUID", StringComparison.OrdinalIgnoreCase) ||
+                                  string.Equals(p.Name, "Guid", StringComparison.OrdinalIgnoreCase)));
+
+        if (guidProp is null)
+            throw new InvalidOperationException(
+                $"Type {typeof(TDto).Name} must expose a public GUID property for filtering.");
+
+        return guidProp.Name;
+    }
+
+    private static string ResolveIdPropertyName()
+    {
+        var idProp = typeof(TDto).GetProperties(BindingFlags.Instance | BindingFlags.Public)
+            .FirstOrDefault(p => p.PropertyType == typeof(int) &&
+                                 (string.Equals(p.Name, "ID", StringComparison.OrdinalIgnoreCase) ||
+                                  string.Equals(p.Name, "Id", StringComparison.OrdinalIgnoreCase)));
+
+        if (idProp is null)
+            throw new InvalidOperationException(
+                $"Type {typeof(TDto).Name} must expose a public int ID property for filtering.");
+
+        return idProp.Name;
+    }
+
+    private async Task<TDto?> LocateExistingAsync(TDto dto, CancellationToken ct)
+    {
+        var query = DBSet.AsNoTracking();
+
+        if (dto.Iid > 0)
+        {
+            var byId = await FilterById(query, dto.Iid).FirstOrDefaultAsync(ct);
+            if (byId is not null)
+                return byId;
+        }
+
+        if (dto.Iguid != Guid.Empty)
+        {
+            var byGuid = await FilterByGuid(query, dto.Iguid).FirstOrDefaultAsync(ct);
+            if (byGuid is not null)
+                return byGuid;
+        }
+
+        var content = dto.GetContent();
+        if (!string.IsNullOrWhiteSpace(content))
+        {
+            var contentResult = await TryGetExistingDTO(Guid.Empty, content);
+            if (contentResult.Success && contentResult.Value is not null)
+                return contentResult.Value;
+        }
+
+        return null;
+    }
+
+    private static void EnsurePersistentKeyValues(TDto target, TDto existing)
+    {
+        if (target is null || existing is null) return;
+
+        var existingId = (int)(IdPropertyInfo.GetValue(existing) ?? 0);
+        if (existingId > 0)
+            IdPropertyInfo.SetValue(target, existingId);
+
+        var existingGuid = (Guid?)(GuidPropertyInfo.GetValue(existing));
+        if (existingGuid is not null && existingGuid != Guid.Empty)
+            GuidPropertyInfo.SetValue(target, existingGuid);
+    }
+
+
     /// <inheritdoc />
     public async Task<Result<IDto>> AddOrUpdateAsync(IDto dto, bool save, CancellationToken ct = default)
     {
@@ -180,10 +287,11 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
             return Result<IDto>.Failure("Invalid Dto type");
         }
 
-    
-        var existingResult = await TryGetExistingDTO(tdto.Iguid);
-        if (existingResult.Success && existingResult.Value is TDto existing)
+        var existing = await LocateExistingAsync(tdto, ct);
+        if (existing is not null)
         {
+            EnsurePersistentKeyValues(tdto, existing);
+
             if (!NeedUpdate(existing, tdto))
             {
                 _logger.Log("DbContextHandler", $"No update needed for {dto.Iguid}");

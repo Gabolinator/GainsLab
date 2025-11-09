@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
+namespace GainsLab.Infrastructure.Migrations
 {
     /// <inheritdoc />
     public partial class InitLocalSqlite : Migration
@@ -28,7 +28,8 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
                     DeletedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
                     DeletedBy = table.Column<string>(type: "TEXT", nullable: true),
                     RowVersion = table.Column<byte[]>(type: "BLOB", rowVersion: true, nullable: true),
-                    Version = table.Column<long>(type: "INTEGER", nullable: false)
+                    Version = table.Column<long>(type: "INTEGER", nullable: false),
+                    authority = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 2)
                 },
                 constraints: table =>
                 {
@@ -45,7 +46,7 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
                     EntityGuid = table.Column<Guid>(type: "TEXT", nullable: false),
                     ChangeType = table.Column<int>(type: "INTEGER", nullable: false),
                     PayloadJson = table.Column<string>(type: "TEXT", nullable: false),
-                    occurred_at = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    occurred_at = table.Column<DateTime>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
                     sent = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false)
                 },
                 constraints: table =>
@@ -89,7 +90,8 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
                     DeletedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
                     DeletedBy = table.Column<string>(type: "TEXT", nullable: true),
                     RowVersion = table.Column<byte[]>(type: "BLOB", rowVersion: true, nullable: true),
-                    Version = table.Column<long>(type: "INTEGER", nullable: false)
+                    Version = table.Column<long>(type: "INTEGER", nullable: false),
+                    authority = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 2)
                 },
                 constraints: table =>
                 {
@@ -130,9 +132,9 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
                 columns: new[] { "updated_at_utc", "updated_seq" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_outbox_changes_sent",
+                name: "IX_outbox_changes_sent_occurred_at",
                 table: "outbox_changes",
-                column: "sent");
+                columns: new[] { "sent", "occurred_at" });
         }
 
         /// <inheritdoc />

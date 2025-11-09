@@ -11,7 +11,6 @@ using GainsLab.Core.Models.Core.Results;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.DTOs;
-using GainsLab.Models.DataManagement.DB.Model.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Models.DataManagement.Sync;
@@ -46,13 +45,13 @@ public async Task<Result> ApplyAsync(IReadOnlyList<ISyncDto> items, ILocalReposi
     
     if (items.Count == 0) return Result.SuccessResult();
 
-    var typed = items.OfType<EquipmentSyncDto>().ToList();
+    var typed = items.OfType<EquipmentSyncDTO>().ToList();
     if (typed.Count == 0) return Result.SuccessResult();
 
     try
     {
         
-        _logger?.Log(nameof(EquipmentSyncProcessor), $"Applying Async for {items.Count} {nameof(EquipmentSyncDto)}");
+        _logger?.Log(nameof(EquipmentSyncProcessor), $"Applying Async for {items.Count} {nameof(EquipmentSyncDTO)}");
 
         await using var dbContext = await _dbContextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
         var descriptorCache = new Dictionary<Guid, DescriptorDTO>();
@@ -62,7 +61,7 @@ public async Task<Result> ApplyAsync(IReadOnlyList<ISyncDto> items, ILocalReposi
         {
             ct.ThrowIfCancellationRequested();
 
-            _logger?.Log(nameof(EquipmentSyncProcessor), $"Applying Async for {nameof(EquipmentSyncDto)} : {dto.Name} | {dto.GUID} | {(dto.DescriptorGUID == null? "null descriptor guid" :dto.DescriptorGUID) }");
+            _logger?.Log(nameof(EquipmentSyncProcessor), $"Applying Async for {nameof(EquipmentSyncDTO)} : {dto.Name} | {dto.GUID} | {(dto.DescriptorGUID == null? "null descriptor guid" :dto.DescriptorGUID) }");
 
             
             // Resolve without saving here
@@ -82,6 +81,7 @@ public async Task<Result> ApplyAsync(IReadOnlyList<ISyncDto> items, ILocalReposi
                     GUID = dto.GUID,
                     CreatedAtUtc = dto.UpdatedAtUtc,
                     CreatedBy = SyncActor,
+                    Authority = dto.Authority
                 };
 
                 await dbContext.Equipments.AddAsync(entity, ct).ConfigureAwait(false);
@@ -93,6 +93,7 @@ public async Task<Result> ApplyAsync(IReadOnlyList<ISyncDto> items, ILocalReposi
 
             // Set the relationship; EF will handle DescriptorID
             entity.Descriptor = descriptor;
+            entity.Authority = dto.Authority;
 
             entity.UpdatedAtUtc = dto.UpdatedAtUtc;
             entity.UpdatedSeq = dto.UpdatedSeq;

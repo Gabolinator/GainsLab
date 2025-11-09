@@ -8,7 +8,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
+namespace GainsLab.Infrastructure.Migrations
 {
     [DbContext(typeof(GainLabSQLDBContext))]
     partial class GainLabSQLDBContextModelSnapshot : ModelSnapshot
@@ -18,11 +18,87 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.5");
 
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.DescriptorDTO", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Authority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(2)
+                        .HasColumnName("authority");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("GUID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("BLOB");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at_utc")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedSeq")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("updated_seq")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<long>("Version")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GUID")
+                        .IsUnique();
+
+                    b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
+
+                    b.ToTable("descriptors", (string)null);
+                });
+
             modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.EquipmentDTO", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
+
+                    b.Property<int>("Authority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(2)
+                        .HasColumnName("authority");
 
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("TEXT");
@@ -104,7 +180,7 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
                     b.Property<Guid>("EntityGuid")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTimeOffset>("OccurredAt")
+                    b.Property<DateTime>("OccurredAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasColumnName("occurred_at")
@@ -122,7 +198,7 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Sent");
+                    b.HasIndex("Sent", "OccurredAt");
 
                     b.ToTable("outbox_changes", (string)null);
                 });
@@ -159,73 +235,9 @@ namespace GainsLab.Infrastructure.Migrations.GainLabSQLDB
                     b.ToTable("SyncStates", (string)null);
                 });
 
-            modelBuilder.Entity("GainsLab.Models.DataManagement.DB.Model.DTOs.DescriptorDTO", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTimeOffset>("CreatedAtUtc")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedBy")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTimeOffset?>("DeletedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("DeletedBy")
-                        .HasColumnType("TEXT");
-
-                    b.Property<Guid>("GUID")
-                        .HasColumnType("TEXT");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_deleted");
-
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("BLOB");
-
-                    b.Property<DateTimeOffset>("UpdatedAtUtc")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasColumnName("updated_at_utc")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long>("UpdatedSeq")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("updated_seq")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<long>("Version")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GUID")
-                        .IsUnique();
-
-                    b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
-
-                    b.ToTable("descriptors", (string)null);
-                });
-
             modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.EquipmentDTO", b =>
                 {
-                    b.HasOne("GainsLab.Models.DataManagement.DB.Model.DTOs.DescriptorDTO", "Descriptor")
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.DescriptorDTO", "Descriptor")
                         .WithMany()
                         .HasForeignKey("DescriptorID")
                         .OnDelete(DeleteBehavior.Restrict)

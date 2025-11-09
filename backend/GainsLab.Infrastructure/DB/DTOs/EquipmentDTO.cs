@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using GainsLab.Core.Models.Core;
-using GainsLab.Models.DataManagement.DB.Model.DTOs;
 
 namespace GainsLab.Infrastructure.DB.DTOs;
 
@@ -16,7 +15,10 @@ public class EquipmentDTO : BaseDto
     public int DescriptorID { get; set; } //from descriptor dto
     
     public DescriptorDTO? Descriptor { get; set; } = null!;
-    
+
+
+    public override string? GetContent() => Name;
+   
 
     public override int Iid => Id;
     public override Guid Iguid => GUID;

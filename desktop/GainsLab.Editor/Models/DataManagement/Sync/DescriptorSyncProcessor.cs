@@ -10,7 +10,7 @@ using GainsLab.Core.Models.Core.Interfaces.DB;
 using GainsLab.Core.Models.Core.Results;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB.Context;
-using GainsLab.Models.DataManagement.DB.Model.DTOs;
+using GainsLab.Infrastructure.DB.DTOs;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Models.DataManagement.Sync;
@@ -39,10 +39,10 @@ public sealed class DescriptorSyncProcessor : ISyncEntityProcessor
 
         if (items.Count == 0) return Result.SuccessResult();
 
-        var typed = items.OfType<DescriptorSyncDto>().ToList();
+        var typed = items.OfType<DescriptorSyncDTO>().ToList();
         if (typed.Count == 0) return Result.SuccessResult();
 
-        _logger?.Log(nameof(DescriptorSyncProcessor), $"Applying {typed.Count} items of type {nameof(DescriptorSyncDto)}");
+        _logger?.Log(nameof(DescriptorSyncProcessor), $"Applying {typed.Count} items of type {nameof(DescriptorSyncDTO)}");
 
         try
         {
@@ -64,7 +64,8 @@ public sealed class DescriptorSyncProcessor : ISyncEntityProcessor
                     {
                         GUID = dto.GUID,
                         CreatedAtUtc = dto.UpdatedAtUtc,
-                        CreatedBy = SyncActor
+                        CreatedBy = SyncActor,
+                        Authority = dto.Authority
                     };
 
                     await dbContext.Descriptors.AddAsync(entity, ct).ConfigureAwait(false);
@@ -78,6 +79,7 @@ public sealed class DescriptorSyncProcessor : ISyncEntityProcessor
                 entity.IsDeleted = dto.IsDeleted;
                 entity.DeletedAt = dto.IsDeleted ? dto.UpdatedAtUtc : null;
                 entity.DeletedBy = dto.IsDeleted ? SyncActor : null;
+                entity.Authority = dto.Authority;
             }
 
             await dbContext.SaveChangesAsync(ct).ConfigureAwait(false);

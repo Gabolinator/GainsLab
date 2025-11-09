@@ -1,4 +1,6 @@
-﻿using System.Text.Json;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
 using GainsLab.Contracts.SyncService;
 using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Results;
@@ -51,8 +53,38 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
             if (pending.Count == 0)
                 return Result.SuccessResult();
 
-            var requests = await BuildPushRequestsAsync(pending, ct).ConfigureAwait(false);
+            var invalid = new List<OutboxChangeDto>();
+            foreach (var change in pending)
+            {
+                if (change.TryValidate(out var reason))
+                    continue;
 
+                invalid.Add(change);
+                _logger.LogWarning(nameof(OutboxDispatcher),
+                    $"Dropping invalid outbox item {change.Id}: {reason}");
+            }
+
+            if (invalid.Count > 0)
+            {
+                dbContext.RemoveRange(invalid);
+                pending = pending.Except(invalid).ToList();
+            }
+
+            if (pending.Count == 0)
+            {
+                await dbContext.SaveChangesAsync(ct).ConfigureAwait(false);
+                return Result.SuccessResult();
+            }
+
+            //organize so the descriptor are before the rest 
+            var ordered = pending
+                .OrderBy(e => e.RankOf())
+                .ThenBy(e => e.Entity).ToList();
+            
+            var requests = await BuildPushRequestsAsync(ordered, ct).ConfigureAwait(false);
+
+           
+            
             foreach (var request in requests)
             {
                 ct.ThrowIfCancellationRequested();
@@ -87,14 +119,15 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
         foreach (var change in pending)
         {
             ct.ThrowIfCancellationRequested();
-
-            if (!TryResolveEntityType(change, out var entityType))
+            
+            if (!change.TryResolveEntityType(out var entityType))
             {
                 _logger.LogWarning(nameof(OutboxDispatcher),
                     $"Skipping outbox item {change.Id} because the entity type could not be resolved.");
                 continue;
             }
 
+          
             using var doc = JsonDocument.Parse(change.PayloadJson);
             var payload = doc.RootElement.Clone();
 
@@ -129,13 +162,15 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
         try
         {
             var entityRoute = request.EntityType.ToString();
+            _logger.Log(nameof(OutboxDispatcher), $"Dispatch to {entityRoute}, {request.Envelope.GetString()}");
+            
             var response = await _httpClient.PostAsJsonAsync($"sync/{entityRoute}", request.Envelope, ct)
                 .ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
                 _logger.LogError(nameof(OutboxDispatcher),
-                    $"Push for {request.EntityType} failed with status {(int)response.StatusCode}.");
+                    $"Push for {request.EntityType} failed with status {(int)response.StatusCode}. - {response.ReasonPhrase}");
                 return;
             }
 
@@ -197,47 +232,62 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
         }
     }
 
-    /// <summary>
-    /// Attempts to derive the <see cref="EntityType"/> from the serialized payload.
-    /// </summary>
-    /// <param name="change">The outbox change containing the serialized payload.</param>
-    /// <param name="entityType">Populated with the resolved entity type when successful.</param>
-    private bool TryResolveEntityType(OutboxChangeDto change, out EntityType entityType)
-    {
-        try
-        {
-            using var doc = JsonDocument.Parse(change.PayloadJson);
-            if (!doc.RootElement.TryGetProperty("Type", out var typeProperty))
-            {
-                entityType = default;
-                return false;
-            }
-
-            if (typeProperty.ValueKind == JsonValueKind.String &&
-                Enum.TryParse<EntityType>(typeProperty.GetString(), true, out var fromString))
-            {
-                entityType = fromString;
-                return true;
-            }
-
-            if (typeProperty.ValueKind == JsonValueKind.Number &&
-                typeProperty.TryGetInt32(out var numeric))
-            {
-                entityType = (EntityType)numeric;
-                return true;
-            }
-
-            entityType = default;
-            return false;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(nameof(OutboxDispatcher),
-                $"Failed to resolve entity type for outbox item {change.Id}: {ex.GetBaseException().Message}");
-            entityType = default;
-            return false;
-        }
-    }
+    // /// <summary>
+    // /// Attempts to derive the <see cref="EntityType"/> from the serialized payload.
+    // /// </summary>
+    // /// <param name="change">The outbox change containing the serialized payload.</param>
+    // /// <param name="entityType">Populated with the resolved entity type when successful.</param>
+    // private bool TryResolveEntityType(OutboxChangeDto change, out EntityType entityType)
+    // {
+    //     entityType = EntityType.unidentified;
+    //     if (!Enum.TryParse(change.Entity, out DTOEntityType dtoType))
+    //     {
+    //         _logger.LogWarning(nameof(OutboxDispatcher), $"Could not parse {change.Entity} to DTOEntityType");
+    //         return false;
+    //     }
+    //
+    //     entityType= dtoType.GetEntityTye();
+    //    
+    //     return entityType != EntityType.unidentified;
+    //     
+    //     
+        //  try
+       // {
+        //     using var doc = JsonDocument.Parse(change.PayloadJson);
+        //     if (!doc.RootElement.TryGetProperty("Type", out var typeProperty))
+        //     {
+        //         entityType = default;
+        //         return false;
+        //     }
+        //
+        //     if (typeProperty.ValueKind == JsonValueKind.String &&
+        //         Enum.TryParse<EntityType>(typeProperty.GetString(), true, out var fromString))
+        //     {
+        //         entityType = fromString;
+        //         return true;
+        //     }
+        //
+        //     if (typeProperty.ValueKind == JsonValueKind.Number &&
+        //         typeProperty.TryGetInt32(out var numeric))
+        //     {
+        //         entityType = (EntityType)numeric;
+        //         return true;
+        //     }
+        //
+        //     entityType = default;
+        //     return false;
+        // }
+        // catch (Exception ex)
+        // {
+        //     _logger.LogError(nameof(OutboxDispatcher),
+        //         $"Failed to resolve entity type for outbox item {change.Id}: {ex.GetBaseException().Message}");
+        //     entityType = default;
+        //     return false;
+        //
+        //
+        //}
+        
+   // }
 
     /// <summary>
     /// Encapsulates a pending outbox change and its cloned payload.
@@ -250,5 +300,8 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
     private sealed record PushRequest(
         EntityType EntityType,
         SyncPushEnvelope Envelope,
-        IReadOnlyList<OutboxItem> Items);
+        IReadOnlyList<OutboxItem> Items)
+    {
+       
+    }
 }

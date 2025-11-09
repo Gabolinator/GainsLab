@@ -13,6 +13,7 @@ using ILogger = GainsLab.Core.Models.Core.Utilities.Logging.ILogger;
 using Results = Microsoft.AspNetCore.Http.Results;
 
 var logger = new GainsLabLogger("BACKEND");
+logger.ToggleDecoration(false);
 var clock = new Clock();
 
 var builder = WebApplication.CreateBuilder(args);
@@ -55,12 +56,12 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     services.AddSingleton<ILogger>(logger);
 
-    services.AddScoped<ISyncService<EquipmentSyncDto>, EquipmentSyncService>();
-    services.AddScoped<ISyncService<DescriptorSyncDto>, DescriptorSyncService>();
+    services.AddScoped<ISyncService<EquipmentSyncDTO>, EquipmentSyncService>();
+    services.AddScoped<ISyncService<DescriptorSyncDTO>, DescriptorSyncService>();
 
     // Also expose as non-generic so the controller can enumerate:
-    services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<EquipmentSyncDto>>());
-    services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<DescriptorSyncDto>>());
+    services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<EquipmentSyncDTO>>());
+    services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<DescriptorSyncDTO>>());
 
     // Optional CORS for your client app
     // services.AddCors(o => o.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));

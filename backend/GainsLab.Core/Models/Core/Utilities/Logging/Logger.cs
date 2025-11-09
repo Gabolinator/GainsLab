@@ -28,30 +28,99 @@ public class GainsLabLogger : ILogger
     /// </summary>
     /// <param name="name">The label displayed in logging output.</param>
     /// <param name="colorHeader">ANSI color code applied to the logger header.</param>
-    public GainsLabLogger(string name, string colorHeader)
+    public GainsLabLogger(string name, DecoratorColor colorHeader)
     {
         LoggerName = name;
-        ColorHeader = colorHeader;
+        _colorHeader = colorHeader;
+    }
+
+    public enum DecoratorColorContext
+    {
+        Reset,
+        Info,
+        Context,
+       Header,
+        WarningText,
+       WarningHeader,
+        ErrorText,
+       ErrorHeader,
+       None
+    }
+    
+    public enum DecoratorColor
+    {
+       White,
+       Cyan,
+       Green,
+       Yellow,
+       Red,
+       Reset,
+       None,
     }
 
     private bool _enabled = true;
     /// <inheritdoc />
     public bool Enabled => _enabled;
 
+    private bool _decorate = true;
+
+    
     /// <summary>
     /// Gets the display name of the logger.
     /// </summary>
     public readonly string LoggerName = "Logger";
+
+    private readonly DecoratorColor _colorHeader = DecoratorColor.Green;
+
+
+    public string GetColor( DecoratorColorContext colorContext )
+    {
+        if (!_decorate) colorContext = DecoratorColorContext.None;
+        
+        return colorContext switch
+        {
+            DecoratorColorContext.Reset => GetColorString(DecoratorColor.Reset),
+            DecoratorColorContext.Info => GetColorString(DecoratorColor.White),
+            DecoratorColorContext.Context => GetColorString(DecoratorColor.Cyan),
+            DecoratorColorContext.Header =>  GetColorString(_colorHeader),
+            DecoratorColorContext.WarningText => GetColorString(DecoratorColor.Yellow),
+            DecoratorColorContext.WarningHeader => GetColorString(DecoratorColor.Yellow),
+            DecoratorColorContext.ErrorText => GetColorString(DecoratorColor.Red),
+            DecoratorColorContext.ErrorHeader =>  GetColorString(DecoratorColor.Red),
+            _ =>  GetColorString(DecoratorColor.None),
+        };
+        
+    }
     
-    private const string ColorReset = "\u001b[0m";
-    private const string ColorInfo = "\u001b[37m";   // White
-    private const string ColorContext = "\u001b[36m"; // Cyan
-    private readonly string ColorHeader = "\u001b[32m"; // Green
-    private const string ColorWarningText = "\u001b[33m"; // Yellow
-    private const string ColorWarningHeader = "\u001b[33m"; // Yellow
-    private const string ColorErrorText = "\u001b[31m";   // Red
-    private const string ColorErrorHeader = "\u001b[31m";   // Red
-    
+    public string GetColorString(DecoratorColor color)
+    {
+        return color switch
+        {
+            DecoratorColor.White =>"\u001b[37m",
+            DecoratorColor.Cyan =>  "\u001b[36m",
+            DecoratorColor.Green => "\u001b[32m",
+            DecoratorColor.Yellow =>  "\u001b[33m",
+            DecoratorColor.Red => "\u001b[31m",
+            DecoratorColor.Reset => "\u001b[0m",
+            DecoratorColor.None => "",
+            _ => ""
+        };
+    }
+
+    private string ColorReset => GetColor(DecoratorColorContext.Reset); //"\u001b[0m";
+    private string ColorInfo  => GetColor(DecoratorColorContext.Info); // "\u001b[37m";   // White
+    private string ColorContext  => GetColor(DecoratorColorContext.Context); //"\u001b[36m"; // Cyan
+    private string ColorHeader => GetColor(DecoratorColorContext.Header); // "\u001b[32m"; // Green
+    private string ColorWarningText  => GetColor(DecoratorColorContext.WarningText); // "\u001b[33m"; // Yellow
+    private  string ColorWarningHeader => GetColor(DecoratorColorContext.WarningHeader); // "\u001b[33m"; // Yellow
+    private  string ColorErrorText => GetColor(DecoratorColorContext.ErrorText); // "\u001b[31m";   // Red
+    private string ColorErrorHeader => GetColor(DecoratorColorContext.ErrorHeader); // "\u001b[31m";   // Red
+
+    public void ToggleDecoration(bool state)
+    {
+        _decorate = state;
+    }
+
     /// <inheritdoc />
     public void ToggleLogging(bool state)
     {

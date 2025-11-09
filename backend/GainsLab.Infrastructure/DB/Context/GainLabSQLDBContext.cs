@@ -1,8 +1,10 @@
-﻿using GainsLab.Core.Models.Core.Utilities.Logging;
+﻿using System.Linq.Expressions;
+using GainsLab.Core.Models.Core;
+using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB.DTOs;
 using GainsLab.Infrastructure.DB.Outbox;
-using GainsLab.Models.DataManagement.DB.Model.DTOs;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace GainsLab.Infrastructure.DB.Context;
 
@@ -30,7 +32,7 @@ public class GainLabSQLDBContext : DbContext
     /// </summary>
     public DbSet<SyncState> SyncStates => Set<SyncState>();
 
-    DbSet<OutboxChangeDto> OutboxChanges => Set<OutboxChangeDto>();
+    public DbSet<OutboxChangeDto> OutboxChanges => Set<OutboxChangeDto>();
 
     /// <summary>
     /// Gets the table that stores equipment records.
@@ -67,28 +69,45 @@ public class GainLabSQLDBContext : DbContext
         });
     }
 
+    
+    
     /// <summary>
     /// Configures the schema for the outbox table when using SQLite.
     /// </summary>
     private void CreateOutBoxTable_Sqlite(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<OutboxChangeDto>(b =>                                                                                                                        
-        {                                                                                                                                                                
-            b.ToTable("outbox_changes");                                                                                                                                 
-            b.HasKey(x => x.Id);                                                                                                                                         
-            b.Property(x => x.Id).ValueGeneratedOnAdd();                                                                                                                 
-            b.Property(x => x.Entity).IsRequired();                                                                                                                      
-            b.Property(x => x.PayloadJson).IsRequired();                                                                                                                 
-            b.Property(x => x.OccurredAt)                                                                                                                                
-                .HasColumnName("occurred_at")                                                                                                                            
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");                                                                                                                
-            b.Property(x => x.Sent)                                                                                                                                      
-                .HasColumnName("sent")                                                                                                                                   
-                .HasDefaultValue(false);                                                                                                                                 
-            b.HasIndex(x => x.Sent);                                                                                                                                     
-        });                                                
-    }
+        // Convert DateTimeOffset <-> UTC DateTime (stored as TEXT by EF in SQLite)
+        var dtoToUtcDateTime = new ValueConverter<DateTimeOffset, DateTime>(
+            (Expression<Func<DateTimeOffset, DateTime>>)(v => v.UtcDateTime),
+            (Expression<Func<DateTime, DateTimeOffset>>)(v =>
+                new DateTimeOffset(DateTime.SpecifyKind(v, DateTimeKind.Utc))));
 
+        modelBuilder.Entity<OutboxChangeDto>(b =>
+        {
+            b.ToTable("outbox_changes");
+            b.HasKey(x => x.Id);
+            b.Property(x => x.Id).ValueGeneratedOnAdd();
+
+            b.Property(x => x.Entity)
+                .IsRequired();
+
+            b.Property(x => x.PayloadJson)
+                .IsRequired();
+
+            b.Property(x => x.OccurredAt)
+                .HasColumnName("occurred_at")
+                .HasConversion(dtoToUtcDateTime) // 👈 key line: makes ORDER BY translatable
+                .HasColumnType("TEXT")           // ISO-8601 string; lexicographically sortable
+                .HasDefaultValueSql("CURRENT_TIMESTAMP"); // SQLite UTC timestamp
+
+            b.Property(x => x.Sent)
+                .HasColumnName("sent")
+                .HasDefaultValue(false);
+
+            // helpful compound index for dispatch scanning
+            b.HasIndex(x => new { x.Sent, x.OccurredAt });
+        });
+    }
     /// <summary>
     /// Configures the schema for the equipment table when using SQLite.
     /// </summary>
@@ -124,6 +143,11 @@ public class GainLabSQLDBContext : DbContext
                 .HasColumnName("is_deleted")
                 .HasDefaultValue(false);
 
+            e.Property(x => x.Authority)
+                .HasColumnName("authority")
+                .HasConversion<int>()
+                .HasDefaultValue(DataAuthority.Bidirectional);
+
             e.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
         });
     }
@@ -157,9 +181,13 @@ public class GainLabSQLDBContext : DbContext
                 .HasColumnName("is_deleted")
                 .HasDefaultValue(false);
 
+            d.Property(x => x.Authority)
+                .HasColumnName("authority")
+                .HasConversion<int>()
+                .HasDefaultValue(DataAuthority.Bidirectional);
+
             d.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
         });
     }
 }
-
 

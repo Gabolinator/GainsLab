@@ -4,7 +4,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace GainsLab.Infrastructure.Migrations
+namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
 {
     /// <inheritdoc />
     public partial class Initial : Migration
@@ -34,7 +34,8 @@ namespace GainsLab.Infrastructure.Migrations
                     DeletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     DeletedBy = table.Column<string>(type: "text", nullable: true),
                     RowVersion = table.Column<byte[]>(type: "bytea", rowVersion: true, nullable: true),
-                    Version = table.Column<long>(type: "bigint", nullable: false)
+                    Version = table.Column<long>(type: "bigint", nullable: false),
+                    authority = table.Column<int>(type: "integer", nullable: false, defaultValue: 2)
                 },
                 constraints: table =>
                 {
@@ -62,7 +63,8 @@ namespace GainsLab.Infrastructure.Migrations
                     DeletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     DeletedBy = table.Column<string>(type: "text", nullable: true),
                     RowVersion = table.Column<byte[]>(type: "bytea", rowVersion: true, nullable: true),
-                    Version = table.Column<long>(type: "bigint", nullable: false)
+                    Version = table.Column<long>(type: "bigint", nullable: false),
+                    Authority = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -89,7 +91,8 @@ namespace GainsLab.Infrastructure.Migrations
                     DeletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     DeletedBy = table.Column<string>(type: "text", nullable: true),
                     RowVersion = table.Column<byte[]>(type: "bytea", rowVersion: true, nullable: true),
-                    Version = table.Column<long>(type: "bigint", nullable: false)
+                    Version = table.Column<long>(type: "bigint", nullable: false),
+                    authority = table.Column<int>(type: "integer", nullable: false, defaultValue: 2)
                 },
                 constraints: table =>
                 {
