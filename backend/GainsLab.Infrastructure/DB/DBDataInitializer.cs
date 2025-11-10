@@ -1,4 +1,5 @@
-﻿using GainsLab.Core.Models.Core.Factory;
+﻿using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
+using GainsLab.Core.Models.Core.Factory;
 using GainsLab.Core.Models.Core.Interfaces;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB.Context;
@@ -41,15 +42,61 @@ public class DBDataInitializer
         
         _logger.Log(nameof(DBDataInitializer),"Initializing Equipments");
         var addedEquipment = await CreateBaseEquipments(db, entityFactory);
+
+        var addedMuscle = await CreateBaseMuscles(db, entityFactory);
         
-        
-        bool addedAny = addedEquipment;
+        bool addedAny = addedEquipment || addedMuscle;
 
         if (addedAny)
         {
             _logger.Log(nameof(DBDataInitializer),$"Initializing Base Entities - Saving Changes");
             await db.SaveChangesAsync();
         }
+        
+    }
+
+    private async Task<bool> CreateBaseMuscles(GainLabPgDBContext db, EntityFactory entityFactory)
+    { 
+        var anyPresent = await db.Muscles.AnyAsync();
+        _logger.Log(nameof(DBDataInitializer),$"Initializing Muscle - Any Present: { anyPresent}");
+
+        if (anyPresent)
+        {
+            _logger.Log(nameof(DBDataInitializer),$"Initializing Muscle - Dont add base Muscle - already present");
+            return false; 
+        }
+        
+        _logger.Log(nameof(DBDataInitializer),$"Initializing Muscle - Create Base Muscle");
+
+        var muscles = entityFactory.CreateBaseMuscles();
+        foreach (var musclesEntity in muscles)
+        {
+            _logger.Log(musclesEntity.ToString());
+        }
+
+        var musclesDtos = muscles.Select(e => (MuscleDTO)e.ToDTO()!);
+
+        foreach (var muscleDto in musclesDtos)
+        {
+            _logger.Log(muscleDto.ToString());
+        }
+            
+        var descriptions = musclesDtos.Select(e => e.Descriptor).Where(d => d != null).Select(d=>d!);
+
+        foreach (var description in descriptions)
+        {
+            _logger.Log(description.ToString());
+        }
+            
+        _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Adding {musclesDtos.Count()} Base Equipments");
+
+             
+        //  db.Descriptors.AddRange(descriptions);
+        //  _logger.Log(nameof(DBDataInitializer),$"Initializing Descriptions - {descriptions.Count()} items");
+
+        db.Muscles.AddRange(musclesDtos);
+         
+        return true;
         
     }
 

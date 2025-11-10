@@ -16,6 +16,8 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
 
     public DbSet<EquipmentDTO> Equipments => Set<EquipmentDTO>();
     public DbSet<DescriptorDTO> Descriptors => Set<DescriptorDTO>();
+    public DbSet<MuscleDTO> Muscles => Set<MuscleDTO>();
+    public DbSet<MuscleAntagonistDTO> MuscleAntagonists => Set<MuscleAntagonistDTO>();
 
     public DbSet<UserDto> Users => Set<UserDto>();
     
@@ -26,6 +28,7 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
         modelBuilder.HasDefaultSchema("public");
         CreateDescriptorTableModel(modelBuilder);
         CreateEquipmentTableModel(modelBuilder);
+        CreateMuscleTableModel(modelBuilder);
         
        // CreateUserTableModel(modelBuilder);
        
@@ -90,6 +93,77 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
         
         
         
+    }
+
+    private void CreateMuscleTableModel(ModelBuilder modelBuilder)
+    {
+        _logger?.Log("GainLabPgDBContext", "Creating Muscle Table");
+
+        modelBuilder.Entity<MuscleDTO>(m =>
+        {
+            m.ToTable("muscles");
+            m.HasKey(x => x.Id);
+
+            m.Property(x => x.Name).IsRequired();
+
+            m.Property(x => x.BodySection)
+                .HasColumnName("body_section")
+                .HasConversion<int>()
+                .HasDefaultValue(eBodySection.undefined);
+
+            m.HasOne(x => x.Descriptor)
+                .WithMany()
+                .HasForeignKey(x => x.DescriptorID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            m.HasIndex(x => x.GUID).IsUnique();
+
+            m.Property(x => x.UpdatedAtUtc)
+                .IsRequired()
+                .HasColumnName("updated_at_utc")
+                .HasDefaultValueSql("now()");
+
+            m.Property(x => x.UpdatedSeq)
+                .HasColumnName("updated_seq")
+                .UseIdentityByDefaultColumn();
+
+            m.Property(x => x.IsDeleted)
+                .HasColumnName("is_deleted")
+                .HasDefaultValue(false);
+
+            m.Property(x => x.Authority)
+                .HasColumnName("authority")
+                .HasConversion<int>()
+                .HasDefaultValue(DataAuthority.Bidirectional);
+
+            m.HasMany(x => x.Antagonists)
+                .WithOne(x => x.Muscle)
+                .HasForeignKey(x => x.MuscleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.HasMany(x => x.Agonists)
+                .WithOne(x => x.Antagonist)
+                .HasForeignKey(x => x.AntagonistId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
+        });
+
+        modelBuilder.Entity<MuscleAntagonistDTO>(link =>
+        {
+            link.ToTable("muscle_antagonists");
+            link.HasKey(x => new { x.MuscleId, x.AntagonistId });
+
+            link.HasOne(x => x.Muscle)
+                .WithMany(x => x.Antagonists)
+                .HasForeignKey(x => x.MuscleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            link.HasOne(x => x.Antagonist)
+                .WithMany(x => x.Agonists)
+                .HasForeignKey(x => x.AntagonistId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 
     private void CreateDescriptorTableModel(ModelBuilder modelBuilder)

@@ -256,6 +256,9 @@ public class OutboxInterceptor : SaveChangesInterceptor
             case EntityType.Equipment when entity is EquipmentDTO equipment:
                 syncDto = EquipmentSyncMapper.ToSyncDTO(equipment);
                 return true;
+            case EntityType.Muscle when entity is MuscleDTO muscle:
+                syncDto = MuscleSyncMapper.ToSyncDTO(muscle);
+                return true;
             default:
                 return false;
         }

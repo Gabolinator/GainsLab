@@ -104,6 +104,63 @@ namespace GainsLab.Infrastructure.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "muscles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    GUID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    DescriptorID = table.Column<int>(type: "INTEGER", nullable: false),
+                    body_section = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 3),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", nullable: false),
+                    updated_at_utc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "CURRENT_TIMESTAMP"),
+                    updated_seq = table.Column<long>(type: "INTEGER", nullable: false, defaultValue: 0L),
+                    UpdatedBy = table.Column<string>(type: "TEXT", nullable: true),
+                    is_deleted = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    DeletedBy = table.Column<string>(type: "TEXT", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "BLOB", rowVersion: true, nullable: true),
+                    Version = table.Column<long>(type: "INTEGER", nullable: false),
+                    authority = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 2)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_muscles", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_muscles_descriptors_DescriptorID",
+                        column: x => x.DescriptorID,
+                        principalTable: "descriptors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "muscle_antagonists",
+                columns: table => new
+                {
+                    MuscleId = table.Column<int>(type: "INTEGER", nullable: false),
+                    AntagonistId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_muscle_antagonists", x => new { x.MuscleId, x.AntagonistId });
+                    table.ForeignKey(
+                        name: "FK_muscle_antagonists_muscles_AntagonistId",
+                        column: x => x.AntagonistId,
+                        principalTable: "muscles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_muscle_antagonists_muscles_MuscleId",
+                        column: x => x.MuscleId,
+                        principalTable: "muscles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_descriptors_GUID",
                 table: "descriptors",
@@ -132,6 +189,27 @@ namespace GainsLab.Infrastructure.Migrations
                 columns: new[] { "updated_at_utc", "updated_seq" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_muscle_antagonists_AntagonistId",
+                table: "muscle_antagonists",
+                column: "AntagonistId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_muscles_DescriptorID",
+                table: "muscles",
+                column: "DescriptorID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_muscles_GUID",
+                table: "muscles",
+                column: "GUID",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_muscles_updated_at_utc_updated_seq",
+                table: "muscles",
+                columns: new[] { "updated_at_utc", "updated_seq" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_outbox_changes_sent_occurred_at",
                 table: "outbox_changes",
                 columns: new[] { "sent", "occurred_at" });
@@ -141,6 +219,9 @@ namespace GainsLab.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "muscle_antagonists");
+
+            migrationBuilder.DropTable(
                 name: "equipments");
 
             migrationBuilder.DropTable(
@@ -148,6 +229,9 @@ namespace GainsLab.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "SyncStates");
+
+            migrationBuilder.DropTable(
+                name: "muscles");
 
             migrationBuilder.DropTable(
                 name: "descriptors");

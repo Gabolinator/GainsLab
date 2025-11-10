@@ -1,6 +1,7 @@
 # Extending GainsLab With New Sync Entities
 
-This guide distills the steps from the existing equipment/descriptor implementations so you can introduce future entities (e.g., `Muscle`, `Workout`, `Movement`) without missing any layers. Follow the sections in order; each builds on shared abstractions described in the project READMEs.
+This guide distills the steps from the existing equipment/descriptor implementations so you can introduce future entities (e.g., `Muscle`, `Workout`, `Movement`) without missing any layers. 
+Follow the sections in order; each builds on shared abstractions described in the project READMEs.
 
 ---
 
@@ -135,3 +136,7 @@ Before touching code:
 - [ ] Manual sync test: push from editor, pull from server, observe outbox + authority behavior.
 
 Following this sequence keeps schema, contracts, and runtime behavior in lockstep, making it easier to onboard future entities without rediscovering the wiring each time.
+
+### Reference Implementation
+
+The newly added `MuscleDTO` + `MuscleAntagonistDTO` (see `backend/GainsLab.Infrastructure/DB/DTOs`) demonstrate the complete pattern: shared DTOs, Postgres/SQLite mappings, sync DTO/mapper (`backend/GainsLab.Contracts/SyncDto/MuscleSyncDTO.cs`, `SyncService/MuscleSyncMapper.cs`), and HTTP/outbox updates. Use it as a template when onboarding additional workout entities.

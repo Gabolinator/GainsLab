@@ -167,6 +167,103 @@ namespace GainsLab.Infrastructure.Migrations
                     b.ToTable("equipments", (string)null);
                 });
 
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleAntagonistDTO", b =>
+                {
+                    b.Property<int>("MuscleId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("AntagonistId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("MuscleId", "AntagonistId");
+
+                    b.HasIndex("AntagonistId");
+
+                    b.ToTable("muscle_antagonists", (string)null);
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Authority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(2)
+                        .HasColumnName("authority");
+
+                    b.Property<int>("BodySection")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(3)
+                        .HasColumnName("body_section");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DescriptorID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<Guid>("GUID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("BLOB");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasColumnName("updated_at_utc")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("UpdatedSeq")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER")
+                        .HasDefaultValue(0L)
+                        .HasColumnName("updated_seq");
+
+                    b.Property<long>("Version")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DescriptorID");
+
+                    b.HasIndex("GUID")
+                        .IsUnique();
+
+                    b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
+
+                    b.ToTable("muscles", (string)null);
+                });
+
             modelBuilder.Entity("GainsLab.Infrastructure.DB.Outbox.OutboxChangeDto", b =>
                 {
                     b.Property<long>("Id")
@@ -247,6 +344,43 @@ namespace GainsLab.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("Descriptor");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleAntagonistDTO", b =>
+                {
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", "Antagonist")
+                        .WithMany("Agonists")
+                        .HasForeignKey("AntagonistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", "Muscle")
+                        .WithMany("Antagonists")
+                        .HasForeignKey("MuscleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Antagonist");
+
+                    b.Navigation("Muscle");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", b =>
+                {
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.DescriptorDTO", "Descriptor")
+                        .WithMany()
+                        .HasForeignKey("DescriptorID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Descriptor");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", b =>
+                {
+                    b.Navigation("Agonists");
+
+                    b.Navigation("Antagonists");
                 });
 #pragma warning restore 612, 618
         }

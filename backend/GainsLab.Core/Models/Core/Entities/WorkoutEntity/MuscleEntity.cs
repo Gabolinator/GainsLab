@@ -17,6 +17,8 @@ namespace GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 public class MuscleContent : IEntityContent<MuscleContent>
 {
     public string Name { get; set; }
+
+    public string LatinName { get; set; }
     public eBodySection BodySection { get; set; } = eBodySection.undefined;
    
     public MuscleContent Validate()
@@ -48,8 +50,8 @@ public class MuscleEntity :  EntityBase<MuscleId, MuscleContent, AuditedInfo>, I
     public MuscleId Id { get; }
     public MuscleContent Content { get; }
 
-    public IReadOnlySet<MuscleId> AntagonistIds { get; }
-    
+    public IReadOnlySet<MuscleId> AntagonistIds { get; set; }
+
     public AuditedInfo CreationInfo { get; }
     public BaseDescriptorEntity Descriptor { get; }
 
@@ -61,7 +63,42 @@ public class MuscleEntity :  EntityBase<MuscleId, MuscleContent, AuditedInfo>, I
         var muscle = new MuscleEntity(Content, Id, CreationInfo, Descriptor ,ids, DbId);
         return muscle;
     }
-      
+
+
+    public void AddAntagonist( bool mutualAdd , params MuscleEntity[] antagonists)
+    {
+        var added = AddAntagonist(antagonists.Select(a=>a.Id).ToArray());
+        if(!added.Any() || !mutualAdd) return;
+
+        foreach (var muscleId in added)
+        {
+            var a = antagonists.FirstOrDefault(a => a.Id == muscleId);
+            if(a ==null) continue;
+
+            a.AddAntagonist(false, this);
+        }
+        
+    }
+    
+    public IEnumerable<MuscleId> AddAntagonist(params MuscleId[] antagonists)
+    {
+        if (AntagonistIds == null || AntagonistIds.Count == 0)
+        {
+            AntagonistIds = new HashSet<MuscleId>(antagonists);
+            return AntagonistIds;
+        }
+
+        var list = new List<MuscleId>(AntagonistIds);
+        
+        foreach (var antagonist in antagonists)
+        {
+            if(list.Contains(antagonist)) continue;
+            list.Add(antagonist);
+        }
+
+        AntagonistIds = list.ToHashSet();
+        return AntagonistIds;
+    }
     
 }
 

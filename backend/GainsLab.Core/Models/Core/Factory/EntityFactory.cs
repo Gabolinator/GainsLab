@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using GainsLab.Core.Models.Core.CreationInfo;
 using GainsLab.Core.Models.Core.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Descriptor;
@@ -49,28 +50,73 @@ public class EntityFactory
     }
 
 
+    public AuditedInfo GetDefaultAudit(string creator = "system")
+    {
+       return AuditedInfo.New(_clock.UtcNow, creator);
+    }
+
     public EquipmentEntity CreateEquipment(string name, string description ,string creator = "system")
     {
-        var auditInfo = AuditedInfo.New(_clock.UtcNow, creator);
+        var auditInfo = GetDefaultAudit(creator);
 
         var jumpRope = _equipmentFactory.Create(new EquipmentCreationConfig
         {
             Id = EquipmentId.New(),
             Content = new EquipmentContent(name),
             Audit = auditInfo,
-            Descriptor = _descriptorFactory.Create(new DescriptiorCreationConfig
-            {
-                Id = DescriptorId.New(),
-                Content = new BaseDescriptorContent
-                {
-                    Description = Description.New(description)
-                },
-                Audit = auditInfo
-            })
+            Descriptor = CreateBaseDescriptor(description, auditInfo)
         });
 
         return jumpRope;
     }
 
+    public IEnumerable<MuscleEntity> CreateBaseMuscles()
+    {
+
+        var list = new List<MuscleEntity>();
+        
+        MuscleEntity quad = CreateMuscle("Quadriceps", "latin name for quad", "Some description for quad", eBodySection.LowerBody);
+        MuscleEntity harmstring= CreateMuscle("Harmstring", "latin name for armstring", "Some description for harmstring", eBodySection.LowerBody);
+
+        quad.AddAntagonist(mutualAdd: true, harmstring);
+        
+        list.Add(quad);
+        list.Add(harmstring);
+
+        return list;
+
+    }
+
+    public BaseDescriptorEntity CreateBaseDescriptor(string description ,AuditedInfo? auditedInfo = null)
+    {
+        var auditInfo = auditedInfo ?? GetDefaultAudit();
+        
+        return _descriptorFactory.Create(new DescriptiorCreationConfig
+        {
+            Id = DescriptorId.New(),
+            Content = new BaseDescriptorContent
+            {
+                Description = Description.New(description)
+            },
+            Audit = auditInfo
+        });
+    }
+
+    public MuscleEntity CreateMuscle(string name, string latinName, string description, eBodySection bodySection , string creator = "system", params MuscleId[] antagonist)
+    {
+        var auditInfo = GetDefaultAudit(creator);
+
+        var descriptor = CreateBaseDescriptor(description, auditInfo);
+        
+        var muscleContent = new MuscleContent
+        {
+            Name = name,
+            LatinName = latinName,
+            BodySection = bodySection
+        };
+
+        return new MuscleEntity(muscleContent,MuscleId.New(),auditInfo, descriptor, antagonist );
+        
+    }
 }
 

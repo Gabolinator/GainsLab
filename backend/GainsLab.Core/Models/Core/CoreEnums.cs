@@ -10,6 +10,7 @@ public static class TypeConverter
             DTOEntityType.UserDTO =>  EntityType.User,
             DTOEntityType.DescriptorDTO =>  EntityType.Descriptor,
             DTOEntityType.EquipmentDTO => EntityType.Equipment,
+            DTOEntityType.MuscleDTO => EntityType.Muscle,
             _ => EntityType.unidentified
         };
     }
@@ -42,6 +43,7 @@ public enum DTOEntityType
     UserDTO, 
     DescriptorDTO,
     EquipmentDTO,
+    MuscleDTO,
     unidentified
 }
 
@@ -50,6 +52,7 @@ public enum SyncDTOType
     UserSyncDTO, 
     DescriptorSyncDTO,
     EquipmentSyncDTO,
+    MuscleSyncDTO,
     unidentified
 }
 

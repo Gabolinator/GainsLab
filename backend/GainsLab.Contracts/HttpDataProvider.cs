@@ -44,6 +44,9 @@ public class HttpDataProvider: IRemoteProvider
             case EntityType.Equipment:
                 var pageEquip = await PullEquipmentPageAsync(cursor, take, ct);
                 return Result<ISyncPage<ISyncDto>>.SuccessResult(pageEquip);
+            case EntityType.Muscle:
+                var pageMuscle = await PullMusclePageAsync(cursor, take, ct);
+                return Result<ISyncPage<ISyncDto>>.SuccessResult(pageMuscle);
             default:
                 return Result<ISyncPage<ISyncDto>>.Failure($"Remote pull for {type} is not implemented.");
         }
@@ -95,6 +98,17 @@ public class HttpDataProvider: IRemoteProvider
         _logger.Log(nameof(HttpDataProvider), $"Pull Equipment page - take {take} - payload items count: {payload?.Items.Count ?? 0} payload items[0] {(payload?.Items.Count>0 ?payload?.Items[0] : "none" )} " );
 
         return payload ?? new SyncPage<EquipmentSyncDTO>(DateTimeOffset.UtcNow, null, Array.Empty<EquipmentSyncDTO>());
+    }
+
+    public async Task<SyncPage<MuscleSyncDTO>> PullMusclePageAsync(
+        ISyncCursor cursor, int take = 200, CancellationToken ct = default)
+    {
+        var url = $"/sync/muscle?ts={Uri.EscapeDataString(cursor.ITs.ToString("o"))}&seq={cursor.ISeq}&take={take}";
+        using var res = await _http.GetAsync(url, ct);
+        res.EnsureSuccessStatusCode();
+
+        var payload = await res.Content.ReadFromJsonAsync<SyncPage<MuscleSyncDTO>>(cancellationToken: ct);
+        return payload ?? new SyncPage<MuscleSyncDTO>(DateTimeOffset.UtcNow, null, Array.Empty<MuscleSyncDTO>());
     }
     
 }

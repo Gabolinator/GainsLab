@@ -32,6 +32,7 @@ public static class EntityDomainMapper
         {
             EntityType.Equipment => EquipmentMapper.ToDTO(domain as EquipmentEntity),
             EntityType.Descriptor => DescriptorMapper.ToDTO(domain as BaseDescriptorEntity),
+            EntityType.Muscle => MuscleMapper.ToDTO(domain as MuscleEntity),
             //to eventually implement others
             _ => throw new ArgumentOutOfRangeException()
         };
@@ -51,6 +52,7 @@ public static class EntityDomainMapper
         {
             EntityType.Equipment => EquipmentMapper.ToDomain(dto as EquipmentDTO),
             EntityType.Descriptor => DescriptorMapper.ToDomain(dto as DescriptorDTO),
+            EntityType.Muscle => MuscleMapper.ToDomain(dto as MuscleDTO),
             //to eventually implement others
             _ => throw new ArgumentOutOfRangeException()
         };

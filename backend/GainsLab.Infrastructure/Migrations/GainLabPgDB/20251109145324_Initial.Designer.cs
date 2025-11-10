@@ -179,6 +179,106 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
                     b.ToTable("equipments", "public");
                 });
 
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleAntagonistDTO", b =>
+                {
+                    b.Property<int>("MuscleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("AntagonistId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("MuscleId", "AntagonistId");
+
+                    b.HasIndex("AntagonistId");
+
+                    b.ToTable("muscle_antagonists", "public");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Authority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(2)
+                        .HasColumnName("authority");
+
+                    b.Property<int>("BodySection")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(3)
+                        .HasColumnName("body_section");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text");
+
+                    b.Property<int>("DescriptorID")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("GUID")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<long>("UpdatedSeq")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_seq");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("UpdatedSeq"));
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DescriptorID");
+
+                    b.HasIndex("GUID")
+                        .IsUnique();
+
+                    b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
+
+                    b.ToTable("muscles", "public");
+                });
+
             modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.UserDto", b =>
                 {
                     b.Property<int>("Id")
@@ -254,6 +354,43 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
                         .IsRequired();
 
                     b.Navigation("Descriptor");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleAntagonistDTO", b =>
+                {
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", "Antagonist")
+                        .WithMany("Agonists")
+                        .HasForeignKey("AntagonistId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", "Muscle")
+                        .WithMany("Antagonists")
+                        .HasForeignKey("MuscleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Antagonist");
+
+                    b.Navigation("Muscle");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", b =>
+                {
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.DescriptorDTO", "Descriptor")
+                        .WithMany()
+                        .HasForeignKey("DescriptorID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Descriptor");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", b =>
+                {
+                    b.Navigation("Agonists");
+
+                    b.Navigation("Antagonists");
                 });
 #pragma warning restore 612, 618
         }
