@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using GainsLab.Core.Models.Core.CreationInfo;
 using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Identifier;
@@ -24,6 +25,8 @@ public class MuscleContent : IEntityContent<MuscleContent>
     public MuscleContent Validate()
     {
         if (string.IsNullOrWhiteSpace(Name)) throw new ArgumentException("Muscle name is required.", nameof(Name));
+       // if (string.IsNullOrWhiteSpace(LatinName)) throw new ArgumentException("Latin name is required.", nameof(LatinName));
+        if (BodySection == eBodySection.undefined) throw new ArgumentException("Body section must be specified.", nameof(BodySection));
         return this;
     }
 }
@@ -42,7 +45,7 @@ public class MuscleEntity :  EntityBase<MuscleId, MuscleContent, AuditedInfo>, I
         int dbId = -1) : base(id, content,creation, dbId)
     {
         Descriptor = descriptor;
-        AntagonistIds = new HashSet<MuscleId>(antagonists ?? Array.Empty<MuscleId>());
+        _antagonistIds = new HashSet<MuscleId>(antagonists ?? Array.Empty<MuscleId>());
     }
     
     public override EntityType Type => EntityType.Muscle;
@@ -50,7 +53,9 @@ public class MuscleEntity :  EntityBase<MuscleId, MuscleContent, AuditedInfo>, I
     public MuscleId Id { get; }
     public MuscleContent Content { get; }
 
-    public IReadOnlySet<MuscleId> AntagonistIds { get; set; }
+    private readonly HashSet<MuscleId> _antagonistIds;
+
+    public IReadOnlySet<MuscleId> AntagonistIds => _antagonistIds;
 
     public AuditedInfo CreationInfo { get; }
     public BaseDescriptorEntity Descriptor { get; }
@@ -67,7 +72,10 @@ public class MuscleEntity :  EntityBase<MuscleId, MuscleContent, AuditedInfo>, I
 
     public void AddAntagonist( bool mutualAdd , params MuscleEntity[] antagonists)
     {
-        var added = AddAntagonist(antagonists.Select(a=>a.Id).ToArray());
+        var added = AddAntagonist(antagonists
+            .Where(a => a.Id != Id)
+            .Select(a=>a.Id)
+            .ToArray());
         if(!added.Any() || !mutualAdd) return;
 
         foreach (var muscleId in added)
@@ -82,22 +90,13 @@ public class MuscleEntity :  EntityBase<MuscleId, MuscleContent, AuditedInfo>, I
     
     public IEnumerable<MuscleId> AddAntagonist(params MuscleId[] antagonists)
     {
-        if (AntagonistIds == null || AntagonistIds.Count == 0)
-        {
-            AntagonistIds = new HashSet<MuscleId>(antagonists);
-            return AntagonistIds;
-        }
-
-        var list = new List<MuscleId>(AntagonistIds);
-        
         foreach (var antagonist in antagonists)
         {
-            if(list.Contains(antagonist)) continue;
-            list.Add(antagonist);
+            if (antagonist == Id) continue;
+            _antagonistIds.Add(antagonist);
         }
 
-        AntagonistIds = list.ToHashSet();
-        return AntagonistIds;
+        return _antagonistIds;
     }
     
 }

@@ -102,11 +102,18 @@ public class EntityFactory
         });
     }
 
-    public MuscleEntity CreateMuscle(string name, string latinName, string description, eBodySection bodySection , string creator = "system", params MuscleId[] antagonist)
+    public MuscleEntity CreateMuscle(
+        string name,
+        string latinName,
+        string description,
+        eBodySection bodySection,
+        string creator = "system",
+        BaseDescriptorEntity? descriptor = null,
+        params MuscleId[] antagonists)
     {
         var auditInfo = GetDefaultAudit(creator);
 
-        var descriptor = CreateBaseDescriptor(description, auditInfo);
+        descriptor ??= CreateBaseDescriptor(description, auditInfo);
         
         var muscleContent = new MuscleContent
         {
@@ -115,7 +122,9 @@ public class EntityFactory
             BodySection = bodySection
         };
 
-        return new MuscleEntity(muscleContent,MuscleId.New(),auditInfo, descriptor, antagonist );
+        muscleContent.Validate();
+
+        return new MuscleEntity(muscleContent,MuscleId.New(),auditInfo, descriptor, antagonists );
         
     }
 }
