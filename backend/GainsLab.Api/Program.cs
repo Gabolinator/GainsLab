@@ -58,10 +58,13 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     services.AddScoped<ISyncService<EquipmentSyncDTO>, EquipmentSyncService>();
     services.AddScoped<ISyncService<DescriptorSyncDTO>, DescriptorSyncService>();
+    services.AddScoped<ISyncService<MuscleSyncDTO>, MuscleSyncService>();
 
+    
     // Also expose as non-generic so the controller can enumerate:
     services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<EquipmentSyncDTO>>());
     services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<DescriptorSyncDTO>>());
+    services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<MuscleSyncDTO>>());
 
     // Optional CORS for your client app
     // services.AddCors(o => o.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));

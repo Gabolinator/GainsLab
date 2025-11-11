@@ -19,6 +19,7 @@ using GainsLab.Models.Factory;
 using GainsLab.Models.DataManagement.Sync;
 using System.Net.Http;
 using GainsLab.Contracts.Outbox;
+using GainsLab.Models.DataManagement.Sync.Processor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -100,6 +101,7 @@ public static class ServiceConfig
         });
         services.AddSingleton<ISyncEntityProcessor, EquipmentSyncProcessor>();
         services.AddSingleton<ISyncEntityProcessor, DescriptorSyncProcessor>();
+        services.AddSingleton<ISyncEntityProcessor, MuscleSyncProcessor>();
         services.AddSingleton<ISyncOrchestrator, SyncOrchestrator>();
         
        // services.AddSingleton<EntityFactory>();

@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using GainsLab.Contracts.SyncDto;
 using GainsLab.Contracts.SyncService;
+using GainsLab.Contracts.SyncService.Mapper;
 using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.DB;
 using GainsLab.Infrastructure.DB.Context;

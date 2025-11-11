@@ -13,7 +13,7 @@ using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.DTOs;
 using Microsoft.EntityFrameworkCore;
 
-namespace GainsLab.Models.DataManagement.Sync;
+namespace GainsLab.Models.DataManagement.Sync.Processor;
 
 /// <summary>
 /// Applies descriptor sync payloads to the local SQLite database.

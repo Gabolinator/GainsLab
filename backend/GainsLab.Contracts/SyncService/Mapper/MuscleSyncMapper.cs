@@ -1,18 +1,21 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using GainsLab.Contracts.SyncDto;
-using GainsLab.Core.Models.Core;
 using GainsLab.Infrastructure.DB.DTOs;
 
-namespace GainsLab.Contracts.SyncService;
+namespace GainsLab.Contracts.SyncService.Mapper;
 
 /// <summary>
-/// Converts between muscle sync DTOs and EF Core DTOs.
+/// Converts between muscle EF DTOs and wire sync DTOs.
 /// </summary>
 public static class MuscleSyncMapper
 {
+    /// <summary>
+    /// Creates a EF DTO ready for persistence from a sync payload.
+    /// </summary>
     public static MuscleDTO FromSyncDTO(MuscleSyncDTO dto, DescriptorDTO? descriptor, string syncActor)
     {
-        var entity = new MuscleDTO
+        return new MuscleDTO
         {
             Name = dto.Name,
             GUID = dto.GUID,
@@ -27,10 +30,11 @@ public static class MuscleSyncMapper
             DeletedAt = dto.IsDeleted ? dto.UpdatedAtUtc : null,
             DeletedBy = dto.IsDeleted ? syncActor : null
         };
-
-        return entity;
     }
 
+    /// <summary>
+    /// Projects a tracked EF DTO to the sync contract, injecting antagonist GUIDs when supplied.
+    /// </summary>
     public static MuscleSyncDTO ToSyncDTO(MuscleDTO dto, IReadOnlyList<Guid>? antagonists = null)
     {
         return new MuscleSyncDTO(

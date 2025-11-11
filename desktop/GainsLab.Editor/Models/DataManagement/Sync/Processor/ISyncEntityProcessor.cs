@@ -6,7 +6,7 @@ using GainsLab.Core.Models.Core.Interfaces.DataManagement;
 using GainsLab.Core.Models.Core.Interfaces.DB;
 using GainsLab.Core.Models.Core.Results;
 
-namespace GainsLab.Models.DataManagement.Sync;
+namespace GainsLab.Models.DataManagement.Sync.Processor;
 
 public interface ISyncEntityProcessor
 {

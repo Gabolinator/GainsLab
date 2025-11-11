@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GainsLab.Infrastructure.Migrations
 {
     [DbContext(typeof(GainLabSQLDBContext))]
-    [Migration("20251109144943_InitLocalSqlite")]
+    [Migration("20251111112744_InitLocalSqlite")]
     partial class InitLocalSqlite
     {
         /// <inheritdoc />

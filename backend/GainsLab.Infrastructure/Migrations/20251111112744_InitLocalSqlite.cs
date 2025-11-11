@@ -219,10 +219,10 @@ namespace GainsLab.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "muscle_antagonists");
+                name: "equipments");
 
             migrationBuilder.DropTable(
-                name: "equipments");
+                name: "muscle_antagonists");
 
             migrationBuilder.DropTable(
                 name: "outbox_changes");
