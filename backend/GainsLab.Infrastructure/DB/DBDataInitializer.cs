@@ -3,6 +3,7 @@ using GainsLab.Core.Models.Core.Factory;
 using GainsLab.Core.Models.Core.Interfaces;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB.Context;
+using GainsLab.Infrastructure.DB.DomainMappers;
 using GainsLab.Infrastructure.DB.DTOs;
 using GainsLab.Infrastructure.DB.Handlers;
 using GainsLab.Models.DataManagement.DB.Model.DomainMappers;
@@ -71,10 +72,12 @@ public class DBDataInitializer
         var muscles = entityFactory.CreateBaseMuscles();
         foreach (var musclesEntity in muscles)
         {
-            _logger.Log(musclesEntity.ToString());
+            _logger.Log(nameof(DBDataInitializer), "musle: " +musclesEntity.ToString());
         }
 
-        var musclesDtos = muscles.Select(e => (MuscleDTO)e.ToDTO()!);
+        var musclesDtos = muscles
+            .Select(e => (MuscleDTO)EntityDomainMapper.ToDTO(e)!)
+            .ToList();
 
         foreach (var muscleDto in musclesDtos)
         {
@@ -88,14 +91,24 @@ public class DBDataInitializer
             _logger.Log(description.ToString());
         }
             
-        _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Adding {musclesDtos.Count()} Base Equipments");
+        _logger.Log(nameof(DBDataInitializer),$"Initializing Muscles - Adding {musclesDtos.Count()} Base Muscles");
 
              
         //  db.Descriptors.AddRange(descriptions);
         //  _logger.Log(nameof(DBDataInitializer),$"Initializing Descriptions - {descriptions.Count()} items");
 
+        
+        //nothing to add
+        if (!musclesDtos.Any()) return false;
+        
         db.Muscles.AddRange(musclesDtos);
-         
+        
+        var antagonistDtos = MuscleMapper.CreateMuscleAntagonistDTOs(musclesDtos, muscles).ToList();
+        if (antagonistDtos.Count > 0)
+        {
+            db.MuscleAntagonists.AddRange(antagonistDtos);
+        }
+        
         return true;
         
     }

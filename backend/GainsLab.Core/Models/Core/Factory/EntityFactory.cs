@@ -79,9 +79,18 @@ public class EntityFactory
         MuscleEntity harmstring= CreateMuscle("Harmstring", "latin name for armstring", "Some description for harmstring", eBodySection.LowerBody);
 
         quad.AddAntagonist(mutualAdd: true, harmstring);
-        
-        list.Add(quad);
+        if (quad != null)
+        {
+            list.Add(quad);
+              if(quad.Content != null)  _logger.Log(nameof(EntityFactory) , $"Added muscle  {quad.Content.Name} to list");
+              else _logger.Log(nameof(EntityFactory) , $"Null content in muscle");
+        }
+       
+        else _logger.Log(nameof(EntityFactory) , $"Muscle is null");
+     
         list.Add(harmstring);
+        _logger.Log(nameof(EntityFactory) , $"Added muscle {harmstring.Content.Name} to list");
+
 
         return list;
 
@@ -122,9 +131,9 @@ public class EntityFactory
             BodySection = bodySection
         };
 
-        muscleContent.Validate();
-
-        return new MuscleEntity(muscleContent,MuscleId.New(),auditInfo, descriptor, antagonists );
+        _logger.Log(nameof(EntityFactory), $"Creating Muscle : {muscleContent.Name}" );
+        
+        return new MuscleEntity(muscleContent.Validate(),MuscleId.New(),auditInfo, descriptor, antagonists );
         
     }
 }

@@ -23,8 +23,10 @@ public class MuscleDTO : BaseDto
 
     public eBodySection BodySection { get; set; } = eBodySection.undefined;
 
+    //antagonist of this muscles
     public ICollection<MuscleAntagonistDTO> Antagonists { get; set; } = new List<MuscleAntagonistDTO>();
 
+    //to which other muscles is this muscle considered antagonist
     public ICollection<MuscleAntagonistDTO> Agonists { get; set; } = new List<MuscleAntagonistDTO>();
 
     public override string? GetContent() => Name;

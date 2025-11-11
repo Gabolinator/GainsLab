@@ -36,7 +36,7 @@ namespace GainsLab.Infrastructure.DB.DomainMappers;
              Name = domain.Name!,
              GUID = domain.Id,
              DescriptorID = domain.Descriptor.DbId,
-             Descriptor = domain.Descriptor.ToDTO(),
+             Descriptor = (DescriptorDTO)domain.Descriptor.ToDTO(),
              CreatedAtUtc = domain.CreationInfo.CreatedAtUtc, // do i set to todays date ? 
              CreatedBy = domain.CreationInfo.CreatedBy,
             
@@ -61,7 +61,7 @@ namespace GainsLab.Infrastructure.DB.DomainMappers;
              Id = domain.DbId,  // Use existing Id
              GUID = domain.Id,
              DescriptorID = domain.Descriptor.DbId,
-             Descriptor = domain.Descriptor.ToDTO(),
+             Descriptor =  (DescriptorDTO)domain.Descriptor.ToDTO(),
              CreatedAtUtc = domain.CreationInfo.CreatedAtUtc,
              CreatedBy = domain.CreationInfo.CreatedBy,
              IsDeleted = domain.CreationInfo.IsDeleted,
@@ -93,7 +93,7 @@ namespace GainsLab.Infrastructure.DB.DomainMappers;
                  dto.IsDeleted,
                  dto.DeletedAt,
                  dto.DeletedBy
-                 ), dto.Descriptor.ToDomain(),
+                 ),  (BaseDescriptorEntity)dto.Descriptor.ToDomain(),
              dto.Id);
 
      }

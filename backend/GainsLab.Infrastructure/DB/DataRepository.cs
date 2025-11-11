@@ -7,6 +7,7 @@ using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Core.Models.Core.Results;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB.Context;
+using GainsLab.Infrastructure.DB.DomainMappers;
 using GainsLab.Infrastructure.DB.Handlers;
 using GainsLab.Models.DataManagement.DB.Model.DomainMappers;
 using Microsoft.EntityFrameworkCore;

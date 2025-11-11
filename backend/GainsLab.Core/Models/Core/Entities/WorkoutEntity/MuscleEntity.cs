@@ -49,15 +49,9 @@ public class MuscleEntity :  EntityBase<MuscleId, MuscleContent, AuditedInfo>, I
     }
     
     public override EntityType Type => EntityType.Muscle;
-    
-    public MuscleId Id { get; }
-    public MuscleContent Content { get; }
-
     private readonly HashSet<MuscleId> _antagonistIds;
-
     public IReadOnlySet<MuscleId> AntagonistIds => _antagonistIds;
 
-    public AuditedInfo CreationInfo { get; }
     public BaseDescriptorEntity Descriptor { get; }
 
     /// <summary>
@@ -98,6 +92,10 @@ public class MuscleEntity :  EntityBase<MuscleId, MuscleContent, AuditedInfo>, I
 
         return _antagonistIds;
     }
-    
-}
 
+
+    public override string ToString()
+    {
+        return $"Muscle entity : {Id} - Name : {Content.Name} - BodySection: {Content.BodySection}";
+    }
+}

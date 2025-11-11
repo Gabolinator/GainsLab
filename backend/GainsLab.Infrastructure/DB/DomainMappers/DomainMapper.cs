@@ -1,15 +1,12 @@
-﻿using System;
-using GainsLab.Core.Models.Core;
+﻿using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Entities.Descriptor;
 using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 using GainsLab.Core.Models.Core.Interfaces.DB;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
-using GainsLab.Infrastructure.DB.DomainMappers;
 using GainsLab.Infrastructure.DB.DTOs;
-using GainsLab.Models.Core;
+using GainsLab.Models.DataManagement.DB.Model.DomainMappers;
 
-
-namespace GainsLab.Models.DataManagement.DB.Model.DomainMappers;
+namespace GainsLab.Infrastructure.DB.DomainMappers;
 
 /// <summary>
 /// Converts between domain entities and their persistence DTO representations.
@@ -25,7 +22,6 @@ public static class EntityDomainMapper
     public static IDto? ToDTO(this IEntity? domain)
     {
         if (domain == null) return null;
-
 
 
         return (domain.Type) switch

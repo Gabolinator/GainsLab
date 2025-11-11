@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GainsLab.Core")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fa5e9eccee446266585637e1aac8cd334b037cc4")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ff2cddc1dd7959f2b88fa40523f252648e686bbe")]
 [assembly: System.Reflection.AssemblyProductAttribute("GainsLab.Core")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GainsLab.Core")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
