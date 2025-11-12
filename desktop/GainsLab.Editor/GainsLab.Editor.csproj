@@ -35,4 +35,8 @@
     <ProjectReference Include="..\..\backend\GainsLab.Core\GainsLab.Core.csproj" />
     <ProjectReference Include="..\..\backend\GainsLab.Infrastructure\GainsLab.Infrastructure.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\Utilities\" />
+  </ItemGroup>
 </Project>

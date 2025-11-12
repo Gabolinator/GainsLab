@@ -313,14 +313,14 @@ public class DataRepository : ILocalRepository
     private void CreateHandlers()
     {
         var descriptorHandler = new DescriptorIdbHandler(_sqldbContext, _logger);
-        var muscleHandler = new MuscleIdbHandler(_sqldbContext, descriptorHandler, _logger);
+        
         
         _handlers = new();
         
         //todo for each EntityType 
         _handlers[EntityType.Equipment] = new EquipmentIdbHandler(_sqldbContext, descriptorHandler , _logger);
         _handlers[EntityType.Descriptor] = descriptorHandler;
-        _handlers[EntityType.Muscle] = muscleHandler;
+        _handlers[EntityType.Muscle] = new MuscleIdbHandler(_sqldbContext, descriptorHandler, _logger);
     }
     
 }

@@ -3,9 +3,11 @@ using System.Linq;
 using System.Text.Json;
 using GainsLab.Contracts.SyncService;
 using GainsLab.Core.Models.Core;
+using GainsLab.Core.Models.Core.Interfaces.DB;
 using GainsLab.Core.Models.Core.Results;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.Outbox;
+using GainsLab.Models.Utilities;
 using Microsoft.EntityFrameworkCore;
 using ILogger = GainsLab.Core.Models.Core.Utilities.Logging.ILogger;
 
@@ -39,6 +41,13 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
     /// <inheritdoc />
     public async Task<Result> DispatchAsync(CancellationToken ct)
     {
+        
+        //todo- add rechecks when failed
+        if (!await NetworkChecker.HasInternetAsync(_logger))
+        {
+            return Result.Failure($"Dispatch Failed - Not internet Connection.");
+        }
+        
         try
         {
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
@@ -83,15 +92,28 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
             
             var requests = await BuildPushRequestsAsync(ordered, ct).ConfigureAwait(false);
 
-           
-            
+
+            var failures = new List<string>();
             foreach (var request in requests)
             {
                 ct.ThrowIfCancellationRequested();
-                await DispatchRequestAsync(request, ct).ConfigureAwait(false);
+                var result = await DispatchRequestAsync(request, ct).ConfigureAwait(false);
+                if (!result.Success)
+                {
+                    failures.Add(result.GetErrorMessage());
+                }
             }
 
             await dbContext.SaveChangesAsync(ct).ConfigureAwait(false);
+
+            if (failures.Count > 0)
+            {
+                var reasons = string.Join("; ", failures.Where(f => !string.IsNullOrWhiteSpace(f)));
+                return Result.Failure(string.IsNullOrWhiteSpace(reasons)
+                    ? "One or more dispatch requests failed."
+                    : $"One or more dispatch requests failed: {reasons}");
+            }
+
             return Result.SuccessResult();
         }
         catch (OperationCanceledException)
@@ -157,7 +179,7 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
     /// </summary>
     /// <param name="request">The grouped payload to dispatch.</param>
     /// <param name="ct">Cancellation token propagated from the caller.</param>
-    private async Task DispatchRequestAsync(PushRequest request, CancellationToken ct)
+    private async Task<Result> DispatchRequestAsync(PushRequest request, CancellationToken ct)
     {
         try
         {
@@ -169,9 +191,10 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError(nameof(OutboxDispatcher),
-                    $"Push for {request.EntityType} failed with status {(int)response.StatusCode}. - {response.ReasonPhrase}");
-                return;
+                var log =
+                    $"Push for {request.EntityType} failed with status {(int)response.StatusCode}. - {response.ReasonPhrase}";
+                _logger.LogError(nameof(OutboxDispatcher), log);
+                return Result.Failure(log);
             }
 
             var result = await response.Content.ReadFromJsonAsync<PushResult>(cancellationToken: ct)
@@ -179,12 +202,13 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
 
             if (result is null)
             {
-                _logger.LogError(nameof(OutboxDispatcher),
-                    $"Push for {request.EntityType} returned an empty payload.");
-                return;
+                var log = $"Push for {request.EntityType} returned an empty payload.";
+                _logger.LogError(nameof(OutboxDispatcher), log);
+                return Result.Failure(log);
             }
 
             MarkDispatched(request.Items, result);
+            return Result.SuccessResult();
         }
         catch (OperationCanceledException)
         {
@@ -192,8 +216,10 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
         }
         catch (Exception ex)
         {
-            _logger.LogError(nameof(OutboxDispatcher),
-                $"Push for {request.EntityType} failed: {ex.GetBaseException().Message}");
+            var log = $"Push for {request.EntityType} failed: {ex.GetBaseException().Message}";
+            _logger.LogError(nameof(OutboxDispatcher), log);
+            return Result.Failure(log);
+            
         }
     }
 

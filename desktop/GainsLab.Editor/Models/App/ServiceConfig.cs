@@ -70,17 +70,11 @@ public static class ServiceConfig
         
         services.AddSingleton<IAppLifeCycle,AppLifecycleService>();
         services.AddSingleton<ILocalRepository, DataRepository>();
-        
-        void ConfigureSyncClient(HttpClient client)
+        void ConfigureSyncClient(IServiceProvider sp, HttpClient client)
         {
-            var baseUrl = Environment.GetEnvironmentVariable("GAINS_SYNC_BASE_URL");
-            if (string.IsNullOrWhiteSpace(baseUrl))
-            {
-                baseUrl = "https://localhost:5001/";
-            }
-
-            if (!baseUrl.EndsWith("/")) baseUrl += "/";
-            client.BaseAddress = new Uri(baseUrl);
+            var logger = sp.GetService<ILogger>();
+            var baseAddress = ResolveSyncBaseAddress(logger);
+            client.BaseAddress = baseAddress;
             client.Timeout = TimeSpan.FromSeconds(30);
         }
 
@@ -108,5 +102,26 @@ public static class ServiceConfig
         services.AddSingleton<MainWindow>();
         services.AddSingleton<SystemInitializer>();
      
+    }
+    private static Uri ResolveSyncBaseAddress(ILogger? logger)
+    {
+        const string defaultBase = "https://localhost:5001/";
+        var configured = Environment.GetEnvironmentVariable("GAINS_SYNC_BASE_URL");
+        var candidate = string.IsNullOrWhiteSpace(configured) ? defaultBase : configured.Trim();
+
+        if (!Uri.TryCreate(candidate, UriKind.Absolute, out var uri) ||
+            (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+        {
+            var message =
+                $"GAINS_SYNC_BASE_URL must be an absolute http/https URL. Current value: '{candidate}'.";
+            logger?.LogError(nameof(ServiceConfig), message);
+            throw new InvalidOperationException(message);
+        }
+
+        var normalized = uri.ToString();
+        if (!normalized.EndsWith("/")) normalized += "/";
+
+        logger?.Log(nameof(ServiceConfig), $"Using sync server base address {normalized}");
+        return new Uri(normalized);
     }
 }
