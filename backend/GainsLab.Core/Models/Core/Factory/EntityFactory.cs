@@ -23,12 +23,14 @@ public class EntityFactory
         _clock = clock;
         _equipmentFactory = new EquipmentFactory(clock, descriptorService );
         _descriptorFactory = new DescriptorFactory(clock, descriptorService );
+        _muscleFactory = new MuscleFactory(clock, descriptorService);
 
     }
 
     private readonly ILogger _logger;
     private readonly EquipmentFactory _equipmentFactory;
     private readonly DescriptorFactory _descriptorFactory;
+    private readonly MuscleFactory _muscleFactory;
     private readonly IClock _clock;
 
 
@@ -123,7 +125,7 @@ public class EntityFactory
         var auditInfo = GetDefaultAudit(creator);
 
         descriptor ??= CreateBaseDescriptor(description, auditInfo);
-        
+
         var muscleContent = new MuscleContent
         {
             Name = name,
@@ -132,8 +134,15 @@ public class EntityFactory
         };
 
         _logger.Log(nameof(EntityFactory), $"Creating Muscle : {muscleContent.Name}" );
-        
-        return new MuscleEntity(muscleContent.Validate(),MuscleId.New(),auditInfo, descriptor, antagonists );
+
+        return _muscleFactory.Create(new MuscleCreationConfig
+        {
+            Content = muscleContent,
+            Audit = auditInfo,
+            Descriptor = descriptor,
+            CreatedBy = creator,
+            Antagonists = antagonists
+        });
         
     }
 }

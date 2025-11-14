@@ -5,10 +5,7 @@ using GainsLab.Core.Models.Core.Utilities;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB;
 using GainsLab.Infrastructure.DB.Context;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using ILogger = GainsLab.Core.Models.Core.Utilities.Logging.ILogger;
 using Results = Microsoft.AspNetCore.Http.Results;
 

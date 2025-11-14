@@ -15,7 +15,6 @@ using GainsLab.Models.DataManagement.Caching;
 using GainsLab.Models.DataManagement.Caching.Interface;
 using GainsLab.Models.DataManagement.DB;
 using GainsLab.Models.DataManagement.FileAccess;
-using GainsLab.Models.Factory;
 using GainsLab.Models.DataManagement.Sync;
 using System.Net.Http;
 using GainsLab.Contracts.Outbox;

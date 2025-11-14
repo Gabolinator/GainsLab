@@ -5,7 +5,6 @@ using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using GainsLab.Core.Models.Core.Factory;
 using GainsLab.Core.Models.Core.Results;
-using GainsLab.Models.Factory;
 using Microsoft.Extensions.Logging;
 using ILogger = GainsLab.Core.Models.Core.Utilities.Logging.ILogger;
 

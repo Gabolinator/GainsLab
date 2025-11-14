@@ -12,9 +12,19 @@ namespace GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 /// </summary>
 public record MovementCategoryContent(string Name , params eMovementCategories[] BaseCategories) : IEntityContent<MovementCategoryContent>
 {
+    public MovementCategoryId? ParentCategoryId { get; set; } = null;
+    
     public MovementCategoryContent Validate()
     {
-        if (string.IsNullOrWhiteSpace(Name)) throw new ArgumentException("MovementCategory name is required.", nameof(Name));
+        if (string.IsNullOrWhiteSpace(Name))
+            throw new ArgumentException("MovementCategory name is required.", nameof(Name));
+
+        if (BaseCategories is null || BaseCategories.Length == 0)
+            throw new ArgumentException("At least one base category is required.", nameof(BaseCategories));
+
+        if (BaseCategories.Contains(eMovementCategories.undefined))
+            throw new ArgumentException("Base categories cannot include 'undefined'.", nameof(BaseCategories));
+
         return this;
     }
 }
@@ -44,7 +54,16 @@ public class MovementCategoryEntity : EntityBase<MovementCategoryId, MovementCat
     {
         var content = new MovementCategoryContent(Content.Name, baseCategories);
         return new MovementCategoryEntity(content, Id, CreationInfo, Descriptor, DbId);
-      
+    }
+    
+    /// <summary>
+    /// Returns a copy with base movement categories replaced by the supplied parent.
+    /// </summary>
+    public MovementCategoryEntity WithParentCategory (MovementCategoryId? parentId)
+    {
+        var content =  new MovementCategoryContent(Content.Name, Content.BaseCategories);
+        content.ParentCategoryId = parentId;
+        return new MovementCategoryEntity(content, Id, CreationInfo, Descriptor, DbId);
     }
 
     public override EntityType Type => EntityType.MovementCategory;

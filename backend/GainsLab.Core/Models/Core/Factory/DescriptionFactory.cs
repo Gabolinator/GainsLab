@@ -14,7 +14,7 @@ namespace GainsLab.Core.Models.Core.Factory;
 /// <summary>
 /// Configuration payload used when creating descriptor entities.
 /// </summary>
-public class DescriptiorCreationConfig
+public sealed class DescriptiorCreationConfig
 {
 
     public DescriptorId? Id { get; init; }
@@ -51,6 +51,7 @@ public class DescriptorFactory : IEntityFactory<BaseDescriptorEntity, Descriptio
     /// </summary>
     public BaseDescriptorEntity Create(DescriptiorCreationConfig cfg)
     {
+        if (cfg is null) throw new ArgumentNullException(nameof(cfg));
         if (cfg.Content is null) throw new ArgumentNullException(nameof(cfg.Content));
         var content = cfg.Content.Validate(); 
 
