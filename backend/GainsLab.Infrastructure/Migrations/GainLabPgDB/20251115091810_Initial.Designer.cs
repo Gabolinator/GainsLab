@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
 {
     [DbContext(typeof(GainLabPgDBContext))]
-    [Migration("20251111093508_Initial")]
+    [Migration("20251115091810_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -177,6 +177,105 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
                     b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
 
                     b.ToTable("equipments", "public");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MovementCategoryDTO", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Authority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(2)
+                        .HasColumnName("authority");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text");
+
+                    b.Property<int>("DescriptorID")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("GUID")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("ParentCategoryDbId")
+                        .HasColumnType("integer");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<long>("UpdatedSeq")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_seq");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("UpdatedSeq"));
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DescriptorID");
+
+                    b.HasIndex("GUID")
+                        .IsUnique();
+
+                    b.HasIndex("ParentCategoryDbId");
+
+                    b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
+
+                    b.ToTable("movement_category", "public");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MovementCategoryRelationDTO", b =>
+                {
+                    b.Property<int>("ParentCategoryId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ChildCategoryId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ParentCategoryId", "ChildCategoryId");
+
+                    b.HasIndex("ChildCategoryId");
+
+                    b.ToTable("movement_category_relations", "public");
                 });
 
             modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleAntagonistDTO", b =>
@@ -356,6 +455,43 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
                     b.Navigation("Descriptor");
                 });
 
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MovementCategoryDTO", b =>
+                {
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.DescriptorDTO", "Descriptor")
+                        .WithMany()
+                        .HasForeignKey("DescriptorID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.MovementCategoryDTO", "ParentCategory")
+                        .WithMany()
+                        .HasForeignKey("ParentCategoryDbId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Descriptor");
+
+                    b.Navigation("ParentCategory");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MovementCategoryRelationDTO", b =>
+                {
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.MovementCategoryDTO", "ChildCategory")
+                        .WithMany("BaseCategoryLinks")
+                        .HasForeignKey("ChildCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.MovementCategoryDTO", "ParentCategory")
+                        .WithMany("ChildCategoryLinks")
+                        .HasForeignKey("ParentCategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ChildCategory");
+
+                    b.Navigation("ParentCategory");
+                });
+
             modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleAntagonistDTO", b =>
                 {
                     b.HasOne("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", "Antagonist")
@@ -384,6 +520,13 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
                         .IsRequired();
 
                     b.Navigation("Descriptor");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MovementCategoryDTO", b =>
+                {
+                    b.Navigation("BaseCategoryLinks");
+
+                    b.Navigation("ChildCategoryLinks");
                 });
 
             modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", b =>

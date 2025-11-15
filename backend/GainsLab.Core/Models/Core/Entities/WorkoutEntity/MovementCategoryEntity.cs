@@ -20,10 +20,10 @@ public record MovementCategoryContent(string Name , params eMovementCategories[]
             throw new ArgumentException("MovementCategory name is required.", nameof(Name));
 
         if (BaseCategories is null || BaseCategories.Length == 0)
-            throw new ArgumentException("At least one base category is required.", nameof(BaseCategories));
+            throw new ArgumentException($" Movemenent Category: {Name} : At least one base category is required.", nameof(BaseCategories));
 
         if (BaseCategories.Contains(eMovementCategories.undefined))
-            throw new ArgumentException("Base categories cannot include 'undefined'.", nameof(BaseCategories));
+            throw new ArgumentException($"Base categories of {Name} cannot include 'undefined'.", nameof(BaseCategories));
 
         return this;
     }

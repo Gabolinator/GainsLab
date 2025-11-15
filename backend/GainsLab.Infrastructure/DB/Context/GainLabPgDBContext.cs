@@ -13,13 +13,20 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
     private ILogger? _logger;
     private IClock _clock;
 
+    #region DB SETS
 
     public DbSet<EquipmentDTO> Equipments => Set<EquipmentDTO>();
     public DbSet<DescriptorDTO> Descriptors => Set<DescriptorDTO>();
     public DbSet<MuscleDTO> Muscles => Set<MuscleDTO>();
     public DbSet<MuscleAntagonistDTO> MuscleAntagonists => Set<MuscleAntagonistDTO>();
 
+    public DbSet<MovementCategoryDTO> MovementCategories => Set<MovementCategoryDTO>();
+    public DbSet<MovementCategoryRelationDTO> MovementCategoryRelations => Set<MovementCategoryRelationDTO>();
+    
     public DbSet<UserDto> Users => Set<UserDto>();
+
+
+    #endregion
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -29,9 +36,82 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
         CreateDescriptorTableModel(modelBuilder);
         CreateEquipmentTableModel(modelBuilder);
         CreateMuscleTableModel(modelBuilder);
-        
-       // CreateUserTableModel(modelBuilder);
+        CreateMovementCategoryTableModel(modelBuilder);
+        // CreateUserTableModel(modelBuilder);
+
+    }
+
+    private void CreateMovementCategoryTableModel(ModelBuilder modelBuilder)
+    {
        
+          _logger?.Log("GainLabPgDBContext", "Creating Movement Category Table");
+
+        modelBuilder.Entity<MovementCategoryDTO>(m =>
+        {
+            m.ToTable("movement_category");
+            m.HasKey(x => x.Id);
+
+            m.Property(x => x.Name).IsRequired();
+            
+            m.HasOne(x => x.Descriptor)
+                .WithMany()
+                .HasForeignKey(x => x.DescriptorID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            m.HasOne(x => x.ParentCategory)
+                .WithMany()
+                .HasForeignKey(x => x.ParentCategoryDbId)
+                .OnDelete(DeleteBehavior.Restrict);
+   
+            m.HasIndex(x => x.GUID).IsUnique();
+
+            m.Property(x => x.UpdatedAtUtc)
+                .IsRequired()
+                .HasColumnName("updated_at_utc")
+                .HasDefaultValueSql("now()");
+
+            m.Property(x => x.UpdatedSeq)
+                .HasColumnName("updated_seq")
+                .UseIdentityByDefaultColumn();
+
+            m.Property(x => x.IsDeleted)
+                .HasColumnName("is_deleted")
+                .HasDefaultValue(false);
+
+            m.Property(x => x.Authority)
+                .HasColumnName("authority")
+                .HasConversion<int>()
+                .HasDefaultValue(DataAuthority.Bidirectional);
+
+            m.HasMany(x => x.BaseCategoryLinks)
+                .WithOne(x => x.ChildCategory)
+                .HasForeignKey(x => x.ChildCategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.HasMany(x => x.ChildCategoryLinks)
+                .WithOne(x => x.ParentCategory)
+                .HasForeignKey(x => x.ParentCategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
+        });
+
+        modelBuilder.Entity<MovementCategoryRelationDTO>(link =>
+        {
+            link.ToTable("movement_category_relations");
+            link.HasKey(x => new { x.ParentCategoryId, x.ChildCategoryId });
+
+            link.HasOne(x => x.ParentCategory)
+                .WithMany(x => x.ChildCategoryLinks)
+                .HasForeignKey(x => x.ParentCategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            link.HasOne(x => x.ChildCategory)
+                .WithMany(x => x.BaseCategoryLinks)
+                .HasForeignKey(x => x.ChildCategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
     }
 
     private void CreateUserTableModel(ModelBuilder modelBuilder)

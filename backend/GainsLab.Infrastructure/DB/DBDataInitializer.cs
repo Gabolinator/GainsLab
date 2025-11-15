@@ -41,10 +41,10 @@ public class DBDataInitializer
         
         var entityFactory = new EntityFactory(_clock,_logger, descriptionService);
         
-        _logger.Log(nameof(DBDataInitializer),"Initializing Equipments");
+        
         var addedEquipment = await CreateBaseEquipments(db, entityFactory);
-
         var addedMuscle = await CreateBaseMuscles(db, entityFactory);
+        var addedCategories = await CreateBaseCategories(db, entityFactory);
         
         bool addedAny = addedEquipment || addedMuscle;
 
@@ -53,6 +53,65 @@ public class DBDataInitializer
             _logger.Log(nameof(DBDataInitializer),$"Initializing Base Entities - Saving Changes");
             await db.SaveChangesAsync();
         }
+        
+    }
+
+    private async Task<bool> CreateBaseCategories(GainLabPgDBContext db, EntityFactory entityFactory)
+    {
+        var anyPresent = await db.MovementCategories.AnyAsync();
+        _logger.Log(nameof(DBDataInitializer),$"Initializing Categories - Any Present:  {anyPresent}");
+        
+        if (anyPresent)
+        {
+            _logger.Log(nameof(DBDataInitializer),$"Initializing Categories - Dont add base Categories - already present");
+            return false; 
+        }
+        
+        _logger.Log(nameof(DBDataInitializer),$"Initializing Categories - Create Base Categories");
+
+        var categories = entityFactory.CreateBaseCategories();
+        
+        foreach (var categoriesEntity in categories)
+        {
+            _logger.Log(nameof(DBDataInitializer), "category: " +categoriesEntity.ToString());
+        }
+
+        var categoriesDtos = categories
+            .Select(e => (MovementCategoryDTO)EntityDomainMapper.ToDTO(e)!)
+            .ToList();
+
+        foreach (var categoryDto in categoriesDtos)
+        {
+            _logger.Log(categoryDto.ToString());
+        }
+            
+        var descriptions = categoriesDtos.Select(e => e.Descriptor).Where(d => d != null).Select(d=>d!);
+
+        foreach (var description in descriptions)
+        {
+            _logger.Log(description.ToString());
+        }
+            
+        _logger.Log(nameof(DBDataInitializer),$"Initializing categories - Adding {categoriesDtos.Count()} Base categories");
+
+             
+        //  db.Descriptors.AddRange(descriptions);
+        //  _logger.Log(nameof(DBDataInitializer),$"Initializing Descriptions - {descriptions.Count()} items");
+
+        
+        //nothing to add
+        if (!categoriesDtos.Any()) return false;
+        
+        db.MovementCategories.AddRange(categoriesDtos);
+        
+        var relationDtos = MovementCategoryMapper.CreateMovementCategoriesRelationDTOs(categoriesDtos, categories).ToList();
+        if (relationDtos.Count > 0)
+        {
+            db.MovementCategoryRelations.AddRange(relationDtos);
+        }
+        
+        return true;
+
         
     }
 
@@ -120,6 +179,8 @@ public class DBDataInitializer
     /// <param name="entityFactory">Factory responsible for creating baseline equipment domain entities.</param>
     private async Task<bool> CreateBaseEquipments(GainLabPgDBContext db, EntityFactory entityFactory)
     {
+        _logger.Log(nameof(DBDataInitializer),"Initializing Equipments");
+        
         var anyPresent = await db.Equipments.AnyAsync();
         _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Any Present: { anyPresent}");
 

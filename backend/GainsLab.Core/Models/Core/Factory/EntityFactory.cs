@@ -24,6 +24,7 @@ public class EntityFactory
         _equipmentFactory = new EquipmentFactory(clock, descriptorService );
         _descriptorFactory = new DescriptorFactory(clock, descriptorService );
         _muscleFactory = new MuscleFactory(clock, descriptorService);
+        _movementCategoryFactory = new MovementCategoryFactory(clock, descriptorService);
 
     }
 
@@ -31,6 +32,7 @@ public class EntityFactory
     private readonly EquipmentFactory _equipmentFactory;
     private readonly DescriptorFactory _descriptorFactory;
     private readonly MuscleFactory _muscleFactory;
+    private readonly MovementCategoryFactory _movementCategoryFactory;
     private readonly IClock _clock;
 
 
@@ -144,6 +146,70 @@ public class EntityFactory
             Antagonists = antagonists
         });
         
+    }
+
+    public IEnumerable<MovementCategoryEntity> CreateBaseCategories()
+    {
+
+
+        List<MovementCategoryEntity> baseCategories = CreateMovementCategoryFromEnum();
+        
+    
+       //then we create the custom categories
+       var kettlebelling = CreateMovementCategory(
+           "Kettlebelling", 
+           "Some description for kettlebelling", 
+           "system", 
+           null,
+           null, eMovementCategories.Weightlifting, eMovementCategories.Cardio);
+       
+       baseCategories.Add(kettlebelling);
+       
+       
+       return baseCategories;
+
+    }
+
+    private List<MovementCategoryEntity> CreateMovementCategoryFromEnum()
+    {
+        var baseCategories = new List<MovementCategoryEntity>();
+        
+        //create the base categories for the enum values 
+        foreach (var eMoveCat in Enum.GetValues<eMovementCategories>())
+        {
+            if(eMoveCat == eMovementCategories.undefined) continue;
+            MovementCategoryEntity cat = CreateMovementCategory(eMoveCat.ToString(), eMoveCat.GetDescription(), "system", null, null, eMoveCat);
+            baseCategories.Add(cat);
+        }
+
+        return baseCategories;
+    }
+
+    private MovementCategoryEntity CreateMovementCategory( 
+        string name,
+        string description,
+        string creator = "system",
+        BaseDescriptorEntity? descriptor = null,
+        MovementCategoryId? parentId = null,
+        params eMovementCategories[] baseCategories)
+    {
+        var content = new MovementCategoryContent(name, baseCategories);
+        content.ParentCategoryId = parentId;
+        
+        var auditInfo = GetDefaultAudit(creator);
+
+        descriptor ??= CreateBaseDescriptor(description, auditInfo);
+        
+        var cat = _movementCategoryFactory.Create(new MovementCategoryCreationConfig
+        {
+             Id = MovementCategoryId.New(),
+             Name = name,
+             BaseCategories = baseCategories,
+             Audit = auditInfo,
+             Descriptor = descriptor
+        });
+
+        return cat;
     }
 }
 
