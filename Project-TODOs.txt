@@ -1,0 +1,25 @@
+Core (backend/GainsLab.Core)
+1. Models/Core/CreationInfo/CreationInfo.cs:47 – Replace the hardcoded BaseAuditedInfo.Clock reference with a real clock abstraction (inject IClock/CoreUtilities) so audit metadata uses the configurable clock.
+2. Models/Core/Interfaces/Component/IWorkoutComponent.cs:19 – If the legacy IWorkoutComponent contract is brought back, enumerate all supported component polymorphic types (equipment, muscles, movements, etc.) instead of leaving the placeholder todo.
+3. Models/Core/Entities/Descriptor/BaseDescriptor.cs:56 – Implement BaseDescriptorContent.Validate() so descriptor data (Description/Notes/Tags/Media) is actually validated before persistence.
+4. Models/Core/Interfaces/Entity/IEntity.cs:9 – Finish the refactor to the new IEntity architecture and port existing aggregates onto the shared base types.
+5. Models/Core/EnumExtensions.cs:5 – Replace the "define me" placeholder descriptions with real text for each eMovementCategories value.
+
+Infrastructure & API
+6. backend/GainsLab.Api/Program.cs:29 – Remove the forced Development environment override (or make it configurable) before production deployment.
+7. backend/GainsLab.Contracts/Outbox/OutboxDispatcher.cs:45 – Add retry/recheck logic for failed dispatch attempts so transient network issues don’t drop changes.
+8. backend/GainsLab.Infrastructure/DB/DataRepository.cs:320 – Populate _handlers for every EntityType (movement categories, movements, workouts, etc.) instead of just equipment/descriptors/muscles.
+9. backend/GainsLab.Infrastructure/DB/Handlers/DescriptorService.cs:19 & :29 – Implement BaseDescriptorService.CreateFor/Update so descriptors are persisted/updated properly instead of returning empty shells.
+10. backend/GainsLab.Infrastructure/DB/Context/GainLabPgDBContext.cs:296 – Complete the SaveChangesAsync override (or remove the todo) so timestamps/metadata are consistently applied via the injected clock.
+11. backend/GainsLab.Infrastructure/Caching/ComponentCacheRegistry.cs:56-118 – Implement all cache registry operations (TryGetCache, TryGetComponent(s), Store/StoreAll, Remove, Clear, etc.) and the TODO placeholders inside StoreAll overloads.
+
+Desktop (GainsLab.Editor)
+12. Models/DataManagement/DataManager.cs:131 – Implement CheckForUpdatesFromUpstream() so the editor actually pulls deltas when online.
+13. Models/DataManagement/DataManager.cs:224 – Implement file loading logic before batch database insertion (currently marked //todo - not implemented).
+14. Models/DataManagement/DataManager.cs:229 – Implement BatchSaveComponentsAsync invocation handling (currently placeholder comment) so file data persists locally.
+15. Models/DataManagement/DataManager.cs:247 – Implement _local.GetAllComponentsAsync() caching flow before storing in-memory caches.
+16. Models/DataManagement/FileAccess/FileDataService.cs:37-69 – Implement SaveToFileAsync, LoadFromFileAsync, LoadAllComponentsAsync, and WriteAllComponentsAsync so offline persistence actually works.
+17. Models/DataManagement/FileAccess/ComponentJsonHelper.cs:19 – When re-enabling file serialization, register all component derived types with the System.Text.Json polymorphism metadata instead of leaving the placeholder todo.
+
+General
+18. Seed the databases with the real baseline data set (replace current test data) once the models and sync flows above are implemented and stable.
