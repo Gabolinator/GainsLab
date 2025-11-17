@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CppExercices", "CppExercices.vcxproj", "{DA3C6538-91CB-4760-A95C-8CBF62652208}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PointerAndRefs", "PointerAndRefs\PointerAndRefs.vcxproj", "{31F68111-3249-4FB8-A23E-5EA6A19C0DB9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA3C6538-91CB-4760-A95C-8CBF62652208}.Debug|Win32.ActiveCfg = Debug|Win32
+		{DA3C6538-91CB-4760-A95C-8CBF62652208}.Debug|Win32.Build.0 = Debug|Win32
+		{DA3C6538-91CB-4760-A95C-8CBF62652208}.Debug|x64.ActiveCfg = Debug|x64
+		{DA3C6538-91CB-4760-A95C-8CBF62652208}.Debug|x64.Build.0 = Debug|x64
+		{DA3C6538-91CB-4760-A95C-8CBF62652208}.Release|Win32.ActiveCfg = Release|Win32
+		{DA3C6538-91CB-4760-A95C-8CBF62652208}.Release|Win32.Build.0 = Release|Win32
+		{DA3C6538-91CB-4760-A95C-8CBF62652208}.Release|x64.ActiveCfg = Release|x64
+		{DA3C6538-91CB-4760-A95C-8CBF62652208}.Release|x64.Build.0 = Release|x64
+		{31F68111-3249-4FB8-A23E-5EA6A19C0DB9}.Debug|Win32.ActiveCfg = Debug|Win32
+		{31F68111-3249-4FB8-A23E-5EA6A19C0DB9}.Debug|Win32.Build.0 = Debug|Win32
+		{31F68111-3249-4FB8-A23E-5EA6A19C0DB9}.Debug|x64.ActiveCfg = Debug|x64
+		{31F68111-3249-4FB8-A23E-5EA6A19C0DB9}.Debug|x64.Build.0 = Debug|x64
+		{31F68111-3249-4FB8-A23E-5EA6A19C0DB9}.Release|Win32.ActiveCfg = Release|Win32
+		{31F68111-3249-4FB8-A23E-5EA6A19C0DB9}.Release|Win32.Build.0 = Release|Win32
+		{31F68111-3249-4FB8-A23E-5EA6A19C0DB9}.Release|x64.ActiveCfg = Release|x64
+		{31F68111-3249-4FB8-A23E-5EA6A19C0DB9}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+EndGlobal

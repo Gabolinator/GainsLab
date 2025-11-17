@@ -41,15 +41,14 @@ public static class MovementCategorySyncMapper
     /// </summary>
     public static MovementCategorySyncDto ToSyncDTO(
         MovementCategoryDTO dto,
-        Guid? parentCategoryGuid,
-        IReadOnlyList<eMovementCategories>? baseCategories = null)
+        (Guid? parentCategoryGuid, IReadOnlyList<eMovementCategories>? baseCategories) parentAndBase)
     {
         return new MovementCategorySyncDto(
             dto.GUID,
             dto.Name,
             dto.Descriptor?.GUID,
-            parentCategoryGuid,
-            baseCategories ?? Array.Empty<eMovementCategories>(),
+            parentAndBase.parentCategoryGuid,
+            parentAndBase.baseCategories ?? Array.Empty<eMovementCategories>(),
             dto.UpdatedAtUtc,
             dto.UpdatedSeq,
             dto.IsDeleted,
