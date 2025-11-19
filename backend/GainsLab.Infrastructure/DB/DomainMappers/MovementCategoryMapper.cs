@@ -86,7 +86,7 @@ public static class MovementCategoryMapper
     /// Creates relation DTOs linking categories to their parents/base categories.
     /// </summary>
     public static IEnumerable<MovementCategoryRelationDTO> CreateMovementCategoriesRelationDTOs(
-        List<MovementCategoryDTO> categoryDtos,
+        IReadOnlyCollection<MovementCategoryDTO> categoryDtos,
         IEnumerable<MovementCategoryEntity> categories)
     {
         if (categoryDtos == null) throw new ArgumentNullException(nameof(categoryDtos));

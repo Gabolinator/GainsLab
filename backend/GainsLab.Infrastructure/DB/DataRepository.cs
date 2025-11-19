@@ -1,6 +1,5 @@
-﻿using System.Diagnostics;
+﻿
 using GainsLab.Core.Models.Core;
-using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 using GainsLab.Core.Models.Core.Interfaces.DataManagement;
 using GainsLab.Core.Models.Core.Interfaces.DB;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
@@ -9,7 +8,6 @@ using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.DomainMappers;
 using GainsLab.Infrastructure.DB.Handlers;
-using GainsLab.Models.DataManagement.DB.Model.DomainMappers;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB;
@@ -22,9 +20,9 @@ public class DataRepository : ILocalRepository
     
     private readonly ILogger _logger;
     private readonly GainLabSQLDBContext _sqldbContext;
-    private Dictionary<EntityType, IDBHandler> _handlers = new();
-    
-    
+    private Dictionary<EntityType, IDBHandler> _handlers { get; set; } = new();
+
+
     /// <summary>
     /// Initializes a new instance of the <see cref="DataRepository"/> class.
     /// </summary>
@@ -321,6 +319,9 @@ public class DataRepository : ILocalRepository
         _handlers[EntityType.Equipment] = new EquipmentIdbHandler(_sqldbContext, descriptorHandler , _logger);
         _handlers[EntityType.Descriptor] = descriptorHandler;
         _handlers[EntityType.Muscle] = new MuscleIdbHandler(_sqldbContext, descriptorHandler, _logger);
+        _handlers[EntityType.MovementCategory] = new MovementCategoryIdbHandler(_sqldbContext, descriptorHandler, _logger);
+        
+        
     }
     
 }

@@ -105,6 +105,45 @@ namespace GainsLab.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "movement_category",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false),
+                    GUID = table.Column<Guid>(type: "TEXT", nullable: false),
+                    DescriptorID = table.Column<int>(type: "INTEGER", nullable: false),
+                    ParentCategoryDbId = table.Column<int>(type: "INTEGER", nullable: true),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false),
+                    CreatedBy = table.Column<string>(type: "TEXT", nullable: false),
+                    updated_at_utc = table.Column<DateTimeOffset>(type: "TEXT", nullable: false, defaultValueSql: "now()"),
+                    updated_seq = table.Column<long>(type: "INTEGER", nullable: false),
+                    UpdatedBy = table.Column<string>(type: "TEXT", nullable: true),
+                    is_deleted = table.Column<bool>(type: "INTEGER", nullable: false, defaultValue: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "TEXT", nullable: true),
+                    DeletedBy = table.Column<string>(type: "TEXT", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "BLOB", rowVersion: true, nullable: true),
+                    Version = table.Column<long>(type: "INTEGER", nullable: false),
+                    authority = table.Column<int>(type: "INTEGER", nullable: false, defaultValue: 2)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_movement_category", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_movement_category_descriptors_DescriptorID",
+                        column: x => x.DescriptorID,
+                        principalTable: "descriptors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_movement_category_movement_category_ParentCategoryDbId",
+                        column: x => x.ParentCategoryDbId,
+                        principalTable: "movement_category",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "muscles",
                 columns: table => new
                 {
@@ -135,6 +174,30 @@ namespace GainsLab.Infrastructure.Migrations
                         principalTable: "descriptors",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "movement_category_relations",
+                columns: table => new
+                {
+                    ParentCategoryId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ChildCategoryId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_movement_category_relations", x => new { x.ParentCategoryId, x.ChildCategoryId });
+                    table.ForeignKey(
+                        name: "FK_movement_category_relations_movement_category_ChildCategoryId",
+                        column: x => x.ChildCategoryId,
+                        principalTable: "movement_category",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_movement_category_relations_movement_category_ParentCategoryId",
+                        column: x => x.ParentCategoryId,
+                        principalTable: "movement_category",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -189,6 +252,32 @@ namespace GainsLab.Infrastructure.Migrations
                 columns: new[] { "updated_at_utc", "updated_seq" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_movement_category_DescriptorID",
+                table: "movement_category",
+                column: "DescriptorID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_movement_category_GUID",
+                table: "movement_category",
+                column: "GUID",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_movement_category_ParentCategoryDbId",
+                table: "movement_category",
+                column: "ParentCategoryDbId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_movement_category_updated_at_utc_updated_seq",
+                table: "movement_category",
+                columns: new[] { "updated_at_utc", "updated_seq" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_movement_category_relations_ChildCategoryId",
+                table: "movement_category_relations",
+                column: "ChildCategoryId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_muscle_antagonists_AntagonistId",
                 table: "muscle_antagonists",
                 column: "AntagonistId");
@@ -222,6 +311,9 @@ namespace GainsLab.Infrastructure.Migrations
                 name: "equipments");
 
             migrationBuilder.DropTable(
+                name: "movement_category_relations");
+
+            migrationBuilder.DropTable(
                 name: "muscle_antagonists");
 
             migrationBuilder.DropTable(
@@ -229,6 +321,9 @@ namespace GainsLab.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "SyncStates");
+
+            migrationBuilder.DropTable(
+                name: "movement_category");
 
             migrationBuilder.DropTable(
                 name: "muscles");

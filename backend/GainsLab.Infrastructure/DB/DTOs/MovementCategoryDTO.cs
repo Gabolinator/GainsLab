@@ -41,21 +41,16 @@ public class MovementCategoryDTO : BaseDto
 
     public IEnumerable<Guid> BaseCategoryGUIDs => BaseCategoryLinks.Select(link => link.ParentCategory.GUID).Distinct();
 
-    public bool TryGetBaseCategoryFromThis(out eMovementCategories category)
-    {
-        category = eMovementCategories.undefined;
-        if (string.IsNullOrWhiteSpace(Name)) return false;
-        
-        return Enum.TryParse(Name, true, out category);
-    }
-    
-    
-    public eMovementCategories ParseToBaseCategory()
-    {
-        if (string.IsNullOrWhiteSpace(Name)) return eMovementCategories.undefined;
-        
-        return Enum.TryParse(Name, true, out eMovementCategories baseCategory) ? baseCategory : eMovementCategories.undefined  ;
-    }
+    // public bool TryGetBaseCategoryFromThis(out eMovementCategories category)
+    // {
+    //     category = eMovementCategories.undefined;
+    //     if (string.IsNullOrWhiteSpace(Name)) return false;
+    //     
+    //     return Enum.TryParse(Name, true, out category);
+    // }
+    //
+    //
+ 
 }
 
 public class MovementCategoryRelationDTO

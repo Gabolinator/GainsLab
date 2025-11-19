@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.Json;
 using GainsLab.Contracts.SyncDto;
 using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
@@ -114,7 +115,7 @@ public class DataManager : IDataManager
         
         if (!didInitialSeed)
         {
-            CheckForUpdatesFromUpstream();
+            await CheckForUpdatesFromUpstreamAsync();
         }
 
         
@@ -126,10 +127,77 @@ public class DataManager : IDataManager
     /// <summary>
     /// Checks the remote source for new updates and schedules a delta sync when required.
     /// </summary>
-    private void CheckForUpdatesFromUpstream()
+    private async Task CheckForUpdatesFromUpstreamAsync()
     {
-        //todo check if any updates to pull
-        _logger.Log(nameof(DataManager), "Check for upstream updates...NOT IMPLEMENTED");
+        _logger.Log(nameof(DataManager), "Checking for upstream updates...");
+
+        if (!await HasInternetConnection())
+        {
+            _logger.LogWarning(nameof(DataManager),
+                "Skipping delta sync because there is no internet connection.");
+            return;
+        }
+
+        var state = await LoadOrCreateSyncStateAsync();
+        if (!state.SeedCompleted)
+        {
+            _logger.LogWarning(nameof(DataManager),
+                "Skipping delta sync because the initial seed has not completed.");
+            return;
+        }
+
+        var cursors = ParseCursorMap(state.CursorsJson);
+
+        var deltaResult = await _syncOrchestrator.PullDeltasAsync(cursors);
+        if (!deltaResult.Success || deltaResult.Value is null)
+        {
+            var error = deltaResult.GetErrorMessage() ?? "Unknown delta sync failure.";
+            _logger.LogError(nameof(DataManager), $"Delta sync failed: {error}");
+            return;
+        }
+
+        var outcome = deltaResult.Value;
+        var updatedCursors = outcome.Cursors ??
+                             (IReadOnlyDictionary<string, string>)new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        state.LastDeltaAt = DateTimeOffset.UtcNow;
+        state.UpstreamSnapshot = string.IsNullOrWhiteSpace(outcome.SnapshotVersion)
+            ? state.UpstreamSnapshot
+            : outcome.SnapshotVersion;
+        state.CursorsJson = JsonSerializer.Serialize(updatedCursors);
+        await _local.SaveSyncStateAsync(state);
+
+        _logger.Log(nameof(DataManager),
+            $"Delta sync completed. Upserted {outcome.EntitiesUpserted}, deleted {outcome.EntitiesDeleted}, hadMore={outcome.HadMore}.");
+
+        var refreshResult = await _local.GetAllComponentsAsync();
+        if (refreshResult.Success && refreshResult.Value is not null)
+        {
+            _cache.StoreAll(refreshResult.Value);
+        }
+        else
+        {
+            _logger.LogWarning(nameof(DataManager),
+                $"Delta sync finished but cache refresh failed: {refreshResult.GetErrorMessage()}");
+        }
+    }
+
+    private Dictionary<string, string> ParseCursorMap(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+        try
+        {
+            var parsed = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+            return parsed ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(nameof(DataManager),
+                $"Could not parse stored cursor payload. Resetting cursors. {ex.Message}");
+            return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        }
     }
 
     /// <summary>

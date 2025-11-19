@@ -339,5 +339,7 @@ public abstract class IdbContextHandler<TDto> : IDBHandler where TDto : class, I
 
     public abstract Task<IReadOnlyList<IEntity>> GetAllEntityAsync(CancellationToken ct = default);
 
+    public string NormalizeContent(string value, Func<string, string> normalizeStrategy) =>
+        normalizeStrategy.Invoke(value);
 
 }

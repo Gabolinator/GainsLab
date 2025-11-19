@@ -45,10 +45,11 @@ public class EntityFactory
         var equipments = new List<EquipmentEntity>();
 
         var jumpRope =CreateEquipment("Jump Rope", "Some description for jump rope");
-        
+        var kettlebell =CreateEquipment("Kettle Bell", "Some description for kettlebell");
+
        
 
-        equipments.Add(jumpRope);
+        equipments.AddRange(new List<EquipmentEntity>{jumpRope, kettlebell});
 
         return equipments;
     }
@@ -163,7 +164,16 @@ public class EntityFactory
            null,
            null, eMovementCategories.Weightlifting, eMovementCategories.Cardio);
        
-       baseCategories.Add(kettlebelling);
+       
+       var olympicWeightlifting = CreateMovementCategory(
+           "Olympic WeightLifting", 
+           "Some description for Olympic WeightLifting", 
+           "system", 
+           null,
+           null, eMovementCategories.Weightlifting);
+
+       
+       baseCategories.AddRange(new List<MovementCategoryEntity>{kettlebelling, olympicWeightlifting});
        
        
        return baseCategories;

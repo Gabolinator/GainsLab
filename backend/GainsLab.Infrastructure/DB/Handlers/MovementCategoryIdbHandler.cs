@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
-using GainsLab.Core.Models.Core.Interfaces.Entity;
+﻿using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Core.Models.Core.Results;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB.Context;
@@ -14,42 +8,32 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB.Handlers;
 
-/// <summary>
-/// Database handler that manages muscle DTO persistence, descriptors, and antagonist retrieval.
-/// </summary>
-public class MuscleIdbHandler : IdbContextHandler<MuscleDTO>
+public class MovementCategoryIdbHandler: IdbContextHandler<MovementCategoryDTO>
 {
     private readonly DescriptorIdbHandler _descriptorHandler;
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MuscleIdbHandler"/> class.
-    /// </summary>
-    public MuscleIdbHandler(
-        GainLabSQLDBContext context,
-        DescriptorIdbHandler descriptorHandler,
-        ILogger logger) : base(context, logger)
+    
+    public MovementCategoryIdbHandler(DbContext context, DescriptorIdbHandler descriptorHandler ,ILogger logger) : base(context, logger)
     {
         _descriptorHandler = descriptorHandler;
+        
     }
 
-    /// <inheritdoc />
-    public override DbSet<MuscleDTO> DBSet
-        => ((GainLabSQLDBContext)_context).Muscles;
-
-    /// <inheritdoc />
-    public override async Task<Result<MuscleDTO>> TryGetExistingDTO(Guid guid, string? content)
+    public override DbSet<MovementCategoryDTO> DBSet =>  ((GainLabSQLDBContext)_context).MovementCategories;
+    public override async Task<Result<MovementCategoryDTO>> TryGetExistingDTO(Guid guid, string? content)
     {
         try
         {
             var query = DBSet.AsNoTracking();
-            MuscleDTO? existing = null;
+            MovementCategoryDTO? existing = null;
 
             if (guid != Guid.Empty)
+            {
                 existing = await query.FirstOrDefaultAsync(e => e.GUID == guid);
+            }
 
             string NormalizeContentStrategy(string value) =>
                 value.Trim().ToUpperInvariant();
-            
+
             if (existing is null && !string.IsNullOrWhiteSpace(content))
             {
                 var normalized = NormalizeContent(content, NormalizeContentStrategy);
@@ -58,18 +42,19 @@ public class MuscleIdbHandler : IdbContextHandler<MuscleDTO>
             }
 
             var success = existing != null;
-            _logger.Log(nameof(MuscleIdbHandler),
-                $"Existing muscle lookup (guid: {guid}, content: {content ?? "<null>"}) -> {success}");
+            _logger.Log(nameof(MovementCategoryIdbHandler),
+                $"Existing movement category lookup (guid: {guid}, content: {content ?? "<null>"}) -> {success}");
 
             return success
-                ? Result<MuscleDTO>.SuccessResult(existing!)
-                : Result<MuscleDTO>.Failure("No existing muscle found");
+                ? Result<MovementCategoryDTO>.SuccessResult(existing!)
+                : Result<MovementCategoryDTO>.Failure("No existing movement category found");
         }
         catch (Exception ex)
         {
-            _logger.LogError(nameof(MuscleIdbHandler), $"Exception in TryGetExistingDTO: {ex.Message}");
-            return Result<MuscleDTO>.Failure($"Error getting muscle: {ex.GetBaseException().Message}");
+            _logger.LogError(nameof(MovementCategoryIdbHandler), $"Exception in TryGetExistingDTO: {ex.Message}");
+            return Result<MovementCategoryDTO>.Failure($"Error getting movement category: {ex.GetBaseException().Message}");
         }
+
     }
 
     /// <inheritdoc />
@@ -78,12 +63,12 @@ public class MuscleIdbHandler : IdbContextHandler<MuscleDTO>
         var dtos = await DBSet
             .AsNoTracking()
             .Include(m => m.Descriptor)
-            .Include(m => m.Antagonists)
-                .ThenInclude(link => link.Antagonist)
+            .Include(m => m.BaseCategoryLinks)
+            .ThenInclude(link => link.ParentCategory)
             .ToListAsync(ct);
 
         var entities = dtos
-            .Select(MuscleMapper.ToDomain)
+            .Select(MovementCategoryMapper.ToDomain)
             .Where(e => e is not null)
             .Cast<IEntity>()
             .ToList();
@@ -92,17 +77,17 @@ public class MuscleIdbHandler : IdbContextHandler<MuscleDTO>
     }
 
     /// <summary>
-    /// Ensures the descriptor reference is persisted and attached before saving the muscle.
+    /// Ensures the descriptor reference is persisted and attached before saving the movement category.
     /// </summary>
-    protected override async Task PrepareRelatedEntitiesAsync(MuscleDTO dto, CancellationToken ct)
+    protected override async Task PrepareRelatedEntitiesAsync(MovementCategoryDTO dto, CancellationToken ct)
     {
         if (dto.Descriptor is null)
             return;
 
         if (dto.Descriptor.GUID == Guid.Empty && string.IsNullOrWhiteSpace(dto.Descriptor.Content))
         {
-            _logger.LogWarning(nameof(MuscleIdbHandler),
-                $"Descriptor reference for muscle {dto.Iguid} is missing GUID/content. Skipping descriptor association.");
+            _logger.LogWarning(nameof(MovementCategoryIdbHandler),
+                $"Descriptor reference for movement category {dto.Iguid} is missing GUID/content. Skipping descriptor association.");
             dto.Descriptor = null;
             dto.DescriptorID = 0;
             return;
@@ -114,7 +99,7 @@ public class MuscleIdbHandler : IdbContextHandler<MuscleDTO>
         if (!descriptorResult.Success || descriptorResult.Value is not DescriptorDTO ensuredDescriptor)
         {
             var reason = descriptorResult.ErrorMessage ?? "Descriptor persistence failed";
-            throw new InvalidOperationException($"Failed to ensure descriptor for muscle {dto.Iguid}: {reason}");
+            throw new InvalidOperationException($"Failed to ensure descriptor for movement category {dto.Iguid}: {reason}");
         }
 
         if (_context.Entry(ensuredDescriptor).State == EntityState.Detached)
@@ -124,5 +109,6 @@ public class MuscleIdbHandler : IdbContextHandler<MuscleDTO>
         dto.DescriptorID = ensuredDescriptor.Iid;
     }
 
-  
+    
+   
 }

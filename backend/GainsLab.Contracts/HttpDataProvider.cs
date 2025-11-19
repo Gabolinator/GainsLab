@@ -54,10 +54,47 @@ public class HttpDataProvider: IRemoteProvider
                
             case EntityType.Muscle:
                 return await PullMusclePageAsync(cursor, take, ct);
+            
+            case EntityType.MovementCategory:
+                return await PullMovementCategoryPageAsync(cursor, take, ct);
             default:
                 return Result<ISyncPage<ISyncDto>>.Failure($"Remote pull for {type} is not implemented.");
         }
 
+    }
+
+    private async Task<Result<ISyncPage<ISyncDto>>> PullMovementCategoryPageAsync(ISyncCursor cursor, int take, CancellationToken ct)
+    {
+        try
+        {
+            var type = EntityType.MovementCategory;
+            var syncType = type.ToString().ToLowerInvariant();
+            
+            var url = $"/sync/{syncType}?ts={Uri.EscapeDataString(cursor.ITs.ToString("o"))}&seq={cursor.ISeq}&take={take}";
+            using var res = await _http.GetAsync(url, ct);
+            res.EnsureSuccessStatusCode();
+
+            _logger.Log(nameof(HttpDataProvider), $"Pull MovementCategory page - take {take} - {res.Content}" );
+        
+            var payload = await res.Content.ReadFromJsonAsync<SyncPage<MovementCategorySyncDto>>(cancellationToken: ct);
+        
+            _logger.Log(nameof(HttpDataProvider), $"Pull MovementCategory page - take {take} - payload items count: {payload?.Items.Count ?? 0} payload items[0] {(payload?.Items.Count>0 ?payload?.Items[0] : "none" )} " );
+
+            return payload == null
+                ? Result<ISyncPage<ISyncDto>>.Failure("Remote pull for MovementCategory failed: server returned an empty payload.")
+                : Result<ISyncPage<ISyncDto>>.SuccessResult(payload);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            var message =
+                $"Remote pull for MovementCategory failed while contacting {DescribeBaseAddress()}: {e.GetBaseException().Message}";
+            _logger.LogError(nameof(HttpDataProvider), message);
+            return Result<ISyncPage<ISyncDto>>.Failure(message);
+        }
     }
 
     /// <summary>
@@ -70,7 +107,10 @@ public class HttpDataProvider: IRemoteProvider
     {
         try
         {
-            var url = $"/sync/descriptor?ts={Uri.EscapeDataString(cursor.ITs.ToString("o"))}&seq={cursor.ISeq}&take={take}";
+            var type = EntityType.Descriptor;
+            var syncType = type.ToString().ToLowerInvariant();
+            
+            var url = $"/sync/{syncType}?ts={Uri.EscapeDataString(cursor.ITs.ToString("o"))}&seq={cursor.ISeq}&take={take}";
             using var res = await _http.GetAsync(url, ct);
             res.EnsureSuccessStatusCode();
 

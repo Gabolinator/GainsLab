@@ -24,14 +24,16 @@ public sealed class EquipmentSyncProcessor : ISyncEntityProcessor
 
     private readonly IDbContextFactory<GainLabSQLDBContext> _dbContextFactory;
     private readonly ILogger _logger;
+    private readonly IDescriptorResolver _descriptorResolver;
 
     /// <summary>
     /// Creates a processor that materializes remote equipment payloads into SQLite entities.
     /// </summary>
-    public EquipmentSyncProcessor(IDbContextFactory<GainLabSQLDBContext> dbContextFactory, ILogger logger)
+    public EquipmentSyncProcessor(IDbContextFactory<GainLabSQLDBContext> dbContextFactory,IDescriptorResolver descriptorResolver, ILogger logger)
     {
         _dbContextFactory = dbContextFactory;
         _logger = logger;
+        _descriptorResolver = descriptorResolver;
     }
 
     /// <inheritdoc />
@@ -65,7 +67,7 @@ public async Task<Result> ApplyAsync(IReadOnlyList<ISyncDto> items, ILocalReposi
 
             
             // Resolve without saving here
-            var descriptor = await ResolveDescriptorAsync(dbContext, dto.DescriptorGUID, descriptorCache, ct)
+            var descriptor = await _descriptorResolver.ResolveDescriptorAsync(dbContext, dto.DescriptorGUID, descriptorCache, ct)
                 .ConfigureAwait(false);
 
             var entity = await dbContext.Equipments
@@ -123,34 +125,5 @@ public async Task<Result> ApplyAsync(IReadOnlyList<ISyncDto> items, ILocalReposi
         _logger?.LogError(nameof(EquipmentSyncProcessor), $"Failed to apply equipment sync: {ex.Message}");
         return Result.Failure($"Failed to apply equipment sync: {ex.GetBaseException().Message}");
     }
-}
-
-private async Task<DescriptorDTO> ResolveDescriptorAsync(
-    GainLabSQLDBContext dbContext,
-    Guid? descriptorGuid,
-    IDictionary<Guid, DescriptorDTO> cache,
-    CancellationToken ct)
-{
-    if (descriptorGuid is null)
-        throw new ArgumentNullException(nameof(descriptorGuid)); // or decide a default/null object strategy
-
-    var key = descriptorGuid.Value;
-
-    if (cache.TryGetValue(key, out var cached))
-        return cached;
-
-    var descriptor = await dbContext.Descriptors
-        .FirstOrDefaultAsync(d => d.GUID == key, ct)
-        .ConfigureAwait(false);
-
-    if (descriptor is null)
-    {
-        descriptor = new DescriptorDTO { GUID = key, Content = "none"};
-        // Track it; DO NOT SaveChanges here
-        await dbContext.Descriptors.AddAsync(descriptor, ct).ConfigureAwait(false);
-    }
-
-    cache[key] = descriptor;
-    return descriptor;
 }
 }

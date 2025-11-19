@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
 {
     [DbContext(typeof(GainLabPgDBContext))]
-    [Migration("20251115091810_Initial")]
+    [Migration("20251119140720_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

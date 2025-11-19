@@ -92,16 +92,31 @@ public static class ServiceConfig
             var client = httpFactory.CreateClient("SyncApi");
             return new OutboxDispatcher(factory, logger, client);
         });
-        services.AddSingleton<ISyncEntityProcessor, EquipmentSyncProcessor>();
-        services.AddSingleton<ISyncEntityProcessor, DescriptorSyncProcessor>();
-        services.AddSingleton<ISyncEntityProcessor, MuscleSyncProcessor>();
-        services.AddSingleton<ISyncOrchestrator, SyncOrchestrator>();
+
+
+        services= AddSyncProcessors(services);
+        
+      
         
        // services.AddSingleton<EntityFactory>();
         services.AddSingleton<MainWindow>();
         services.AddSingleton<SystemInitializer>();
      
     }
+
+    private static IServiceCollection AddSyncProcessors(IServiceCollection services)
+    {
+        var descriptorResolver = new DescriptorResolver("syn");
+        services.AddSingleton<IDescriptorResolver>(descriptorResolver); 
+        services.AddSingleton<ISyncEntityProcessor, DescriptorSyncProcessor>();
+        services.AddSingleton<ISyncEntityProcessor, EquipmentSyncProcessor>();
+        services.AddSingleton<ISyncEntityProcessor, MuscleSyncProcessor>();
+        services.AddSingleton<ISyncEntityProcessor, MovementCategorySyncProcessor>();
+        services.AddSingleton<ISyncOrchestrator, SyncOrchestrator>();
+
+        return services;
+    }
+
     private static Uri ResolveSyncBaseAddress(ILogger? logger)
     {
         const string defaultBase = "https://localhost:5001/";

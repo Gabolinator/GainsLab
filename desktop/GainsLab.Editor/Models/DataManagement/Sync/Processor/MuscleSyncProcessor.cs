@@ -24,13 +24,15 @@ public class MuscleSyncProcessor : ISyncEntityProcessor
 
     private readonly IDbContextFactory<GainLabSQLDBContext> _dbContextFactory;
     private readonly ILogger _logger;
+    private readonly IDescriptorResolver _descriptorResolver;
     
     public EntityType EntityType => EntityType.Muscle;
     
-    public MuscleSyncProcessor(IDbContextFactory<GainLabSQLDBContext> dbContextFactory, ILogger logger)
+    public MuscleSyncProcessor(IDbContextFactory<GainLabSQLDBContext> dbContextFactory, IDescriptorResolver descriptorResolver ,ILogger logger)
     {
         _dbContextFactory = dbContextFactory;
         _logger = logger;
+        _descriptorResolver = descriptorResolver;
     }
     
     /// <summary>
@@ -60,8 +62,8 @@ public class MuscleSyncProcessor : ISyncEntityProcessor
 
                 _logger?.Log(nameof(MuscleSyncProcessor),
                     $"Applying Async for {nameof(MuscleSyncDTO)} : {dto.Name} | {dto.GUID} | {(dto.DescriptorGUID == null ? "null descriptor guid" : dto.DescriptorGUID)}");
-
-                var descriptor = await ResolveDescriptorAsync(dbContext, dto.DescriptorGUID, descriptorCache, ct)
+                
+                var descriptor = await _descriptorResolver.ResolveDescriptorAsync(dbContext, dto.DescriptorGUID, descriptorCache, ct)
                     .ConfigureAwait(false);
 
                 var entity = await dbContext.Muscles
@@ -132,45 +134,7 @@ public class MuscleSyncProcessor : ISyncEntityProcessor
         }
     }
 
-    /// <summary>
-    /// Resolves an existing descriptor or creates a placeholder when the remote payload omits one.
-    /// </summary>
-    private async Task<DescriptorDTO> ResolveDescriptorAsync(
-        GainLabSQLDBContext dbContext,
-        Guid? descriptorGuid,
-        IDictionary<Guid, DescriptorDTO> cache,
-        CancellationToken ct)
-    {
-        var key = descriptorGuid is null || descriptorGuid == Guid.Empty
-            ? Guid.Empty
-            : descriptorGuid.Value;
-
-        if (cache.TryGetValue(key, out var cached))
-            return cached;
-
-        var descriptor = await dbContext.Descriptors
-            .FirstOrDefaultAsync(d => d.GUID == key, ct)
-            .ConfigureAwait(false);
-
-        if (descriptor is null)
-        {
-            descriptor = new DescriptorDTO
-            {
-                GUID = key,
-                Content = "none",
-                CreatedAtUtc = DateTimeOffset.UtcNow,
-                UpdatedAtUtc = DateTimeOffset.UtcNow,
-                CreatedBy = SyncActor,
-                UpdatedBy = SyncActor,
-                Authority = DataAuthority.Bidirectional
-            };
-
-            await dbContext.Descriptors.AddAsync(descriptor, ct).ConfigureAwait(false);
-        }
-
-        cache[key] = descriptor;
-        return descriptor;
-    }
+    
 
     /// <summary>
     /// Normalizes the antagonist GUID payload into a deduped list, enforcing empty sets for tombstones.

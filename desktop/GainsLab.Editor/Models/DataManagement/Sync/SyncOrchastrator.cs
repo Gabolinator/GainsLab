@@ -206,6 +206,9 @@ public sealed class SyncOrchestrator : ISyncOrchestrator
             return (true, 0, startAt, null, false);
         }
 
+        _logger.Log(nameof(SyncOrchestrator), $"Found processor registered for {entityType}");
+
+        
         var cursor = startAt;
         var processed = 0;
         var sawMore = false;
