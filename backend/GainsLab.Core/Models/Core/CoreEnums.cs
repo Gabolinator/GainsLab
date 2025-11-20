@@ -57,7 +57,11 @@ public enum SyncDTOType
 }
 
 
-
+public enum MuscleRole
+{
+    Primary,
+    Secondary
+}
 
 /// <summary>
 /// Lists the workout-oriented component categories that can appear in programs.
