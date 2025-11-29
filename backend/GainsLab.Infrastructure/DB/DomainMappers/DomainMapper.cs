@@ -30,6 +30,7 @@ public static class EntityDomainMapper
             EntityType.Descriptor => DescriptorMapper.ToDTO(domain as BaseDescriptorEntity),
             EntityType.Muscle => MuscleMapper.ToDTO(domain as MuscleEntity),
             EntityType.MovementCategory => MovementCategoryMapper.ToDTO(domain as MovementCategoryEntity),
+            EntityType.Movement => MovementMapper.ToDTO(domain as MovementEntity),
             //to eventually implement others
             _ => throw new ArgumentOutOfRangeException()
         };
@@ -51,6 +52,8 @@ public static class EntityDomainMapper
             EntityType.Descriptor => DescriptorMapper.ToDomain(dto as DescriptorDTO),
             EntityType.Muscle => MuscleMapper.ToDomain(dto as MuscleDTO),
             EntityType.MovementCategory => MovementCategoryMapper.ToDomain(dto as MovementCategoryDTO),
+            EntityType.Movement => MovementMapper.ToDomain(dto as MovementDTO),
+            
             //to eventually implement others
             _ => throw new ArgumentOutOfRangeException()
         };

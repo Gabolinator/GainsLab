@@ -18,6 +18,7 @@ using GainsLab.Models.DataManagement.FileAccess;
 using GainsLab.Models.DataManagement.Sync;
 using System.Net.Http;
 using GainsLab.Contracts.Outbox;
+using GainsLab.Core.Models.Core.Interfaces;
 using GainsLab.Models.DataManagement.Sync.Processor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -82,6 +83,8 @@ public static class ServiceConfig
         
         services.AddSingleton<IComponentCacheRegistry, ComponentCacheRegistry>();
         services.AddSingleton<IFileDataService, JsonFilesDataService>();
+
+        services.AddSingleton<IEntitySeedResolver, EntitySeedResolver>();
         services.AddSingleton<IDataManager, DataManager>();
         services.AddSingleton<ISyncCursorStore, FileSyncCursorStore>();
         services.AddSingleton<IOutboxDispatcher>(sp =>

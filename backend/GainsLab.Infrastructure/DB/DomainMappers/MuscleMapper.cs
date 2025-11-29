@@ -65,7 +65,13 @@ public static class MuscleMapper
             dto.DeletedAt,
             dto.DeletedBy);
 
-        return new MuscleEntity(content, new MuscleId(dto.GUID),audited ,descriptor ?? new BaseDescriptorEntity(),dto.AntagonistGUIDs.Select(it=> new MuscleId(it)));
+        return new MuscleEntity(
+            content,
+            new MuscleId(dto.GUID),
+            audited,
+            descriptor ?? new BaseDescriptorEntity(),
+            dto.AntagonistGUIDs.Select(it => new MuscleId(it)),
+            dto.Id);
 
         
 

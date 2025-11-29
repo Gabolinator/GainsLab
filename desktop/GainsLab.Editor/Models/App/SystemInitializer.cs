@@ -55,6 +55,8 @@ public class SystemInitializer : ISystemInitializer
         
         _workoutLogger.Log(nameof(SystemInitializer),"Initializing system...");
         
+        //
+        
         await _cacheRegistry.InitializeAsync();
         await _dataManager.InitializeAsync();
         await _dataManager.LoadAndCacheDataAsync();

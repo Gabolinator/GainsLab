@@ -32,6 +32,7 @@ public class GainsLabLogger : ILogger
     {
         LoggerName = name;
         _colorHeader = colorHeader;
+        _decorate = _colorHeader != DecoratorColor.None;
     }
 
     public enum DecoratorColorContext

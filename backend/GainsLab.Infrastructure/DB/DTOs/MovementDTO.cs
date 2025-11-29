@@ -28,6 +28,9 @@ public class MovementDTO : BaseDto
 
     public ICollection<MovementEquipmentRelationDTO> EquipmentRelations { get; set; } = new List<MovementEquipmentRelationDTO>();
     
+    public Guid? VariantOfMovementGuid { get; set; }
+    public MovementDTO? VariantOfMovement { get; set; }
+    
     public override int Iid => Id;
     public override Guid Iguid => GUID;
     public override string? GetContent() => Name;

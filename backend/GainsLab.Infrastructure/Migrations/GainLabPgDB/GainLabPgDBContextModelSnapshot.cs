@@ -275,6 +275,128 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
                     b.ToTable("movement_category_relations", "public");
                 });
 
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MovementDTO", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Authority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(2)
+                        .HasColumnName("authority");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("text");
+
+                    b.Property<int>("DescriptorID")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("GUID")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_deleted");
+
+                    b.Property<int>("MovementCategoryId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<long>("UpdatedSeq")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasColumnName("updated_seq");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("UpdatedSeq"));
+
+                    b.Property<Guid?>("VariantOfMovementGuid")
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DescriptorID");
+
+                    b.HasIndex("GUID")
+                        .IsUnique();
+
+                    b.HasIndex("MovementCategoryId");
+
+                    b.HasIndex("VariantOfMovementGuid");
+
+                    b.HasIndex("UpdatedAtUtc", "UpdatedSeq");
+
+                    b.ToTable("movement", "public");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MovementEquipmentRelationDTO", b =>
+                {
+                    b.Property<int>("MovementId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("EquipmentId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("MovementId", "EquipmentId");
+
+                    b.HasIndex("EquipmentId");
+
+                    b.ToTable("movement_equipment_relation", "public");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MovementMuscleRelationDTO", b =>
+                {
+                    b.Property<int>("MovementId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MuscleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MuscleRole")
+                        .HasColumnType("integer");
+
+                    b.HasKey("MovementId", "MuscleId");
+
+                    b.HasIndex("MuscleId");
+
+                    b.ToTable("movement_muscle_relation", "public");
+                });
+
             modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleAntagonistDTO", b =>
                 {
                     b.Property<int>("MuscleId")
@@ -489,6 +611,70 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
                     b.Navigation("ParentCategory");
                 });
 
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MovementDTO", b =>
+                {
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.DescriptorDTO", "Descriptor")
+                        .WithMany()
+                        .HasForeignKey("DescriptorID")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.MovementCategoryDTO", "Category")
+                        .WithMany()
+                        .HasForeignKey("MovementCategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.MovementDTO", "VariantOfMovement")
+                        .WithMany()
+                        .HasForeignKey("VariantOfMovementGuid")
+                        .HasPrincipalKey("GUID");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Descriptor");
+
+                    b.Navigation("VariantOfMovement");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MovementEquipmentRelationDTO", b =>
+                {
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.EquipmentDTO", "Equipment")
+                        .WithMany()
+                        .HasForeignKey("EquipmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.MovementDTO", "Movement")
+                        .WithMany("EquipmentRelations")
+                        .HasForeignKey("MovementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Equipment");
+
+                    b.Navigation("Movement");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MovementMuscleRelationDTO", b =>
+                {
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.MovementDTO", "Movement")
+                        .WithMany("MuscleRelations")
+                        .HasForeignKey("MovementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", "Muscle")
+                        .WithMany()
+                        .HasForeignKey("MuscleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Movement");
+
+                    b.Navigation("Muscle");
+                });
+
             modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleAntagonistDTO", b =>
                 {
                     b.HasOne("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", "Antagonist")
@@ -524,6 +710,13 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
                     b.Navigation("BaseCategoryLinks");
 
                     b.Navigation("ChildCategoryLinks");
+                });
+
+            modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MovementDTO", b =>
+                {
+                    b.Navigation("EquipmentRelations");
+
+                    b.Navigation("MuscleRelations");
                 });
 
             modelBuilder.Entity("GainsLab.Infrastructure.DB.DTOs.MuscleDTO", b =>

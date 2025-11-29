@@ -1,6 +1,7 @@
 ﻿using GainsLab.Contracts.Interface;
 using GainsLab.Contracts.SyncDto;
 using GainsLab.Contracts.SyncService;
+using GainsLab.Core.Models.Core.Interfaces;
 using GainsLab.Core.Models.Core.Utilities;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB;
@@ -71,6 +72,8 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
 
     }
 
+    services.AddSingleton<IEntitySeedResolver, EntitySeedResolver>();
+    
   
     // Optional CORS for your client app
     // services.AddCors(o => o.AddDefaultPolicy(p => p.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
@@ -103,7 +106,8 @@ static async Task RunApplicationAsync(WebApplication app, ILogger logger, Clock 
 {
     using var scope = app.Services.CreateScope();
     var db = scope.ServiceProvider.GetRequiredService<GainLabPgDBContext>();
-
+    var resolver = scope.ServiceProvider.GetRequiredService<IEntitySeedResolver>();
+    
     db.AddLogger(logger);
     db.AddClock(clock);
 
@@ -124,7 +128,7 @@ static async Task RunApplicationAsync(WebApplication app, ILogger logger, Clock 
     var dbInitializer = new DBDataInitializer(logger, clock);
 
     logger.Log("Initializing DB");
-    await dbInitializer.CreateBaseEntities(db);
+    await dbInitializer.CreateBaseEntities(db,resolver);
     logger.Log("Initialize DB - completed");
 
     await app.RunAsync();

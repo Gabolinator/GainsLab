@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using GainsLab.Core.Models.Core.CreationInfo;
 using GainsLab.Core.Models.Core.Descriptor;
 using GainsLab.Core.Models.Core.Entities.Descriptor;
@@ -17,15 +19,16 @@ namespace GainsLab.Core.Models.Core.Factory;
 public class EntityFactory
 {
 
-    public EntityFactory(IClock clock, ILogger logger, IDescriptorService<BaseDescriptorEntity> descriptorService)
+    public EntityFactory(IClock clock, ILogger logger ,IDescriptorService<BaseDescriptorEntity> descriptorService, IEntitySeedResolver resolver)
     {
         _logger = logger;
         _clock = clock;
-        _equipmentFactory = new EquipmentFactory(clock, descriptorService );
-        _descriptorFactory = new DescriptorFactory(clock, descriptorService );
-        _muscleFactory = new MuscleFactory(clock, descriptorService);
-        _movementCategoryFactory = new MovementCategoryFactory(clock, descriptorService);
-
+        _equipmentFactory = new EquipmentFactory(clock, descriptorService, resolver );
+        _descriptorFactory = new DescriptorFactory(clock, descriptorService , resolver);
+        _muscleFactory = new MuscleFactory(clock, descriptorService, resolver);
+        _movementCategoryFactory = new MovementCategoryFactory(clock, descriptorService, resolver);
+        _movementFactory = new MovementFactory(clock, descriptorService, resolver);
+        _resolver = resolver;
     }
 
     private readonly ILogger _logger;
@@ -34,25 +37,11 @@ public class EntityFactory
     private readonly MuscleFactory _muscleFactory;
     private readonly MovementCategoryFactory _movementCategoryFactory;
     private readonly IClock _clock;
+    private readonly MovementFactory _movementFactory;
+    private readonly IEntitySeedResolver _resolver;
 
 
-    /// <summary>
-    /// Generates the seeded equipment entities required for a new deployment.
-    /// </summary>
-    public List<EquipmentEntity> CreateBaseEquipments()
-    {
-        
-        var equipments = new List<EquipmentEntity>();
 
-        var jumpRope =CreateEquipment("Jump Rope", "Some description for jump rope");
-        var kettlebell =CreateEquipment("Kettle Bell", "Some description for kettlebell");
-
-       
-
-        equipments.AddRange(new List<EquipmentEntity>{jumpRope, kettlebell});
-
-        return equipments;
-    }
 
 
     public AuditedInfo GetDefaultAudit(string creator = "system")
@@ -60,11 +49,57 @@ public class EntityFactory
        return AuditedInfo.New(_clock.UtcNow, creator);
     }
 
+    public EquipmentEntity GetOrCreateEquipment(string name, string description, string creator = "system")
+    {
+       // var auditInfo = GetDefaultAudit(creator);
+      //  var descriptor = CreateBaseDescriptor(description, auditInfo);
+        
+        
+        //
+        // return _equipmentFactory.GetOrCreate(new EquipmentCreationConfig
+        // {
+        //     Id = EquipmentId.New(),
+        //     Content = new EquipmentContent(name),
+        //     Audit = auditInfo,
+        //     Descriptor = CreateBaseDescriptor(description, auditInfo)
+        // });
+
+        return GetOrCreateEntity(name, 
+            () => CreateEquipment(name,description,creator));
+    }
+
+    public MuscleEntity GetOrCreateMuscle(
+        string name,
+        string latinName,
+        string description,
+        eBodySection bodySection,
+        string creator = "system",
+        BaseDescriptorEntity? descriptor = null,
+        params MuscleId[] antagonists)
+    {
+        return GetOrCreateEntity(name, () =>
+            CreateMuscle(name, latinName, description, bodySection, creator, descriptor, antagonists));
+    }
+
+    public MovementCategoryEntity GetOrCreateMovementCategory(
+        string name,
+        string description,
+        string creator = "system",
+        BaseDescriptorEntity? descriptor = null,
+        MovementCategoryId? parentId = null,
+        params eMovementCategories[] baseCategories)
+    {
+        return GetOrCreateEntity(name, () =>
+            CreateMovementCategory(name, description, creator, descriptor, parentId, baseCategories));
+    }
+
     public EquipmentEntity CreateEquipment(string name, string description ,string creator = "system")
     {
         var auditInfo = GetDefaultAudit(creator);
 
-        var jumpRope = _equipmentFactory.Create(new EquipmentCreationConfig
+      
+        
+        var eq = _equipmentFactory.Create(new EquipmentCreationConfig
         {
             Id = EquipmentId.New(),
             Content = new EquipmentContent(name),
@@ -72,35 +107,11 @@ public class EntityFactory
             Descriptor = CreateBaseDescriptor(description, auditInfo)
         });
 
-        return jumpRope;
-    }
-
-    public IEnumerable<MuscleEntity> CreateBaseMuscles()
-    {
-
-        var list = new List<MuscleEntity>();
         
-        MuscleEntity quad = CreateMuscle("Quadriceps", "latin name for quad", "Some description for quad", eBodySection.LowerBody);
-        MuscleEntity harmstring= CreateMuscle("Harmstring", "latin name for armstring", "Some description for harmstring", eBodySection.LowerBody);
-
-        quad.AddAntagonist(mutualAdd: true, harmstring);
-        if (quad != null)
-        {
-            list.Add(quad);
-              if(quad.Content != null)  _logger.Log(nameof(EntityFactory) , $"Added muscle  {quad.Content.Name} to list");
-              else _logger.Log(nameof(EntityFactory) , $"Null content in muscle");
-        }
-       
-        else _logger.Log(nameof(EntityFactory) , $"Muscle is null");
-     
-        list.Add(harmstring);
-        _logger.Log(nameof(EntityFactory) , $"Added muscle {harmstring.Content.Name} to list");
-
-
-        return list;
-
+        return eq;
     }
 
+   
     public BaseDescriptorEntity CreateBaseDescriptor(string description ,AuditedInfo? auditedInfo = null)
     {
         var auditInfo = auditedInfo ?? GetDefaultAudit();
@@ -149,52 +160,7 @@ public class EntityFactory
         
     }
 
-    public IEnumerable<MovementCategoryEntity> CreateBaseCategories()
-    {
-
-
-        List<MovementCategoryEntity> baseCategories = CreateMovementCategoryFromEnum();
-        
-    
-       //then we create the custom categories
-       var kettlebelling = CreateMovementCategory(
-           "Kettlebelling", 
-           "Some description for kettlebelling", 
-           "system", 
-           null,
-           null, eMovementCategories.Weightlifting, eMovementCategories.Cardio);
-       
-       
-       var olympicWeightlifting = CreateMovementCategory(
-           "Olympic WeightLifting", 
-           "Some description for Olympic WeightLifting", 
-           "system", 
-           null,
-           null, eMovementCategories.Weightlifting);
-
-       
-       baseCategories.AddRange(new List<MovementCategoryEntity>{kettlebelling, olympicWeightlifting});
-       
-       
-       return baseCategories;
-
-    }
-
-    private List<MovementCategoryEntity> CreateMovementCategoryFromEnum()
-    {
-        var baseCategories = new List<MovementCategoryEntity>();
-        
-        //create the base categories for the enum values 
-        foreach (var eMoveCat in Enum.GetValues<eMovementCategories>())
-        {
-            if(eMoveCat == eMovementCategories.undefined) continue;
-            MovementCategoryEntity cat = CreateMovementCategory(eMoveCat.ToString(), eMoveCat.GetDescription(), "system", null, null, eMoveCat);
-            baseCategories.Add(cat);
-        }
-
-        return baseCategories;
-    }
-
+   
     private MovementCategoryEntity CreateMovementCategory( 
         string name,
         string description,
@@ -221,5 +187,160 @@ public class EntityFactory
 
         return cat;
     }
-}
 
+    private TEntity GetOrCreateEntity<TEntity>(string name, Func<TEntity> factory)
+        where TEntity : class
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Entity name cannot be empty.", nameof(name));
+        }
+
+        var key = name.Trim();
+        if (_resolver.TryGet<TEntity>(key, out var existing))
+        {
+            return existing;
+        }
+
+        var entity = factory();
+        _resolver.Track(key, entity);
+        return entity;
+    }
+
+    internal bool TryGetMovement(string name, out MovementEntity entity)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            entity = null!;
+            return false;
+        }
+
+        return _resolver.TryGet(name, out entity);
+    }
+
+    internal void TrackMovement(MovementEntity movement)
+    {
+        if (movement == null)
+        {
+            throw new ArgumentNullException(nameof(movement));
+        }
+
+        var movementName = movement.Content?.Name;
+        if (string.IsNullOrWhiteSpace(movementName))
+        {
+            throw new InvalidOperationException("Movement name is required to track movement.");
+        }
+
+        _resolver.Track(movementName, movement);
+    }
+
+
+   
+    public MovementEntity GetOrCreateMovement(string name, string description, string creator, BaseDescriptorEntity? descriptor, string categoryName, List<string> equipmentsName, List<string> mainMusclesNames, List<string> secondaryMusclesNames, string? variantOfMovementName = null)
+    {
+        return GetOrCreateEntity(name, () =>
+            CreateMovementFromNames(name, description, creator, descriptor, categoryName, equipmentsName ,mainMusclesNames, secondaryMusclesNames, variantOfMovementName));
+
+        
+    }
+
+    private MovementEntity CreateMovementFromNames(
+        string name,
+        string description,
+        string creator,
+        BaseDescriptorEntity? descriptor,
+        string categoryName,
+        List<string> equipmentsName,
+        List<string> mainMusclesNames,
+        List<string> secondaryMusclesNames,
+        string? variantOfMovementName)
+    {
+        // resolve category, equipment, and muscles (creates placeholders when missing)
+        var category = GetOrCreateMovementCategory(categoryName, "");
+
+        var equipments = equipmentsName
+            .Select(e => GetOrCreateEquipment(e, ""))
+            .ToList();
+
+      
+        
+        var mainMuscles = mainMusclesNames
+            .Select(m => GetOrCreateMuscle(m, "", "", eBodySection.undefined))
+            .ToList();
+        var secondaryMuscles = secondaryMusclesNames
+            .Select(m => GetOrCreateMuscle(m, "", "", eBodySection.undefined))
+            .ToList();
+
+        _logger.Log(nameof(EntityFactory), $"Movement: {name} -  " +
+                                           $"| Got or Created {equipments.Count} equipments" +
+                                           $"| Got or Created {mainMuscles.Count} Main Muscles" +
+                                           $"| Got or Created {secondaryMuscles.Count} Secondary Muscles");
+
+        
+        var auditInfo = GetDefaultAudit(creator);
+
+        descriptor ??= CreateBaseDescriptor(description, auditInfo);
+
+        var movementContent = new MovementContent(
+            name,
+            category.Id,
+            new MuscleWorked(mainMuscles, secondaryMuscles),
+            new EquipmentIdList(equipments),
+            variantOf: (variantOfMovementName, null)); // variant resolved post creation
+
+        var persistence = BuildMovementPersistenceModel(
+            category,
+            equipments,
+            mainMuscles,
+            secondaryMuscles);
+
+        _logger.Log(nameof(EntityFactory), $"Created movement {name} : " +
+                                           $"muscle worked : primary {movementContent.MusclesWorked.PrimaryMuscles.Count()}" +
+                                           $"| equipment : {movementContent.EquipmentRequired.Count()}");
+        
+        return _movementFactory.Create(movementContent, auditInfo, descriptor, persistence);
+    }
+
+    private static MovementPersistenceModel BuildMovementPersistenceModel(
+        MovementCategoryEntity category,
+        IReadOnlyCollection<EquipmentEntity> equipments,
+        IReadOnlyCollection<MuscleEntity> mainMuscles,
+        IReadOnlyCollection<MuscleEntity> secondaryMuscles)
+    {
+        if (category.DbId <= 0)
+        {
+            throw new InvalidOperationException(
+                $"Movement category '{category.Content.Name}' must exist in the database before seeding a movement.");
+        }
+
+        var muscleLookup = new Dictionary<MuscleId, int>();
+        foreach (var muscle in mainMuscles.Concat(secondaryMuscles))
+        {
+            if (muscle.DbId <= 0)
+            {
+                throw new InvalidOperationException(
+                    $"Muscle '{muscle.Content.Name}' must exist in the database before seeding a movement.");
+            }
+
+            muscleLookup[muscle.Id] = muscle.DbId;
+        }
+
+        var equipmentLookup = new Dictionary<EquipmentId, int>();
+        foreach (var equipment in equipments)
+        {
+            if (equipment.DbId <= 0)
+            {
+                throw new InvalidOperationException(
+                    $"Equipment '{equipment.Content.Name}' must exist in the database before seeding a movement.");
+            }
+
+            equipmentLookup[equipment.Id] = equipment.DbId;
+        }
+
+        return new MovementPersistenceModel(
+            category.DbId,
+            muscleLookup,
+            equipmentLookup);
+    }
+    
+}

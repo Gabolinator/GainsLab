@@ -34,14 +34,16 @@ public sealed class MuscleCreationConfig
 
 public class MuscleFactory :  IEntityFactory<MuscleEntity, MuscleCreationConfig>
 {
-    public MuscleFactory(IClock clock, IDescriptorService<BaseDescriptorEntity> descriptorService)
+    public MuscleFactory(IClock clock, IDescriptorService<BaseDescriptorEntity> descriptorService, IEntitySeedResolver resolver)
     {
         _clock = clock;
         _descriptorService = descriptorService;
+        _resolver = resolver;
     }
 
     private readonly IClock _clock;
     private readonly IDescriptorService<BaseDescriptorEntity> _descriptorService;
+    private readonly IEntitySeedResolver _resolver;
 
     public MuscleEntity Create(MuscleCreationConfig config)
     {

@@ -17,12 +17,23 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
 
     public DbSet<EquipmentDTO> Equipments => Set<EquipmentDTO>();
     public DbSet<DescriptorDTO> Descriptors => Set<DescriptorDTO>();
+    
+    //muscles
     public DbSet<MuscleDTO> Muscles => Set<MuscleDTO>();
     public DbSet<MuscleAntagonistDTO> MuscleAntagonists => Set<MuscleAntagonistDTO>();
 
+    //categories 
     public DbSet<MovementCategoryDTO> MovementCategories => Set<MovementCategoryDTO>();
     public DbSet<MovementCategoryRelationDTO> MovementCategoryRelations => Set<MovementCategoryRelationDTO>();
     
+    
+    //movement
+    public DbSet<MovementDTO> Movement => Set<MovementDTO>();
+    public DbSet<MovementMuscleRelationDTO> MovementMuscleRelations => Set<MovementMuscleRelationDTO>();
+    public DbSet<MovementEquipmentRelationDTO> MovementEquipmentRelations => Set<MovementEquipmentRelationDTO>();
+
+    
+    //user
     public DbSet<UserDto> Users => Set<UserDto>();
 
 
@@ -37,7 +48,97 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
         CreateEquipmentTableModel(modelBuilder);
         CreateMuscleTableModel(modelBuilder);
         CreateMovementCategoryTableModel(modelBuilder);
+        CreateMovementTableModel(modelBuilder);
         // CreateUserTableModel(modelBuilder);
+
+    }
+
+    private void CreateMovementTableModel(ModelBuilder modelBuilder)
+    {
+        _logger?.Log("GainLabPgDBContext", "Creating Movement Table");
+
+        //base movement table
+        modelBuilder.Entity<MovementDTO>(m =>
+        {
+            m.ToTable("movement");
+            m.HasKey(x => x.Id);
+            m.Property(x => x.Name).IsRequired();
+            m.HasOne(x=>x.Descriptor) 
+                .WithMany()
+                .HasForeignKey(x => x.DescriptorID)
+                .OnDelete(DeleteBehavior.Restrict);
+            
+            m.HasOne(x=>x.Category) 
+                .WithMany()
+                .HasForeignKey(x => x.MovementCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+            m.HasIndex(x => x.GUID).IsUnique();
+            
+                                                                                                                                           
+                m.HasOne(m => m.VariantOfMovement)                                                                                                                              
+                .WithMany()                                                                                                                                                    
+                .HasForeignKey(m => m.VariantOfMovementGuid)                                                                                                                   
+                .HasPrincipalKey(m => m.GUID);   
+            
+            m.Property(x => x.UpdatedAtUtc)
+                .IsRequired()
+                .HasColumnName("updated_at_utc")
+                .HasDefaultValueSql("now()");
+
+            m.Property(x => x.UpdatedSeq)
+                .HasColumnName("updated_seq")
+                .UseIdentityByDefaultColumn();
+
+            m.Property(x => x.IsDeleted)
+                .HasColumnName("is_deleted")
+                .HasDefaultValue(false);
+
+            m.Property(x => x.Authority)
+                .HasColumnName("authority")
+                .HasConversion<int>()
+                .HasDefaultValue(DataAuthority.Bidirectional);
+            
+            
+            m.HasMany(x => x.EquipmentRelations)
+                .WithOne(x => x.Movement)
+                .HasForeignKey(x => x.MovementId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            m.HasMany(x => x.MuscleRelations)
+                .WithOne(x => x.Movement)
+                .HasForeignKey(x => x.MovementId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            m.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
+            
+            
+        });
+        
+    
+        
+        //equipment movement joined table
+        modelBuilder.Entity<MovementEquipmentRelationDTO>(link =>
+        {
+            link.ToTable("movement_equipment_relation");
+            link.HasKey(x => new { x.MovementId, x.EquipmentId });
+            link.HasOne(x => x.Movement)
+                .WithMany(x => x.EquipmentRelations)
+                .HasForeignKey(x => x.MovementId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+        });
+        
+        //muscle movement joined table
+        modelBuilder.Entity<MovementMuscleRelationDTO>(link =>
+        {
+            link.ToTable("movement_muscle_relation");
+            link.HasKey(x => new { x.MovementId, x.MuscleId });
+            link.HasOne(x => x.Movement)
+                .WithMany(x => x.MuscleRelations)
+                .HasForeignKey(x => x.MovementId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+        });
 
     }
 

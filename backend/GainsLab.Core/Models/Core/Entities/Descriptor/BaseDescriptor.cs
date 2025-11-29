@@ -61,23 +61,17 @@ public class BaseDescriptorContent
 /// <summary>
 /// Aggregate root that couples descriptor identity, content, and audit metadata.
 /// </summary>
-public class BaseDescriptorEntity : EntityBase<DescriptorId,BaseDescriptorContent, AuditedInfo> , IEquatable<BaseDescriptorEntity>
+public class BaseDescriptorEntity : EntityBase<DescriptorId, BaseDescriptorContent, AuditedInfo>, IEquatable<BaseDescriptorEntity>
 {
     public BaseDescriptorEntity()
+        : base(new DescriptorId(Guid.Empty), new BaseDescriptorContent(), new AuditedInfo(DateTimeOffset.UtcNow, "system"), -1)
     {
-        
     }
 
-    public BaseDescriptorEntity(DescriptorId id, BaseDescriptorContent content, AuditedInfo creationInfo)
+    public BaseDescriptorEntity(DescriptorId id, BaseDescriptorContent content, AuditedInfo creationInfo, int dbId = -1)
+        : base(id, content, creationInfo, dbId)
     {
-        Id = id;
-        Content = content;
-        CreationInfo = creationInfo;
     }
-
-    public DescriptorId Id { get; }
-    public BaseDescriptorContent Content { get; }
-    public AuditedInfo CreationInfo { get; }
 
     public override EntityType Type => EntityType.Descriptor;
     public bool Equals(BaseDescriptorEntity? other)

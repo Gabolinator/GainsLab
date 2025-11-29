@@ -8,6 +8,7 @@ using GainsLab.Contracts.SyncDto;
 using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 using GainsLab.Core.Models.Core.Factory;
+using GainsLab.Core.Models.Core.Interfaces;
 using GainsLab.Core.Models.Core.Interfaces.Caching;
 using GainsLab.Core.Models.Core.Interfaces.DataManagement;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
@@ -15,6 +16,7 @@ using GainsLab.Core.Models.Core.Results;
 using GainsLab.Core.Models.Core.Utilities;
 using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure;
+using GainsLab.Infrastructure.DB;
 using GainsLab.Infrastructure.DB.Handlers;
 using GainsLab.Models.Core.LifeCycle;
 using GainsLab.Models.DataManagement.Sync;
@@ -43,10 +45,13 @@ public class DataManager : IDataManager
     //read and write data to files
     private readonly IFileDataService _fileDataService;
     private readonly ISyncOrchestrator _syncOrchestrator;
+    
+    private readonly IEntitySeedResolver _resolver;
 
     private string fileDirectory;
     private readonly IAppLifeCycle _lifeCycle;
     private Task<bool>? _seedTask;
+   
 
     /// <summary>
     /// Creates a new <see cref="DataManager"/> wired up with the required infrastructure services.
@@ -65,7 +70,8 @@ public class DataManager : IDataManager
         ILocalRepository localProvider,
         IComponentCacheRegistry cache,
         IFileDataService fileDataService,
-        ISyncOrchestrator syncOrchestrator)
+        ISyncOrchestrator syncOrchestrator,
+        IEntitySeedResolver resolver)
     {
         _logger = logger;
         _remote = remoteProvider;
@@ -74,6 +80,7 @@ public class DataManager : IDataManager
         _fileDataService = fileDataService;
         _lifeCycle = lifeCycle;
         _syncOrchestrator = syncOrchestrator;
+        _resolver = resolver;
 
     }
 
@@ -268,11 +275,12 @@ public class DataManager : IDataManager
         
         //create a test equipment and send it to the remote
         var descriptionService = new BaseDescriptorService(clock);
-        var entityFactory = new EntityFactory(clock,_logger, descriptionService);
+        var entityFactory = new EntityFactory(clock,_logger, descriptionService, _resolver);
         
-        var db = entityFactory.CreateEquipment("Dumbbell", "some description for dumbbell 2 - should be added", "editor test");
+        var dumbbell = entityFactory.CreateEquipment("Dumbbell", "some description for dumbbell 2 - should be added", "editor test");
 
-        var list = new List<EquipmentEntity> {db};
+        var list = new List<EquipmentEntity> {dumbbell};
+        
         
         //save to local db and sync up
         return  await SaveComponentsAsync(list, true);

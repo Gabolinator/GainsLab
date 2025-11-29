@@ -30,20 +30,23 @@ public class MovementCategoryCreationConfig
 
 public class MovementCategoryFactory: IEntityFactory<MovementCategoryEntity, MovementCategoryCreationConfig>
 {
-    public MovementCategoryFactory(IClock clock, IDescriptorService<BaseDescriptorEntity> descSvc)
+    public MovementCategoryFactory(IClock clock, IDescriptorService<BaseDescriptorEntity> descSvc, IEntitySeedResolver resolver)
     {
         _clock = clock;
         _descSvc = descSvc;
+        _resolver = resolver;
     }
     
     private readonly IClock _clock;              
     private readonly IDescriptorService<BaseDescriptorEntity> _descSvc;
-    
+    private readonly IEntitySeedResolver _resolver;
+
     public MovementCategoryEntity Create(MovementCategoryCreationConfig config)
     {
         if (config is null) throw new ArgumentNullException(nameof(config));
         if (string.IsNullOrWhiteSpace(config.Name)) throw new ArgumentNullException(nameof(config.Name));
-
+        
+        
         var content = new MovementCategoryContent(config.Name, config.BaseCategories ?? []);
         content.Validate();
         

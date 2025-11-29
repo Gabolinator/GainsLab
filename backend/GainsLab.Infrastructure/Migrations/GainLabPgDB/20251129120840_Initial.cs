@@ -186,6 +186,57 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
                 });
 
             migrationBuilder.CreateTable(
+                name: "movement",
+                schema: "public",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    GUID = table.Column<Guid>(type: "uuid", nullable: false),
+                    DescriptorID = table.Column<int>(type: "integer", nullable: false),
+                    MovementCategoryId = table.Column<int>(type: "integer", nullable: false),
+                    VariantOfMovementGuid = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedAtUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<string>(type: "text", nullable: false),
+                    updated_at_utc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false, defaultValueSql: "now()"),
+                    updated_seq = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UpdatedBy = table.Column<string>(type: "text", nullable: true),
+                    is_deleted = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
+                    DeletedAt = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<string>(type: "text", nullable: true),
+                    RowVersion = table.Column<byte[]>(type: "bytea", rowVersion: true, nullable: true),
+                    Version = table.Column<long>(type: "bigint", nullable: false),
+                    authority = table.Column<int>(type: "integer", nullable: false, defaultValue: 2)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_movement", x => x.Id);
+                    table.UniqueConstraint("AK_movement_GUID", x => x.GUID);
+                    table.ForeignKey(
+                        name: "FK_movement_descriptors_DescriptorID",
+                        column: x => x.DescriptorID,
+                        principalSchema: "public",
+                        principalTable: "descriptors",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_movement_movement_VariantOfMovementGuid",
+                        column: x => x.VariantOfMovementGuid,
+                        principalSchema: "public",
+                        principalTable: "movement",
+                        principalColumn: "GUID");
+                    table.ForeignKey(
+                        name: "FK_movement_movement_category_MovementCategoryId",
+                        column: x => x.MovementCategoryId,
+                        principalSchema: "public",
+                        principalTable: "movement_category",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "movement_category_relations",
                 schema: "public",
                 columns: table => new
@@ -239,6 +290,61 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "movement_equipment_relation",
+                schema: "public",
+                columns: table => new
+                {
+                    MovementId = table.Column<int>(type: "integer", nullable: false),
+                    EquipmentId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_movement_equipment_relation", x => new { x.MovementId, x.EquipmentId });
+                    table.ForeignKey(
+                        name: "FK_movement_equipment_relation_equipments_EquipmentId",
+                        column: x => x.EquipmentId,
+                        principalSchema: "public",
+                        principalTable: "equipments",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_movement_equipment_relation_movement_MovementId",
+                        column: x => x.MovementId,
+                        principalSchema: "public",
+                        principalTable: "movement",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "movement_muscle_relation",
+                schema: "public",
+                columns: table => new
+                {
+                    MovementId = table.Column<int>(type: "integer", nullable: false),
+                    MuscleId = table.Column<int>(type: "integer", nullable: false),
+                    MuscleRole = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_movement_muscle_relation", x => new { x.MovementId, x.MuscleId });
+                    table.ForeignKey(
+                        name: "FK_movement_muscle_relation_movement_MovementId",
+                        column: x => x.MovementId,
+                        principalSchema: "public",
+                        principalTable: "movement",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_movement_muscle_relation_muscles_MuscleId",
+                        column: x => x.MuscleId,
+                        principalSchema: "public",
+                        principalTable: "muscles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_descriptors_GUID",
                 schema: "public",
@@ -272,6 +378,37 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
                 columns: new[] { "updated_at_utc", "updated_seq" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_movement_DescriptorID",
+                schema: "public",
+                table: "movement",
+                column: "DescriptorID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_movement_GUID",
+                schema: "public",
+                table: "movement",
+                column: "GUID",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_movement_MovementCategoryId",
+                schema: "public",
+                table: "movement",
+                column: "MovementCategoryId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_movement_updated_at_utc_updated_seq",
+                schema: "public",
+                table: "movement",
+                columns: new[] { "updated_at_utc", "updated_seq" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_movement_VariantOfMovementGuid",
+                schema: "public",
+                table: "movement",
+                column: "VariantOfMovementGuid");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_movement_category_DescriptorID",
                 schema: "public",
                 table: "movement_category",
@@ -303,6 +440,18 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
                 column: "ChildCategoryId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_movement_equipment_relation_EquipmentId",
+                schema: "public",
+                table: "movement_equipment_relation",
+                column: "EquipmentId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_movement_muscle_relation_MuscleId",
+                schema: "public",
+                table: "movement_muscle_relation",
+                column: "MuscleId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_muscle_antagonists_AntagonistId",
                 schema: "public",
                 table: "muscle_antagonists",
@@ -332,11 +481,15 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "equipments",
+                name: "movement_category_relations",
                 schema: "public");
 
             migrationBuilder.DropTable(
-                name: "movement_category_relations",
+                name: "movement_equipment_relation",
+                schema: "public");
+
+            migrationBuilder.DropTable(
+                name: "movement_muscle_relation",
                 schema: "public");
 
             migrationBuilder.DropTable(
@@ -348,11 +501,19 @@ namespace GainsLab.Infrastructure.Migrations.GainLabPgDB
                 schema: "public");
 
             migrationBuilder.DropTable(
-                name: "movement_category",
+                name: "equipments",
+                schema: "public");
+
+            migrationBuilder.DropTable(
+                name: "movement",
                 schema: "public");
 
             migrationBuilder.DropTable(
                 name: "muscles",
+                schema: "public");
+
+            migrationBuilder.DropTable(
+                name: "movement_category",
                 schema: "public");
 
             migrationBuilder.DropTable(

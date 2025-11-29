@@ -23,19 +23,17 @@ public static class DescriptorMapper
     {
         return new DescriptorDTO
         {
-          GUID = domain.Id,
-          Content = domain.Content.Description != null ? domain.Content.Description.Text?? "none" : "none",
-          CreatedAtUtc = domain.CreationInfo.CreatedAtUtc, // do i set to todays date ? 
-          CreatedBy = domain.CreationInfo.CreatedBy,
-            
-          UpdatedAtUtc = domain.CreationInfo.UpdatedAtUtc?? CoreUtilities.Clock.UtcNow, // do i set to todays date ? 
-          UpdatedBy = domain.CreationInfo.UpdatedBy,
-          Version = domain.CreationInfo.Version,
-             
-          IsDeleted = domain.CreationInfo.IsDeleted,
-          DeletedAt = domain.CreationInfo.DeletedAt,
-          DeletedBy = domain.CreationInfo.DeletedBy,
-          
+            Id = domain.DbId > 0 ? domain.DbId : 0,
+            GUID = domain.Id,
+            Content = domain.Content.Description != null ? domain.Content.Description.Text ?? "none" : "none",
+            CreatedAtUtc = domain.CreationInfo.CreatedAtUtc,
+            CreatedBy = domain.CreationInfo.CreatedBy,
+            UpdatedAtUtc = domain.CreationInfo.UpdatedAtUtc ?? CoreUtilities.Clock.UtcNow,
+            UpdatedBy = domain.CreationInfo.UpdatedBy,
+            Version = domain.CreationInfo.Version,
+            IsDeleted = domain.CreationInfo.IsDeleted,
+            DeletedAt = domain.CreationInfo.DeletedAt,
+            DeletedBy = domain.CreationInfo.DeletedBy
         };
     }
 
@@ -52,8 +50,10 @@ public static class DescriptorMapper
         }
 
         var description = new Description(dto.Content);
-        
-        return new BaseDescriptorEntity(new DescriptorId(dto.GUID), new BaseDescriptorContent{Description = description}, new AuditedInfo(DateTimeOffset.UtcNow, "unknown" ));
+        var content = new BaseDescriptorContent { Description = description };
+        var creation = new AuditedInfo(dto.CreatedAtUtc, dto.CreatedBy, dto.UpdatedAtUtc, dto.UpdatedBy, dto.Version, dto.IsDeleted, dto.DeletedAt, dto.DeletedBy);
+
+        return new BaseDescriptorEntity(new DescriptorId(dto.GUID), content, creation, dto.Id);
 
         
 

@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
 
 namespace GainsLab.Core.Models.Core.Entities.Identifier;
 
@@ -9,6 +10,17 @@ namespace GainsLab.Core.Models.Core.Entities.Identifier;
 /// </summary>
 public class EquipmentIdList : IEnumerable<EquipmentId>
 {
+    public EquipmentIdList()
+    {
+    }
+    
+    public EquipmentIdList(IEnumerable<EquipmentEntity> equipments)
+    {
+        AddUniques(equipments.Select(e=>e.Id));
+    }
+    
+    
+
     public List<EquipmentId> Ids { get; set; } = new();
 
     public IEnumerator<EquipmentId> GetEnumerator() => Ids.GetEnumerator();

@@ -36,16 +36,18 @@ public sealed class DescriptiorCreationConfig
 /// </summary>
 public class DescriptorFactory : IEntityFactory<BaseDescriptorEntity, DescriptiorCreationConfig>
 {
-    public  DescriptorFactory(IClock clock, IDescriptorService<BaseDescriptorEntity> descSvc)
+    public  DescriptorFactory(IClock clock, IDescriptorService<BaseDescriptorEntity> descSvc, IEntitySeedResolver resolver)
     {
         _clock = clock;
         _descSvc = descSvc;
+        _resolver = resolver;
     }
     
     
     private readonly IClock _clock;              
     private readonly IDescriptorService<BaseDescriptorEntity> _descSvc;
-    
+    private readonly IEntitySeedResolver _resolver;
+
     /// <summary>
     /// Creates and persists a descriptor from the supplied configuration.
     /// </summary>

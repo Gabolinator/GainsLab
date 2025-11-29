@@ -38,101 +38,78 @@ public class DBDataInitializer
     /// Ensures that core reference entities exist in the database.
     /// </summary>
     /// <param name="db">The Postgres context used for querying and persisting entities.</param>
-    public async Task CreateBaseEntities(GainLabPgDBContext db)
+    public async Task CreateBaseEntities(GainLabPgDBContext db, IEntitySeedResolver resolver)
     {
+        
+        await WarmSeedResolverAsync(db, resolver);
         
         var descriptionService = new BaseDescriptorService(_clock);
         
-        var entityFactory = new EntityFactory(_clock,_logger, descriptionService);
+        var entityFactory = new EntityFactory(_clock,_logger, descriptionService, resolver);
+        var entitySeeder = new EntitySeeder(_logger,entityFactory);
         
+        //start by seeding "base block" to be sure we have the foundation to create other objects 
         
-        var addedEquipment = await CreateBaseEquipments(db, entityFactory);
-        var addedMuscle = await CreateBaseMuscles(db, entityFactory);
-        var addedCategories = await CreateBaseCategories(db, entityFactory);
+        var addedEquipment = await CreateBaseEquipments(db, entitySeeder);
+        var addedMuscle = await CreateBaseMuscles(db, entitySeeder);
+        var addedCategories = await CreateBaseCategories(db, entitySeeder);
+       
         
-        var added = new List<bool> {addedEquipment, addedMuscle,addedCategories };
-        
-        bool addedAny = added.Any(it=>it);
+        bool prerequisitesAdded = new List<bool> {addedEquipment, addedMuscle,addedCategories}.Any(it=>it);
 
-        if (addedAny)
+        if (prerequisitesAdded)
         {
             if(_verbose) _logger.Log(nameof(DBDataInitializer),$"Initializing Base Entities - Saving Changes");
             await db.SaveChangesAsync();
+            await WarmSeedResolverAsync(db, resolver);
+            
+            //resolve missing link here - example resolve the variantOf of a movement ? 
+            
         }
+        
+        //we probably need to update the cache 
+        
+        //then add move complex objects 
+        var addedMovements = await CreateBaseMovements(db, entitySeeder);
+
+       bool addedMovementsAny = addedMovements;
+
+        if (addedMovementsAny)
+        {
+            if(_verbose) _logger.Log(nameof(DBDataInitializer),$"Initializing Base Entities - Saving Changes");
+            await db.SaveChangesAsync();
+            await WarmSeedResolverAsync(db, resolver);
+            
+            //resolve missing link here - example resolve the variantOf of a movement ? 
+            
+        }
+        
         
     }
 
-    // private async Task<bool> CreateBaseCategories(GainLabPgDBContext db, EntityFactory entityFactory)
-    // {
-    //     var existingNames = await db.MovementCategories
-    //         .AsNoTracking()
-    //         .Select(c => c.Name)
-    //         .ToListAsync();
-    //     var anyPresent = existingNames.Count > 0;
-    //     if(_verbose) _logger.Log(nameof(DBDataInitializer),$"Initializing Categories - Any Present:  {anyPresent}");
-    //     
-    //     if(_verbose) _logger.Log(nameof(DBDataInitializer),$"Initializing Categories - Create Base Categories");
-    //
-    //     var categories = entityFactory.CreateBaseCategories();
-    //     
-    //     //for debug - comment me out after 
-    //     foreach (var categoriesEntity in categories)
-    //     {
-    //         if(_verbose) _logger.Log(nameof(DBDataInitializer), "category: " +categoriesEntity.Content.ToString());
-    //     }
-    //
-    //     var categoriesDtos = categories
-    //         .Select(e => (MovementCategoryDTO)EntityDomainMapper.ToDTO(e)!)
-    //         .ToList();
-    //
-    //     categoriesDtos = EnsureUniqueContent(
-    //         categoriesDtos,
-    //         dto => dto.Name,
-    //         "movement categories",
-    //         existingNames);
-    //
-    //     //for debug - comment me out after 
-    //     foreach (var categoryDto in categoriesDtos)
-    //     {
-    //         if(_verbose) _logger.Log(nameof(DBDataInitializer),$" CategoryName - {categoryDto.Name.ToString()}");
-    //     }
-    //         
-    //     var descriptions = categoriesDtos.Select(e => e.Descriptor).Where(d => d != null).Select(d=>d!);
-    //
-    //     //for debug - comment me out after 
-    //     foreach (var description in descriptions)
-    //     {
-    //         if(_verbose) _logger.Log(description.ToString());
-    //     }
-    //         
-    //     if(_verbose) _logger.Log(nameof(DBDataInitializer),$"Initializing categories - Adding {categoriesDtos.Count()} Base categories");
-    //
-    //     if (!categoriesDtos.Any())
-    //     {
-    //         if(_verbose) _logger.Log(nameof(DBDataInitializer),$"Initializing categories - No new categories to add.");
-    //         return false;
-    //     }
-    //     
-    //     db.MovementCategories.AddRange(categoriesDtos);
-    //     
-    //     var relationDtos = MovementCategoryMapper.CreateMovementCategoriesRelationDTOs(categoriesDtos, categories).ToList();
-    //     if (relationDtos.Count > 0)
-    //     {
-    //         db.MovementCategoryRelations.AddRange(relationDtos);
-    //     }
-    //     
-    //     return true;
-    //
-    //     
-    // }
-    private Task<bool> CreateBaseCategories(GainLabPgDBContext db, EntityFactory entityFactory)
+    private Task<bool> CreateBaseMovements(GainLabPgDBContext db, EntitySeeder entitySeeder)
+    {
+        return SeedBaseEntitiesAsync<MovementEntity, MovementDTO>(
+            db,
+            existingNameQuery: db.MovementCategories
+                .AsNoTracking()
+                .Select(c => c.Name),
+            createBaseDomainEntities: entitySeeder.CreateBaseMovements,
+            mapToDto: domain => (MovementDTO)EntityDomainMapper.ToDTO(domain)!,
+            nameSelector: dto => dto.Name,
+            entityLabel: "movement categories",
+            targetDbSet: db.Movement);
+        
+    }
+    
+    private Task<bool> CreateBaseCategories(GainLabPgDBContext db, EntitySeeder entitySeeder)
     {
         return SeedBaseEntitiesAsync<MovementCategoryEntity, MovementCategoryDTO>(
             db,
             existingNameQuery: db.MovementCategories
                 .AsNoTracking()
                 .Select(c => c.Name),
-            createBaseDomainEntities: entityFactory.CreateBaseCategories,
+            createBaseDomainEntities: entitySeeder.CreateBaseCategories,
             mapToDto: domain => (MovementCategoryDTO)EntityDomainMapper.ToDTO(domain)!,
             nameSelector: dto => dto.Name,
             entityLabel: "movement categories",
@@ -151,14 +128,14 @@ public class DBDataInitializer
     }
     
     
-    private Task<bool> CreateBaseMuscles(GainLabPgDBContext db, EntityFactory entityFactory)
+    private Task<bool> CreateBaseMuscles(GainLabPgDBContext db, EntitySeeder entitySeeder)
     { 
         return SeedBaseEntitiesAsync<MuscleEntity, MuscleDTO>(
             db,
             existingNameQuery: db.Muscles
                 .AsNoTracking()
                 .Select(m => m.Name),
-            createBaseDomainEntities: entityFactory.CreateBaseMuscles,
+            createBaseDomainEntities: entitySeeder.CreateBaseMuscles,
             mapToDto: domain => (MuscleDTO)EntityDomainMapper.ToDTO(domain)!,
             nameSelector: dto => dto.Name,
             entityLabel: "muscles",
@@ -174,87 +151,88 @@ public class DBDataInitializer
                     ctx.MuscleAntagonists.AddRange(antagonistDtos);
                 }
             });
-
-        
-        // var existingNames = await db.Muscles
-        //     .AsNoTracking()
-        //     .Select(m => m.Name)
-        //     .ToListAsync();
-        // var anyPresent = existingNames.Count > 0;
-        // if(_verbose) _logger.Log(nameof(DBDataInitializer),$"Initializing Muscle - Any Present: { anyPresent}");
-        //
-        // if(_verbose) _logger.Log(nameof(DBDataInitializer),$"Initializing Muscle - Create Base Muscle");
-        //
-        // var muscles = entityFactory.CreateBaseMuscles();
-        //
-        // //for debug - comment me out after 
-        // foreach (var musclesEntity in muscles)
-        // {
-        //     if(_verbose) _logger.Log(nameof(DBDataInitializer), "musle: " +musclesEntity.ToString());
-        // }
-        //
-        // var musclesDtos = muscles
-        //     .Select(e => (MuscleDTO)EntityDomainMapper.ToDTO(e)!)
-        //     .ToList();
-        //
-        // musclesDtos = EnsureUniqueContent(
-        //     musclesDtos,
-        //     dto => dto.Name,
-        //     "muscles",
-        //     existingNames);
-        //
-        // //for debug - comment me out after 
-        // foreach (var muscleDto in musclesDtos)
-        // {
-        //     if(_verbose) _logger.Log(muscleDto.ToString());
-        // }
-        //     
-        // var descriptions = musclesDtos.Select(e => e.Descriptor).Where(d => d != null).Select(d=>d!);
-        //
-        // //for debug - comment me out after 
-        // foreach (var description in descriptions)
-        // {
-        //     if(_verbose) _logger.Log(description.ToString());
-        // }
-        //     
-        // if(_verbose) _logger.Log(nameof(DBDataInitializer),$"Initializing Muscles - Adding {musclesDtos.Count()} Base Muscles");
-        //
-        //      
-        // //  db.Descriptors.AddRange(descriptions);
-        // //  if(_verbose) _logger.Log(nameof(DBDataInitializer),$"Initializing Descriptions - {descriptions.Count()} items");
-        //
-        //
-        // if (!musclesDtos.Any())
-        // {
-        //     if(_verbose) _logger.Log(nameof(DBDataInitializer), "Initializing Muscle - No new muscles to add.");
-        //     return false;
-        // }
-        //
-        // db.Muscles.AddRange(musclesDtos);
-        //
-        // var antagonistDtos = MuscleMapper.CreateMuscleAntagonistDTOs(musclesDtos, muscles).ToList();
-        // if (antagonistDtos.Count > 0)
-        // {
-        //     db.MuscleAntagonists.AddRange(antagonistDtos);
-        // }
-        //
-        // return true;
-        
     }
+
+    private async Task WarmSeedResolverAsync(GainLabPgDBContext db, IEntitySeedResolver resolver)
+    {
+        await TrackExistingEquipmentsAsync(db, resolver);
+        await TrackExistingMusclesAsync(db, resolver);
+        await TrackExistingCategoriesAsync(db, resolver);
+    }
+
+    private static async Task TrackExistingEquipmentsAsync(GainLabPgDBContext db, IEntitySeedResolver resolver)
+    {
+        resolver.Clear<EquipmentEntity>();
+        var equipments = await db.Equipments
+            .AsNoTracking()
+            .Include(e => e.Descriptor)
+            .ToListAsync();
+
+        foreach (var dto in equipments)
+        {
+            if (EntityDomainMapper.ToDomain(dto) is EquipmentEntity equipment &&
+                !string.IsNullOrWhiteSpace(equipment.Content.Name))
+            {
+                resolver.Track(equipment.Content.Name, equipment);
+            }
+        }
+    }
+
+    private static async Task TrackExistingMusclesAsync(GainLabPgDBContext db, IEntitySeedResolver resolver)
+    {
+        resolver.Clear<MuscleEntity>();
+        var muscles = await db.Muscles
+            .AsNoTracking()
+            .Include(m => m.Descriptor)
+            .Include(m => m.Antagonists)
+                .ThenInclude(link => link.Antagonist)
+            .ToListAsync();
+
+        foreach (var dto in muscles)
+        {
+            if (EntityDomainMapper.ToDomain(dto) is MuscleEntity muscle &&
+                !string.IsNullOrWhiteSpace(muscle.Content.Name))
+            {
+                resolver.Track(muscle.Content.Name, muscle);
+            }
+        }
+    }
+
+    private static async Task TrackExistingCategoriesAsync(GainLabPgDBContext db, IEntitySeedResolver resolver)
+    {
+        resolver.Clear<MovementCategoryEntity>();
+        var categories = await db.MovementCategories
+            .AsNoTracking()
+            .Include(c => c.Descriptor)
+            .Include(c => c.ParentCategory)
+            .Include(c => c.BaseCategoryLinks)
+                .ThenInclude(link => link.ParentCategory)
+            .ToListAsync();
+
+        foreach (var dto in categories)
+        {
+            if (EntityDomainMapper.ToDomain(dto) is MovementCategoryEntity category &&
+                !string.IsNullOrWhiteSpace(category.Content.Name))
+            {
+                resolver.Track(category.Content.Name, category);
+            }
+        }
+    }
+    
 
     /// <summary>
     /// Populates the database with the default set of equipment records when none exist.
     /// </summary>
     /// <param name="db">Database context used to check and persist equipment records.</param>
     /// <param name="entityFactory">Factory responsible for creating baseline equipment domain entities.</param>
-    private Task<bool> CreateBaseEquipments(GainLabPgDBContext db, EntityFactory entityFactory)
+    private Task<bool> CreateBaseEquipments(GainLabPgDBContext db, EntitySeeder entitySeeder)
     {
         return SeedBaseEntitiesAsync<EquipmentEntity, EquipmentDTO>(
             db,
             existingNameQuery: db.Equipments
                 .AsNoTracking()
                 .Select(e => e.Name),
-            createBaseDomainEntities: entityFactory.CreateBaseEquipments,
+            createBaseDomainEntities: entitySeeder.CreateBaseEquipments,
             mapToDto: domain => (EquipmentDTO)domain.ToDTO()!,
             nameSelector: dto => dto.Name,
             entityLabel: "equipments",
@@ -262,58 +240,6 @@ public class DBDataInitializer
             // no extra entities like relations, so null
         );
         
-        // if(_verbose) _logger.Log(nameof(DBDataInitializer),"Initializing Equipments");
-        //
-        // var existingNames = await db.Equipments
-        //     .AsNoTracking()
-        //     .Select(e => e.Name)
-        //     .ToListAsync();
-        // var anyPresent = existingNames.Count > 0;
-        // if(_verbose) _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Any Present: { anyPresent}");
-        //
-        // if(_verbose) _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Create Base Equipments");
-        //
-        // var equipments = entityFactory.CreateBaseEquipments();
-        //     foreach (var equipmentEntity in equipments)
-        //     {
-        //         if(_verbose) _logger.Log(equipmentEntity.ToString());
-        //     }
-        //
-        //     var equipmentDtos = equipments
-        //         .Select(e => (EquipmentDTO)e.ToDTO()!)
-        //         .ToList();
-        //
-        //     equipmentDtos = EnsureUniqueContent(
-        //         equipmentDtos,
-        //         dto => dto.Name,
-        //         "equipments",
-        //         existingNames);
-        //
-        //     if (!equipmentDtos.Any())
-        //     {
-        //         if(_verbose) _logger.Log(nameof(DBDataInitializer), "Initializing Equipments - No new equipments to add.");
-        //         return false;
-        //     }
-        //
-        //     //for debug - comment me out after 
-        //     foreach (var equipmentDto in equipmentDtos)
-        //     {
-        //         if(_verbose) _logger.Log(equipmentDto.ToString());
-        //     }
-        //     
-        //     var descriptions = equipmentDtos.Select(e => e.Descriptor).Where(d => d != null).Select(d=>d!);
-        //
-        //     //for debug - comment me out after 
-        //     foreach (var description in descriptions)
-        //     {
-        //         if(_verbose) _logger.Log(description.ToString());
-        //     }
-        //     
-        //     if(_verbose) _logger.Log(nameof(DBDataInitializer),$"Initializing Equipments - Adding {equipmentDtos.Count()} Base Equipments");
-        //
-        //     db.Equipments.AddRange(equipmentDtos);
-        //  
-        //     return true;
     }
 
     private List<TDto> EnsureUniqueContent<TDto>(
