@@ -61,7 +61,8 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
         services.AddScoped<ISyncService<EquipmentSyncDTO>, EquipmentSyncService>();
         services.AddScoped<ISyncService<DescriptorSyncDTO>, DescriptorSyncService>();
         services.AddScoped<ISyncService<MovementCategorySyncDto>, MovementCategorySyncService>();
-        services.AddScoped<ISyncService<MuscleSyncDTO>, MuscleSyncService>();
+        services.AddScoped<ISyncService<MuscleSyncDTO>, MuscleSyncService>(); 
+        services.AddScoped<ISyncService<MovementSyncDTO>, MovementSyncService>();
 
     
         // Also expose as non-generic so the controller can enumerate:
@@ -69,6 +70,7 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
         services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<DescriptorSyncDTO>>());
         services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<MuscleSyncDTO>>());
         services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<MovementCategorySyncDto>>());
+        services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<MovementSyncDTO>>());
 
     }
 

@@ -50,6 +50,12 @@ public class GainLabSQLDBContext : DbContext
     public DbSet<MovementCategoryDTO> MovementCategories => Set<MovementCategoryDTO>();
     public DbSet<MovementCategoryRelationDTO> MovementCategoryRelations => Set<MovementCategoryRelationDTO>();
 
+    //movement
+    public DbSet<MovementDTO> Movement => Set<MovementDTO>();
+    public DbSet<MovementMuscleRelationDTO> MovementMuscleRelations => Set<MovementMuscleRelationDTO>();
+    public DbSet<MovementEquipmentRelationDTO> MovementEquipmentRelations => Set<MovementEquipmentRelationDTO>();
+
+    
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -61,9 +67,73 @@ public class GainLabSQLDBContext : DbContext
         CreateDescriptorTableModel_Sqlite(modelBuilder);
         CreateMuscleTableModel_Sqlite(modelBuilder);
         CreateMovementCategoryTableModel_Sqlite(modelBuilder);
+        CreateMovementTableModel_Squlite(modelBuilder);
     }
 
-     private void CreateMovementCategoryTableModel_Sqlite(ModelBuilder modelBuilder)
+    private void CreateMovementTableModel_Squlite(ModelBuilder modelBuilder)
+    {
+        _logger?.Log("GainLabPgDBContext", "Creating Movement Table");
+
+        //base movement table
+        modelBuilder.Entity<MovementDTO>(m =>
+        {
+            m.ToTable("movement");
+            m.HasKey(x => x.Id);
+            m.Property(x => x.Name).IsRequired();
+            m.HasOne(x => x.Descriptor)
+                .WithMany()
+                .HasForeignKey(x => x.DescriptorID)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            m.HasOne(x => x.Category)
+                .WithMany()
+                .HasForeignKey(x => x.MovementCategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+            m.HasIndex(x => x.GUID).IsUnique();
+
+
+            m.HasOne(m => m.VariantOfMovement)
+                .WithMany()
+                .HasForeignKey(m => m.VariantOfMovementGuid)
+                .HasPrincipalKey(m => m.GUID);
+
+            m.Property(x => x.UpdatedAtUtc)
+                .IsRequired()
+                .HasColumnName("updated_at_utc")
+                .HasDefaultValueSql("now()");
+
+            m.Property(x => x.UpdatedSeq)
+                .HasColumnName("updated_seq")
+                .UseIdentityByDefaultColumn();
+
+            m.Property(x => x.IsDeleted)
+                .HasColumnName("is_deleted")
+                .HasDefaultValue(false);
+
+            m.Property(x => x.Authority)
+                .HasColumnName("authority")
+                .HasConversion<int>()
+                .HasDefaultValue(DataAuthority.Bidirectional);
+
+
+            m.HasMany(x => x.EquipmentRelations)
+                .WithOne(x => x.Movement)
+                .HasForeignKey(x => x.MovementId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.HasMany(x => x.MuscleRelations)
+                .WithOne(x => x.Movement)
+                .HasForeignKey(x => x.MovementId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            m.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
+
+
+        });
+    }
+
+
+    private void CreateMovementCategoryTableModel_Sqlite(ModelBuilder modelBuilder)
     {
        
           _logger?.Log("GainLabPgDBContext", "Creating Movement Category Table");
