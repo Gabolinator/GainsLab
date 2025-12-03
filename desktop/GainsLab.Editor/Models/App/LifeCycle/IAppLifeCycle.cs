@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Avalonia.Controls.ApplicationLifetimes;
-
 namespace GainsLab.Models.Core.LifeCycle;
 
 /// <summary>
@@ -32,7 +30,9 @@ public interface IAppLifeCycle
     /// <summary>
     /// Wires the lifecycle to the platform-specific host and prepares event subscriptions.
     /// </summary>
-    Task InitializeAsync(IServiceProvider serviceProvider, IApplicationLifetime? lifetime);
+    /// <param name="serviceProvider">Configured dependency injection container.</param>
+    /// <param name="lifetimeContext">Platform-specific lifetime object (Avalonia lifetime, MAUI app, etc.).</param>
+    Task InitializeAsync(IServiceProvider serviceProvider, object? lifetimeContext);
     
     /// <summary>
     /// Explicitly triggers the start pipeline (useful for tests and CLI scenarios).

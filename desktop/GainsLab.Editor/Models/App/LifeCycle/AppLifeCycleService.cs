@@ -36,9 +36,9 @@ public class AppLifecycleService  : IAppLifeCycle
     }
 
     /// <inheritdoc />
-    public async Task InitializeAsync( IServiceProvider serviceProvider, IApplicationLifetime? lifetime)
+    public async Task InitializeAsync(IServiceProvider serviceProvider, object? lifetimeContext)
     {
-        if (lifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        if (lifetimeContext is IClassicDesktopStyleApplicationLifetime desktop)
         {
            // desktop.MainWindow.Closed += OnMainWindowClosed;
             desktop.ShutdownRequested += OnShutdownResquested;

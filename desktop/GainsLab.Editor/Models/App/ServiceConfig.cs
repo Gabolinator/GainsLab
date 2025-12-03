@@ -29,7 +29,7 @@ namespace GainsLab.Models.App;
 /// <summary>
 /// Provides configuration for dependency injection services used in the application.
 /// </summary>
-public static class ServiceConfig
+public static partial class ServiceConfig
 {
     
     
@@ -68,7 +68,6 @@ public static class ServiceConfig
         services.AddDbContextFactory<GainLabSQLDBContext>(ConfigureSqlite);
 
         
-        services.AddSingleton<IAppLifeCycle,AppLifecycleService>();
         services.AddSingleton<ILocalRepository, DataRepository>();
         void ConfigureSyncClient(IServiceProvider sp, HttpClient client)
         {
@@ -102,10 +101,12 @@ public static class ServiceConfig
       
         
        // services.AddSingleton<EntityFactory>();
-        services.AddSingleton<MainWindow>();
         services.AddSingleton<SystemInitializer>();
+        ConfigurePlatformServices(services);
      
     }
+
+    static partial void ConfigurePlatformServices(IServiceCollection services);
 
     private static IServiceCollection AddSyncProcessors(IServiceCollection services)
     {

@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GainsLab.Contracts", "backe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GainsLab.Api", "backend\GainsLab.Api\GainsLab.Api.csproj", "{4856F68F-431C-43AB-8DDF-AF2582523692}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GainsLab.Maui", "GainsLab.Maui\GainsLab.Maui.csproj", "{2F189A1F-B80E-44C3-A4E8-18430B483C25}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{4856F68F-431C-43AB-8DDF-AF2582523692}.Release|x64.Build.0 = Release|Any CPU
 		{4856F68F-431C-43AB-8DDF-AF2582523692}.Release|x86.ActiveCfg = Release|Any CPU
 		{4856F68F-431C-43AB-8DDF-AF2582523692}.Release|x86.Build.0 = Release|Any CPU
+		{2F189A1F-B80E-44C3-A4E8-18430B483C25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F189A1F-B80E-44C3-A4E8-18430B483C25}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F189A1F-B80E-44C3-A4E8-18430B483C25}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{2F189A1F-B80E-44C3-A4E8-18430B483C25}.Debug|x64.Build.0 = Debug|Any CPU
+		{2F189A1F-B80E-44C3-A4E8-18430B483C25}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2F189A1F-B80E-44C3-A4E8-18430B483C25}.Debug|x86.Build.0 = Debug|Any CPU
+		{2F189A1F-B80E-44C3-A4E8-18430B483C25}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F189A1F-B80E-44C3-A4E8-18430B483C25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F189A1F-B80E-44C3-A4E8-18430B483C25}.Release|x64.ActiveCfg = Release|Any CPU
+		{2F189A1F-B80E-44C3-A4E8-18430B483C25}.Release|x64.Build.0 = Release|Any CPU
+		{2F189A1F-B80E-44C3-A4E8-18430B483C25}.Release|x86.ActiveCfg = Release|Any CPU
+		{2F189A1F-B80E-44C3-A4E8-18430B483C25}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
