@@ -1,10 +1,9 @@
-﻿
-@attribute [StreamRendering]
+﻿@attribute [StreamRendering]
 
-<h3>EquipmentDisplayComponent</h3>
+<h3>MuscleDisplayComponent</h3>
 
 <p>
-    @if (_equipments == null)
+    @if (_muscles == null)
     {
         @if (_error)
         {
@@ -21,23 +20,27 @@
     }
     else
     {
-        <table class="tableEquipment">
+        <table class="tableMuscle">
             <thead>
             <tr>
                 <th>Index</th>
                 <th>Name</th>
-                <th aria-label="Description">Desc</th>
+                <th>Desc</th>
+                <th>Section</th>
+                <th>Antagonists</th>
                 <th>Date</th>
             </tr>
             </thead>
             <tbody>
-            @foreach (var eq in _equipments)
+            @foreach (var m in _muscles)
             {
                 <tr>
                     <td>@i</td>
-                    <td>@eq.Name</td>
-                    <td>@GetDescription(eq)</td>
-                    <td>@eq.UpdatedAtUtc</td>
+                    <td>@m.Name</td>
+                    <td>@GetDescription(m)</td>
+                    <td>@m.BodySection</td>
+                    <td>@GetAntagonist(m)</td>
+                    <td>@m.UpdatedAtUtc</td>
                 </tr>
                 i++;
             }
@@ -49,7 +52,7 @@
 
 @code
 {
-    private EquipmentDTO[]? _equipments = null;
+    private MuscleDTO[]? _muscles = null;
     [Inject] private ILogger Logger { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
     [Inject] private IEntitySyncClient SyncClient { get; set; } = default!;
@@ -72,22 +75,29 @@
 
     private async Task GetEquipments()
     {
-        _equipments = null;
+        _muscles = null;
 
-        var result = await SyncClient.GetAllEquipmentsDtoAsync();
+        var result = await SyncClient.GetAllMusclesDtoAsync();
         if (!result.Success)
         {
-            _equipments = null;
+            _muscles = null;
             _error = true;
             _errorMessage = result.GetErrorMessage();
             return;
         }
 
-        _equipments = !result.HasValue ? null : result.Value.ToArray();
+        _muscles = !result.HasValue ? null : result.Value.ToArray();
     }
 
-    private string GetDescription(EquipmentDTO eq)
+    private string GetDescription(MuscleDTO eq)
     {
         return eq.Descriptor?.Content ?? "Description not found";
     }
+
+    private string GetAntagonist(MuscleDTO muscleDto)
+    {
+        if (muscleDto.Antagonists.Count == 0) return "None";
+        return string.Join(',', muscleDto.Antagonists.Select(a=>a.Antagonist.Name));
+    }
 }
+
