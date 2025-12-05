@@ -1,8 +1,7 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using GainsLab.Core.Models.Core.Interfaces.DB;
 
-namespace GainsLab.Models.DataManagement.Sync;
+namespace GainsLab.Contracts.SyncService;
 
 public static class SyncCursorUtil                                                                                                                                     
 {                                                                                                                                                                  

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net9.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\backend\GainsLab.Contracts\GainsLab.Contracts.csproj" />
+      <ProjectReference Include="..\..\backend\GainsLab.Core\GainsLab.Core.csproj" />
+      <ProjectReference Include="..\..\desktop\GainsLab.Editor\GainsLab.Editor.csproj" />
+    </ItemGroup>
+
+</Project>

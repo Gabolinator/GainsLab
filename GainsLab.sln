@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GainsLab.Contracts", "backe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GainsLab.Api", "backend\GainsLab.Api\GainsLab.Api.csproj", "{4856F68F-431C-43AB-8DDF-AF2582523692}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GainsLab.WebLayer", "web\GainsLab.WebLayer\GainsLab.WebLayer.csproj", "{DB31A407-56B5-4D21-A299-F5B07012490C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{4856F68F-431C-43AB-8DDF-AF2582523692}.Release|x64.Build.0 = Release|Any CPU
 		{4856F68F-431C-43AB-8DDF-AF2582523692}.Release|x86.ActiveCfg = Release|Any CPU
 		{4856F68F-431C-43AB-8DDF-AF2582523692}.Release|x86.Build.0 = Release|Any CPU
+		{DB31A407-56B5-4D21-A299-F5B07012490C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB31A407-56B5-4D21-A299-F5B07012490C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB31A407-56B5-4D21-A299-F5B07012490C}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DB31A407-56B5-4D21-A299-F5B07012490C}.Debug|x64.Build.0 = Debug|Any CPU
+		{DB31A407-56B5-4D21-A299-F5B07012490C}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{DB31A407-56B5-4D21-A299-F5B07012490C}.Debug|x86.Build.0 = Debug|Any CPU
+		{DB31A407-56B5-4D21-A299-F5B07012490C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB31A407-56B5-4D21-A299-F5B07012490C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB31A407-56B5-4D21-A299-F5B07012490C}.Release|x64.ActiveCfg = Release|Any CPU
+		{DB31A407-56B5-4D21-A299-F5B07012490C}.Release|x64.Build.0 = Release|Any CPU
+		{DB31A407-56B5-4D21-A299-F5B07012490C}.Release|x86.ActiveCfg = Release|Any CPU
+		{DB31A407-56B5-4D21-A299-F5B07012490C}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

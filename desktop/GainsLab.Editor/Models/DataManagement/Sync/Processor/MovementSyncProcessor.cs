@@ -100,14 +100,15 @@ public class MovementSyncProcessor : ISyncEntityProcessor
             await dbContext.SaveChangesAsync(ct).ConfigureAwait(false);
             _logger?.Log(nameof(MuscleSyncProcessor), "Save Changes Async Completed (muscles)");
 
-            foreach (var (muscleGuid, desiredAntagonists) in pendingAntagonists)
-            {
-                if (!muscleLookup.TryGetValue(muscleGuid, out var muscleEntity))
-                    continue;
-
-                await SyncAntagonistsAsync(dbContext, muscleEntity, desiredAntagonists, ct)
-                    .ConfigureAwait(false);
-            }
+            //todo finish implementation 
+            // foreach (var (muscleGuid, desiredAntagonists) in pendingAntagonists)
+            // {
+            //     if (!muscleLookup.TryGetValue(muscleGuid, out var muscleEntity))
+            //         continue;
+            //
+            //     await SyncAntagonistsAsync(dbContext, muscleEntity, desiredAntagonists, ct)
+            //         .ConfigureAwait(false);
+            // }
 
             _logger?.Log(nameof(MuscleSyncProcessor), "Save Changes Async (antagonists)");
             await dbContext.SaveChangesAsync(ct).ConfigureAwait(false);
