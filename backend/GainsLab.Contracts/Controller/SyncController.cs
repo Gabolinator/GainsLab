@@ -1,12 +1,12 @@
 ﻿using System.Text.Json;
 using GainsLab.Contracts.Interface;
-using GainsLab.Contracts.SyncDto;
+using GainsLab.Contracts.SyncService;
 using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.DB;
 using GainsLab.Core.Models.Core.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
-namespace GainsLab.Contracts.SyncService;
+namespace GainsLab.Contracts.Controller;
 
 /// <summary>
 /// ASP.NET Core controller that exposes sync endpoints for consuming clients.
