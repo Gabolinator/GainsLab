@@ -1,4 +1,9 @@
-﻿
+﻿@using GainsLab.Application.DTOs
+@using GainsLab.Application.Interfaces.Sync
+
+
+@using GainsLab.Domain.Interfaces
+
 @attribute [StreamRendering]
 
 <h3>EquipmentDisplayComponent</h3>
@@ -49,7 +54,7 @@
 
 @code
 {
-    private EquipmentDTO[]? _equipments = null;
+    private EquipmentRecord[]? _equipments = null;
     [Inject] private ILogger Logger { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
     [Inject] private IEntitySyncClient SyncClient { get; set; } = default!;
@@ -74,7 +79,7 @@
     {
         _equipments = null;
 
-        var result = await SyncClient.GetAllEquipmentsDtoAsync();
+        var result = await SyncClient.GetAllEquipmentsRecordAsync();
         if (!result.Success)
         {
             _equipments = null;
@@ -86,7 +91,7 @@
         _equipments = !result.HasValue ? null : result.Value.ToArray();
     }
 
-    private string GetDescription(EquipmentDTO eq)
+    private string GetDescription(EquipmentRecord eq)
     {
         return eq.Descriptor?.Content ?? "Description not found";
     }

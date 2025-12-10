@@ -1,13 +1,13 @@
 
-using GainsLab.Contracts;
-using GainsLab.Contracts.Interface;
-using GainsLab.Contracts.SyncService;
-using GainsLab.Core.Models.Core.Interfaces;
-using GainsLab.Core.Models.Core.Interfaces.DataManagement;
-using GainsLab.Core.Models.Core.Utilities;
-using GainsLab.Core.Models.Core.Utilities.Logging;
+using GainsLab.Application.Interfaces.Sync;
+
+using GainsLab.Domain.Interfaces;
+using GainsLab.Infrastructure;
+using GainsLab.Infrastructure.Logging;
+using GainsLab.Infrastructure.SyncService;
+using GainsLab.Infrastructure.Utilities;
 using GainsLab.WebLayer.Components;
-using ILogger = GainsLab.Core.Models.Core.Utilities.Logging.ILogger;
+using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -2,24 +2,26 @@
 using System.IO;
 using GainsLab.Contracts;
 using GainsLab.Core.Models.Core.Factory;
-using GainsLab.Core.Models.Core.Interfaces.Caching;
 using GainsLab.Core.Models.Core.Interfaces.DataManagement;
-using GainsLab.Core.Models.Core.Utilities.Logging;
 using GainsLab.Infrastructure.DB;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.Outbox;
 using GainsLab.Models.App.LifeCycle;
-using GainsLab.Models.Core.LifeCycle;
 using GainsLab.Models.DataManagement;
-using GainsLab.Models.DataManagement.Caching;
-using GainsLab.Models.DataManagement.Caching.Interface;
 using GainsLab.Models.DataManagement.DB;
 using GainsLab.Models.DataManagement.FileAccess;
-using GainsLab.Models.DataManagement.Sync;
 using System.Net.Http;
-using GainsLab.Contracts.Outbox;
-using GainsLab.Core.Models.Core.Interfaces;
-using GainsLab.Models.DataManagement.Sync.Processor;
+using GainsLab.Application;
+using GainsLab.Application.Interfaces;
+using GainsLab.Application.Outbox;
+using GainsLab.Domain.Interfaces;
+using GainsLab.Domain.Interfaces.Caching;
+using GainsLab.Infrastructure;
+using GainsLab.Infrastructure.Caching;
+using GainsLab.Infrastructure.Logging;
+using GainsLab.Infrastructure.Outbox;
+using GainsLab.Infrastructure.Sync;
+using GainsLab.Infrastructure.Sync.Processor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -69,7 +71,7 @@ public static class ServiceConfig
 
         
         services.AddSingleton<IAppLifeCycle,AppLifecycleService>();
-        services.AddSingleton<ILocalRepository, DataRepository>();
+        services.AddSingleton<GainsLab.Application.Interfaces.DataManagement.ILocalRepository, DataRepository>();
         void ConfigureSyncClient(IServiceProvider sp, HttpClient client)
         {
             var logger = sp.GetService<ILogger>();
@@ -78,14 +80,14 @@ public static class ServiceConfig
             client.Timeout = TimeSpan.FromSeconds(30);
         }
 
-        services.AddHttpClient<IRemoteProvider, HttpDataProvider>(ConfigureSyncClient);
+        services.AddHttpClient<GainsLab.Application.Interfaces.Sync.IRemoteProvider, HttpDataProvider>(ConfigureSyncClient);
         services.AddHttpClient("SyncApi", ConfigureSyncClient);
         
         services.AddSingleton<IComponentCacheRegistry, ComponentCacheRegistry>();
         services.AddSingleton<IFileDataService, JsonFilesDataService>();
 
         services.AddSingleton<IEntitySeedResolver, EntitySeedResolver>();
-        services.AddSingleton<IDataManager, DataManager>();
+        services.AddSingleton<GainsLab.Application.Interfaces.DataManagement.IDataManager, DataManager>();
         services.AddSingleton<ISyncCursorStore, FileSyncCursorStore>();
         services.AddSingleton<IOutboxDispatcher>(sp =>
         {

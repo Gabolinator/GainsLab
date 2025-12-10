@@ -1,4 +1,7 @@
-﻿using GainsLab.Core.Models.Core.Utilities.Logging;
+﻿
+
+
+using GainsLab.Domain.Interfaces;
 
 namespace GainsLab.Models.Utilities;
 

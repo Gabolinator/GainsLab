@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using GainsLab.Core.Models.Core.Interfaces.DataManagement;
+using GainsLab.Application.Interfaces.Sync;
+
 
 namespace GainsLab.Infrastructure;
 

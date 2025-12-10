@@ -8,8 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\GainsLab.Core\GainsLab.Core.csproj" />
-      <ProjectReference Include="..\GainsLab.Infrastructure\GainsLab.Infrastructure.csproj" />
+      <ProjectReference Include="..\GainsLab.Domain\GainsLab.Domain.csproj" />
     </ItemGroup>
 
 </Project>

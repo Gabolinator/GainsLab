@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
-using GainsLab.Core.Models.Core.Factory;
-using GainsLab.Core.Models.Core.Interfaces;
-using GainsLab.Core.Models.Core.Utilities.Logging;
+using GainsLab.Application.DomainMappers;
+using GainsLab.Application.DTOs;
+using GainsLab.Application.EntityFactory;
+using GainsLab.Domain.Entities.WorkoutEntity;
+using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
-using GainsLab.Infrastructure.DB.DomainMappers;
-using GainsLab.Infrastructure.DB.DTOs;
 using GainsLab.Infrastructure.DB.Handlers;
-using GainsLab.Models.DataManagement.DB.Model.DomainMappers;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB;
@@ -89,13 +87,13 @@ public class DBDataInitializer
 
     private Task<bool> CreateBaseMovements(GainLabPgDBContext db, EntitySeeder entitySeeder)
     {
-        return SeedBaseEntitiesAsync<MovementEntity, MovementDTO>(
+        return SeedBaseEntitiesAsync<MovementEntity, MovementRecord>(
             db,
             existingNameQuery: db.MovementCategories
                 .AsNoTracking()
                 .Select(c => c.Name),
             createBaseDomainEntities: entitySeeder.CreateBaseMovements,
-            mapToDto: domain => (MovementDTO)EntityDomainMapper.ToDTO(domain)!,
+            mapToDto: domain => (MovementRecord)EntityDomainMapper.ToRecord(domain, _clock)!,
             nameSelector: dto => dto.Name,
             entityLabel: "movement categories",
             targetDbSet: db.Movement);
@@ -104,13 +102,13 @@ public class DBDataInitializer
     
     private Task<bool> CreateBaseCategories(GainLabPgDBContext db, EntitySeeder entitySeeder)
     {
-        return SeedBaseEntitiesAsync<MovementCategoryEntity, MovementCategoryDTO>(
+        return SeedBaseEntitiesAsync<MovementCategoryEntity, MovementCategoryRecord>(
             db,
             existingNameQuery: db.MovementCategories
                 .AsNoTracking()
                 .Select(c => c.Name),
             createBaseDomainEntities: entitySeeder.CreateBaseCategories,
-            mapToDto: domain => (MovementCategoryDTO)EntityDomainMapper.ToDTO(domain)!,
+            mapToDto: domain => (MovementCategoryRecord)EntityDomainMapper.ToRecord(domain, _clock)!,
             nameSelector: dto => dto.Name,
             entityLabel: "movement categories",
             targetDbSet: db.MovementCategories,
@@ -130,20 +128,20 @@ public class DBDataInitializer
     
     private Task<bool> CreateBaseMuscles(GainLabPgDBContext db, EntitySeeder entitySeeder)
     { 
-        return SeedBaseEntitiesAsync<MuscleEntity, MuscleDTO>(
+        return SeedBaseEntitiesAsync<MuscleEntity, MuscleRecord>(
             db,
             existingNameQuery: db.Muscles
                 .AsNoTracking()
                 .Select(m => m.Name),
             createBaseDomainEntities: entitySeeder.CreateBaseMuscles,
-            mapToDto: domain => (MuscleDTO)EntityDomainMapper.ToDTO(domain)!,
+            mapToDto: domain => (MuscleRecord)EntityDomainMapper.ToRecord(domain, _clock)!,
             nameSelector: dto => dto.Name,
             entityLabel: "muscles",
             targetDbSet: db.Muscles,
             addExtraEntities: (ctx, muscleDtos, muscleDomainEntities) =>
             {
                 var antagonistDtos = MuscleMapper
-                    .CreateMuscleAntagonistDTOs(muscleDtos, muscleDomainEntities)
+                    .CreateMuscleAntagonistRecords(muscleDtos, muscleDomainEntities)
                     .ToList();
 
                 if (antagonistDtos.Count > 0)
@@ -227,13 +225,13 @@ public class DBDataInitializer
     /// <param name="entityFactory">Factory responsible for creating baseline equipment domain entities.</param>
     private Task<bool> CreateBaseEquipments(GainLabPgDBContext db, EntitySeeder entitySeeder)
     {
-        return SeedBaseEntitiesAsync<EquipmentEntity, EquipmentDTO>(
+        return SeedBaseEntitiesAsync<EquipmentEntity, EquipmentRecord>(
             db,
             existingNameQuery: db.Equipments
                 .AsNoTracking()
                 .Select(e => e.Name),
             createBaseDomainEntities: entitySeeder.CreateBaseEquipments,
-            mapToDto: domain => (EquipmentDTO)domain.ToDTO()!,
+            mapToDto: domain => (EquipmentRecord)domain.ToRecord(_clock)!,
             nameSelector: dto => dto.Name,
             entityLabel: "equipments",
             targetDbSet: db.Equipments

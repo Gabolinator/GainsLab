@@ -12,4 +12,9 @@
     </Reference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\Core\" />
+    <Folder Include="Models\Core\Interfaces\" />
+  </ItemGroup>
+
 </Project>

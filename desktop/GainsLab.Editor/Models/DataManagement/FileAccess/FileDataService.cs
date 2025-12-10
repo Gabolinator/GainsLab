@@ -8,7 +8,7 @@ using GainsLab.Core.Models.Core;
 using GainsLab.Core.Models.Core.Interfaces.DataManagement;
 using GainsLab.Core.Models.Core.Interfaces.Entity;
 using GainsLab.Core.Models.Core.Results;
-using GainsLab.Core.Models.Core.Utilities.Logging;
+using GainsLab.Domain.Interfaces;
 using GainsLab.Models.Core;
 using GainsLab.Models.Core.Interfaces;
 

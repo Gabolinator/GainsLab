@@ -1,7 +1,6 @@
-﻿using System;
-using GainsLab.Core.Models.Core.Utilities.Logging;
+﻿using GainsLab.Domain.Interfaces;
 
-namespace GainsLab.Models.Core.Exceptions.DataBaseOperations;
+namespace GainsLab.Infrastructure.DB.Exceptions.DataBaseOperations;
 
 public class DataBaseOperationException : Exception
 {

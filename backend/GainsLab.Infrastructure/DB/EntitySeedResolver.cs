@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using GainsLab.Core.Models.Core.Interfaces;
-using GainsLab.Core.Models.Core.Utilities.Logging;
+﻿
+using GainsLab.Domain.Interfaces;
 
 namespace GainsLab.Infrastructure.DB;
 

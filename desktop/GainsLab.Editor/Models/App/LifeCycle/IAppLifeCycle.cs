@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
 
-namespace GainsLab.Models.Core.LifeCycle;
+namespace GainsLab.Models.App.LifeCycle;
 
 /// <summary>
 /// Exposes lifecycle events and hooks for the desktop application host.

@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\backend\GainsLab.Api\GainsLab.Api.csproj" />
+    <ProjectReference Include="..\..\backend\GainsLab.Application\GainsLab.Application.csproj" />
     <ProjectReference Include="..\..\backend\GainsLab.Contracts\GainsLab.Contracts.csproj" />
     <ProjectReference Include="..\..\backend\GainsLab.Core\GainsLab.Core.csproj" />
     <ProjectReference Include="..\..\backend\GainsLab.Infrastructure\GainsLab.Infrastructure.csproj" />

@@ -10,7 +10,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\GainsLab.Contracts\GainsLab.Contracts.csproj" />
-      <ProjectReference Include="..\GainsLab.Core\GainsLab.Core.csproj" />
       <ProjectReference Include="..\GainsLab.Infrastructure\GainsLab.Infrastructure.csproj" />
     </ItemGroup>
 

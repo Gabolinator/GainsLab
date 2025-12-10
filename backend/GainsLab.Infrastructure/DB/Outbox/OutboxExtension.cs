@@ -1,5 +1,6 @@
-﻿using GainsLab.Core.Models.Core;
-using GainsLab.Core.Models.Core.Utilities;
+﻿
+using GainsLab.Domain;
+using GainsLab.Infrastructure.Utilities;
 
 namespace GainsLab.Infrastructure.DB.Outbox;
 
@@ -10,7 +11,7 @@ public static class OutboxExtension
     /// </summary>
     /// <param name="change">The outbox change containing the serialized payload.</param>
     /// <param name="entityType">Populated with the resolved entity type when successful.</param>
-    public static bool TryResolveEntityType(this OutboxChangeDto change, out EntityType entityType)
+    public static bool TryResolveEntityType(this OutboxChangeRecord change, out EntityType entityType)
     {
         entityType = EntityType.unidentified;
         if (!Enum.TryParse(change.Entity, out DTOEntityType dtoType))

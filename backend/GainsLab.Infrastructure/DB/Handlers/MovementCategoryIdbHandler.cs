@@ -1,14 +1,15 @@
-﻿using GainsLab.Core.Models.Core.Interfaces.Entity;
-using GainsLab.Core.Models.Core.Results;
-using GainsLab.Core.Models.Core.Utilities.Logging;
+﻿using GainsLab.Application.DomainMappers;
+using GainsLab.Application.DTOs;
+using GainsLab.Application.Results;
+using GainsLab.Domain.Interfaces;
+using GainsLab.Domain.Interfaces.Entity;
 using GainsLab.Infrastructure.DB.Context;
-using GainsLab.Infrastructure.DB.DomainMappers;
-using GainsLab.Infrastructure.DB.DTOs;
+
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB.Handlers;
 
-public class MovementCategoryIdbHandler: IdbContextHandler<MovementCategoryDTO>
+public class MovementCategoryIdbHandler: IdbContextHandler<MovementCategoryRecord>
 {
     private readonly DescriptorIdbHandler _descriptorHandler;
     
@@ -18,13 +19,13 @@ public class MovementCategoryIdbHandler: IdbContextHandler<MovementCategoryDTO>
         
     }
 
-    public override DbSet<MovementCategoryDTO> DBSet =>  ((GainLabSQLDBContext)_context).MovementCategories;
-    public override async Task<Result<MovementCategoryDTO>> TryGetExistingDTO(Guid guid, string? content)
+    public override DbSet<MovementCategoryRecord> DBSet =>  ((GainLabSQLDBContext)_context).MovementCategories;
+    public override async Task<Result<MovementCategoryRecord>> TryGetExistingRecord(Guid guid, string? content)
     {
         try
         {
             var query = DBSet.AsNoTracking();
-            MovementCategoryDTO? existing = null;
+            MovementCategoryRecord? existing = null;
 
             if (guid != Guid.Empty)
             {
@@ -46,13 +47,13 @@ public class MovementCategoryIdbHandler: IdbContextHandler<MovementCategoryDTO>
                 $"Existing movement category lookup (guid: {guid}, content: {content ?? "<null>"}) -> {success}");
 
             return success
-                ? Result<MovementCategoryDTO>.SuccessResult(existing!)
-                : Result<MovementCategoryDTO>.Failure("No existing movement category found");
+                ? Result<MovementCategoryRecord>.SuccessResult(existing!)
+                : Result<MovementCategoryRecord>.Failure("No existing movement category found");
         }
         catch (Exception ex)
         {
-            _logger.LogError(nameof(MovementCategoryIdbHandler), $"Exception in TryGetExistingDTO: {ex.Message}");
-            return Result<MovementCategoryDTO>.Failure($"Error getting movement category: {ex.GetBaseException().Message}");
+            _logger.LogError(nameof(MovementCategoryIdbHandler), $"Exception in TryGetExistingRecord: {ex.Message}");
+            return Result<MovementCategoryRecord>.Failure($"Error getting movement category: {ex.GetBaseException().Message}");
         }
 
     }
@@ -60,14 +61,14 @@ public class MovementCategoryIdbHandler: IdbContextHandler<MovementCategoryDTO>
     /// <inheritdoc />
     public override async Task<IReadOnlyList<IEntity>> GetAllEntityAsync(CancellationToken ct = default)
     {
-        var dtos = await DBSet
+        var Records = await DBSet
             .AsNoTracking()
             .Include(m => m.Descriptor)
             .Include(m => m.BaseCategoryLinks)
             .ThenInclude(link => link.ParentCategory)
             .ToListAsync(ct);
 
-        var entities = dtos
+        var entities = Records
             .Select(MovementCategoryMapper.ToDomain)
             .Where(e => e is not null)
             .Cast<IEntity>()
@@ -79,34 +80,34 @@ public class MovementCategoryIdbHandler: IdbContextHandler<MovementCategoryDTO>
     /// <summary>
     /// Ensures the descriptor reference is persisted and attached before saving the movement category.
     /// </summary>
-    protected override async Task PrepareRelatedEntitiesAsync(MovementCategoryDTO dto, CancellationToken ct)
+    protected override async Task PrepareRelatedEntitiesAsync(MovementCategoryRecord Record, CancellationToken ct)
     {
-        if (dto.Descriptor is null)
+        if (Record.Descriptor is null)
             return;
 
-        if (dto.Descriptor.GUID == Guid.Empty && string.IsNullOrWhiteSpace(dto.Descriptor.Content))
+        if (Record.Descriptor.GUID == Guid.Empty && string.IsNullOrWhiteSpace(Record.Descriptor.Content))
         {
             _logger.LogWarning(nameof(MovementCategoryIdbHandler),
-                $"Descriptor reference for movement category {dto.Iguid} is missing GUID/content. Skipping descriptor association.");
-            dto.Descriptor = null;
-            dto.DescriptorID = 0;
+                $"Descriptor reference for movement category {Record.Iguid} is missing GUID/content. Skipping descriptor association.");
+            Record.Descriptor = null;
+            Record.DescriptorID = 0;
             return;
         }
 
-        var descriptorResult = await _descriptorHandler.AddOrUpdateAsync(dto.Descriptor, save: false, ct)
+        var descriptorResult = await _descriptorHandler.AddOrUpdateAsync(Record.Descriptor, save: false, ct)
             .ConfigureAwait(false);
 
-        if (!descriptorResult.Success || descriptorResult.Value is not DescriptorDTO ensuredDescriptor)
+        if (!descriptorResult.Success || descriptorResult.Value is not DescriptorRecord ensuredDescriptor)
         {
             var reason = descriptorResult.ErrorMessage ?? "Descriptor persistence failed";
-            throw new InvalidOperationException($"Failed to ensure descriptor for movement category {dto.Iguid}: {reason}");
+            throw new InvalidOperationException($"Failed to ensure descriptor for movement category {Record.Iguid}: {reason}");
         }
 
         if (_context.Entry(ensuredDescriptor).State == EntityState.Detached)
             _context.Attach(ensuredDescriptor);
 
-        dto.Descriptor = ensuredDescriptor;
-        dto.DescriptorID = ensuredDescriptor.Iid;
+        Record.Descriptor = ensuredDescriptor;
+        Record.DescriptorID = ensuredDescriptor.Iid;
     }
 
     

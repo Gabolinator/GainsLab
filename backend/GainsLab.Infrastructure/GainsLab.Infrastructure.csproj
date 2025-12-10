@@ -22,13 +22,20 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\GainsLab.Application\GainsLab.Application.csproj" />
+      <ProjectReference Include="..\GainsLab.Contracts\GainsLab.Contracts.csproj" />
       <ProjectReference Include="..\GainsLab.Core\GainsLab.Core.csproj" />
+      <ProjectReference Include="..\GainsLab.Domain\GainsLab.Domain.csproj" />
     </ItemGroup>
 
     <ItemGroup>
       <Reference Include="Microsoft.AspNetCore.Mvc.Core">
         <HintPath>..\..\..\..\..\..\Program Files\dotnet\shared\Microsoft.AspNetCore.App\9.0.4\Microsoft.AspNetCore.Mvc.Core.dll</HintPath>
       </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Desktop\" />
     </ItemGroup>
 
 </Project>

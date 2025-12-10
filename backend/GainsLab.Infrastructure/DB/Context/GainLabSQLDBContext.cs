@@ -1,7 +1,7 @@
 ﻿using System.Linq.Expressions;
-using GainsLab.Core.Models.Core;
-using GainsLab.Core.Models.Core.Utilities.Logging;
-using GainsLab.Infrastructure.DB.DTOs;
+using GainsLab.Application.DTOs;
+using GainsLab.Domain;
+using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Outbox;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -32,28 +32,28 @@ public class GainLabSQLDBContext : DbContext
     /// </summary>
     public DbSet<SyncState> SyncStates => Set<SyncState>();
 
-    public DbSet<OutboxChangeDto> OutboxChanges => Set<OutboxChangeDto>();
+    public DbSet<OutboxChangeRecord> OutboxChanges => Set<OutboxChangeRecord>();
 
     /// <summary>
     /// Gets the table that stores equipment records.
     /// </summary>
-    public DbSet<EquipmentDTO> Equipments => Set<EquipmentDTO>();
+    public DbSet<EquipmentRecord> Equipments => Set<EquipmentRecord>();
 
     /// <summary>
     /// Gets the table that stores descriptor records.
     /// </summary>
-    public DbSet<DescriptorDTO> Descriptors => Set<DescriptorDTO>();
+    public DbSet<DescriptorRecord> Descriptors => Set<DescriptorRecord>();
 
-    public DbSet<MuscleDTO> Muscles => Set<MuscleDTO>();
-    public DbSet<MuscleAntagonistDTO> MuscleAntagonists => Set<MuscleAntagonistDTO>();
+    public DbSet<MuscleRecord> Muscles => Set<MuscleRecord>();
+    public DbSet<MuscleAntagonistRecord> MuscleAntagonists => Set<MuscleAntagonistRecord>();
 
-    public DbSet<MovementCategoryDTO> MovementCategories => Set<MovementCategoryDTO>();
-    public DbSet<MovementCategoryRelationDTO> MovementCategoryRelations => Set<MovementCategoryRelationDTO>();
+    public DbSet<MovementCategoryRecord> MovementCategories => Set<MovementCategoryRecord>();
+    public DbSet<MovementCategoryRelationRecord> MovementCategoryRelations => Set<MovementCategoryRelationRecord>();
 
     //movement
-    public DbSet<MovementDTO> Movement => Set<MovementDTO>();
-    public DbSet<MovementMuscleRelationDTO> MovementMuscleRelations => Set<MovementMuscleRelationDTO>();
-    public DbSet<MovementEquipmentRelationDTO> MovementEquipmentRelations => Set<MovementEquipmentRelationDTO>();
+    public DbSet<MovementRecord> Movement => Set<MovementRecord>();
+    public DbSet<MovementMuscleRelationRecord> MovementMuscleRelations => Set<MovementMuscleRelationRecord>();
+    public DbSet<MovementEquipmentRelationRecord> MovementEquipmentRelations => Set<MovementEquipmentRelationRecord>();
 
     
     /// <inheritdoc />
@@ -75,7 +75,7 @@ public class GainLabSQLDBContext : DbContext
         _logger?.Log("GainLabPgDBContext", "Creating Movement Table");
 
         //base movement table
-        modelBuilder.Entity<MovementDTO>(m =>
+        modelBuilder.Entity<MovementRecord>(m =>
         {
             m.ToTable("movement");
             m.HasKey(x => x.Id);
@@ -138,7 +138,7 @@ public class GainLabSQLDBContext : DbContext
        
           _logger?.Log("GainLabPgDBContext", "Creating Movement Category Table");
 
-        modelBuilder.Entity<MovementCategoryDTO>(m =>
+        modelBuilder.Entity<MovementCategoryRecord>(m =>
         {
             m.ToTable("movement_category");
             m.HasKey(x => x.Id);
@@ -188,7 +188,7 @@ public class GainLabSQLDBContext : DbContext
             m.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
         });
 
-        modelBuilder.Entity<MovementCategoryRelationDTO>(link =>
+        modelBuilder.Entity<MovementCategoryRelationRecord>(link =>
         {
             link.ToTable("movement_category_relations");
             link.HasKey(x => new { x.ParentCategoryId, x.ChildCategoryId });
@@ -227,12 +227,12 @@ public class GainLabSQLDBContext : DbContext
     private void CreateOutBoxTable_Sqlite(ModelBuilder modelBuilder)
     {
         // Convert DateTimeOffset <-> UTC DateTime (stored as TEXT by EF in SQLite)
-        var dtoToUtcDateTime = new ValueConverter<DateTimeOffset, DateTime>(
+        var RecordToUtcDateTime = new ValueConverter<DateTimeOffset, DateTime>(
             (Expression<Func<DateTimeOffset, DateTime>>)(v => v.UtcDateTime),
             (Expression<Func<DateTime, DateTimeOffset>>)(v =>
                 new DateTimeOffset(DateTime.SpecifyKind(v, DateTimeKind.Utc))));
 
-        modelBuilder.Entity<OutboxChangeDto>(b =>
+        modelBuilder.Entity<OutboxChangeRecord>(b =>
         {
             b.ToTable("outbox_changes");
             b.HasKey(x => x.Id);
@@ -246,7 +246,7 @@ public class GainLabSQLDBContext : DbContext
 
             b.Property(x => x.OccurredAt)
                 .HasColumnName("occurred_at")
-                .HasConversion(dtoToUtcDateTime) // 👈 key line: makes ORDER BY translatable
+                .HasConversion(RecordToUtcDateTime) // 👈 key line: makes ORDER BY translatable
                 .HasColumnType("TEXT")           // ISO-8601 string; lexicographically sortable
                 .HasDefaultValueSql("CURRENT_TIMESTAMP"); // SQLite UTC timestamp
 
@@ -263,7 +263,7 @@ public class GainLabSQLDBContext : DbContext
     /// </summary>
     private void CreateEquipmentTableModel_Sqlite(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<EquipmentDTO>(e =>
+        modelBuilder.Entity<EquipmentRecord>(e =>
         {
             e.ToTable("equipments");
             e.HasKey(x => x.Id);
@@ -307,7 +307,7 @@ public class GainLabSQLDBContext : DbContext
     /// </summary>
     private void CreateDescriptorTableModel_Sqlite(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<DescriptorDTO>(d =>
+        modelBuilder.Entity<DescriptorRecord>(d =>
         {
             d.ToTable("descriptors");
             d.HasKey(x => x.Id);
@@ -342,7 +342,7 @@ public class GainLabSQLDBContext : DbContext
 
     private void CreateMuscleTableModel_Sqlite(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<MuscleDTO>(m =>
+        modelBuilder.Entity<MuscleRecord>(m =>
         {
             m.ToTable("muscles");
             m.HasKey(x => x.Id);
@@ -392,7 +392,7 @@ public class GainLabSQLDBContext : DbContext
             m.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
         });
 
-        modelBuilder.Entity<MuscleAntagonistDTO>(link =>
+        modelBuilder.Entity<MuscleAntagonistRecord>(link =>
         {
             link.ToTable("muscle_antagonists");
             link.HasKey(x => new { x.MuscleId, x.AntagonistId });

@@ -1,35 +1,32 @@
-﻿using System;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using GainsLab.Core.Models.Core.Interfaces.Entity;
-using GainsLab.Core.Models.Core.Results;
-using GainsLab.Core.Models.Core.Utilities.Logging;
+﻿
+using GainsLab.Application.DomainMappers;
+using GainsLab.Application.DTOs;
+using GainsLab.Application.Results;
+using GainsLab.Domain.Interfaces;
+using GainsLab.Domain.Interfaces.Entity;
 using GainsLab.Infrastructure.DB.Context;
-using GainsLab.Infrastructure.DB.DTOs;
-using GainsLab.Models.DataManagement.DB.Model.DomainMappers;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB.Handlers;
 
 /// <summary>
-/// Database handler that manages descriptor DTO persistence inside the local SQLite database.
+/// Database handler that manages descriptor Record persistence inside the local SQLite database.
 /// </summary>
-public class DescriptorIdbHandler : IdbContextHandler<DescriptorDTO>
+public class DescriptorIdbHandler : IdbContextHandler<DescriptorRecord>
 {
     public DescriptorIdbHandler(GainLabSQLDBContext context, ILogger logger) : base(context, logger)
     {
     }
 
-    public override DbSet<DescriptorDTO> DBSet
+    public override DbSet<DescriptorRecord> DBSet
         => ((GainLabSQLDBContext)_context).Descriptors;
 
-    public override async Task<Result<DescriptorDTO>> TryGetExistingDTO(Guid guid, string? content)
+    public override async Task<Result<DescriptorRecord>> TryGetExistingRecord(Guid guid, string? content)
     {
         try
         {
             var query = DBSet.AsNoTracking();
-            DescriptorDTO? existing = null;
+            DescriptorRecord? existing = null;
 
             if (guid != Guid.Empty)
                 existing = await query.FirstOrDefaultAsync(d => d.GUID == guid);
@@ -46,23 +43,23 @@ public class DescriptorIdbHandler : IdbContextHandler<DescriptorDTO>
                 $"Existing descriptor lookup (guid: {guid}, content: {content ?? "<null>"}) -> {success}");
 
             return success
-                ? Result<DescriptorDTO>.SuccessResult(existing!)
-                : Result<DescriptorDTO>.Failure("No existing descriptor found");
+                ? Result<DescriptorRecord>.SuccessResult(existing!)
+                : Result<DescriptorRecord>.Failure("No existing descriptor found");
         }
         catch (Exception ex)
         {
-            _logger.LogError("DescriptorDbHandler", $"Exception in TryGetExistingDTO: {ex.Message}");
-            return Result<DescriptorDTO>.Failure($"Error getting descriptor: {ex.GetBaseException().Message}");
+            _logger.LogError("DescriptorDbHandler", $"Exception in TryGetExistingRecord: {ex.Message}");
+            return Result<DescriptorRecord>.Failure($"Error getting descriptor: {ex.GetBaseException().Message}");
         }
     }
 
     public override async Task<IReadOnlyList<IEntity>> GetAllEntityAsync(CancellationToken ct = default)
     {
-        var dtos = await DBSet
+        var Records = await DBSet
             .AsNoTracking()
             .ToListAsync(ct);
 
-        var entities = dtos
+        var entities = Records
             .Select(DescriptorMapper.ToDomain)
             .Where(e => e is not null)
             .Cast<IEntity>()

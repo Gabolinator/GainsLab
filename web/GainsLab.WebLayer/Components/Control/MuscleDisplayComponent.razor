@@ -1,4 +1,9 @@
-﻿@attribute [StreamRendering]
+﻿@using GainsLab.Application.DTOs
+@using GainsLab.Application.Interfaces.Sync
+
+
+@using GainsLab.Domain.Interfaces
+@attribute [StreamRendering]
 
 <h3>MuscleDisplayComponent</h3>
 
@@ -52,7 +57,7 @@
 
 @code
 {
-    private MuscleDTO[]? _muscles = null;
+    private MuscleRecord[]? _muscles = null;
     [Inject] private ILogger Logger { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
     [Inject] private IEntitySyncClient SyncClient { get; set; } = default!;
@@ -77,7 +82,7 @@
     {
         _muscles = null;
 
-        var result = await SyncClient.GetAllMusclesDtoAsync();
+        var result = await SyncClient.GetAllMusclesRecordAsync();
         if (!result.Success)
         {
             _muscles = null;
@@ -89,15 +94,15 @@
         _muscles = !result.HasValue ? null : result.Value.ToArray();
     }
 
-    private string GetDescription(MuscleDTO eq)
+    private string GetDescription(MuscleRecord eq)
     {
         return eq.Descriptor?.Content ?? "Description not found";
     }
 
-    private string GetAntagonist(MuscleDTO muscleDto)
+    private string GetAntagonist(MuscleRecord muscleRecord)
     {
-        if (muscleDto.Antagonists.Count == 0) return "None";
-        return string.Join(',', muscleDto.Antagonists.Select(a=>a.Antagonist.Name));
+        if (muscleRecord.Antagonists.Count == 0) return "None";
+        return string.Join(',', muscleRecord.Antagonists.Select(a=>a.Antagonist.Name));
     }
 }
 

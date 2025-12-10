@@ -1,13 +1,14 @@
 ﻿using GainsLab.Contracts.Interface;
 using GainsLab.Contracts.SyncDto;
 using GainsLab.Contracts.SyncService;
-using GainsLab.Core.Models.Core.Interfaces;
-using GainsLab.Core.Models.Core.Utilities;
-using GainsLab.Core.Models.Core.Utilities.Logging;
+using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB;
 using GainsLab.Infrastructure.DB.Context;
+using GainsLab.Infrastructure.Logging;
+using GainsLab.Infrastructure.SyncService;
+using GainsLab.Infrastructure.Utilities;
 using Microsoft.EntityFrameworkCore;
-using ILogger = GainsLab.Core.Models.Core.Utilities.Logging.ILogger;
+using ILogger = GainsLab.Domain.Interfaces.ILogger;
 using Results = Microsoft.AspNetCore.Http.Results;
 
 var logger = new GainsLabLogger("BACKEND");

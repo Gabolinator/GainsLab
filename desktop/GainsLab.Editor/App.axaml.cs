@@ -4,10 +4,11 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using GainsLab.Application.Interfaces;
 using GainsLab.Core.Models.Core.Interfaces.DataManagement;
 using GainsLab.Core.Models.Core.Results;
 using GainsLab.Models.App;
-using GainsLab.Models.Core.LifeCycle;
+using GainsLab.Models.App.LifeCycle;
 using GainsLab.Models.DataManagement;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql.Replication.TestDecoding;
@@ -17,7 +18,7 @@ namespace GainsLab;
 /// <summary>
 /// Avalonia application bootstrapper responsible for initializing the editor and wiring startup logic.
 /// </summary>
-public partial class App : Application
+public partial class App : Avalonia.Application
 {
     
     //boot strapper service

@@ -1,7 +1,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json;
-using GainsLab.Core.Models.Core.Utilities;
+using GainsLab.Infrastructure.Utilities;
 
 namespace GainsLab.Infrastructure.DB.Outbox;
 
@@ -15,7 +15,7 @@ public enum ChangeType { Insert, Update, Delete }
 /// <summary>
 /// Represents a single outbox record queued for upstream dispatch.
 /// </summary>
-public class OutboxChangeDto
+public class OutboxChangeRecord
 {
     [Key]
     public long Id { get; set; } // identity
@@ -28,7 +28,7 @@ public class OutboxChangeDto
     
     public override string ToString()
     {
-        return $"{nameof(OutboxChangeDto)} - " +
+        return $"{nameof(OutboxChangeRecord)} - " +
                $"ID : {Id} | " +
                $"Entity Type {Entity} |"+
                $"EntityGuid :{EntityGuid} |"+
@@ -65,7 +65,7 @@ public class OutboxChangeDto
 
         try
         {
-            CoreUtilities.Logger.Log(nameof(OutboxChangeDto), $"Validating payload : {PayloadJson}");
+            CoreUtilities.Logger.Log(nameof(OutboxChangeRecord), $"Validating payload : {PayloadJson}");
             
             using var doc = JsonDocument.Parse(PayloadJson);
             var root = doc.RootElement;

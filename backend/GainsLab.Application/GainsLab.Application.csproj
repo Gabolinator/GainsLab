@@ -6,4 +6,9 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <ProjectReference Include="..\GainsLab.Contracts\GainsLab.Contracts.csproj" />
+      <ProjectReference Include="..\GainsLab.Domain\GainsLab.Domain.csproj" />
+    </ItemGroup>
+
 </Project>

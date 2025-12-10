@@ -1,8 +1,7 @@
 ﻿
-using GainsLab.Core.Models.Core;
-using GainsLab.Core.Models.Core.Interfaces;
-using GainsLab.Core.Models.Core.Utilities.Logging;
-using GainsLab.Infrastructure.DB.DTOs;
+using GainsLab.Application.DTOs;
+using GainsLab.Domain;
+using GainsLab.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB.Context;
@@ -15,26 +14,26 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
 
     #region DB SETS
 
-    public DbSet<EquipmentDTO> Equipments => Set<EquipmentDTO>();
-    public DbSet<DescriptorDTO> Descriptors => Set<DescriptorDTO>();
+    public DbSet<EquipmentRecord> Equipments => Set<EquipmentRecord>();
+    public DbSet<DescriptorRecord> Descriptors => Set<DescriptorRecord>();
     
     //muscles
-    public DbSet<MuscleDTO> Muscles => Set<MuscleDTO>();
-    public DbSet<MuscleAntagonistDTO> MuscleAntagonists => Set<MuscleAntagonistDTO>();
+    public DbSet<MuscleRecord> Muscles => Set<MuscleRecord>();
+    public DbSet<MuscleAntagonistRecord> MuscleAntagonists => Set<MuscleAntagonistRecord>();
 
     //categories 
-    public DbSet<MovementCategoryDTO> MovementCategories => Set<MovementCategoryDTO>();
-    public DbSet<MovementCategoryRelationDTO> MovementCategoryRelations => Set<MovementCategoryRelationDTO>();
+    public DbSet<MovementCategoryRecord> MovementCategories => Set<MovementCategoryRecord>();
+    public DbSet<MovementCategoryRelationRecord> MovementCategoryRelations => Set<MovementCategoryRelationRecord>();
     
     
     //movement
-    public DbSet<MovementDTO> Movement => Set<MovementDTO>();
-    public DbSet<MovementMuscleRelationDTO> MovementMuscleRelations => Set<MovementMuscleRelationDTO>();
-    public DbSet<MovementEquipmentRelationDTO> MovementEquipmentRelations => Set<MovementEquipmentRelationDTO>();
+    public DbSet<MovementRecord> Movement => Set<MovementRecord>();
+    public DbSet<MovementMuscleRelationRecord> MovementMuscleRelations => Set<MovementMuscleRelationRecord>();
+    public DbSet<MovementEquipmentRelationRecord> MovementEquipmentRelations => Set<MovementEquipmentRelationRecord>();
 
     
     //user
-    public DbSet<UserDto> Users => Set<UserDto>();
+    public DbSet<UserRecord> Users => Set<UserRecord>();
 
 
     #endregion
@@ -58,7 +57,7 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
         _logger?.Log("GainLabPgDBContext", "Creating Movement Table");
 
         //base movement table
-        modelBuilder.Entity<MovementDTO>(m =>
+        modelBuilder.Entity<MovementRecord>(m =>
         {
             m.ToTable("movement");
             m.HasKey(x => x.Id);
@@ -117,7 +116,7 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
     
         
         //equipment movement joined table
-        modelBuilder.Entity<MovementEquipmentRelationDTO>(link =>
+        modelBuilder.Entity<MovementEquipmentRelationRecord>(link =>
         {
             link.ToTable("movement_equipment_relation");
             link.HasKey(x => new { x.MovementId, x.EquipmentId });
@@ -129,7 +128,7 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
         });
         
         //muscle movement joined table
-        modelBuilder.Entity<MovementMuscleRelationDTO>(link =>
+        modelBuilder.Entity<MovementMuscleRelationRecord>(link =>
         {
             link.ToTable("movement_muscle_relation");
             link.HasKey(x => new { x.MovementId, x.MuscleId });
@@ -147,7 +146,7 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
        
           _logger?.Log("GainLabPgDBContext", "Creating Movement Category Table");
 
-        modelBuilder.Entity<MovementCategoryDTO>(m =>
+        modelBuilder.Entity<MovementCategoryRecord>(m =>
         {
             m.ToTable("movement_category");
             m.HasKey(x => x.Id);
@@ -197,7 +196,7 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
             m.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
         });
 
-        modelBuilder.Entity<MovementCategoryRelationDTO>(link =>
+        modelBuilder.Entity<MovementCategoryRelationRecord>(link =>
         {
             link.ToTable("movement_category_relations");
             link.HasKey(x => new { x.ParentCategoryId, x.ChildCategoryId });
@@ -218,15 +217,15 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
     private void CreateUserTableModel(ModelBuilder modelBuilder)
     {
         _logger?.Log("GainLabPgDBContext", "Creating User Table");
-        modelBuilder.Entity<UserDto>()
+        modelBuilder.Entity<UserRecord>()
             .HasKey(e => e.Id);  
 
-        modelBuilder.Entity<UserDto>()
+        modelBuilder.Entity<UserRecord>()
             .Property(e => e.Id)
             .HasColumnType("INTEGER")
             .ValueGeneratedOnAdd(); 
         
-        modelBuilder.Entity<UserDto>()
+        modelBuilder.Entity<UserRecord>()
             .Property(x => x.Version)
             .IsConcurrencyToken();
     }
@@ -235,7 +234,7 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
     {
         
         _logger?.Log("GainLabPgDBContext", "Creating Equipment Table");
-        modelBuilder.Entity<EquipmentDTO>(e =>
+        modelBuilder.Entity<EquipmentRecord>(e =>
         {
             e.ToTable("equipments");
             e.HasKey(x => x.Id);
@@ -280,7 +279,7 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
     {
         _logger?.Log("GainLabPgDBContext", "Creating Muscle Table");
 
-        modelBuilder.Entity<MuscleDTO>(m =>
+        modelBuilder.Entity<MuscleRecord>(m =>
         {
             m.ToTable("muscles");
             m.HasKey(x => x.Id);
@@ -330,7 +329,7 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
             m.HasIndex(x => new { x.UpdatedAtUtc, x.UpdatedSeq });
         });
 
-        modelBuilder.Entity<MuscleAntagonistDTO>(link =>
+        modelBuilder.Entity<MuscleAntagonistRecord>(link =>
         {
             link.ToTable("muscle_antagonists");
             link.HasKey(x => new { x.MuscleId, x.AntagonistId });
@@ -351,7 +350,7 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
     {
 
         _logger?.Log("GainLabPgDBContext", "Creating Descriptor Table");
-        modelBuilder.Entity<DescriptorDTO>(d =>
+        modelBuilder.Entity<DescriptorRecord>(d =>
         {
             d.ToTable("descriptors");
             d.HasKey(x => x.Id);
@@ -400,7 +399,7 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
         {
             var now = _clock?.UtcNow??DateTimeOffset.UtcNow;
 
-            foreach (var entry in ChangeTracker.Entries<BaseDto>())
+            foreach (var entry in ChangeTracker.Entries<BaseRecord>())
             {
                 if (entry.State is EntityState.Added or EntityState.Modified)
                 {

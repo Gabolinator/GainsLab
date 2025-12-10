@@ -1,17 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using GainsLab.Core.Models.Core;
-using GainsLab.Core.Models.Core.Interfaces.Caching;
-using GainsLab.Core.Models.Core.Interfaces.Entity;
-using GainsLab.Core.Models.Core.Utilities.Logging;
-using GainsLab.Infrastructure.Caching;
-using GainsLab.Models.Core;
-using GainsLab.Models.Core.Interfaces;
-using GainsLab.Models.DataManagement.Caching.Interface;
+﻿using GainsLab.Domain;
+using GainsLab.Domain.Interfaces;
+using GainsLab.Domain.Interfaces.Caching;
+using GainsLab.Domain.Interfaces.Entity;
 
-namespace GainsLab.Models.DataManagement.Caching;
+namespace GainsLab.Infrastructure.Caching;
 
 /// <summary>
 /// Provides a central registry for component caches keyed by <see cref="EntityType"/>.

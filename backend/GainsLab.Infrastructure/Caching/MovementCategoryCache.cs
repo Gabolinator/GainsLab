@@ -1,9 +1,8 @@
-﻿using GainsLab.Core.Models.Core;
-using GainsLab.Core.Models.Core.Entities.Identifier;
-using GainsLab.Core.Models.Core.Entities.WorkoutEntity;
-using GainsLab.Core.Models.Core.Utilities.Logging;
-using GainsLab.Models.Core;
-using GainsLab.Models.DataManagement.Caching;
+﻿
+using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
+using GainsLab.Domain.Entities.WorkoutEntity;
+using GainsLab.Domain.Interfaces;
 
 namespace GainsLab.Infrastructure.Caching;
 

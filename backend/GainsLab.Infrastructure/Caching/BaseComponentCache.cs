@@ -1,9 +1,8 @@
-﻿using GainsLab.Core.Models.Core;
-using GainsLab.Core.Models.Core.Interfaces.Caching;
-using GainsLab.Core.Models.Core.Utilities.Logging;
-using GainsLab.Models.Core;
+﻿using GainsLab.Domain;
+using GainsLab.Domain.Interfaces;
+using GainsLab.Domain.Interfaces.Caching;
 
-namespace GainsLab.Models.DataManagement.Caching;
+namespace GainsLab.Infrastructure.Caching;
 
 /// <summary>
 /// Provides a skeletal implementation for component caches backed by an in-memory dictionary.

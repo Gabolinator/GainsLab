@@ -1,8 +1,9 @@
-﻿using GainsLab.Core.Models.Core.CreationInfo;
-using GainsLab.Core.Models.Core.Entities.Descriptor;
-using GainsLab.Core.Models.Core.Entities.Identifier;
-using GainsLab.Core.Models.Core.Interfaces;
-using GainsLab.Models.Core.Interfaces;
+﻿using GainsLab.Application.Interfaces;
+using GainsLab.Domain.Entities.CreationInfo;
+using GainsLab.Domain.Entities.Descriptor;
+using GainsLab.Domain.Entities.Identifier;
+using GainsLab.Domain.Interfaces;
+
 
 namespace GainsLab.Infrastructure.DB.Handlers;
 

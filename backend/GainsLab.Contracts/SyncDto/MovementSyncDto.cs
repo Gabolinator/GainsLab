@@ -1,5 +1,5 @@
-﻿using GainsLab.Core.Models.Core;
-using GainsLab.Core.Models.Core.Interfaces.DB;
+﻿using GainsLab.Contracts.Interface;
+using GainsLab.Domain;
 
 namespace GainsLab.Contracts.SyncDto;
 

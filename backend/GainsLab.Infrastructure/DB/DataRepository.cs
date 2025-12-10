@@ -1,12 +1,14 @@
 ﻿
-using GainsLab.Core.Models.Core;
-using GainsLab.Core.Models.Core.Interfaces.DataManagement;
-using GainsLab.Core.Models.Core.Interfaces.DB;
-using GainsLab.Core.Models.Core.Interfaces.Entity;
-using GainsLab.Core.Models.Core.Results;
-using GainsLab.Core.Models.Core.Utilities.Logging;
+using GainsLab.Application;
+using GainsLab.Application.DomainMappers;
+using GainsLab.Application.Interfaces.DataManagement;
+using GainsLab.Application.Interfaces.Sync;
+using GainsLab.Application.Results;
+using GainsLab.Contracts.Interface;
+using GainsLab.Domain;
+using GainsLab.Domain.Interfaces;
+using GainsLab.Domain.Interfaces.Entity;
 using GainsLab.Infrastructure.DB.Context;
-using GainsLab.Infrastructure.DB.DomainMappers;
 using GainsLab.Infrastructure.DB.Handlers;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,6 +22,7 @@ public class DataRepository : ILocalRepository
     
     private readonly ILogger _logger;
     private readonly GainLabSQLDBContext _sqldbContext;
+    private readonly IClock _clock;
     private Dictionary<EntityType, IDBHandler> _handlers { get; set; } = new();
 
 
@@ -28,10 +31,11 @@ public class DataRepository : ILocalRepository
     /// </summary>
     /// <param name="logger">Logger used to emit diagnostic messages.</param>
     /// <param name="sqldbContext">EF Core context used to access the local database.</param>
-    public DataRepository(ILogger logger, GainLabSQLDBContext sqldbContext)
+    public DataRepository(ILogger logger, GainLabSQLDBContext sqldbContext, IClock clock)
     {
         _logger = logger;
         _sqldbContext = sqldbContext;
+        _clock = clock;
     }
     
     /// <inheritdoc />
@@ -110,10 +114,10 @@ public class DataRepository : ILocalRepository
                 var items = kvp.Value;
 
            
-                var dtos = new List<IDto>(items.Count);
+                var dtos = new List<IRecord>(items.Count);
                 foreach (var e in items)
                 {
-                    var dto = e.ToDTO();
+                    var dto = e.ToRecord(_clock);
                     if (dto is null)
                     {
                         var msg = $"Mapping to DTO returned null for entity type {type} .";
@@ -132,7 +136,7 @@ public class DataRepository : ILocalRepository
 
            
                 var handler = _handlers[type];
-                Result<IReadOnlyList<IDto>> handlerResult;
+                Result<IReadOnlyList<IRecord>> handlerResult;
                 try
                 {
                     //we add or update but dont let the handler save
@@ -276,6 +280,8 @@ public class DataRepository : ILocalRepository
             SeedVersion = 1,
             CursorsJson = "{}"
         };
+
+       
     }
 
     public async Task SaveSyncStateAsync(ISyncState state)
