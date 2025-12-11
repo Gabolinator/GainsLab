@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.Json;
+
 using System.Threading.Tasks;
-using GainsLab.Core.Models.Core;
-using GainsLab.Core.Models.Core.Interfaces.DataManagement;
-using GainsLab.Core.Models.Core.Interfaces.Entity;
-using GainsLab.Core.Models.Core.Results;
+using GainsLab.Application.Interfaces.DataManagement;
+using GainsLab.Application.Results;
+using GainsLab.Domain;
 using GainsLab.Domain.Interfaces;
-using GainsLab.Models.Core;
-using GainsLab.Models.Core.Interfaces;
+using GainsLab.Domain.Interfaces.Entity;
+
 
 namespace GainsLab.Models.DataManagement.FileAccess;
 

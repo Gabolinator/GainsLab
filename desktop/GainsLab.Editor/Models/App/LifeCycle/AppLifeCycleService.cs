@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Threading.Tasks;
 using Avalonia.Controls.ApplicationLifetimes;
-using GainsLab.Application.Interfaces;
-using GainsLab.Core.Models.Core.Interfaces.DataManagement;
+using GainsLab.Application.Interfaces.DataManagement;
 using GainsLab.Domain.Interfaces;
-using GainsLab.Models.DataManagement.DB;
+
 
 namespace GainsLab.Models.App.LifeCycle;
 

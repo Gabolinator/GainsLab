@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
-using GainsLab.Application.Interfaces;
-using GainsLab.Core.Models.Core.Interfaces.DataManagement;
+using GainsLab.Application.Interfaces.DataManagement;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Domain.Interfaces.Caching;
 using GainsLab.Models.App.LifeCycle;
-using GainsLab.Models.DataManagement;
-using GainsLab.Models.DataManagement.DB;
-using Microsoft.Extensions.DependencyInjection;
+
 
 namespace GainsLab.Models.App;
 

@@ -2,11 +2,8 @@ using System;
 using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Avalonia.Markup.Xaml.MarkupExtensions;
-using GainsLab.Core.Models.Core.Factory;
-using GainsLab.Core.Models.Core.Results;
-using Microsoft.Extensions.Logging;
-using ILogger = GainsLab.Core.Models.Core.Utilities.Logging.ILogger;
+using GainsLab.Application.Results;
+using GainsLab.Domain.Interfaces;
 
 
 namespace GainsLab;

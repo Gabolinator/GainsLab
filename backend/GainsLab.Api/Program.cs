@@ -1,6 +1,5 @@
-﻿using GainsLab.Contracts.Interface;
+﻿
 using GainsLab.Contracts.SyncDto;
-using GainsLab.Contracts.SyncService;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB;
 using GainsLab.Infrastructure.DB.Context;
@@ -130,6 +129,7 @@ static async Task RunApplicationAsync(WebApplication app, ILogger logger, Clock 
 
     var dbInitializer = new DBDataInitializer(logger, clock);
 
+    //todo remove me after testing , we will seed db from the data management console.
     logger.Log("Initializing DB");
     await dbInitializer.CreateBaseEntities(db,resolver);
     logger.Log("Initialize DB - completed");
