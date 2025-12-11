@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace GainsLab.Api.Controller;
 
 /// <summary>
-/// ASP.NET Core controller that exposes sync endpoints for consuming clients.
+/// ASP.NET Core gateway/orchestrator that exposes bulk synchronization endpoints 
+/// for all entity types.
 /// </summary>
 [ApiController]
 [Route("sync")]

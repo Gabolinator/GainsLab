@@ -1,12 +1,15 @@
 using System.Data;
 using GainsLab.Application.DTOs;
+using GainsLab.Application.Results;
 using GainsLab.Contracts.Interface;
 using GainsLab.Contracts.SyncDto;
 using GainsLab.Contracts.SyncService.Mapper;
 using GainsLab.Domain;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace GainsLab.Infrastructure.SyncService;
 
@@ -256,4 +259,25 @@ public class DescriptorSyncService : ISyncService<DescriptorSyncDTO>
         var val = await cmd.ExecuteScalarAsync(ct);
         return Convert.ToInt64(val);
     }
+
+
+    public async Task<Result<DescriptorSyncDTO>> PullById(Guid id,CancellationToken ct = default)
+    {
+        var entity = await _db.Descriptors.AsNoTracking().FirstOrDefaultAsync(d=> d.GUID == id,ct);
+        
+        if (entity is null) return Result<DescriptorSyncDTO>.Failure("Descriptor not found");
+        if(entity.IsDeleted) return Result<DescriptorSyncDTO>.Failure("Descriptor is deleted");
+        
+        var dto= new DescriptorSyncDTO(
+            entity.GUID,
+            entity.Content,
+            entity.UpdatedAtUtc,
+            entity.UpdatedSeq,
+            entity.IsDeleted,
+            entity.Authority);
+        
+        return Result<DescriptorSyncDTO>.SuccessResult(dto);
+        
+    }
+    
 }

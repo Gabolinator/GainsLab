@@ -72,6 +72,8 @@ static void ConfigureServices(IServiceCollection services, IConfiguration config
         services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<MovementCategorySyncDto>>());
         services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<MovementSyncDTO>>());
 
+        
+        
     }
 
     services.AddSingleton<IEntitySeedResolver, EntitySeedResolver>();
