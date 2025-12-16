@@ -261,7 +261,7 @@ public class DescriptorSyncService : ISyncService<DescriptorSyncDTO>
     }
 
 
-    public async Task<Result<DescriptorSyncDTO>> PullById(Guid id,CancellationToken ct = default)
+    public async Task<Result<DescriptorSyncDTO>> PullByIdAsync(Guid id,CancellationToken ct = default)
     {
         var entity = await _db.Descriptors.AsNoTracking().FirstOrDefaultAsync(d=> d.GUID == id,ct);
         

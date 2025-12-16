@@ -1,4 +1,5 @@
 ﻿
+using System.Text.Json;
 using GainsLab.Infrastructure.SyncService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,8 +10,8 @@ namespace GainsLab.Api.Controller;
 /*todo add 
 [] Put
 [] Patch
-[] Delete
-do i keep 
+
+we wont expose delete as its part of cascading delete of the parent aggregate
 */
 
 /// <summary>
@@ -31,7 +32,7 @@ public class DescriptionController :  ControllerBase
     }
     
     [HttpGet("sync")]
-    public async Task<IActionResult> PullAll(
+    public async Task<IActionResult> PullAllDescription(
         [FromQuery] DateTimeOffset? ts, [FromQuery] long? seq, [FromQuery] int take = 200, CancellationToken ct = default)
     {
         
@@ -43,16 +44,48 @@ public class DescriptionController :  ControllerBase
     }
     
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> Pull(
+    public async Task<IActionResult> GetDescription(
         Guid id, CancellationToken ct = default)
     {
-        var result = await _svc.PullById(id,ct);
+        var result = await _svc.PullByIdAsync(id,ct);
         if(!result.Success)  return NotFound();
         
         return Ok(result.Value!);
     }
     
+       
+    [HttpPost("sync")]
+    public async Task<IActionResult> PostDescription(
+        JsonElement payload, CancellationToken ct = default)
+    {
+        var result = await _svc.PostAsync(payload,ct);
+        if(!result.Success)  return Unauthorized(); //change error type
+        
+        return Created();
+    }
+
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> PutDescription(
+        Guid? guid, JsonElement payload, CancellationToken ct = default)
+    {
+        var result = await _svc.PutAsync(guid,payload,ct);
+        if(!result.Success)  return Unauthorized(); //change error type
+        
+        return Ok(result.Value!);
+    }
+    
+    [HttpPatch("{id:guid}")] 
+    public async Task<IActionResult> PatchDescription(
+        Guid? guid, JsonElement payload, CancellationToken ct = default)
+    {
+        var result = await _svc.PatchAsync(guid,payload,ct);
+        if(!result.Success)  return Unauthorized(); //change error type
+        
+        return Ok(result.Value!);
+    }
     
     
+  
+
     
 }
