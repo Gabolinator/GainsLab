@@ -1,8 +1,7 @@
-﻿
-using GainsLab.Contracts.Interface;
+﻿using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
 
-namespace GainsLab.Contracts.SyncDto;
+namespace GainsLab.Contracts.Dtos.SyncDto;
 
 public record MovementCategorySyncDto(
     Guid GUID,

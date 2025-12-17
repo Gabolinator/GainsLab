@@ -1,7 +1,7 @@
 ﻿using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
 
-namespace GainsLab.Contracts.SyncDto;
+namespace GainsLab.Contracts.Dtos.SyncDto;
 
 /// <summary>
 /// Synchronization DTO for equipment entities transported through the sync pipeline.

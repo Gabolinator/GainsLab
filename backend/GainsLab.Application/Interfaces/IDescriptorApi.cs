@@ -1,5 +1,5 @@
 ﻿using GainsLab.Application.Results;
-using GainsLab.Contracts.SyncDto;
+using GainsLab.Contracts.Dtos.SyncDto;
 
 namespace GainsLab.Application.Interfaces;
 

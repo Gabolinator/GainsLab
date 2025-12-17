@@ -1,8 +1,8 @@
 using System.Data;
 using GainsLab.Application.DTOs;
 using GainsLab.Application.Results;
+using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Interface;
-using GainsLab.Contracts.SyncDto;
 using GainsLab.Contracts.SyncService.Mapper;
 using GainsLab.Domain;
 using GainsLab.Domain.Interfaces;
@@ -20,15 +20,17 @@ public class DescriptorSyncService : ISyncService<DescriptorSyncDTO>
 {
     private readonly GainLabPgDBContext _db;
     private readonly ILogger _log;
+    private readonly IClock _clock;
     private const string SyncActor = "sync";
     
     /// <summary>
     /// Initializes a new instance of the <see cref="DescriptorSyncService"/> class.
     /// </summary>
-    public DescriptorSyncService(GainLabPgDBContext db, ILogger log)
+    public DescriptorSyncService(GainLabPgDBContext db, ILogger log, IClock clock)
     {
         _db = db;
         _log = log;
+        _clock = clock;
     }
 
     /// <inheritdoc />
@@ -58,7 +60,7 @@ public class DescriptorSyncService : ISyncService<DescriptorSyncDTO>
     /// <returns>A <see cref="SyncPage{TSyncDto}"/> containing descriptor DTOs and the next cursor when available.</returns>
     public async Task<SyncPage<DescriptorSyncDTO>> PullAsync(SyncCursor cur, int take, CancellationToken ct)
     {
-        var serverTime = DateTimeOffset.UtcNow;
+        var serverTime = _clock.UtcNow;
         take = Math.Clamp(take, 1, 500);
 
         var q = _db.Descriptors.AsNoTracking()
@@ -94,7 +96,7 @@ public class DescriptorSyncService : ISyncService<DescriptorSyncDTO>
     /// <returns>A push result describing the outcome for each item.</returns>
    public async Task<PushResult> PushAsync(IEnumerable<DescriptorSyncDTO> items, CancellationToken ct)
 {
-    var now = DateTimeOffset.UtcNow;
+    var now = _clock.UtcNow;
     var payloads = items.Select(s => DescriptorSyncMapper.FromSyncDTO(s, SyncActor)).ToList();
 
     var strategy = _db.Database.CreateExecutionStrategy();

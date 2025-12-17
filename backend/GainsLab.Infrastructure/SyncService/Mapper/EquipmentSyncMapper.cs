@@ -1,5 +1,5 @@
 ﻿using GainsLab.Application.DTOs;
-using GainsLab.Contracts.SyncDto;
+using GainsLab.Contracts.Dtos.SyncDto;
 
 
 namespace GainsLab.Contracts.SyncService.Mapper;

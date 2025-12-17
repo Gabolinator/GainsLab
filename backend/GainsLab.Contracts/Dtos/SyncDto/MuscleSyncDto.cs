@@ -1,7 +1,7 @@
 ﻿using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
 
-namespace GainsLab.Contracts.SyncDto;
+namespace GainsLab.Contracts.Dtos.SyncDto;
 
 /// <summary>
 /// Synchronization payload describing a muscle, its descriptor link, and antagonists.

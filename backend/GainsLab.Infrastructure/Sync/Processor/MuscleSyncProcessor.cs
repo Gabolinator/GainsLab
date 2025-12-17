@@ -1,8 +1,8 @@
 ﻿using GainsLab.Application.DTOs;
 using GainsLab.Application.Interfaces.DataManagement;
 using GainsLab.Application.Results;
+using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Interface;
-using GainsLab.Contracts.SyncDto;
 using GainsLab.Domain;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;

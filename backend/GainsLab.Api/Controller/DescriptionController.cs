@@ -1,5 +1,9 @@
 ﻿
 using System.Text.Json;
+using GainsLab.Contracts.Dtos.PostDto;
+using GainsLab.Contracts.Dtos.PutDto;
+using GainsLab.Contracts.Dtos.UpdateDto;
+using GainsLab.Infrastructure.DB.Repository;
 using GainsLab.Infrastructure.SyncService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,8 +12,7 @@ namespace GainsLab.Api.Controller;
 
 
 /*todo add 
-[] Put
-[] Patch
+[] validation
 
 we wont expose delete as its part of cascading delete of the parent aggregate
 */
@@ -21,18 +24,19 @@ we wont expose delete as its part of cascading delete of the parent aggregate
 [Route("api/descriptions")]
 public class DescriptionController :  ControllerBase
 {
+    private readonly DescriptorRepository _repo;
     private readonly DescriptorSyncService _svc;
-
     /// <summary>
     /// Initializes a new instance of the <see cref="DescriptorSyncService"/> class.
     /// </summary>
-    public DescriptionController(DescriptorSyncService syncService)
+    public DescriptionController(DescriptorSyncService syncService, DescriptorRepository repo)
     {
         _svc= syncService;
+        _repo = repo;
     }
     
     [HttpGet("sync")]
-    public async Task<IActionResult> PullAllDescription(
+    public async Task<IActionResult> PullAllDescriptions(
         [FromQuery] DateTimeOffset? ts, [FromQuery] long? seq, [FromQuery] int take = 200, CancellationToken ct = default)
     {
         
@@ -47,39 +51,48 @@ public class DescriptionController :  ControllerBase
     public async Task<IActionResult> GetDescription(
         Guid id, CancellationToken ct = default)
     {
-        var result = await _svc.PullByIdAsync(id,ct);
+        
+        if(id == Guid.Empty)  return BadRequest();
+        
+        var result = await _repo.PullByIdAsync(id,ct);
         if(!result.Success)  return NotFound();
         
         return Ok(result.Value!);
     }
     
        
-    [HttpPost("sync")]
+    [HttpPost()]
     public async Task<IActionResult> PostDescription(
-        JsonElement payload, CancellationToken ct = default)
+        [FromBody] DescriptorPostDTO? payload, CancellationToken ct = default)
     {
-        var result = await _svc.PostAsync(payload,ct);
+        if(payload == null)  return BadRequest();
+        
+        var result = await _repo.PostAsync(payload,ct);
         if(!result.Success)  return Unauthorized(); //change error type
         
-        return Created();
+        return Created(result.Value?.Id.ToString(), result.Value);
     }
 
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> PutDescription(
-        Guid? guid, JsonElement payload, CancellationToken ct = default)
+       Guid id, [FromBody] DescriptorPutDTO? payload  , CancellationToken ct = default)
     {
-        var result = await _svc.PutAsync(guid,payload,ct);
-        if(!result.Success)  return Unauthorized(); //change error type
+        if(payload == null|| id == Guid.Empty)  return BadRequest();
+        
+        var result = await _repo.PutAsync(id,payload,ct);
+        if(!result.Success)  return NotFound(); //change error type
         
         return Ok(result.Value!);
     }
     
     [HttpPatch("{id:guid}")] 
     public async Task<IActionResult> PatchDescription(
-        Guid? guid, JsonElement payload, CancellationToken ct = default)
+        Guid id, [FromBody] DescriptorUpdateDTO? payload, CancellationToken ct = default)
     {
-        var result = await _svc.PatchAsync(guid,payload,ct);
-        if(!result.Success)  return Unauthorized(); //change error type
+        if(payload == null|| id == Guid.Empty)  return BadRequest();
+        
+        var result = await _repo.PatchAsync(id,payload,ct);
+        if(!result.Success)  return NotFound(); 
         
         return Ok(result.Value!);
     }

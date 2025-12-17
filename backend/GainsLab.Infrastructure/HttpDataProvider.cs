@@ -1,8 +1,8 @@
 ﻿using System.Net.Http.Json;
 using GainsLab.Application.Interfaces.Sync;
 using GainsLab.Application.Results;
+using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Interface;
-using GainsLab.Contracts.SyncDto;
 using GainsLab.Contracts.SyncService;
 using GainsLab.Domain;
 using GainsLab.Domain.Interfaces;
