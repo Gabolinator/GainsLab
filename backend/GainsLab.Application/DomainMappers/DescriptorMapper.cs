@@ -1,4 +1,7 @@
 ﻿using GainsLab.Application.DTOs;
+using GainsLab.Contracts.Dtos.GetDto;
+using GainsLab.Contracts.Dtos.PostDto;
+using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Domain.Entities.CreationInfo;
 using GainsLab.Domain.Entities.Descriptor;
 using GainsLab.Domain.Entities.Identifier;
@@ -11,6 +14,77 @@ namespace GainsLab.Application.DomainMappers;
 /// </summary>
 public static class DescriptorMapper
 {
+
+    public static DescriptorGetDTO? ToGetDTO(this DescriptorRecord? dto)
+    {
+        if (dto == null) return null;
+
+        return new DescriptorGetDTO(
+            dto.GUID,
+            dto.Content,
+            dto.CreatedAtUtc,
+            dto.UpdatedAtUtc,
+            dto.UpdatedSeq,
+            dto.IsDeleted,
+            dto.Authority);
+
+    }
+    
+    public static DescriptorRecord? ToEntity(this DescriptorPostDTO? dto, IClock clock)
+    {
+        if (dto == null) return null;
+
+        return new DescriptorRecord
+        {
+            GUID = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
+            Content = dto.DescriptionContent,
+            CreatedAtUtc = clock.UtcNow,
+            CreatedBy = !string.IsNullOrWhiteSpace(dto.CreatedBy)? dto.CreatedBy : "system",
+            UpdatedAtUtc = clock.UtcNow,
+            UpdatedSeq = 1,
+            UpdatedBy = dto.CreatedBy,
+            Authority =  dto.Authority
+        };
+
+
+    }
+    
+    public static DescriptorPutDTO? ToPutDTO(this DescriptorRecord? dto, IClock clock)
+    {
+        if (dto == null) return null;
+
+        return new DescriptorPutDTO{
+           Id= dto.GUID,
+           DescriptionContent = dto.Content,
+            Notes = null,
+            Tags =  null,
+           Authority = dto.Authority,
+           UpdatedBy = dto.UpdatedBy};
+        
+    }
+    
+    
+    public static DescriptorRecord? ToEntity(this DescriptorPutDTO? dto, IClock clock, Guid? id = null, DescriptorRecord? record= null)
+    {
+        if (dto == null) return null;
+
+        return new DescriptorRecord
+        {
+            
+            GUID = id == null || id.Value.Equals(Guid.Empty) ? Guid.NewGuid() : id.Value,
+            Content = dto.DescriptionContent,
+            CreatedAtUtc = record !=null ? record.CreatedAtUtc: clock.UtcNow,
+            CreatedBy = record !=null ? record.CreatedBy : "system",
+            UpdatedAtUtc = clock.UtcNow,
+            UpdatedSeq = record !=null ? record.UpdatedSeq:1,
+            UpdatedBy = dto.UpdatedBy,
+            Authority =  dto.Authority
+        };
+
+
+    }
+
+
     /// <summary>
     /// Projects a descriptor domain entity into a DTO suitable for persistence.
     /// </summary>

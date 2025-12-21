@@ -17,4 +17,6 @@ public record DescriptorUpdateDTO
 
     [EnumDataType(typeof(DataAuthority))]
     public DataAuthority? Authority { get; init; }
+
+    public string? UpdatedBy { get; set; }
 }

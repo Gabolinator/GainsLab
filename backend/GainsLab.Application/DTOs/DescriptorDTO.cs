@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Domain;
 
 namespace GainsLab.Application.DTOs;
@@ -28,4 +29,6 @@ public class DescriptorRecord : BaseRecord
                $"Guid :{GUID} |"+
                $"Content :{Content} ";
     }
+
+  
 }

@@ -77,7 +77,7 @@ public class DescriptionController :  ControllerBase
     public async Task<IActionResult> PutDescription(
        Guid id, [FromBody] DescriptorPutDTO? payload  , CancellationToken ct = default)
     {
-        if(payload == null|| id == Guid.Empty)  return BadRequest();
+        if(payload == null)  return BadRequest();
         
         var result = await _repo.PutAsync(id,payload,ct);
         if(!result.Success)  return NotFound(); //change error type

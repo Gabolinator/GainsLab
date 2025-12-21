@@ -21,4 +21,6 @@ public record DescriptorPostDTO
 
     [EnumDataType(typeof(DataAuthority))]
     public DataAuthority Authority { get; init; } = DataAuthority.Bidirectional;
+    
+    public string? CreatedBy { get; init; }
 }
