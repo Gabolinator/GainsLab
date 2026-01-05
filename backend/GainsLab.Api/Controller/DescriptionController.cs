@@ -1,5 +1,10 @@
 ﻿
 using System.Text.Json;
+using GainsLab.Application.DomainMappers;
+using GainsLab.Application.DTOs;
+using GainsLab.Application.Interfaces;
+using GainsLab.Application.Results.APIResults;
+using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
@@ -24,12 +29,12 @@ we wont expose delete as its part of cascading delete of the parent aggregate
 [Route("api/descriptions")]
 public class DescriptionController :  ControllerBase
 {
-    private readonly DescriptorRepository _repo;
+    private readonly IDescriptorRepository _repo;
     private readonly DescriptorSyncService _svc;
     /// <summary>
     /// Initializes a new instance of the <see cref="DescriptorSyncService"/> class.
     /// </summary>
-    public DescriptionController(DescriptorSyncService syncService, DescriptorRepository repo)
+    public DescriptionController(DescriptorSyncService syncService, IDescriptorRepository repo)
     {
         _svc= syncService;
         _repo = repo;
@@ -52,12 +57,11 @@ public class DescriptionController :  ControllerBase
         Guid id, CancellationToken ct = default)
     {
         
-        if(id == Guid.Empty)  return BadRequest();
+        if( id == Guid.Empty)  return BadRequest();
         
         var result = await _repo.PullByIdAsync(id,ct);
-        if(!result.Success)  return NotFound();
-        
-        return Ok(result.Value!);
+
+        return  APIResultValidation.ValidateResult<DescriptorGetDTO>(this,result);
     }
     
        
@@ -65,12 +69,13 @@ public class DescriptionController :  ControllerBase
     public async Task<IActionResult> PostDescription(
         [FromBody] DescriptorPostDTO? payload, CancellationToken ct = default)
     {
+        
         if(payload == null)  return BadRequest();
         
         var result = await _repo.PostAsync(payload,ct);
-        if(!result.Success)  return Unauthorized(); //change error type
-        
-        return Created(result.Value?.Id.ToString(), result.Value);
+   
+        return APIResultValidation.ValidateResult<DescriptorGetDTO>(this, result,
+            result.Value != null ? new ActionResultInfo(GetActionName(), result.Value.Id) : null);
     }
 
     [HttpPut("{id:guid}")]
@@ -80,10 +85,11 @@ public class DescriptionController :  ControllerBase
         if(payload == null)  return BadRequest();
         
         var result = await _repo.PutAsync(id,payload,ct);
-        if(!result.Success)  return NotFound(); //change error type
         
-        return Ok(result.Value!);
+        return  APIResultValidation.ValidateResult<DescriptorPutDTO>(this,result, new ActionResultInfo(GetActionName(),id));
+        
     }
+    
     
     [HttpPatch("{id:guid}")] 
     public async Task<IActionResult> PatchDescription(
@@ -92,13 +98,12 @@ public class DescriptionController :  ControllerBase
         if(payload == null|| id == Guid.Empty)  return BadRequest();
         
         var result = await _repo.PatchAsync(id,payload,ct);
-        if(!result.Success)  return NotFound(); 
-        
-        return Ok(result.Value!);
+        return  APIResultValidation.ValidateResult< DescriptorUpdateDTO>(this,result);
+    
     }
-    
-    
-  
 
-    
+
+    private string GetActionName() => nameof(GetDescription);
+
+
 }

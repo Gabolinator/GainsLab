@@ -2,7 +2,6 @@
 
 namespace GainsLab.Application.Results;
 
-
 /// <summary>
 /// Represents the outcome of an operation without exposing typed values.
 /// </summary>
@@ -11,6 +10,8 @@ public interface IResult
     bool Success { get; }
     string? ErrorMessage { get; }
 }
+
+
 
 /// <summary>
 /// Basic success/failure result with optional error messaging.

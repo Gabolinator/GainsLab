@@ -4,9 +4,13 @@ using GainsLab.Domain;
 
 namespace GainsLab.Contracts.Dtos.PutDto;
 
+public enum UpsertOutcome { Created, Updated, Failed }
+
 public record DescriptorPutDTO
 {
     public Guid? Id { get; set; } =null;
+
+    public UpsertOutcome Outcome { get; set; } = UpsertOutcome.Failed;
     
     [Required]
     [StringLength(1024, MinimumLength = 3)]

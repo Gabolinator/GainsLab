@@ -2,13 +2,14 @@
 using GainsLab.Application.DomainMappers;
 using GainsLab.Application.DTOs;
 using GainsLab.Application.Interfaces;
-using GainsLab.Application.Results;
+using GainsLab.Application.Results.APIResults;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB.Repository;
@@ -34,7 +35,7 @@ public class DescriptorRepository : IDescriptorRepository
         _log = log;
     }
     
-    public async Task<Result<DescriptorGetDTO>> PullByIdAsync(Guid id, CancellationToken ct)
+    public async Task<APIResult<DescriptorGetDTO>> PullByIdAsync(Guid id, CancellationToken ct)
     {
         try
         {
@@ -43,114 +44,130 @@ public class DescriptorRepository : IDescriptorRepository
                 .Where(d => !d.IsDeleted)
                 .FirstOrDefaultAsync(d => d.GUID == id, ct);
 
-            return descriptions != null ? Result<DescriptorGetDTO>.SuccessResult(descriptions.ToGetDTO()!):Result<DescriptorGetDTO>.Failure("Not Found");
+            
+            
+            return descriptions != null ? 
+                APIResult<DescriptorGetDTO>.Found(descriptions.ToGetDTO()!):
+                APIResult<DescriptorGetDTO>.NotFound(id.ToString());
 
         }
         catch (Exception e)
         {
-            return Result<DescriptorGetDTO>.Failure(e.Message);
+            return APIResult<DescriptorGetDTO>.Exception(e.Message);
         }
     }
 
-    public async Task<Result<DescriptorRecord>> PostAsync(DescriptorPostDTO payload, CancellationToken ct)
+    public async Task<APIResult<DescriptorGetDTO>> PostAsync(DescriptorPostDTO payload, CancellationToken ct)
     {
         try
         {
-            var newEntry = await _db.AddAsync(payload.ToEntity(_clock), ct).ConfigureAwait(false);
-            if (newEntry is { State: EntityState.Added, Entity: not null })
-            {
-                await _db.SaveChangesAsync(ct);
-                
-                return Result<DescriptorRecord>.SuccessResult(newEntry.Entity);
-            }
+            var entity = payload.ToEntity(_clock);           // GUID created here
+            if (entity == null) return APIResult<DescriptorGetDTO>.BadRequest("Could not create record from dto");
+       
+            var record = await CreateAsync(entity, ct);
             
-            return Result<DescriptorRecord>.Failure("Not inserted");
-
+            //if success => value != null
+            return record.Success  ? APIResult<DescriptorGetDTO>.Created(record.Value.ToGetDTO()!) : APIResult<DescriptorGetDTO>.NotCreated("Failed to create record");
+            
         }
-        catch (Exception exception)
+        catch (Exception e)
         {
-            return Result<DescriptorRecord>.Failure(exception.Message);
+            return APIResult<DescriptorGetDTO>.Exception(e.Message);
         }
+        
     }
-
-
-    public async Task<Result<DescriptorPutDTO>> PutAsync(Guid? id, DescriptorPutDTO payload, CancellationToken ct)
+    
+    
+    public async Task<APIResult<DescriptorPutDTO>> PutAsync(Guid id, DescriptorPutDTO payload, CancellationToken ct)
     {
         try
         {
-            var description = id == null || id.Equals(Guid.Empty)? null: await _db.Descriptors.FirstOrDefaultAsync(d => d.GUID == id  && !d.IsDeleted, ct);
+           if(id == Guid.Empty) return APIResult<DescriptorPutDTO>.BadRequest("Id cannot be empty");
 
-            if (description ==null )
+            var existing = await _db.Descriptors.FirstOrDefaultAsync(d => d.GUID == id && !d.IsDeleted, ct);
+
+            if (existing is null)
             {
-                //new entity 
-                //insert
-               var newEntry = await _db.Descriptors.AddAsync(payload.ToEntity(_clock, id)!, ct).ConfigureAwait(false);
-               
-               if (newEntry is { State: EntityState.Added, Entity: not null })
-               {
-                   await _db.SaveChangesAsync(ct);
-                
-                   return Result<DescriptorPutDTO>.SuccessResult(newEntry.Entity.ToPutDTO(_clock)!);
-               }
-            
-               return Result<DescriptorPutDTO>.Failure("Not inserted for updates");
-               
-            }
-            
-            //replace content of existing entity
-            description.Content = payload.DescriptionContent;
-            description.UpdatedAtUtc = _clock.UtcNow;
-            description.UpdatedBy = payload.UpdatedBy;
-            description.Authority = payload.Authority;
-            
-            await _db.SaveChangesAsync(ct);
+                // create via shared method
+                var entity = payload.ToEntity(_clock, id)!; // guid may be null -> create a new one inside mapping OR enforce not null
+                var created = await CreateAsync(entity, ct);
 
-            return  Result<DescriptorPutDTO>.SuccessResult(description.ToPutDTO(_clock)!);
+                
+                return !created.Success ? 
+                    APIResult<DescriptorPutDTO>.NotCreated(created.ErrorMessage ?? "Create failed") : 
+                    APIResult<DescriptorPutDTO>.Created(created.Value!.ToPutDTO(_clock, UpsertOutcome.Created)!);
+            }
+
+            payload.Id = id;
             
+            //nothing changed
+            if(!existing.AnythingChanged(payload)) 
+                return APIResult<DescriptorPutDTO>.NothingChanged($"For entity : {payload.Id}");
+            
+            //put always updates all field
+            
+            // update branch
+            existing.Content = payload.DescriptionContent;
+            existing.UpdatedAtUtc = _clock.UtcNow;
+            existing.UpdatedBy = payload.UpdatedBy;
+            existing.Authority = payload.Authority;
+
+            await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+            return APIResult<DescriptorPutDTO>.Updated(existing.ToPutDTO(_clock, UpsertOutcome.Updated)!);
         }
-        catch (Exception exception)
+        catch (Exception e)
         {
-            return Result<DescriptorPutDTO>.Failure(exception.Message);
+            return APIResult<DescriptorPutDTO>.Exception(e.Message);
         }
     }
 
-    public async Task<Result<DescriptorUpdateDTO>> PatchAsync(Guid id, DescriptorUpdateDTO payload, CancellationToken ct)
+    public async Task<APIResult<DescriptorUpdateDTO>> PatchAsync(Guid id, DescriptorUpdateDTO payload, CancellationToken ct)
     {
 
         try
         {
             var description = id.Equals(Guid.Empty)? null: await _db.Descriptors.FirstOrDefaultAsync(d => d.GUID == id  && !d.IsDeleted, ct);
-            if(description == null) return Result<DescriptorUpdateDTO>.Failure("Not found for update");
+            if(description == null) 
+                return APIResult<DescriptorUpdateDTO>.NotUpdated("Not found for update");
 
         
-            bool anyUpdate = false;
-            if (payload.DescriptionContent != null)
+            
+            if (description.TryUpdate(payload, _clock))
             {
-                description.Content = payload.DescriptionContent;
-                anyUpdate = true;
-            }
-        
-            if (payload.Authority != null)
-            {
-                description.Authority = payload.Authority.Value;
-                anyUpdate = true;
-            }
-
-            if (anyUpdate)
-            {
-                description.UpdatedAtUtc = _clock.UtcNow;
-                description.UpdatedBy = payload.UpdatedBy;
+              
                 await  _db.SaveChangesAsync(ct);
+                return APIResult<DescriptorUpdateDTO>.Updated(payload);
             }
             
-            return Result<DescriptorUpdateDTO>.SuccessResult(payload);
+            return  APIResult<DescriptorUpdateDTO>.NothingChanged("Nothing changed");
 
         }
         catch (Exception e)
         {
-            return Result<DescriptorUpdateDTO>.Failure(e.Message);
+            return APIResult<DescriptorUpdateDTO>.Exception(e.Message);
         }
         
+    }
+    
+    private async Task<APIResult<DescriptorRecord>> CreateAsync(
+        DescriptorRecord entity,
+        CancellationToken ct)
+    {
+        try
+        {
+            var entry = await _db.Descriptors.AddAsync(entity, ct).ConfigureAwait(false);
+            if (entry is { State: EntityState.Added, Entity: not null })
+            {
+                await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+                return APIResult<DescriptorRecord>.Created(entry.Entity);
+            }
+
+            return APIResult<DescriptorRecord>.Problem("Not inserted");
+        }
+        catch (Exception e)
+        {
+            return APIResult<DescriptorRecord>.Exception(e.Message);
+        }
     }
     
     

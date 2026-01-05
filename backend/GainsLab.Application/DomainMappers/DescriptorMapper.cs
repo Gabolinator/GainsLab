@@ -49,7 +49,7 @@ public static class DescriptorMapper
 
     }
     
-    public static DescriptorPutDTO? ToPutDTO(this DescriptorRecord? dto, IClock clock)
+    public static DescriptorPutDTO? ToPutDTO(this DescriptorRecord? dto, IClock clock, UpsertOutcome outcome)
     {
         if (dto == null) return null;
 
@@ -59,7 +59,9 @@ public static class DescriptorMapper
             Notes = null,
             Tags =  null,
            Authority = dto.Authority,
-           UpdatedBy = dto.UpdatedBy};
+           UpdatedBy = dto.UpdatedBy,
+           Outcome = outcome,
+        };
         
     }
     
