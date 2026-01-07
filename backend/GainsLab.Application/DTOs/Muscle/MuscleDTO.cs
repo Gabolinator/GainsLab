@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using GainsLab.Application.DTOs.Description;
 using GainsLab.Domain;
 
-namespace GainsLab.Application.DTOs;
+namespace GainsLab.Application.DTOs.Muscle;
 
 /// <summary>
 /// Database representation of a muscle entity along with descriptor and antagonists.

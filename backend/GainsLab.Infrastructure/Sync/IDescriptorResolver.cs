@@ -1,4 +1,5 @@
 ﻿using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
 using GainsLab.Infrastructure.DB.Context;
 
 namespace GainsLab.Infrastructure.Sync;

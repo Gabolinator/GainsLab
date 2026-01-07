@@ -1,4 +1,6 @@
 ﻿using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
+using GainsLab.Application.DTOs.Muscle;
 using GainsLab.Domain.Entities.CreationInfo;
 using GainsLab.Domain.Entities.Descriptor;
 using GainsLab.Domain.Entities.Identifier;

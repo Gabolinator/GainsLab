@@ -1,4 +1,6 @@
-﻿namespace GainsLab.Application.DTOs;
+﻿using GainsLab.Application.DTOs.Equipment;
+
+namespace GainsLab.Application.DTOs.Movement;
 
 /// <summary>
 /// Join entity connecting movements to the equipment they require.

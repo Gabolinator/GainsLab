@@ -2,6 +2,9 @@
 using System.Text;
 using System.Text.Json;
 using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
+using GainsLab.Application.DTOs.Equipment;
+using GainsLab.Application.DTOs.Muscle;
 using GainsLab.Contracts.Interface;
 using GainsLab.Contracts.SyncService.Mapper;
 using GainsLab.Domain;

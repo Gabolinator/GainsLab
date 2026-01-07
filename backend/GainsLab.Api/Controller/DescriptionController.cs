@@ -1,14 +1,10 @@
 ﻿
-using System.Text.Json;
-using GainsLab.Application.DomainMappers;
-using GainsLab.Application.DTOs;
 using GainsLab.Application.Interfaces;
 using GainsLab.Application.Results.APIResults;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
-using GainsLab.Infrastructure.DB.Repository;
 using GainsLab.Infrastructure.SyncService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +13,7 @@ namespace GainsLab.Api.Controller;
 
 
 /*todo add 
-[] validation
+[x] validation 
 
 we wont expose delete as its part of cascading delete of the parent aggregate
 */
@@ -34,14 +30,14 @@ public class DescriptionController :  ControllerBase
     /// <summary>
     /// Initializes a new instance of the <see cref="DescriptorSyncService"/> class.
     /// </summary>
-    public DescriptionController(DescriptorSyncService syncService, IDescriptorRepository repo)
+    public DescriptionController(IDescriptorRepository repo, DescriptorSyncService syncService)
     {
         _svc= syncService;
         _repo = repo;
     }
     
     [HttpGet("sync")]
-    public async Task<IActionResult> PullAllDescriptions(
+    public async Task<IActionResult> GetDescriptions(
         [FromQuery] DateTimeOffset? ts, [FromQuery] long? seq, [FromQuery] int take = 200, CancellationToken ct = default)
     {
         

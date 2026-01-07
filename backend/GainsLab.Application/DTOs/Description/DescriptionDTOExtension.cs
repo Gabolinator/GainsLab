@@ -2,9 +2,9 @@
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Domain.Interfaces;
 
-namespace GainsLab.Application.DTOs;
+namespace GainsLab.Application.DTOs.Description;
 
-public static class DTOExtension
+public static class DescriptionDTOExtension
 {
     
     public static bool AnythingChanged(this DescriptorRecord record, DescriptorPutDTO dto)
@@ -14,6 +14,16 @@ public static class DTOExtension
             record.GetContent(), 
             dto.DescriptionContent, 
             StringComparison.InvariantCultureIgnoreCase) 
+               || record.Authority !=  dto.Authority;
+    }
+    
+    public static bool AnythingChanged(this DescriptorRecord record, DescriptorUpdateDTO dto)
+    {
+        //can add other criterias as needed - ignore tags etc for now
+        return !string.Equals(
+                   record.GetContent(), 
+                   dto.DescriptionContent, 
+                   StringComparison.InvariantCultureIgnoreCase) 
                || record.Authority !=  dto.Authority;
     }
     

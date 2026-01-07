@@ -6,6 +6,7 @@ public enum ApiResultStatus
     Found,
     Updated,
     Created,
+    Deleted,
     NotFound,
     BadRequest,
     Unauthorized,
@@ -38,6 +39,9 @@ public class APIResult<T> : Result<T>
     
     public static APIResult<T> Updated(T value)
         => SuccessResult(ApiResultStatus.Updated, value);
+    
+    public static APIResult<T> Deleted(T value)
+        => SuccessResult(ApiResultStatus.Deleted, value);
     
     public static APIResult<T> NotFound(string notFoundMessage) 
         => Failure(ApiResultStatus.NotFound, $"Not Found: {notFoundMessage}" );

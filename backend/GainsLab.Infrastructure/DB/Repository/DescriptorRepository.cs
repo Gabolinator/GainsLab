@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using GainsLab.Application.DomainMappers;
 using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.Interfaces;
 using GainsLab.Application.Results.APIResults;
 using GainsLab.Contracts.Dtos.GetDto;
@@ -9,7 +10,6 @@ using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.DB.Repository;
@@ -149,7 +149,7 @@ public class DescriptorRepository : IDescriptorRepository
         
     }
     
-    private async Task<APIResult<DescriptorRecord>> CreateAsync(
+    public async Task<APIResult<DescriptorRecord>> CreateAsync(
         DescriptorRecord entity,
         CancellationToken ct)
     {

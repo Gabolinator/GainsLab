@@ -1,5 +1,7 @@
 ﻿using System.Data;
 using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
+using GainsLab.Application.DTOs.Equipment;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Interface;
 using GainsLab.Contracts.SyncService.Mapper;

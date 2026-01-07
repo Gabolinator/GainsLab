@@ -1,5 +1,12 @@
 ﻿using System.Linq.Expressions;
 using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
+using GainsLab.Application.DTOs.Equipment;
+using GainsLab.Application.DTOs.Movement;
+using GainsLab.Application.DTOs.MovementCategory;
+using GainsLab.Application.DTOs.Muscle;
+using GainsLab.Application.DTOs.User;
+using GainsLab.Application.Interfaces;
 using GainsLab.Domain;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Outbox;
@@ -11,7 +18,7 @@ namespace GainsLab.Infrastructure.DB.Context;
 /// <summary>
 /// SQLite-backed DbContext used by the desktop application for local persistence.
 /// </summary>
-public class GainLabSQLDBContext : DbContext
+public class GainLabSQLDBContext : DbContext 
 {
     private readonly ILogger _logger;
 
@@ -55,7 +62,9 @@ public class GainLabSQLDBContext : DbContext
     public DbSet<MovementMuscleRelationRecord> MovementMuscleRelations => Set<MovementMuscleRelationRecord>();
     public DbSet<MovementEquipmentRelationRecord> MovementEquipmentRelations => Set<MovementEquipmentRelationRecord>();
 
-    
+    public DbSet<UserRecord> Users => Set<UserRecord>();
+
+
     /// <inheritdoc />
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

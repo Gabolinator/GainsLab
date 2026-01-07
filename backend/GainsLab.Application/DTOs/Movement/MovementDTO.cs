@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using GainsLab.Application.DTOs.Description;
+using GainsLab.Application.DTOs.MovementCategory;
 using GainsLab.Domain;
 
-namespace GainsLab.Application.DTOs;
+namespace GainsLab.Application.DTOs.Movement;
 
 /// <summary>
 /// Database representation of a movement aggregate including descriptor, category, and related entities.

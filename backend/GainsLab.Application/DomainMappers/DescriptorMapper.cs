@@ -1,4 +1,5 @@
 ﻿using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;

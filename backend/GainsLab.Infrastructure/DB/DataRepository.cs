@@ -316,7 +316,7 @@ public class DataRepository : ILocalRepository
     /// </summary>
     private void CreateHandlers()
     {
-        var descriptorHandler = new DescriptorIdbHandler(_sqldbContext, _logger);
+        var descriptorHandler = new DescriptorIdbSQLHandler(_sqldbContext, _logger);
         
         
         _handlers = new();

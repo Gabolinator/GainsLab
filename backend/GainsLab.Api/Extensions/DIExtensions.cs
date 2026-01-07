@@ -1,6 +1,8 @@
-﻿using GainsLab.Contracts.Dtos.SyncDto;
+﻿using GainsLab.Application.Interfaces;
+using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB;
+using GainsLab.Infrastructure.DB.Repository;
 using GainsLab.Infrastructure.SyncService;
 using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
@@ -21,12 +23,18 @@ public static class DIExtensions
         services.AddSingleton<IClock>(clock);
 
         AddSyncServices(services);
-
+        AddEntitiesRepositories(services);
         
         services.AddSingleton<IEntitySeedResolver, EntitySeedResolver>();
     }
-    
-    
+
+    private static void AddEntitiesRepositories(IServiceCollection services)
+    {
+        services.AddSingleton<IDescriptorRepository, DescriptorRepository>();
+        services.AddSingleton<IEquipmentRepository, EquipmentRepository>();
+    }
+
+
     public static void AddSyncServices(IServiceCollection services)
     {
   

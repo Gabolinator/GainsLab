@@ -55,7 +55,7 @@ public class ResultList : IResultList,IResult, IEnumerable<Result>
 
     public virtual bool Success => !AllFailure;
 
-    public string? ErrorMessage
+    public string ErrorMessage
         => Success
             ? null
             : string.Join(" | ",
@@ -138,7 +138,7 @@ public class ResultList<T> :  IResultList,IResult, IEnumerable<Result<T>>
 
     public bool Success { get; }
    
-    public string? ErrorMessage
+    public string ErrorMessage
         => Success
             ? null
             : string.Join(" | ",

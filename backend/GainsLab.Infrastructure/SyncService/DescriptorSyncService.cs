@@ -1,5 +1,6 @@
 using System.Data;
 using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.Results;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Interface;

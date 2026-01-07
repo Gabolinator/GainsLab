@@ -23,6 +23,7 @@ public static class APIResultValidation
                     new { id = actionResultInfo.id}, 
                     result.Value)
                 : controller.Problem(),
+            ApiResultStatus.Deleted => controller.NoContent(),
             ApiResultStatus.NotFound => controller.NotFound(result.GetErrorMessage()),
             ApiResultStatus.BadRequest => controller.BadRequest(result.GetErrorMessage()),
             ApiResultStatus.Unauthorized => controller.Unauthorized(result.GetErrorMessage()),

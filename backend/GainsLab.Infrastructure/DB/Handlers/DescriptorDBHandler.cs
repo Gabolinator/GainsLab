@@ -1,6 +1,7 @@
 ﻿
 using GainsLab.Application.DomainMappers;
 using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.Results;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Domain.Interfaces.Entity;
@@ -12,9 +13,9 @@ namespace GainsLab.Infrastructure.DB.Handlers;
 /// <summary>
 /// Database handler that manages descriptor Record persistence inside the local SQLite database.
 /// </summary>
-public class DescriptorIdbHandler : IdbContextHandler<DescriptorRecord>
+public class DescriptorIdbSQLHandler : IdbContextHandler<DescriptorRecord>
 {
-    public DescriptorIdbHandler(GainLabSQLDBContext context, ILogger logger) : base(context, logger)
+    public DescriptorIdbSQLHandler(GainLabSQLDBContext context, ILogger logger) : base(context, logger)
     {
     }
 

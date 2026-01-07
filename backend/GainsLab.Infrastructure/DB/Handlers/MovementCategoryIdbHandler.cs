@@ -1,5 +1,7 @@
 ﻿using GainsLab.Application.DomainMappers;
 using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
+using GainsLab.Application.DTOs.MovementCategory;
 using GainsLab.Application.Results;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Domain.Interfaces.Entity;
@@ -11,9 +13,9 @@ namespace GainsLab.Infrastructure.DB.Handlers;
 
 public class MovementCategoryIdbHandler: IdbContextHandler<MovementCategoryRecord>
 {
-    private readonly DescriptorIdbHandler _descriptorHandler;
+    private readonly DescriptorIdbSQLHandler _descriptorHandler;
     
-    public MovementCategoryIdbHandler(DbContext context, DescriptorIdbHandler descriptorHandler ,ILogger logger) : base(context, logger)
+    public MovementCategoryIdbHandler(DbContext context, DescriptorIdbSQLHandler descriptorHandler ,ILogger logger) : base(context, logger)
     {
         _descriptorHandler = descriptorHandler;
         

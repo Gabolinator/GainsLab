@@ -1,4 +1,6 @@
 ﻿using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
+using GainsLab.Application.DTOs.Movement;
 using GainsLab.Contracts.Dtos.SyncDto;
 
 

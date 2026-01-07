@@ -1,4 +1,6 @@
 ﻿using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
+using GainsLab.Application.DTOs.Muscle;
 using GainsLab.Contracts.Dtos.SyncDto;
 
 namespace GainsLab.Infrastructure.SyncService.Mapper;

@@ -8,7 +8,7 @@ namespace GainsLab.Application.Results;
 public interface IResult
 {
     bool Success { get; }
-    string? ErrorMessage { get; }
+    string ErrorMessage { get; }
 }
 
 
@@ -19,13 +19,22 @@ public interface IResult
 public class Result : IResult
 {
     public bool Success { get;}
-    public string? ErrorMessage { get; }
-    public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
+
+    public List<string> ErrorMessages { get; private set; } = new List<string>();
+    
+    public string ErrorMessage => string.Join(", ", ErrorMessages);
+    public bool HasError => ErrorMessages.Any();
+
+    public void AddError(string? errorMessage)
+    {
+        if(string.IsNullOrWhiteSpace(errorMessage)) return;
+        ErrorMessages.Add(errorMessage);
+    }
 
     protected Result(bool success, string? errorMessage = null)
     {
         Success = success;
-        ErrorMessage = errorMessage;
+        AddError(errorMessage);
     }
 
     public static Result SuccessResult() => new(true);

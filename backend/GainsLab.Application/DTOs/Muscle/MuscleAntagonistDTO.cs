@@ -1,4 +1,4 @@
-﻿namespace GainsLab.Application.DTOs;
+﻿namespace GainsLab.Application.DTOs.Muscle;
 
 /// <summary>
 /// Join entity representing a muscle-antagonist relationship.

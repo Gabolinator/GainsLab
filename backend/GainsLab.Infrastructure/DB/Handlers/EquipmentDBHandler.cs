@@ -3,6 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using GainsLab.Application.DomainMappers;
 using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
+using GainsLab.Application.DTOs.Equipment;
 using GainsLab.Application.Results;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Domain.Interfaces.Entity;
@@ -16,7 +18,7 @@ namespace GainsLab.Infrastructure.DB.Handlers;
 /// </summary>
 public class EquipmentIdbHandler : IdbContextHandler<EquipmentRecord>
 {
-    private readonly DescriptorIdbHandler _descriptorHandler;
+    private readonly DescriptorIdbSQLHandler _descriptorHandler;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="EquipmentIdbHandler"/> class.
@@ -24,7 +26,7 @@ public class EquipmentIdbHandler : IdbContextHandler<EquipmentRecord>
     /// <param name="context">EF Core context used for data access.</param>
     /// <param name="descriptorHandler"> For Inserting and validating descriptor Records</param>
     /// <param name="logger">Logger used for diagnostic output.</param>
-    public EquipmentIdbHandler(GainLabSQLDBContext context, DescriptorIdbHandler descriptorHandler ,ILogger logger) : base(context, logger)
+    public EquipmentIdbHandler(GainLabSQLDBContext context, DescriptorIdbSQLHandler descriptorHandler ,ILogger logger) : base(context, logger)
     {
         _descriptorHandler = descriptorHandler;
     }

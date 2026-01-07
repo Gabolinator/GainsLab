@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using GainsLab.Application.DTOs.Equipment;
 using GainsLab.Domain;
 using GainsLab.Domain.Entities.User;
 
-namespace GainsLab.Application.DTOs;
+namespace GainsLab.Application.DTOs.User;
 
 public class UserRecord : BaseRecord
 {

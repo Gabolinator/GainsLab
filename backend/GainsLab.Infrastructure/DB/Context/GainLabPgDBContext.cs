@@ -1,5 +1,12 @@
 ﻿
 using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
+using GainsLab.Application.DTOs.Equipment;
+using GainsLab.Application.DTOs.Movement;
+using GainsLab.Application.DTOs.MovementCategory;
+using GainsLab.Application.DTOs.Muscle;
+using GainsLab.Application.DTOs.User;
+using GainsLab.Application.Interfaces;
 using GainsLab.Domain;
 using GainsLab.Domain.Interfaces;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +14,7 @@ using Microsoft.EntityFrameworkCore;
 namespace GainsLab.Infrastructure.DB.Context;
 
 //db context for postgress
-public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) : DbContext(options)
+public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) : DbContext(options) 
 {
     private ILogger? _logger;
     private IClock _clock;

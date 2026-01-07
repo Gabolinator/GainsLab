@@ -1,11 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using GainsLab.Contracts.Dtos.PutDto;
-using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Domain;
-using GainsLab.Domain.Interfaces;
 
-namespace GainsLab.Application.DTOs;
+namespace GainsLab.Application.DTOs.Description;
 
 [Table("descriptors")]
 public class DescriptorRecord : BaseRecord
@@ -32,6 +29,5 @@ public class DescriptorRecord : BaseRecord
                $"Content :{Content} ";
     }
 
-
-    
 }
+

@@ -1,6 +1,7 @@
-﻿using GainsLab.Domain;
+﻿using GainsLab.Application.DTOs.Muscle;
+using GainsLab.Domain;
 
-namespace GainsLab.Application.DTOs;
+namespace GainsLab.Application.DTOs.Movement;
 
 /// <summary>
 /// Join entity linking a movement to a muscle and the role that muscle plays.

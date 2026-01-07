@@ -5,6 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using GainsLab.Application.DomainMappers;
 using GainsLab.Application.DTOs;
+using GainsLab.Application.DTOs.Description;
+using GainsLab.Application.DTOs.Muscle;
 using GainsLab.Application.Results;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Domain.Interfaces.Entity;
@@ -18,14 +20,14 @@ namespace GainsLab.Infrastructure.DB.Handlers;
 /// </summary>
 public class MuscleIdbHandler : IdbContextHandler<MuscleRecord>
 {
-    private readonly DescriptorIdbHandler _descriptorHandler;
+    private readonly DescriptorIdbSQLHandler _descriptorHandler;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MuscleIdbHandler"/> class.
     /// </summary>
     public MuscleIdbHandler(
         GainLabSQLDBContext context,
-        DescriptorIdbHandler descriptorHandler,
+        DescriptorIdbSQLHandler descriptorHandler,
         ILogger logger) : base(context, logger)
     {
         _descriptorHandler = descriptorHandler;
