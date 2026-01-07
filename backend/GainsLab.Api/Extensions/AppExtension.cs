@@ -59,7 +59,7 @@ public static class AppExtension
 
         //todo remove me after testing , we will seed db from the data management console.
         logger.Log("Initializing DB");
-        await dbInitializer.CreateBaseEntities(db,resolver);
+       // await dbInitializer.CreateBaseEntities(db,resolver);
         logger.Log("Initialize DB - completed");
 
         await app.RunAsync();

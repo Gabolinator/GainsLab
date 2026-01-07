@@ -22,7 +22,7 @@ public static class APIResultValidation
                     actionResultInfo.nameOfAction, 
                     new { id = actionResultInfo.id}, 
                     result.Value)
-                : controller.Problem(),
+                : controller.Problem(result.GetErrorMessage()),
             ApiResultStatus.Deleted => controller.NoContent(),
             ApiResultStatus.NotFound => controller.NotFound(result.GetErrorMessage()),
             ApiResultStatus.BadRequest => controller.BadRequest(result.GetErrorMessage()),

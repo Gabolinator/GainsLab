@@ -1,6 +1,8 @@
-﻿using GainsLab.Application.DTOs;
+﻿using GainsLab.Application.DomainMappers;
+using GainsLab.Application.DTOs;
 using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.DTOs.Equipment;
+using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 
 
@@ -55,5 +57,21 @@ public static class EquipmentSyncMapper
             e.UpdatedSeq,
             e.IsDeleted,
             e.Authority);
+    }
+
+    public static EquipmentGetDTO? ToGetDTO(EquipmentSyncDTO? dto ,DescriptorRecord? descriptor, DateTimeOffset createdAtUtc, string sync)
+    {
+        if (dto == null) return null;
+
+        return new EquipmentGetDTO(
+            dto.GUID,
+            dto.Name,
+            dto.DescriptorGUID,
+            descriptor.ToGetDTO(),
+            createdAtUtc,
+            dto.UpdatedAtUtc,
+            dto.UpdatedSeq,
+            dto.IsDeleted,
+            dto.Authority);
     }
 }

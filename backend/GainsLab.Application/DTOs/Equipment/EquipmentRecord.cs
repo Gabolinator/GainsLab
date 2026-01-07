@@ -18,7 +18,7 @@ public class EquipmentRecord : BaseRecord
 
 
     public override string? GetContent() => Name;
-   
+    
 
     public override int Iid => Id;
     public override Guid Iguid => GUID;

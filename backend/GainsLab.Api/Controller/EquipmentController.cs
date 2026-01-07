@@ -3,20 +3,23 @@ using GainsLab.Application.Results.APIResults;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
+using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Infrastructure.SyncService;
 using Microsoft.AspNetCore.Mvc;
 
+
 namespace GainsLab.Api.Controller;
 
 [ApiController]
-[Route("api/equipments")]
+[Route("equipments")]
 public class EquipmentController : ControllerBase
 {
     private readonly IEquipmentRepository _repo;
-    private readonly EquipmentSyncService _svc;
+    private readonly ISyncService<EquipmentSyncDTO> _svc;
+   
 
-    public EquipmentController(IEquipmentRepository repo, EquipmentSyncService svc)
+    public EquipmentController(IEquipmentRepository repo, ISyncService<EquipmentSyncDTO> svc)
     {
         _repo = repo;
         _svc = svc;
@@ -39,6 +42,7 @@ public class EquipmentController : ControllerBase
     public async Task<IActionResult> GetEquipment(
         Guid id, CancellationToken ct = default)
     {
+        
         
         if( id == Guid.Empty)  return BadRequest();
         

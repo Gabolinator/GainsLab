@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using GainsLab.Application.DTOs.Muscle;
 
 namespace GainsLab.Application.Results;
 
@@ -66,6 +67,9 @@ public class Result<T> : Result
         Value = value;
     }
 
+    public static Result<T> NotImplemented()
+        => Result<T>.Failure("Not Implemented");
+    
     public static Result<T> SuccessResult(T value)
         => new(true, value, null);
 
@@ -87,6 +91,8 @@ public class Result<T> : Result
 
     public override string ToString()
         => Success ? $"Success: {Value}" : $"Failure: {ErrorMessage ?? "Unknown Error"}";
+
+
 }
 
 // public class Result : IResult

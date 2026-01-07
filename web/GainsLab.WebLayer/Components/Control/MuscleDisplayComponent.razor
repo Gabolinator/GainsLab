@@ -1,5 +1,6 @@
 ﻿@using GainsLab.Application.DTOs
 @using GainsLab.Application.DTOs.Muscle
+@using GainsLab.Application.Interfaces.DataManagement.Gateway
 @using GainsLab.Application.Interfaces.Sync
 
 
@@ -61,7 +62,7 @@
     private MuscleRecord[]? _muscles = null;
     [Inject] private ILogger Logger { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
-    [Inject] private IEntitySyncClient SyncClient { get; set; } = default!;
+    [Inject] private IMuscleGateway SyncClient { get; set; } = default!;
     
     
     private int i =1;
@@ -83,7 +84,7 @@
     {
         _muscles = null;
 
-        var result = await SyncClient.GetAllMusclesRecordAsync();
+        var result = await SyncClient.GetAllMusclesAsync();
         if (!result.Success)
         {
             _muscles = null;

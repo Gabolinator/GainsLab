@@ -1,8 +1,13 @@
 
+using GainsLab.Application.Interfaces.DataManagement.Gateway;
+using GainsLab.Application.Interfaces.DataManagement.Provider;
 using GainsLab.Application.Interfaces.Sync;
 
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure;
+using GainsLab.Infrastructure.Api;
+using GainsLab.Infrastructure.Api.Gateway;
+using GainsLab.Infrastructure.Api.Interface;
 using GainsLab.Infrastructure.Logging;
 using GainsLab.Infrastructure.SyncService;
 using GainsLab.Infrastructure.Utilities;
@@ -49,9 +54,38 @@ void ConfigureSyncClient(IServiceProvider sp, HttpClient client)
     client.Timeout = TimeSpan.FromSeconds(30);
 }
 
+void AddApis(IServiceCollection s)
+{
+    s.AddHttpClient<IDescriptorApi, DescriptorApi>(ConfigureSyncClient);
+    s.AddHttpClient<IEquipmentApi, EquipmentApi>(ConfigureSyncClient);
+    s.AddScoped<IApiClientRegistry, ApiClientRegistry>();
+}
+
+void AddProvider(IServiceCollection s)
+{
+    s.AddScoped<IDescriptorProvider, HttpDataProvider>();
+    s.AddScoped<IEquipmentProvider,HttpDataProvider>();
+    s.AddScoped<IMuscleProvider,HttpDataProvider>();
+}
+
+void AddGateway(IServiceCollection s)
+{
+    s.AddScoped<IDescriptorGateway, DescriptorGateway>();
+    s.AddScoped<IEquipmentGateway,EquipmentGateway>();
+    s.AddScoped<IMuscleGateway,MuscleGateway>();
+}
+
+
+AddApis(builder.Services);
+
+
+
 builder.Services.AddHttpClient<IRemoteProvider, HttpDataProvider>(ConfigureSyncClient);
 builder.Services.AddHttpClient("SyncApi", ConfigureSyncClient);
-builder.Services.AddSingleton<IEntitySyncClient, EntitySyncClient>();
+builder.Services.AddScoped<IEntitySyncClient, EntitySyncClient>();
+
+AddProvider(builder.Services);
+AddGateway(builder.Services);
 
 // Add services to the container.
 builder.Services.AddRazorComponents();

@@ -1,0 +1,26 @@
+﻿@using GainsLab.WebLayer.Model
+
+
+
+    <td>@Index</td>
+    <td>@Name</td>
+    <td>@Description</td>
+    <td>@UpdatedAtUtc</td>
+    <td><LinkComponent Link ="Link"></LinkComponent></td>
+                    
+
+
+@code {
+    [Parameter]
+    public int Index { get; set; } = 0;
+    [Parameter]
+    public string Name { get; set; } = "Unknown";
+    [Parameter]
+    public string Description { get; set; } = "Description";
+    [Parameter]
+    public string UpdatedAtUtc { get; set; } = "UpdatedAtUtc";
+    [Parameter]
+    public Link? Link { get; set; } = null;
+    
+    
+}

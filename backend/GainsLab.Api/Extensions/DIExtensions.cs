@@ -12,6 +12,7 @@ public static class DIExtensions
 {
     public static void ConfigureServicesPreDBContext(this IServiceCollection services, ILogger logger)
     {
+        AddSyncServices(services);
         services.AddControllers();
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
@@ -22,7 +23,7 @@ public static class DIExtensions
         services.AddSingleton<ILogger>(logger);
         services.AddSingleton<IClock>(clock);
 
-        AddSyncServices(services);
+       
         AddEntitiesRepositories(services);
         
         services.AddSingleton<IEntitySeedResolver, EntitySeedResolver>();

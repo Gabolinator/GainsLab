@@ -1,0 +1,17 @@
+﻿@using GainsLab.WebLayer.Model
+
+<a class="link-opacity-75" href=@GetPage()>@GetText()</a>
+
+@code {
+    [Parameter] public Link? Link { get; set; } = default!;
+
+    string GetPage()
+    {
+        return Link != null ? Link.Page : "#";
+    }
+    string GetText()
+    {
+        return Link != null ? Link.Text : "unfound";
+    }
+
+}

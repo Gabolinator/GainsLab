@@ -31,6 +31,8 @@ public class EquipmentRepository : IEquipmentRepository
     
     public async Task<APIResult<EquipmentGetDTO>> PullByIdAsync(Guid id, CancellationToken ct)
     {
+        _log.Log(nameof(PullByIdAsync), $"Trying to pull equipment by id {id}" );
+        
         try
         {
             var equipment = await _db.Equipments
@@ -46,6 +48,7 @@ public class EquipmentRepository : IEquipmentRepository
         
         catch (Exception e)
         {
+            _log.LogError(nameof(PullByIdAsync), $"Exeption Trying to pull equipment by id {id} - {e.GetBaseException()}" );
             return APIResult<EquipmentGetDTO>.Exception(e.Message);
         }
     }

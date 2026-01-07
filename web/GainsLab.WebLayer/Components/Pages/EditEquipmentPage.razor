@@ -1,0 +1,44 @@
+﻿@page "/equipments/{id:guid}"
+@using GainsLab.Application.Interfaces.DataManagement.Gateway
+@using GainsLab.Contracts.Dtos.GetDto
+@using GainsLab.Domain.Interfaces
+@using Microsoft.AspNetCore.Http.HttpResults
+
+
+
+<p>
+    @if (Equipment == null)
+    {
+        <p>Equipment Not Found</p>
+    }
+    else
+    {
+        <p>@Equipment.Name</p>
+    }
+
+</p>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; } = Guid.Empty;
+
+    [Inject] private ILogger Logger { get; set; } = default!;
+    [Inject] private IClock Clock { get; set; } = default!;
+    [Inject] private IEquipmentGateway Repo { get; set; } = default!;
+
+    public EquipmentGetDTO? Equipment { get; set; } = null;
+
+    
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+
+        var eq = await Repo.GetEquipmentByIdAsync(Id);
+        if(!eq.Success) return;
+        
+        Equipment = eq.Value;
+        
+    }
+
+
+}

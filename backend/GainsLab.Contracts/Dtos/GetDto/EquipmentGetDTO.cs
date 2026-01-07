@@ -24,3 +24,5 @@ public record EquipmentGetDTO(
     long UpdatedSeq,
     bool IsDeleted = false,
     DataAuthority Authority = DataAuthority.Bidirectional);
+
+
