@@ -16,6 +16,6 @@ public class MuscleGateway : IMuscleGateway
 
     public async Task<Result<IReadOnlyList<MuscleRecord>>> GetAllMusclesAsync()
     {
-        return Result<IReadOnlyList<MuscleRecord>>.NotImplemented();
+        return Result<IReadOnlyList<MuscleRecord>>.NotImplemented(nameof(GetAllMusclesAsync));
     }
 }

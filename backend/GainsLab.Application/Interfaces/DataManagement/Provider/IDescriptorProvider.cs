@@ -1,6 +1,8 @@
 ﻿using GainsLab.Application.Results;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
+using GainsLab.Contracts.Dtos.UpdateDto;
+using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Interface;
 
 namespace GainsLab.Application.Interfaces.DataManagement.Provider;
@@ -13,6 +15,6 @@ public interface IDescriptorProvider
     
     Task<Result<DescriptorPostDTO>>  CreateDescriptorAsync(DescriptorPostDTO entity, CancellationToken ct);
     
-    Task<Result<DescriptorPostDTO>> UpdateDescriptorAsync(DescriptorPostDTO entity, CancellationToken ct);
+    Task<Result<DescriptorUpdateOutcome>> UpdateDescriptorAsync(DescriptorUpdateRequest updateDescriptor, CancellationToken ct);
 
 }

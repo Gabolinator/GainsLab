@@ -3,8 +3,11 @@ using GainsLab.Application.DTOs.Equipment;
 using GainsLab.Application.Interfaces.DataManagement.Gateway;
 using GainsLab.Application.Interfaces.DataManagement.Provider;
 using GainsLab.Application.Results;
+using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.SyncDto;
+using GainsLab.Contracts.Dtos.UpdateDto;
+using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.SyncService.Mapper;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.SyncService;
@@ -61,9 +64,58 @@ public class EquipmentGateway : IEquipmentGateway
     
     public async Task<Result<EquipmentGetDTO>> GetEquipmentByIdAsync(Guid id)
         => await  _provider.GetEquipmentAsync(new(id,null), default);
+
+    public async Task<Result<EquipmentCombinedOutcome>> UpdateEquipmentAsync(EquipmentUpdateRequest request, DescriptorUpdateRequest? descriptorUpdateRequest)
+    {
+        
+       MessagesContainer message = new MessagesContainer();
+       DescriptorUpdateOutcome? descriptor = null;
     
-    
-    
-  
-    
+
+       
+        //start by trying to update description
+        if (descriptorUpdateRequest != null &&
+            descriptorUpdateRequest!.UpdateRequest == UpdateRequest.Update)
+        {
+            var descriptorOutcome = await _descriptorGateway.UpdateDescriptorAsync(descriptorUpdateRequest);
+            
+            if (!descriptorOutcome.Success || descriptorOutcome.Value == null ||
+                descriptorOutcome.Value.Outcome == UpdateOutcome.Failed)
+            {
+                _logger.LogWarning(nameof(EquipmentGateway), $"Did not update descriptor {descriptorOutcome.GetMessages()}");
+                message.Append(descriptorOutcome.GetMessages());
+            }
+            
+            else 
+            {
+                descriptor = descriptorOutcome.Value!;
+            }
+        }
+        
+        if(descriptor == null) message.AddWarning("Did not update descriptor");
+        
+        
+        
+        
+        
+       
+        EquipmentUpdateOutcome equipment = null;
+        //them update this 
+        var equipmentOutcome = await _provider.UpdateEquipmentAsync(request, CancellationToken.None);
+        if (!equipmentOutcome.Success || equipmentOutcome.Value == null ||
+            equipmentOutcome.Value.Outcome == UpdateOutcome.Failed)
+        {
+            message.Append(equipmentOutcome.GetMessages());
+        }
+        
+        else equipment = equipmentOutcome.Value!;
+
+
+        return equipment == null && descriptor == null
+            ? Result<EquipmentCombinedOutcome>.Failure(message)
+            : Result<EquipmentCombinedOutcome>.SuccessResult(new EquipmentCombinedOutcome(equipment, descriptor,
+                message));
+
+
+    }
 }

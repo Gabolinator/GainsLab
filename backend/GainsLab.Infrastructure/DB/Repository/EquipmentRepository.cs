@@ -4,6 +4,7 @@ using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.DTOs.Equipment;
 using GainsLab.Application.Interfaces;
 using GainsLab.Application.Results.APIResults;
+using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
@@ -96,7 +97,7 @@ public class EquipmentRepository : IEquipmentRepository
 
                 
                 return !created.Success ? 
-                    APIResult<EquipmentPutDTO>.NotCreated(created.ErrorMessage ?? "Create failed") : 
+                    APIResult<EquipmentPutDTO>.NotCreated(created.GetErrorMessage()?? "Create failed") : 
                     APIResult<EquipmentPutDTO>.Created(created.Value!.ToPutDTO(_clock, UpsertOutcome.Created)!);
             }
 
@@ -121,7 +122,7 @@ public class EquipmentRepository : IEquipmentRepository
             var descriptorResult = await _descriptorRepository.PutAsync(payload.Descriptor.Id.Value, payload.Descriptor, ct);
             if (!descriptorResult.Success || descriptorResult.Value?.Id == null)
             {
-                var error = descriptorResult.ErrorMessage ?? "Descriptor update failed";
+                var error = descriptorResult.GetErrorMessage() ?? "Descriptor update failed";
                 return APIResult<EquipmentPutDTO>.Exception(error);
             }
 

@@ -4,9 +4,12 @@ using GainsLab.Application.Results.APIResults;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
+using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
+using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Infrastructure.SyncService;
 using Microsoft.AspNetCore.Mvc;
+using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
 namespace GainsLab.Api.Controller;
 
@@ -22,17 +25,17 @@ we wont expose delete as its part of cascading delete of the parent aggregate
 /// ASP.NET Core controller that exposes endpoints for description.
 /// </summary>
 [ApiController]
-[Route("api/descriptions")]
+[Route("descriptions")]
 public class DescriptionController :  ControllerBase
 {
     private readonly IDescriptorRepository _repo;
-    private readonly DescriptorSyncService _svc;
-    /// <summary>
-    /// Initializes a new instance of the <see cref="DescriptorSyncService"/> class.
-    /// </summary>
-    public DescriptionController(IDescriptorRepository repo, DescriptorSyncService syncService)
+    private readonly ISyncService<DescriptorSyncDTO> _svc;
+    private readonly ILogger _logger;
+ 
+    public DescriptionController(IDescriptorRepository repo, ISyncService<DescriptorSyncDTO> syncService, ILogger logger)
     {
         _svc= syncService;
+        _logger = logger;
         _repo = repo;
     }
     
@@ -91,11 +94,14 @@ public class DescriptionController :  ControllerBase
     public async Task<IActionResult> PatchDescription(
         Guid id, [FromBody] DescriptorUpdateDTO? payload, CancellationToken ct = default)
     {
+        _logger.Log(nameof(DescriptionController), $"Try Patch Descriptor {id} - payload null: {payload == null}");
+        
         if(payload == null|| id == Guid.Empty)  return BadRequest();
         
+        
         var result = await _repo.PatchAsync(id,payload,ct);
-        return  APIResultValidation.ValidateResult< DescriptorUpdateDTO>(this,result);
-    
+        
+        return  APIResultValidation.ValidateResult<DescriptorUpdateOutcome>(this,result);
     }
 
 

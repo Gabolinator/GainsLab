@@ -161,7 +161,7 @@ public abstract class IdbContextHandler<TRecord> : IDBHandler where TRecord : cl
                 if (!r.Success || r.Value is null)
                 {
                     // Fail fast -> rollback whole batch for atomicity
-                    var reason = r.ErrorMessage ?? "Unknown error";
+                    var reason = r.GetErrorMessage() ?? "Unknown error";
                     return Result<IReadOnlyList<IRecord>>.Failure($"Failed on Record {Record.GetType().Name}: {reason}");
                 }
 

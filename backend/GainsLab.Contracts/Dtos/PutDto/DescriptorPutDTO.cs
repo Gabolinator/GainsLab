@@ -4,7 +4,7 @@ using GainsLab.Domain;
 
 namespace GainsLab.Contracts.Dtos.PutDto;
 
-public enum UpsertOutcome { Created, Updated, Failed }
+
 
 public record DescriptorPutDTO
 {

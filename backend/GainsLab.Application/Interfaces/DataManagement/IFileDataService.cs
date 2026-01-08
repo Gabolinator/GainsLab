@@ -17,7 +17,7 @@ public interface IFileDataService
     /// <summary>
     /// Loads a collection of items from the specified file path.
     /// </summary>
-    Task<ResultList<T>> LoadFromFileAsync<T>(string filePath);
+   // Task<ResultList<T>> LoadFromFileAsync<T>(string filePath);
 
     /// <summary>
     /// Loads all component data associated with the application.

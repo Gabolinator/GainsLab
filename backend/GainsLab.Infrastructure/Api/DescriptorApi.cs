@@ -1,8 +1,11 @@
 ﻿using System.Net.Http.Json;
 using GainsLab.Application.Results;
+using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.SyncDto;
+using GainsLab.Contracts.Dtos.UpdateDto;
+using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
 using GainsLab.Domain.Interfaces;
@@ -84,8 +87,61 @@ public class DescriptorApi : IDescriptorApi
         throw new NotImplementedException();
     }
 
-    public Task<Result<DescriptorPostDTO>> UpdateDescriptorAsync(DescriptorPostDTO entity, CancellationToken ct)
+    public async Task<Result<DescriptorUpdateOutcome>> UpdateDescriptorAsync(DescriptorUpdateRequest request, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        if (request.UpdateRequest == UpdateRequest.DontUpdate)
+        {
+            return  Result<DescriptorUpdateOutcome>.Failure("Did not update descriptor - Marked as DontUpdate");
+        }
+
+        var id = request.CorrelationId;
+        
+        if (id == Guid.Empty)
+        {
+            return  Result<DescriptorUpdateOutcome>.Failure("Did not update descriptor - ID invalid");
+        }
+        
+        if (!await NetworkChecker.HasInternetAsync(_logger))
+        {
+            var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
+            _logger.LogWarning(nameof(DescriptorApi), message);
+            return Result<DescriptorUpdateOutcome>.Failure(message);
+        }
+
+        
+        
+        try
+        {
+            _logger.Log(nameof(DescriptorApi), $"Try Patch Descriptor - id {id} - {request.Descriptor.DescriptionContent}" );
+
+            
+            var url = $"/descriptions/{Uri.EscapeDataString(id.ToString()!)}";
+            using var res = await _http.PatchAsync(url,JsonContent.Create(request.Descriptor) ,ct);
+            res.EnsureSuccessStatusCode();
+        
+            _logger.Log(nameof(DescriptorApi), $"Patch Descriptor - id {id} - {res.Content}" );
+
+            var payload = await res.Content.ReadFromJsonAsync<DescriptorUpdateOutcome>(cancellationToken: ct);
+            
+            if (payload == null)
+            {
+                return  Result<DescriptorUpdateOutcome>.Failure(res.ReasonPhrase!);
+            }
+
+            return Result<DescriptorUpdateOutcome>.SuccessResult(payload);
+            
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception e)
+        {
+            var message =
+                $"Remote patch for Descriptor failed while contacting {_http.DescribeBaseAddress()}: {e.GetBaseException().Message}";
+            _logger.LogError(nameof(DescriptorApi), message);
+            return  Result<DescriptorUpdateOutcome>.Failure(message);
+        }
+        
     }
 }

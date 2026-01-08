@@ -2,6 +2,8 @@
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.RequestDto;
+using GainsLab.Contracts.Dtos.UpdateDto;
+using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Interface;
 
 namespace GainsLab.Infrastructure.Api.Interface;
@@ -14,8 +16,8 @@ public interface IEquipmentApi
     
     Task<Result<EquipmentPostDTO>>  CreateEquipmentAsync(EquipmentPostDTO entity, CancellationToken ct);
     
-    Task<Result<EquipmentPostDTO>> UpdateEquipmentAsync(EquipmentPostDTO entity, CancellationToken ct);
+    Task<Result<EquipmentUpdateOutcome>> UpdateEquipmentAsync(EquipmentUpdateRequest request, CancellationToken ct);
     
-    Task<Result<EquipmentGetDTO>> DeleteEquipmentAsync(EquipmentGetDTO entity, CancellationToken ct);
+    Task<Result<EquipmentGetDTO>> DeleteEquipmentAsync(EquipmentRequestDTO entity, CancellationToken ct);
 
 }

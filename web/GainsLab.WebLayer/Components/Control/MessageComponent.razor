@@ -1,0 +1,16 @@
+﻿@using GainsLab.Application.Results
+<h3>MessageComponent</h3>
+
+<p>
+    @if (Messages != null)
+    {
+        @Messages.ToString()
+    }
+</p>
+
+@code {
+
+    [Parameter]
+    public MessagesContainer? Messages { get; set; } = null;
+
+}

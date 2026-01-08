@@ -1,20 +1,54 @@
-﻿@page "/equipments/{id:guid}"
+﻿@rendermode InteractiveServer
+@page "/equipments/{id:guid}"
+@using GainsLab.Application.DTOs
 @using GainsLab.Application.Interfaces.DataManagement.Gateway
+@using GainsLab.Application.Results
+@using GainsLab.Contracts
 @using GainsLab.Contracts.Dtos.GetDto
+@using GainsLab.Contracts.Dtos.UpdateDto
+@using GainsLab.Contracts.Dtos.UpdateDto.Outcome
 @using GainsLab.Domain.Interfaces
-@using Microsoft.AspNetCore.Http.HttpResults
+@using GainsLab.Infrastructure.Utilities
+@using GainsLab.WebLayer.Components.Control
+@using GainsLab.WebLayer.Model
 
 
 
 <p>
-    @if (Equipment == null)
+    @if (EditEquipment != null)
     {
-        <p>Equipment Not Found</p>
+        <EditForm EditContext="FormContext" FormName="formEditEquipment" OnValidSubmit="SubmitHandler">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+        
+            
+            <div class="mb-2">
+                <label>Name</label>
+                <InputText Value="@EditEquipment.Name"
+                           ValueChanged="OnNameChanged"
+                           ValueExpression="@(() => EditEquipment.Name)"
+                           @oninput="OnNameInput" />
+                <ValidationMessage For="(() => EditEquipment.Name)"/>
+            </div>
+            
+            <div class="mb-2">
+                <label>Description</label>
+                <InputText class="form-control"
+                           @bind-Value="EditDescriptor.DescriptionContent"/>
+            </div>
+            
+          @if (_isEditValid)
+          {
+              <button class="btn btn-primary" type="submit">Update</button>
+          }
+          
+          <br/> <a href="/equipments" class="btn btn-primary">Close</a>
+            <br/>
+            
+        </EditForm>
     }
-    else
-    {
-        <p>@Equipment.Name</p>
-    }
+   
+    <MessageComponent Messages="@Messages"></MessageComponent>
 
 </p>
 
@@ -27,18 +61,221 @@
     [Inject] private IEquipmentGateway Repo { get; set; } = default!;
 
     public EquipmentGetDTO? Equipment { get; set; } = null;
+    public EquipmentEditFormDTO? EditEquipment { get; set; } = null;
+    public DescriptorEditDTO EditDescriptor { get; set; } = new();
 
+    private EditContext? FormContext;
+    private ValidationMessageStore? _validationMessages;
+    private FieldIdentifier _nameField;
+
+    private bool _isEditValid = false;
+    private string _normalizedOriginalName = string.Empty;
+    private string _originalDescriptorContent = string.Empty;
+    
+    
+    private HashSet<string> ExistingEquipmentNames { get; set; } = new HashSet<string>();
+
+    public MessagesContainer? Messages { get; set; } = new MessagesContainer();
+
+
+    private Task OnNameChanged(string value)
+    {
+        // This is what EditContext uses for standard change notifications
+        EditEquipment!.Name = value;
+        return Task.CompletedTask;
+    }
+
+    private void OnNameInput(ChangeEventArgs e)
+    {
+        EditEquipment!.Name = e.Value?.ToString();
+        
+        FormContext?.NotifyFieldChanged(_nameField);
+    }
     
     protected override async Task OnParametersSetAsync()
     {
-        await base.OnParametersSetAsync();
+        Logger.Log(nameof(EditEquipmentPage),$"On Parameter set");
 
-        var eq = await Repo.GetEquipmentByIdAsync(Id);
-        if(!eq.Success) return;
         
-        Equipment = eq.Value;
+        await base.OnParametersSetAsync();
+        Messages ??= new MessagesContainer();
+        
+        Messages.ClearAll();
+        
+        _isEditValid = false;
+
+        //we cache all the equipments - so we can filter for same name
+        var eqs = await Repo.GetAllEquipmentsAsync();
+        if (eqs.Value == null || eqs.Value.Count == 0)
+        {
+            Messages.AddError("No Equipments Found");
+            return;
+        }
+    
+        var eq = eqs.Success ? eqs.Value.FirstOrDefault(e => e.Id == Id) : null;
+        if (eq == null)
+        {
+            Messages.AddError("Equipment not found");
+            return;
+        }
+        
+        Equipment = eq;
+        EditEquipment = Equipment!.FromGetDTO();
+        EditDescriptor = EditEquipment.Descriptor ?? new DescriptorEditDTO();
+
+        _normalizedOriginalName = Normalize(Equipment!.Name);
+        _originalDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
+
+        ExistingEquipmentNames = eqs.Value
+            .Select(e => Normalize(e.Name))
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Where(n => !string.Equals(n, _normalizedOriginalName, StringComparison.InvariantCultureIgnoreCase))
+            .ToHashSet(StringComparer.InvariantCultureIgnoreCase);
+        
+        BuildEditContext();
+
+        Messages.AddInfo($"Equipments Names : {string.Join(",", ExistingEquipmentNames)}");
+        
+        
+    }
+    
+    private void BuildEditContext()
+    {
+        if (FormContext != null)
+        {
+            FormContext.OnFieldChanged -= HandleFieldChanged;
+            FormContext.OnValidationRequested -= HandleValidationRequested;
+        }
+
+        FormContext = new EditContext(EditEquipment!);
+        _validationMessages = new ValidationMessageStore(FormContext);
+
+        _nameField = FieldIdentifier.Create(() => EditEquipment!.Name);
+
+        FormContext.OnFieldChanged += HandleFieldChanged;
+        FormContext.OnValidationRequested += HandleValidationRequested;
+        
+        ValidateUniqueName();
+    }
+
+    private void HandleFieldChanged(object? sender, FieldChangedEventArgs e)
+    {
+        if (e.FieldIdentifier.FieldName == nameof(EquipmentEditFormDTO.Name))
+        {
+            ValidateUniqueName();
+        }
+
+        
+    }
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
+    {
+        ValidateUniqueName();
+    }
+
+    private void ValidateUniqueName()
+    {
+        if (FormContext == null || _validationMessages == null || EditEquipment == null)
+            return;
+     
+        
+        _validationMessages.Clear(_nameField);
+
+        Messages ??= new MessagesContainer();
+     
+        Messages.Clear(MessageType.Warning);
+        
+        var candidate = Normalize(EditEquipment.Name);
+
+        if (string.IsNullOrWhiteSpace(candidate))
+        {
+            _isEditValid = false;
+            EditEquipment.UpdateRequest = UpdateRequest.DontUpdate;
+            FormContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        if (ExistingEquipmentNames.Contains(candidate))
+        {
+            _validationMessages.Add(_nameField, "An equipment with this name already exists.");
+            _isEditValid = false;
+            EditEquipment.UpdateRequest = UpdateRequest.DontUpdate;
+            FormContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        if (string.Equals(candidate, _normalizedOriginalName, StringComparison.InvariantCultureIgnoreCase))
+        {
+            var warning = $"Validated Equipment Name - unchanged candidate {candidate}";
+            Messages.AddWarning(warning);
+            Logger.Log(nameof(EditEquipmentPage),warning);
+            _validationMessages.Clear(_nameField);
+            _isEditValid = true;
+            EditEquipment.UpdateRequest = UpdateRequest.DontUpdate;
+            FormContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        _isEditValid = true;
+        EditEquipment.UpdateRequest = UpdateRequest.Update;
+        FormContext.NotifyValidationStateChanged();
+    }
+    
+
+    private static string Normalize(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return string.Empty;
+        
+        var t = StringFormater.RemoveUnwantedChar(name);
+        
+        return t;
+    }
+
+    public void Dispose()
+    {
+        if (FormContext != null)
+        {
+            FormContext.OnFieldChanged -= HandleFieldChanged;
+            FormContext.OnValidationRequested -= HandleValidationRequested;
+        }
+    }
+
+
+    private async Task SubmitHandler()
+    {
+        Messages ??= new MessagesContainer();
+        var currentDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
+        if (string.Equals(currentDescriptorContent, _originalDescriptorContent, StringComparison.InvariantCultureIgnoreCase))
+        {
+            Messages.AddError($"Equipment {Equipment!.Name} description content did not change");
+            EditDescriptor.UpdateRequest = UpdateRequest.DontUpdate;
+        }
+        else
+        {
+            EditDescriptor.UpdateRequest = UpdateRequest.Update;
+        }
+        
+        EditEquipment!.Descriptor = EditDescriptor;
+        
+        var request = EditEquipment.ToUpdateRequest();
+        
+        //Logger.Log(nameof(EditEquipmentPage), "Submitting Equipment");
+      
+        Messages.ClearAll();
+        
+        var outcome= await Repo.UpdateEquipmentAsync(request, EditEquipment.Descriptor.ToUpdateRequest());
+        if (!outcome.Success)
+        {
+            Messages.AddError("Could not update equipment: ");
+            Messages.Append(outcome.GetMessages());
+        }
+
+        else Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
         
     }
 
 
+  
+   
 }

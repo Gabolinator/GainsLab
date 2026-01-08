@@ -4,6 +4,8 @@ using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.RequestDto;
 using GainsLab.Contracts.Dtos.SyncDto;
+using GainsLab.Contracts.Dtos.UpdateDto;
+using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Interface;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.Api.Interface;
@@ -122,12 +124,12 @@ public class EquipmentApi :IEquipmentApi
         throw new NotImplementedException();
     }
 
-    public Task<Result<EquipmentPostDTO>> UpdateEquipmentAsync(EquipmentPostDTO entity, CancellationToken ct)
+    public async Task<Result<EquipmentUpdateOutcome>> UpdateEquipmentAsync(EquipmentUpdateRequest request, CancellationToken ct)
     {
-        throw new NotImplementedException();
+     return  Result<EquipmentUpdateOutcome>.NotImplemented(nameof(UpdateEquipmentAsync));
     }
 
-    public Task<Result<EquipmentGetDTO>> DeleteEquipmentAsync(EquipmentGetDTO entity, CancellationToken ct)
+    public Task<Result<EquipmentGetDTO>> DeleteEquipmentAsync(EquipmentRequestDTO entity, CancellationToken ct)
     {
         throw new NotImplementedException();
     }

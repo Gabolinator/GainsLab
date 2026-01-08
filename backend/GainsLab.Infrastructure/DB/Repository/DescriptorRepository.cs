@@ -4,10 +4,12 @@ using GainsLab.Application.DTOs;
 using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.Interfaces;
 using GainsLab.Application.Results.APIResults;
+using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
+using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
 using Microsoft.EntityFrameworkCore;
@@ -94,7 +96,7 @@ public class DescriptorRepository : IDescriptorRepository
 
                 
                 return !created.Success ? 
-                    APIResult<DescriptorPutDTO>.NotCreated(created.ErrorMessage ?? "Create failed") : 
+                    APIResult<DescriptorPutDTO>.NotCreated(created.GetErrorMessage() ?? "Create failed") : 
                     APIResult<DescriptorPutDTO>.Created(created.Value!.ToPutDTO(_clock, UpsertOutcome.Created)!);
             }
 
@@ -121,30 +123,28 @@ public class DescriptorRepository : IDescriptorRepository
         }
     }
 
-    public async Task<APIResult<DescriptorUpdateDTO>> PatchAsync(Guid id, DescriptorUpdateDTO payload, CancellationToken ct)
+    public async Task<APIResult<DescriptorUpdateOutcome>> PatchAsync(Guid id, DescriptorUpdateDTO payload, CancellationToken ct)
     {
 
         try
         {
             var description = id.Equals(Guid.Empty)? null: await _db.Descriptors.FirstOrDefaultAsync(d => d.GUID == id  && !d.IsDeleted, ct);
             if(description == null) 
-                return APIResult<DescriptorUpdateDTO>.NotUpdated("Not found for update");
-
-        
+                return APIResult<DescriptorUpdateOutcome>.NotUpdated("Not found for update");
             
             if (description.TryUpdate(payload, _clock))
             {
-              
                 await  _db.SaveChangesAsync(ct);
-                return APIResult<DescriptorUpdateDTO>.Updated(payload);
+                
+                return APIResult<DescriptorUpdateOutcome>.Updated(new DescriptorUpdateOutcome(UpdateOutcome.Updated, description.ToGetDTO()));
             }
             
-            return  APIResult<DescriptorUpdateDTO>.NothingChanged("Nothing changed");
+            return  APIResult<DescriptorUpdateOutcome>.NothingChanged("Nothing changed");
 
         }
         catch (Exception e)
         {
-            return APIResult<DescriptorUpdateDTO>.Exception(e.Message);
+            return APIResult<DescriptorUpdateOutcome>.Exception(e.Message);
         }
         
     }

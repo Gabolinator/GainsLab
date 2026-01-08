@@ -10,9 +10,8 @@ public record EquipmentUpdateDTO
 {
     [StringLength(256, MinimumLength = 2)]
     public string? Name { get; init; }
-
-    public DescriptorUpdateDTO? Descriptor { get; init; }
-
+    public DescriptorUpdateDTO? Descriptor { get; set; } = null;
+    
     [EnumDataType(typeof(DataAuthority))]
     public DataAuthority? Authority { get; init; }
 

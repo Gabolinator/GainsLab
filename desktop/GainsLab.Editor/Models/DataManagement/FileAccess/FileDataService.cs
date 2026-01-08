@@ -32,10 +32,10 @@ public class JsonFilesDataService  : IFileDataService
         throw new System.NotImplementedException();
     }
 
-    public Task< ResultList<T>> LoadFromFileAsync<T>(string filePath)
-    {
-        throw new System.NotImplementedException();
-    }
+    // public Task< ResultList<T>> LoadFromFileAsync<T>(string filePath)
+    // {
+    //     throw new System.NotImplementedException();
+    // }
 
     public async Task<Dictionary<EntityType, IReadOnlyList<IEntity>>> LoadAllComponentsAsync()
     {

@@ -9,7 +9,7 @@ namespace GainsLab.Application.Results;
 public interface IResult
 {
     bool Success { get; }
-    string ErrorMessage { get; }
+    MessagesContainer Messages { get; }
 }
 
 
@@ -20,16 +20,19 @@ public interface IResult
 public class Result : IResult
 {
     public bool Success { get;}
+    public MessagesContainer Messages { get; } = new MessagesContainer();
 
-    public List<string> ErrorMessages { get; private set; } = new List<string>();
-    
-    public string ErrorMessage => string.Join(", ", ErrorMessages);
-    public bool HasError => ErrorMessages.Any();
+    public bool HasError => Messages.HasErrors;
 
     public void AddError(string? errorMessage)
     {
         if(string.IsNullOrWhiteSpace(errorMessage)) return;
-        ErrorMessages.Add(errorMessage);
+        Messages.AddError(errorMessage);
+    }
+    public void AddInfo(string? message)
+    {
+        if(string.IsNullOrWhiteSpace(message)) return;
+        Messages.AddInfo(message);
     }
 
     protected Result(bool success, string? errorMessage = null)
@@ -37,16 +40,23 @@ public class Result : IResult
         Success = success;
         AddError(errorMessage);
     }
+   
+    
+    protected Result(bool success, MessagesContainer? message = null)
+    {
+        Success = success;
+        Messages = message ?? new MessagesContainer();
+    }
 
-    public static Result SuccessResult() => new(true);
+    public static Result SuccessResult() => new(true, new MessagesContainer());
     public static Result Failure(string errorMessage)
         => new(false, string.IsNullOrWhiteSpace(errorMessage) ? "Unknown error" : errorMessage);
 
     public override string ToString() =>
-        Success ? "Success" : $"Failure: {ErrorMessage ?? "Unknown Error"}";
+        Success ? "Success" : $"Failure: {GetErrorMessage() ?? "Unknown Error"}";
     
     
-    public virtual string GetErrorMessage() => HasError ? ErrorMessage! : string.Empty;
+    public virtual string GetErrorMessage() => HasError ? Messages.ToString(MessageType.Error)! : string.Empty;
 }
 
 /// <summary>
@@ -56,8 +66,7 @@ public class Result<T> : Result
 {
     public T? Value { get; }
 
-    public override string GetErrorMessage() => HasError ? ErrorMessage! : string.Empty;
-
+    
     [MemberNotNullWhen(true, nameof(Value))]
     public bool HasValue => Value is not null;
 
@@ -66,100 +75,41 @@ public class Result<T> : Result
     {
         Value = value;
     }
+    
+    public Result(bool success, T? value, MessagesContainer? message)
+        : base(success, message)
+    {
+        Value = value;
+    }
 
-    public static Result<T> NotImplemented()
-        => Result<T>.Failure("Not Implemented");
+    public static Result<T> NotImplemented(string?  context =null)
+        => Result<T>.Failure($"{(string.IsNullOrWhiteSpace(context)? "" : context + "- ")}Not Implemented");
     
     public static Result<T> SuccessResult(T value)
-        => new(true, value, null);
+        => new(true, value, new MessagesContainer());
 
     public static Result<T> Failure(string errorMessage)
         => new(false, default, string.IsNullOrWhiteSpace(errorMessage) ? "Unknown error" : errorMessage);
 
+    public static Result<T> Failure(MessagesContainer message)
+        => new(false, default, message);
+    
     public bool TryGetValue([NotNullWhen(true)] out T? value)
     {
         value = Success ? Value : default;
         return Success && Value is not null;
     }
 
-    public void Deconstruct(out bool success, out T? value, out string? error)
-    {
-        success = Success;
-        value = Value;
-        error = ErrorMessage;
-    }
+   
 
     public override string ToString()
-        => Success ? $"Success: {Value}" : $"Failure: {ErrorMessage ?? "Unknown Error"}";
-
-
+        => Success ? $"Success: {Value}" : $"Failure: {Messages.ToString() ?? "Unknown Error"}";
+    
+    public MessagesContainer GetMessages()
+    {
+        return Messages;
+    }
 }
 
-// public class Result : IResult
-// {
-//     public bool Success { get; }
-//     public string? ErrorMessage { get; }
-//     public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
-//
-//     protected Result(bool success, string? errorMessage = null)
-//     {
-//         Success = success;
-//         ErrorMessage = errorMessage;
-//     }
-//
-//     public static Result SuccessResult() => new(true);
-//     public static Result Failure(string errorMessage) => new(false, errorMessage);
-//
-//     public override string ToString() =>
-//         Success ? "Success" : $"Failure: {ErrorMessage ?? "Unknown Error"}";
-// }
-//
-//
-// public class Result<T> : IResult
-// {
-//     public T? Value { get; }
-//     
-//     public bool Success { get; }
-//    
-//     public string? ErrorMessage { get; }
-//
-//     public bool HasError => !string.IsNullOrWhiteSpace(ErrorMessage);
-//
-//     public string GetMessage() => HasError ? ErrorMessage! : string.Empty;
-//     // If you want: success implies non-null Value for ref types
-//     [MemberNotNullWhen(true, nameof(Value))]
-//     public bool HasValue => Value is not null;
-//
-//
-//
-//     private Result(bool success, T? value, string? errorMessage)
-//     {
-//         Success = success;
-//         Value = value;
-//         ErrorMessage = errorMessage;
-//     }
-//
-//     public static Result<T> SuccessResult(T value)
-//         => new(true, value, null);
-//
-//     public static Result<T> Failure(string errorMessage)
-//         => new(false, default, string.IsNullOrWhiteSpace(errorMessage) ? "Unknown error" : errorMessage);
-//
-//     public bool TryGetValue([NotNullWhen(true)] out T? value)
-//     {
-//         value = Success ? Value : default;
-//         return Success && Value is not null;
-//     }
-//
-//     public void Deconstruct(out bool success, out T? value, out string? error)
-//     {
-//         success = Success;
-//         value = Value;
-//         error = ErrorMessage;
-//     }
-//
-//     public override string ToString()
-//         => Success ? $"Success: {Value}" : $"Failure: {ErrorMessage ?? "Unknown Error"}";
-// }
 
 

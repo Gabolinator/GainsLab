@@ -90,7 +90,7 @@ public class EquipmentIdbHandler : IdbContextHandler<EquipmentRecord>
 
         if (!descriptorResult.Success || descriptorResult.Value is not DescriptorRecord ensuredDescriptor)
         {
-            var reason = descriptorResult.ErrorMessage ?? "Descriptor persistence failed";
+            var reason = descriptorResult.GetErrorMessage() ?? "Descriptor persistence failed";
             throw new InvalidOperationException($"Failed to ensure descriptor for equipment {Record.Iguid}: {reason}");
         }
 

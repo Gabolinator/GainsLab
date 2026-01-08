@@ -10,8 +10,10 @@ namespace GainsLab.Api.Extensions;
 
 public static class DIExtensions
 {
-    public static void ConfigureServicesPreDBContext(this IServiceCollection services, ILogger logger)
+    public static void ConfigureServicesPreDBContext(this IServiceCollection services, ILogger logger, IClock clock)
     {
+        services.AddSingleton<ILogger>(logger);
+        services.AddSingleton<IClock>(clock);
         AddSyncServices(services);
         services.AddControllers();
         services.AddEndpointsApiExplorer();
@@ -20,9 +22,6 @@ public static class DIExtensions
     
     public static void ConfigureServicesPostDBContext(this IServiceCollection services, ILogger logger, IClock clock)
     {
-        services.AddSingleton<ILogger>(logger);
-        services.AddSingleton<IClock>(clock);
-
        
         AddEntitiesRepositories(services);
         

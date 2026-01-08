@@ -6,6 +6,8 @@ using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.RequestDto;
 using GainsLab.Contracts.Dtos.SyncDto;
+using GainsLab.Contracts.Dtos.UpdateDto;
+using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Interface;
 using GainsLab.Contracts.SyncService;
 using GainsLab.Domain;
@@ -166,7 +168,7 @@ public class HttpDataProvider:
     public Task<Result<DescriptorPostDTO>> CreateDescriptorAsync(DescriptorPostDTO entity, CancellationToken ct)
         => Descriptors.CreateDescriptorAsync(entity, ct);
 
-    public Task<Result<DescriptorPostDTO>> UpdateDescriptorAsync(DescriptorPostDTO entity, CancellationToken ct)
+    public Task<Result<DescriptorUpdateOutcome>> UpdateDescriptorAsync(DescriptorUpdateRequest entity, CancellationToken ct)
         => Descriptors.UpdateDescriptorAsync(entity, ct);
 
 
@@ -185,10 +187,10 @@ public class HttpDataProvider:
     public Task<Result<EquipmentPostDTO>> CreateEquipmentAsync(EquipmentPostDTO entity, CancellationToken ct)
         => Equipments.CreateEquipmentAsync(entity, ct);
 
-    public Task<Result<EquipmentPostDTO>> UpdateEquipmentAsync(EquipmentPostDTO entity, CancellationToken ct)
-        => Equipments.UpdateEquipmentAsync(entity, ct);
+    public Task<Result<EquipmentUpdateOutcome>> UpdateEquipmentAsync(EquipmentUpdateRequest updateRequest, CancellationToken ct)
+        => Equipments.UpdateEquipmentAsync(updateRequest, ct);
 
-    public Task<Result<EquipmentGetDTO>> DeleteEquipmentAsync(EquipmentGetDTO entity, CancellationToken ct)
+    public Task<Result<EquipmentGetDTO>> DeleteEquipmentAsync(EquipmentRequestDTO entity, CancellationToken ct)
         => Equipments.DeleteEquipmentAsync(entity, ct);
     
     #endregion

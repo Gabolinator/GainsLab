@@ -152,7 +152,7 @@ public class DataRepository : ILocalRepository
 
                 if (!handlerResult.Success || handlerResult.Value is null)
                 {
-                    var msg = $"Handler for {type} returned failure: {handlerResult.ErrorMessage ?? "unknown error"}.";
+                    var msg = $"Handler for {type} returned failure: {handlerResult.GetErrorMessage() ?? "unknown error"}.";
                     _logger.LogWarning(nameof(DataRepository), msg);
                     errors.Add(msg);
                     continue;
@@ -235,11 +235,7 @@ public class DataRepository : ILocalRepository
         throw new NotImplementedException();
     }
 
-
-    public Task<ResultList<TEntity>> GetAllComponentsOfTypeAsync<TEntity>()
-    {
-        throw new NotImplementedException();
-    }
+    
 
     /// <inheritdoc />
     public async Task<Result<TEntity>> SaveComponentAsync<TEntity>(TEntity component)

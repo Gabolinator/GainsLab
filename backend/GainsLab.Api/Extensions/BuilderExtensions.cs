@@ -28,7 +28,7 @@ public static class BuilderExtensions
        IConfiguration configuration =  builder.Configuration;
         
        //controller , swagger, etc
-        services.ConfigureServicesPreDBContext(logger);
+        services.ConfigureServicesPreDBContext(logger, clock);
         
 
         var connectionString = configuration.GetConnectionString("GainsLabDb");
