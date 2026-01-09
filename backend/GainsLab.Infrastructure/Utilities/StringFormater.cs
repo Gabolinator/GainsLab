@@ -12,7 +12,7 @@ public static class StringFormater
         return text.Trim(trimChars);
     }
 
-    public static string RemoveUnwantedChar(string text, params char[] args)
+    public static string RemoveUnwantedChar(string? text, params char[] args)
     {
         if (string.IsNullOrEmpty(text))
             return string.Empty;

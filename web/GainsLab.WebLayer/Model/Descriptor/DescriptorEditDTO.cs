@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Xml;
 using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
+using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Domain;
 
-namespace GainsLab.WebLayer.Model;
+namespace GainsLab.WebLayer.Model.Descriptor;
 
 public class DescriptorEditDTO
 {

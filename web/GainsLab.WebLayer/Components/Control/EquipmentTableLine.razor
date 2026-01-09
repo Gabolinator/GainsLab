@@ -1,26 +1,33 @@
 ﻿@using GainsLab.WebLayer.Model
+@rendermode InteractiveServer
 
-
-
-    <td>@Index</td>
-    <td>@Name</td>
-    <td>@Description</td>
-    <td>@UpdatedAtUtc</td>
-    <td><LinkComponent Link ="Link"></LinkComponent></td>
-                    
-
+<td>@Index</td>
+<td>@Name</td>
+<td>@Description</td>
+<td>@UpdatedAtUtc</td>
+<td><LinkComponent Link="EditLink"></LinkComponent></td>
+<td>
+    <button class="btn btn-link p-0 text-danger" type="button" @onclick="OnDeleteClicked">
+        Delete
+    </button>
+</td>
 
 @code {
-    [Parameter]
-    public int Index { get; set; } = 0;
-    [Parameter]
-    public string Name { get; set; } = "Unknown";
-    [Parameter]
-    public string Description { get; set; } = "Description";
-    [Parameter]
-    public string UpdatedAtUtc { get; set; } = "UpdatedAtUtc";
-    [Parameter]
-    public Link? Link { get; set; } = null;
-    
-    
+    [Parameter] public int Index { get; set; } = 0;
+    [Parameter] public string Name { get; set; } = "Unknown";
+    [Parameter] public string Description { get; set; } = "Description";
+    [Parameter] public string UpdatedAtUtc { get; set; } = "UpdatedAtUtc";
+    [Parameter] public Link? EditLink { get; set; }
+    [Parameter] public Guid EquipmentId { get; set; } = Guid.Empty;
+    [Parameter] public EventCallback<Guid> DeleteRequested { get; set; }
+
+    private async Task OnDeleteClicked()
+    {
+        if (!DeleteRequested.HasDelegate || EquipmentId == Guid.Empty)
+        {
+            return;
+        }
+
+        await DeleteRequested.InvokeAsync(EquipmentId);
+    }
 }

@@ -1,4 +1,4 @@
-﻿namespace GainsLab.Contracts.Dtos.UpdateDto;
+﻿namespace GainsLab.Contracts.Dtos.UpdateDto.Request;
 
 public sealed record DescriptorUpdateRequest( 
     DescriptorUpdateDTO Descriptor,

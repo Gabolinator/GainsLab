@@ -89,7 +89,17 @@ public class EquipmentController : ControllerBase
         return  APIResultValidation.ValidateResult<EquipmentUpdateOutcome>(this,result);
     
     }
+    
+   
 
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteEquipment(Guid id, CancellationToken ct = default)
+    {
+        if (id == Guid.Empty) return BadRequest();
+
+        var result = await _repo.DeleteAsync(id, ct);
+        return APIResultValidation.ValidateResult<EquipmentGetDTO>(this, result);
+    }
 
     private string GetActionName() => nameof(GetEquipment);
     

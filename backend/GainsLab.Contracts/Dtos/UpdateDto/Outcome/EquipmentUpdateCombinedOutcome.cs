@@ -2,7 +2,7 @@
 
 namespace GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 
-public sealed record EquipmentCombinedOutcome(
+public sealed record EquipmentUpdateCombinedOutcome(
     EquipmentUpdateOutcome? Equipment,
     DescriptorUpdateOutcome? DescriptorUpdateOutcome,
     IMessagesContainer? Message);

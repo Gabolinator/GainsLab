@@ -20,7 +20,7 @@ public interface IResult
 public class Result : IResult
 {
     public bool Success { get;}
-    public MessagesContainer Messages { get; } = new MessagesContainer();
+    public MessagesContainer Messages { get; set; } = new MessagesContainer();
 
     public bool HasError => Messages.HasErrors;
 
@@ -51,6 +51,9 @@ public class Result : IResult
     public static Result SuccessResult() => new(true, new MessagesContainer());
     public static Result Failure(string errorMessage)
         => new(false, string.IsNullOrWhiteSpace(errorMessage) ? "Unknown error" : errorMessage);
+    
+    public static Result Failure(MessagesContainer message)
+        => new(false, message);
 
     public override string ToString() =>
         Success ? "Success" : $"Failure: {GetErrorMessage() ?? "Unknown Error"}";

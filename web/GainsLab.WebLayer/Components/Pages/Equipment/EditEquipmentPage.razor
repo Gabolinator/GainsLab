@@ -4,13 +4,15 @@
 @using GainsLab.Application.Interfaces.DataManagement.Gateway
 @using GainsLab.Application.Results
 @using GainsLab.Contracts
+@using GainsLab.Contracts.Dtos.Delete.Outcome
 @using GainsLab.Contracts.Dtos.GetDto
-@using GainsLab.Contracts.Dtos.UpdateDto
-@using GainsLab.Contracts.Dtos.UpdateDto.Outcome
+@using GainsLab.Contracts.Dtos.ID
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Utilities
 @using GainsLab.WebLayer.Components.Control
 @using GainsLab.WebLayer.Model
+@using GainsLab.WebLayer.Model.Descriptor
+@using GainsLab.WebLayer.Model.Equipment
 
 
 
@@ -41,13 +43,22 @@
           {
               <button class="btn btn-primary" type="submit">Update</button>
           }
-          
+
+          <br/>
           <br/> <a href="/equipments" class="btn btn-primary">Close</a>
-            <br/>
+          <br/>
+          
+          <br/>
+       
             
         </EditForm>
     }
-   
+    <br/>
+    <br/>  @if (Equipment != null)
+           {
+               <button class="btn btn-primary" @onclick="Delete">Delete</button>
+           }
+
     <MessageComponent Messages="@Messages"></MessageComponent>
 
 </p>
@@ -94,7 +105,7 @@
     
     protected override async Task OnParametersSetAsync()
     {
-        Logger.Log(nameof(EditEquipmentPage),$"On Parameter set");
+       // Logger.Log(nameof(EditEquipmentPage),$"On Parameter set");
 
         
         await base.OnParametersSetAsync();
@@ -134,7 +145,7 @@
         
         BuildEditContext();
 
-        Messages.AddInfo($"Equipments Names : {string.Join(",", ExistingEquipmentNames)}");
+       // Messages.AddInfo($"Equipments Names : {string.Join(",", ExistingEquipmentNames)}");
         
         
     }
@@ -276,6 +287,35 @@
     }
 
 
-  
-   
+    private async Task Delete()
+    {
+        
+        
+        Messages ??= new MessagesContainer();
+        Messages.ClearAll();
+        if (Equipment == null || Equipment.Id == Guid.Empty)
+        {
+            Messages.AddWarning("Invalid Equipment Id");
+            return;
+        }
+        
+        
+        //show a toast style window , you sure you want to ? 
+
+        Result<EquipmentDeleteOutcome> outcome = await Repo.DeleteEquipmentAsync(new EquipmentEntityId(Equipment.Id));
+        if (outcome.Success || outcome.Value is not { Outcome: DeleteOutcome.Deleted })
+        {
+            Messages.Append(outcome.Messages);
+            return;
+        }
+        
+        Messages.AddInfo($"Equipment {outcome.Value.Id} Deleted");
+        
+        
+
+
+    }
+    
+    
+
 }

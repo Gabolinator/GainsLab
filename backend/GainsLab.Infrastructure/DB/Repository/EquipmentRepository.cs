@@ -187,13 +187,20 @@ public class EquipmentRepository : IEquipmentRepository
                     .Include(equipmentRecord => equipmentRecord.Descriptor)
                     .FirstOrDefaultAsync(d => d.GUID == id, ct);
         
+            
+            _log.Log(nameof(EquipmentRepository),$"Trying to delete equipment - {id}");
+            
             if (existing is null) return APIResult<EquipmentGetDTO>.NotFound($"Equipment {id} not found for deletion");
+            _log.Log(nameof(EquipmentRepository),$"Equipment - {id} found");
 
-            //existing.IsDeleted = true;
+            
+            existing.IsDeleted = true;
+            existing.UpdatedAtUtc = _clock.UtcNow;
+
             var dto = existing.ToGetDTO();
-
-            _db.Equipments.Remove(existing);
         
+            _db.Remove(existing);
+            
             await _db.SaveChangesAsync(ct).ConfigureAwait(false);
         
             return APIResult<EquipmentGetDTO>.Deleted(dto!);

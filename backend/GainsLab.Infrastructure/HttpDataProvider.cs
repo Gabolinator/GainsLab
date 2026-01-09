@@ -2,12 +2,15 @@
 using GainsLab.Application.Interfaces.DataManagement.Provider;
 using GainsLab.Application.Interfaces.Sync;
 using GainsLab.Application.Results;
+using GainsLab.Contracts.Dtos.Delete.Outcome;
 using GainsLab.Contracts.Dtos.GetDto;
+using GainsLab.Contracts.Dtos.ID;
 using GainsLab.Contracts.Dtos.PostDto;
-using GainsLab.Contracts.Dtos.RequestDto;
+using GainsLab.Contracts.Dtos.PostDto.Outcome;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Contracts.Interface;
 using GainsLab.Contracts.SyncService;
 using GainsLab.Domain;
@@ -165,7 +168,7 @@ public class HttpDataProvider:
     public Task<Result<DescriptorGetDTO>> GetDescriptorAsync(DescriptorGetDTO entity, CancellationToken ct)
         => Descriptors.GetDescriptorAsync(entity, ct);
 
-    public Task<Result<DescriptorPostDTO>> CreateDescriptorAsync(DescriptorPostDTO entity, CancellationToken ct)
+    public Task<Result<DescriptorCreateOutcome>> CreateDescriptorAsync(DescriptorPostDTO entity, CancellationToken ct)
         => Descriptors.CreateDescriptorAsync(entity, ct);
 
     public Task<Result<DescriptorUpdateOutcome>> UpdateDescriptorAsync(DescriptorUpdateRequest entity, CancellationToken ct)
@@ -179,18 +182,16 @@ public class HttpDataProvider:
     public Task<Result<ISyncPage<ISyncDto>>> PullEquipmentPageAsync(ISyncCursor cursor, int take, CancellationToken ct)
         => Equipments.PullEquipmentPageAsync(cursor, take, ct);
 
-    public Task<Result<EquipmentGetDTO>> GetEquipmentAsync(EquipmentRequestDTO entity, CancellationToken ct)
+    public Task<Result<EquipmentGetDTO>> GetEquipmentAsync(EquipmentEntityId entity, CancellationToken ct)
         => Equipments.GetEquipmentAsync(entity, ct);
-
-       
-
-    public Task<Result<EquipmentPostDTO>> CreateEquipmentAsync(EquipmentPostDTO entity, CancellationToken ct)
+    
+    public Task<Result<EquipmentCreateOutcome>> CreateEquipmentAsync(EquipmentPostDTO entity, CancellationToken ct)
         => Equipments.CreateEquipmentAsync(entity, ct);
 
     public Task<Result<EquipmentUpdateOutcome>> UpdateEquipmentAsync(EquipmentUpdateRequest updateRequest, CancellationToken ct)
         => Equipments.UpdateEquipmentAsync(updateRequest, ct);
 
-    public Task<Result<EquipmentGetDTO>> DeleteEquipmentAsync(EquipmentRequestDTO entity, CancellationToken ct)
+    public Task<Result<EquipmentDeleteOutcome>> DeleteEquipmentAsync(EquipmentEntityId entity, CancellationToken ct)
         => Equipments.DeleteEquipmentAsync(entity, ct);
     
     #endregion

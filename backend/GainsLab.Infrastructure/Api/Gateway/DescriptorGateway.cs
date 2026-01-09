@@ -2,9 +2,12 @@
 using GainsLab.Application.Interfaces.DataManagement.Gateway;
 using GainsLab.Application.Interfaces.DataManagement.Provider;
 using GainsLab.Application.Results;
+using GainsLab.Contracts.Dtos.PostDto;
+using GainsLab.Contracts.Dtos.PostDto.Outcome;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Contracts.SyncService.Mapper;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.SyncService;
@@ -74,7 +77,10 @@ public class DescriptorGateway : IDescriptorGateway
 
     public Task<Result<DescriptorUpdateOutcome>> UpdateDescriptorAsync(DescriptorUpdateRequest updateDescriptor)
         => _provider.UpdateDescriptorAsync(updateDescriptor, default);
-    
+
+    public Task<Result<DescriptorCreateOutcome>> CreateDescriptorAsync(DescriptorPostDTO descriptorPostDto)
+        => _provider.CreateDescriptorAsync(descriptorPostDto, default);
+
 
     public async Task<Result<IReadOnlyList<DescriptorSyncDTO>>> GetAllDescriptorSyncDtoAsync()
     {

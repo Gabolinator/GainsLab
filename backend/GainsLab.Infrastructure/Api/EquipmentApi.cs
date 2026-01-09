@@ -1,12 +1,15 @@
 ﻿using System.Net.Http.Json;
 using GainsLab.Application.Results;
 using GainsLab.Contracts;
+using GainsLab.Contracts.Dtos.Delete.Outcome;
 using GainsLab.Contracts.Dtos.GetDto;
+using GainsLab.Contracts.Dtos.ID;
 using GainsLab.Contracts.Dtos.PostDto;
-using GainsLab.Contracts.Dtos.RequestDto;
+using GainsLab.Contracts.Dtos.PostDto.Outcome;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Contracts.Interface;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.Api.Interface;
@@ -73,8 +76,9 @@ public class EquipmentApi :IEquipmentApi
             return Result<ISyncPage<ISyncDto>>.Failure(message);
         }
     }
+    
 
-    public async Task<Result<EquipmentGetDTO>> GetEquipmentAsync(EquipmentRequestDTO requestDto, CancellationToken ct)
+    public async Task<Result<EquipmentGetDTO>> GetEquipmentAsync(EquipmentEntityId requestDto, CancellationToken ct)
     {
         if (!await NetworkChecker.HasInternetAsync(_logger))
         {
@@ -120,9 +124,64 @@ public class EquipmentApi :IEquipmentApi
         return Result<EquipmentGetDTO>.Failure("No Id or Name to retrieve the Equipment");
     }
 
-    public Task<Result<EquipmentPostDTO>> CreateEquipmentAsync(EquipmentPostDTO entity, CancellationToken ct)
+    public async Task<Result<EquipmentCreateOutcome>> CreateEquipmentAsync(EquipmentPostDTO entity, CancellationToken ct)
     {
-        throw new NotImplementedException();
+            var id = entity.Id;
+        if (id == Guid.Empty)
+        {
+            return  Result<EquipmentCreateOutcome>.Failure("Did not create Equipment - ID invalid");
+        }
+        
+        if (string.IsNullOrWhiteSpace(entity.Name))
+        {
+            return  Result<EquipmentCreateOutcome>.Failure("Did not create Equipment - name empty");
+        }
+        
+        if (!await NetworkChecker.HasInternetAsync(_logger))
+        {
+            var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
+            _logger.LogWarning(nameof(EquipmentApi), message);
+            return Result<EquipmentCreateOutcome>.Failure(message);
+        }
+
+        try
+        {
+            _logger.Log(nameof(EquipmentApi), $"Try Post Equipment - id {id} - {entity.Name}" );
+
+            
+            var url = $"/equipments/";
+            using var res = await _http.PostAsync(url,JsonContent.Create(entity) ,ct);
+            res.EnsureSuccessStatusCode();
+        
+            _logger.Log(nameof(EquipmentApi), $"Post Equipment - id {id} - {res.Content}" );
+
+            var payload = await res.Content.ReadFromJsonAsync<EquipmentGetDTO>(cancellationToken: ct);
+            
+            if (payload == null)
+            {
+                return  Result<EquipmentCreateOutcome>.Failure(res.ReasonPhrase!);
+            }
+
+            
+            return Result<EquipmentCreateOutcome>.SuccessResult(new EquipmentCreateOutcome(CreateOutcome.Created,payload));
+            
+        }
+        catch (OperationCanceledException)
+        {
+            var message =
+                $"Remote post for Equipment failed because operation vas cancelled";
+            _logger.LogError(nameof(EquipmentApi), message);
+            return  Result<EquipmentCreateOutcome>.Failure(message);
+        }
+        catch (Exception e)
+        {
+            var message =
+                $"Remote patch for Equipment failed while contacting {_http.DescribeBaseAddress()}: {e.GetBaseException().Message}";
+            _logger.LogError(nameof(EquipmentApi), message);
+            return  Result<EquipmentCreateOutcome>.Failure(message);
+        }
+        
+        
     }
 
     public async Task<Result<EquipmentUpdateOutcome>> UpdateEquipmentAsync(EquipmentUpdateRequest request, CancellationToken ct)
@@ -186,8 +245,60 @@ public class EquipmentApi :IEquipmentApi
         
     }
 
-    public Task<Result<EquipmentGetDTO>> DeleteEquipmentAsync(EquipmentRequestDTO entity, CancellationToken ct)
+    public async Task<Result<EquipmentDeleteOutcome>> DeleteEquipmentAsync(EquipmentEntityId entity, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        if (!entity.IsValid())
+        {
+            return Result<EquipmentDeleteOutcome>.Failure("Invalid entity ID");
+        }
+
+        if (!entity.IsIdValid())
+        {
+            //to do branch to use name , but not yet implemented
+            return Result<EquipmentDeleteOutcome>.Failure("Invalid entity ID");
+        }
+        
+        if (!await NetworkChecker.HasInternetAsync(_logger))
+        {
+            var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
+            _logger.LogWarning(nameof(EquipmentApi), message);
+            return Result<EquipmentDeleteOutcome>.Failure(message);
+        }
+
+        try
+        {
+            var id= entity.Id!.Value;
+            _logger.Log(nameof(EquipmentApi), $"Try Delete Equipment - id {id}" );
+
+            
+            var url = $"/equipments/{Uri.EscapeDataString(id.ToString()!)}";
+            using var res = await _http.DeleteAsync(url, ct);
+            res.EnsureSuccessStatusCode();
+            
+            
+            _logger.Log(nameof(EquipmentApi), $"Delete Equipment - id {id} - {res.Content}" );
+
+            
+            return Result<EquipmentDeleteOutcome>.SuccessResult(new EquipmentDeleteOutcome(new EquipmentEntityId(id),DeleteOutcome.Deleted));
+        }
+        
+        
+        catch (OperationCanceledException)
+        {
+            var message =
+                $"Remote Delete for Equipment failed because operation vas cancelled";
+            _logger.LogError(nameof(EquipmentApi), message);
+            return  Result<EquipmentDeleteOutcome>.Failure(message);
+        }
+        
+        catch (Exception e)
+        {
+            var message =
+                $"Remote Delete for Equipment failed while contacting {_http.DescribeBaseAddress()}: {e.GetBaseException().Message}";
+            _logger.LogError(nameof(EquipmentApi), message);
+            return  Result<EquipmentDeleteOutcome>.Failure(message);
+        }
+
+        
     }
 }

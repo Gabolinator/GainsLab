@@ -14,9 +14,8 @@ public record EquipmentPostDTO
     [Required]
     [StringLength(256, MinimumLength = 2)]
     public string Name { get; init; } = string.Empty;
-
-    [Required]
-    public DescriptorPostDTO Descriptor { get; init; } = default!;
+    
+    public DescriptorPostDTO? Descriptor { get; set; } = null;
 
     [EnumDataType(typeof(DataAuthority))]
     public DataAuthority Authority { get; init; } = DataAuthority.Bidirectional;

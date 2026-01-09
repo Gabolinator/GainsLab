@@ -1,11 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.Data;
 using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
+using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Domain;
+using GainsLab.WebLayer.Model.Descriptor;
 
-namespace GainsLab.WebLayer.Model;
+namespace GainsLab.WebLayer.Model.Equipment;
 
 //used to gather the data from a form 
 public class EquipmentEditFormDTO

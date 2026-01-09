@@ -17,6 +17,6 @@ public interface IEquipmentRepository
     Task<APIResult<EquipmentPutDTO>> PutAsync(Guid id, EquipmentPutDTO payload, CancellationToken ct);
     Task<APIResult<EquipmentUpdateOutcome>> PatchAsync(Guid id, EquipmentUpdateDTO payload, CancellationToken ct);
     Task<APIResult<EquipmentGetDTO>> DeleteAsync(Guid id, CancellationToken ct);
-    Task<APIResult<EquipmentRecord>> CreateAsync(EquipmentRecord entity, CancellationToken ct);
+   
 
 }

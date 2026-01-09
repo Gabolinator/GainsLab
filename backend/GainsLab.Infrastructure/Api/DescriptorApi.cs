@@ -3,9 +3,10 @@ using GainsLab.Application.Results;
 using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
+using GainsLab.Contracts.Dtos.PostDto.Outcome;
 using GainsLab.Contracts.Dtos.SyncDto;
-using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
 using GainsLab.Domain.Interfaces;
@@ -82,9 +83,63 @@ public class DescriptorApi : IDescriptorApi
         throw new NotImplementedException();
     }
 
-    public Task<Result<DescriptorPostDTO>> CreateDescriptorAsync(DescriptorPostDTO entity, CancellationToken ct)
+    public async Task<Result<DescriptorCreateOutcome>> CreateDescriptorAsync(DescriptorPostDTO entity, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        var id = entity.Id;
+        if (id == Guid.Empty)
+        {
+            return  Result<DescriptorCreateOutcome>.Failure("Did not create descriptor - ID invalid");
+        }
+        
+        if (string.IsNullOrWhiteSpace(entity.DescriptionContent))
+        {
+            return  Result<DescriptorCreateOutcome>.Failure("Did not create descriptor - content empty");
+        }
+        
+        if (!await NetworkChecker.HasInternetAsync(_logger))
+        {
+            var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
+            _logger.LogWarning(nameof(DescriptorApi), message);
+            return Result<DescriptorCreateOutcome>.Failure(message);
+        }
+
+        try
+        {
+            _logger.Log(nameof(DescriptorApi), $"Try Post Descriptor - id {id} - {entity.DescriptionContent}" );
+
+            
+            var url = $"/descriptions/";
+            using var res = await _http.PostAsync(url,JsonContent.Create(entity) ,ct);
+            res.EnsureSuccessStatusCode();
+        
+            _logger.Log(nameof(DescriptorApi), $"Patch Descriptor - id {id} - {res.Content}" );
+
+            var payload = await res.Content.ReadFromJsonAsync<DescriptorGetDTO>(cancellationToken: ct);
+            
+            if (payload == null)
+            {
+                return  Result<DescriptorCreateOutcome>.Failure(res.ReasonPhrase!);
+            }
+
+            
+            return Result<DescriptorCreateOutcome>.SuccessResult(new DescriptorCreateOutcome(CreateOutcome.Created,payload));
+            
+        }
+        catch (OperationCanceledException)
+        {
+            var message =
+                $"Remote post for Descriptor failed because operation vas cancelled";
+            _logger.LogError(nameof(DescriptorApi), message);
+            return  Result<DescriptorCreateOutcome>.Failure(message);
+        }
+        catch (Exception e)
+        {
+            var message =
+                $"Remote patch for Descriptor failed while contacting {_http.DescribeBaseAddress()}: {e.GetBaseException().Message}";
+            _logger.LogError(nameof(DescriptorApi), message);
+            return  Result<DescriptorCreateOutcome>.Failure(message);
+        }
+        
     }
 
     public async Task<Result<DescriptorUpdateOutcome>> UpdateDescriptorAsync(DescriptorUpdateRequest request, CancellationToken ct)

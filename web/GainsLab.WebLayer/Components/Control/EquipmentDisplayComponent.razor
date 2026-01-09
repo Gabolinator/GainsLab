@@ -1,9 +1,12 @@
 ﻿
+@rendermode InteractiveServer
+@using System.Linq
 @using GainsLab.Application.Interfaces.DataManagement.Gateway
 @using GainsLab.Application.Results
+@using GainsLab.Contracts
+@using GainsLab.Contracts.Dtos.Delete.Outcome
 @using GainsLab.Contracts.Dtos.GetDto
-
-
+@using GainsLab.Contracts.Dtos.ID
 @using GainsLab.Domain.Interfaces
 @using GainsLab.WebLayer.Model
 
@@ -43,11 +46,17 @@
             <tbody>
             @foreach (var eq in _equipments)
             {
-               
-                <tr>
-            <EquipmentTableLine Index="i" Name="@eq.Name" Description="@GetDescription(eq)"  UpdatedAtUtc="@eq.UpdatedAtUtc.ToString()" Link="@GetEditLink(eq)"></EquipmentTableLine>
 
-            
+                <tr>
+                    <EquipmentTableLine Index="i"
+                                        Name="@eq.Name"
+                                        Description="@GetDescription(eq)"
+                                        UpdatedAtUtc="@eq.UpdatedAtUtc.ToString()"
+                                        EditLink="@GetEditLink(eq)"
+                                        EquipmentId="@eq.Id"
+                                        DeleteRequested="DeleteEquipmentAsync">
+                    </EquipmentTableLine>
+
                 </tr>
                 i++;
             }
@@ -101,6 +110,32 @@
         return eq.Descriptor?.content ?? "Description not found";
     }
 
-    private Link? GetEditLink(EquipmentGetDTO eq) =>new Link{Text = $" Edit: {eq.Name}", Page = $@"equipments/{eq.Id}"};
-   
+    private Link? GetEditLink(EquipmentGetDTO eq) => new Link { Text = $" Edit: {eq.Name}", Page = $@"equipments/{eq.Id}" };
+
+    private async Task DeleteEquipmentAsync(Guid equipmentId)
+    {
+        Logger.Log(nameof(EquipmentDisplayComponent), $"Deleting equipment {equipmentId}");
+        Result<EquipmentDeleteOutcome> result = await Repo.DeleteEquipmentAsync(new EquipmentEntityId(equipmentId));
+        if (!result.Success || result.Value is not { Outcome: DeleteOutcome.Deleted })
+        {
+            _error = true;
+            _errorMessage = $"Unable to delete equipment {equipmentId}: {result.GetErrorMessage()}";
+            Logger.LogError(nameof(EquipmentDisplayComponent), _errorMessage);
+
+            return;
+        }
+
+        _error = false;
+        _errorMessage = null;
+
+        if (_equipments is null)
+        {
+            return;
+        }
+
+        Logger.Log(nameof(EquipmentDisplayComponent), $"Deleted equipment {equipmentId}");
+
+        
+        _equipments = _equipments.Where(eq => eq.Id != equipmentId).ToArray();
+    }
 }
