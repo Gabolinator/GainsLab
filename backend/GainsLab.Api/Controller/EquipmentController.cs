@@ -5,6 +5,7 @@ using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
+using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Infrastructure.SyncService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -85,7 +86,7 @@ public class EquipmentController : ControllerBase
         if(payload == null|| id == Guid.Empty)  return BadRequest();
         
         var result = await _repo.PatchAsync(id,payload,ct);
-        return  APIResultValidation.ValidateResult< EquipmentUpdateDTO>(this,result);
+        return  APIResultValidation.ValidateResult<EquipmentUpdateOutcome>(this,result);
     
     }
 

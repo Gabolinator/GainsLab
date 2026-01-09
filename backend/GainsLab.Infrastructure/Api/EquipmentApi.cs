@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using GainsLab.Application.Results;
+using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.RequestDto;
@@ -126,7 +127,63 @@ public class EquipmentApi :IEquipmentApi
 
     public async Task<Result<EquipmentUpdateOutcome>> UpdateEquipmentAsync(EquipmentUpdateRequest request, CancellationToken ct)
     {
-     return  Result<EquipmentUpdateOutcome>.NotImplemented(nameof(UpdateEquipmentAsync));
+        if (request.UpdateRequest == UpdateRequest.DontUpdate)
+        {
+            return  Result<EquipmentUpdateOutcome>.Failure("Did not update Equipment - Marked as DontUpdate");
+        }
+
+        var id = request.CorrelationId;
+        
+        if (id == Guid.Empty)
+        {
+            return  Result<EquipmentUpdateOutcome>.Failure("Did not update Equipment - ID invalid");
+        }
+        
+        if (!await NetworkChecker.HasInternetAsync(_logger))
+        {
+            var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
+            _logger.LogWarning(nameof(EquipmentApi), message);
+            return Result<EquipmentUpdateOutcome>.Failure(message);
+        }
+
+        try
+        {
+            _logger.Log(nameof(EquipmentApi), $"Try Patch Equipment - id {id} - {request.Equipment.Name}" );
+
+            
+            var url = $"/equipments/{Uri.EscapeDataString(id.ToString()!)}";
+            using var res = await _http.PatchAsync(url, JsonContent.Create(request.Equipment), ct);
+            res.EnsureSuccessStatusCode();
+            
+            _logger.Log(nameof(EquipmentApi), $"Patch Equipment - id {id} - {res.Content}" );
+
+            var payload = await res.Content.ReadFromJsonAsync<EquipmentUpdateOutcome>(cancellationToken: ct);
+            
+            if (payload == null)
+            {
+                return  Result<EquipmentUpdateOutcome>.Failure(res.ReasonPhrase!);
+            }
+
+            return Result<EquipmentUpdateOutcome>.SuccessResult(payload);
+        }
+        
+        
+        catch (OperationCanceledException)
+        {
+            var message =
+                $"Remote patch for Equipment failed because operation vas cancelled";
+            _logger.LogError(nameof(EquipmentApi), message);
+            return  Result<EquipmentUpdateOutcome>.Failure(message);
+        }
+        
+        catch (Exception e)
+        {
+            var message =
+                $"Remote patch for Equipment failed while contacting {_http.DescribeBaseAddress()}: {e.GetBaseException().Message}";
+            _logger.LogError(nameof(EquipmentApi), message);
+            return  Result<EquipmentUpdateOutcome>.Failure(message);
+        }
+        
     }
 
     public Task<Result<EquipmentGetDTO>> DeleteEquipmentAsync(EquipmentRequestDTO entity, CancellationToken ct)

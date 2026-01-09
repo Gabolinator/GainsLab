@@ -9,6 +9,7 @@ using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
+using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
 using Microsoft.EntityFrameworkCore;
@@ -148,7 +149,7 @@ public class EquipmentRepository : IEquipmentRepository
         }
     }
 
-    public async Task<APIResult<EquipmentUpdateDTO>> PatchAsync(Guid id, EquipmentUpdateDTO payload, CancellationToken ct)
+    public async Task<APIResult<EquipmentUpdateOutcome>> PatchAsync(Guid id, EquipmentUpdateDTO payload, CancellationToken ct)
     {
         try
         {
@@ -158,20 +159,20 @@ public class EquipmentRepository : IEquipmentRepository
                     .FirstOrDefaultAsync(d => d.GUID == id  && !d.IsDeleted, ct);
            
             if(equipment == null) 
-                return APIResult<EquipmentUpdateDTO>.NotUpdated("Not found for update");
+                return APIResult<EquipmentUpdateOutcome>.NotUpdated("Not found for update");
 
 
             if (!equipment.TryUpdate(payload, _clock))
-                return APIResult<EquipmentUpdateDTO>.NothingChanged("Nothing changed");
+                return APIResult<EquipmentUpdateOutcome>.NothingChanged("Nothing changed");
             
             
             await  _db.SaveChangesAsync(ct);
-            return APIResult<EquipmentUpdateDTO>.Updated(payload);
+            return APIResult<EquipmentUpdateOutcome>.Updated(new EquipmentUpdateOutcome(UpdateOutcome.Updated,UpdateOutcome.NotUpdated,null,equipment.ToGetDTO()));
 
         }
         catch (Exception e)
         {
-            return APIResult<EquipmentUpdateDTO>.Exception(e.Message);
+            return APIResult<EquipmentUpdateOutcome>.Exception(e.Message);
         }
     }
 

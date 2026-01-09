@@ -133,7 +133,10 @@ public class DescriptorApi : IDescriptorApi
         }
         catch (OperationCanceledException)
         {
-            throw;
+            var message =
+                $"Remote patch for Descriptor failed because operation vas cancelled";
+            _logger.LogError(nameof(DescriptorApi), message);
+            return  Result<DescriptorUpdateOutcome>.Failure(message);
         }
         catch (Exception e)
         {
