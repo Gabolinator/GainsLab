@@ -1,0 +1,80 @@
+﻿
+@rendermode InteractiveServer
+@using GainsLab.WebLayer.Model.Notification.Confirmation
+@inject IConfirmDialog ConfirmDialog
+@implements IDisposable
+
+
+@if (_isOpen)
+{
+    <div class="confirm-backdrop" @onclick="Cancel">
+        <div class="confirm-modal" @onclick:stopPropagation="true" tabindex="-1">
+            <h4>@_title</h4>
+            <p>@_message</p>
+
+            <div class="confirm-actions">
+                <button class="btn btn-secondary" @onclick="Cancel">@_cancelText</button>
+                <button class="btn @(_isDanger ? "btn-danger" : "btn-primary")" @onclick="Confirm">
+                    @_confirmText
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool _isOpen;
+    private string _title = "";
+    private string _message = "";
+    private string _confirmText = "Confirm";
+    private string _cancelText = "Cancel";
+    private bool _isDanger;
+
+    private TaskCompletionSource<bool>? _tcs;
+
+    private ConfirmDialogService? _service;
+
+    protected override void OnInitialized()
+    {
+        if (ConfirmDialog is ConfirmDialogService s)
+        {
+            _service = s;
+            s.OnShow += ShowInternalAsync;
+        }
+    }
+
+    public void Dispose()
+    {
+        if(_service is not null) _service.OnShow -= ShowInternalAsync;
+    }
+    
+    private Task<bool> ShowInternalAsync(ConfirmRequest req)
+    {
+        _title = req.Title;
+        _message = req.Message;
+        _confirmText = req.ConfirmText;
+        _cancelText = req.CancelText;
+        _isDanger = req.IsDanger;
+
+        _tcs = new TaskCompletionSource<bool>();
+        _isOpen = true;
+
+        InvokeAsync(StateHasChanged);
+
+        return _tcs.Task;
+    }
+
+    private void Confirm()
+    {
+        _isOpen = false;
+        _tcs?.TrySetResult(true);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void Cancel()
+    {
+        _isOpen = false;
+        _tcs?.TrySetResult(false);
+        InvokeAsync(StateHasChanged);
+    }
+}

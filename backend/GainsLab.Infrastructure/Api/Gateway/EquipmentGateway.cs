@@ -15,6 +15,8 @@ using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Contracts.SyncService.Mapper;
 using GainsLab.Domain.Interfaces;
+using GainsLab.Infrastructure.Caching.QueryCache;
+using GainsLab.Infrastructure.Caching.Registry;
 using GainsLab.Infrastructure.SyncService;
 
 namespace GainsLab.Infrastructure.Api.Gateway;
@@ -23,36 +25,52 @@ public class EquipmentGateway : IEquipmentGateway
 {
     private readonly IEquipmentProvider _provider;
     private readonly ILogger _logger;
-    private IDescriptorGateway _descriptorGateway;
-  
+    private readonly DescriptorRegistry _descriptorGateway;
+    private readonly EquipmentQueryCache _cache;
     
-    public EquipmentGateway(IEquipmentProvider equipmentProvider, IDescriptorGateway descriptorGateway ,ILogger logger)
+    
+    public EquipmentGateway(IEquipmentProvider equipmentProvider, DescriptorRegistry descriptorGateway ,ILogger logger, EquipmentQueryCache cache)
     {
         _provider = equipmentProvider;
         _descriptorGateway = descriptorGateway;
         _logger = logger;
+        _cache = cache;
     }
 
     public async Task<Result<IReadOnlyList<EquipmentGetDTO>>> GetAllEquipmentsAsync()
     {
         var syncDtos = await GetAllEquipmentsSyncDtoAsync();
-        if(!syncDtos.Success) return Result<IReadOnlyList<EquipmentGetDTO>>.Failure(syncDtos.GetErrorMessage());
-        await _descriptorGateway.UpdateCacheAsync();
-       
-        return Result<IReadOnlyList<EquipmentGetDTO>>.SuccessResult((syncDtos.Value != null
-            ? syncDtos.Value.Select(s => EquipmentSyncMapper.ToGetDTO(s, GetDescriptor(s.DescriptorGUID) ,s.UpdatedAtUtc,"sync")).ToList(): new())!);
+
+        if (!syncDtos.Success)
+            return Result<IReadOnlyList<EquipmentGetDTO>>
+                .Failure(syncDtos.GetErrorMessage());
+
+        if (syncDtos.Value == null)
+            return Result<IReadOnlyList<EquipmentGetDTO>>
+                .SuccessResult(Array.Empty<EquipmentGetDTO>());
+
+        var tasks = syncDtos.Value.Select(s =>
+            EquipmentSyncMapper.ToGetDTOAsync(
+                s,
+                GetDescriptorAsync(s.DescriptorGUID),
+                s.UpdatedAtUtc,
+                "sync"
+            )
+        );
+
+        var dtos = await Task.WhenAll(tasks);
+        
+        return Result<IReadOnlyList<EquipmentGetDTO>>
+            .SuccessResult(dtos!);
         
     }
 
-   
+    private Task<DescriptorGetDTO?> GetDescriptorAsync(Guid? id)
+        => _descriptorGateway.GetDescriptorByIdAsync(id);
+        
+    
 
-    private DescriptorRecord? GetDescriptor(Guid? descriptorGuid)
-    {
-       if(descriptorGuid == null) return null;
-       return _descriptorGateway.TryGetDescriptor(descriptorGuid.Value, out var result) ? result : null;
-    }
-    
-    
+
     public async Task<Result<IReadOnlyList<EquipmentSyncDTO>>> GetAllEquipmentsSyncDtoAsync()
     {
         var result =  await _provider.PullEquipmentPageAsync(SyncCursorUtil.MinValue, 200, default);;
@@ -66,14 +84,7 @@ public class EquipmentGateway : IEquipmentGateway
             new());
 
     }
-
-    // public async Task<Result<EquipmentGetDTO>> GetEquipmentByIdAsync(Guid id)
-    // {
-    //     
-    //     if(id == Guid.Empty) return Result<EquipmentGetDTO>.Failure("Invalid id");
-    //     
-    //     return await  _provider.GetEquipmentAsync(new(id,null), default);
-    // }
+    
     
     public async Task<Result<EquipmentGetDTO>> GetEquipmentAsync(EquipmentEntityId id)
     {
@@ -112,6 +123,7 @@ public class EquipmentGateway : IEquipmentGateway
         }
         
         if(descriptor == null) message.AddWarning("Did not update descriptor");
+        else _descriptorGateway.Invalidate();
         
         EquipmentUpdateOutcome equipment = null;
         //them update this 
@@ -124,6 +136,8 @@ public class EquipmentGateway : IEquipmentGateway
         
         else equipment = equipmentOutcome.Value!;
 
+        if(equipment != null) _cache.Invalidate();
+       
 
         return equipment == null && descriptor == null
             ? Result<EquipmentUpdateCombinedOutcome>.Failure(message)
@@ -140,7 +154,18 @@ public class EquipmentGateway : IEquipmentGateway
             return Result<EquipmentDeleteOutcome>.Failure("Invalid id");
         }
 
-        return await _provider.DeleteEquipmentAsync(request, default);
+        var result = await _provider.DeleteEquipmentAsync(request, default);
+        if (result.Success)
+        {
+           InvalidateCaches();
+        }
+        return result;
+    }
+
+    private void InvalidateCaches()
+    {
+        _descriptorGateway.Invalidate();
+        _cache.Invalidate();
     }
 
     public async Task<Result<EquipmentCreateCombineOutcome>> CreateEquipmentAsync(EquipmentCombineCreateRequest request)
@@ -183,8 +208,9 @@ public class EquipmentGateway : IEquipmentGateway
                 equipmentCreateOutcome = equipmentOutcome.Value!;
                 var createdDescriptor = equipmentCreateOutcome.CreatedEquipment?.Descriptor;
                 descriptorCreateOutcome = createdDescriptor == null ? null : new DescriptorCreateOutcome(CreateOutcome.Created,createdDescriptor);
-                
             }
+
+            InvalidateCaches();
         }
         
         //invalid

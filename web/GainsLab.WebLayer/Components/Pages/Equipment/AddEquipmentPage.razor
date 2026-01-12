@@ -7,10 +7,13 @@
 @using GainsLab.Contracts.Dtos.PostDto.Outcome
 @using GainsLab.Contracts.Dtos.PostDto.Request
 @using GainsLab.Domain.Interfaces
+@using GainsLab.Infrastructure.Caching.Registry
 @using GainsLab.Infrastructure.Utilities
 @using GainsLab.WebLayer.Components.Control
 @using GainsLab.WebLayer.Model.Descriptor
 @using GainsLab.WebLayer.Model.Equipment
+@using GainsLab.WebLayer.Model.Notification
+@implements IDisposable
 
 
 
@@ -61,7 +64,11 @@
 @code {
     [Inject] private ILogger Logger { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
+    [Inject] private IToast Toast{ get; set; }
+
     [Inject] private IEquipmentGateway Repo { get; set; } = default!;
+    [Inject] private EquipmentRegistry EquipmentRegistry { get; set; } = default!;
+    [Inject] private DescriptorRegistry DescriptorRegistry { get; set; } = default!;
     
     public EquipmentCreateDTO? CreateEquipment { get; set; } = null;
     public DescriptorCreateDTO CreateDescriptor { get; set; } = new();
@@ -104,7 +111,7 @@
         _isEditValid = false;
 
         //we cache all the equipments - so we can filter for same name
-        var eqs = await Repo.GetAllEquipmentsAsync();
+        var eqs = await EquipmentRegistry.GetAllAsync();
         if (eqs.Value == null || eqs.Value.Count == 0)
         {
             Messages.AddError("No Equipments Found");
@@ -257,11 +264,12 @@
             Messages.AddError($"Equipment description content invalid");
             Messages.Append(descriptorValid.Messages);
             CreateDescriptor.CreateRequest = CreateRequest.DontCreate;
+            Toast.Error($"Equipment description content invalid  : {descriptorValid.GetErrorMessage()}");
+            return;
         }
-        else
-        {
-            CreateDescriptor.CreateRequest = CreateRequest.Create;
-        }
+       
+        CreateDescriptor.CreateRequest = CreateRequest.Create;
+        
         
         CreateEquipment!.Descriptor = CreateDescriptor;
         
@@ -273,9 +281,20 @@
         {
             Messages.AddError("Could not update equipment: ");
             Messages.Append(outcome.GetMessages());
+            Toast.Error("Failed to Create Equipment");
+            
         }
 
-        else Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
+        else
+        {
+            Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
+            Toast.Success("Equipment successfully created!");
+            EquipmentRegistry.Invalidate();
+            DescriptorRegistry.Invalidate();
+           // Toast.FromMessages(Messages);
+        }
+        
+        Toast.FromMessages(Messages, null, ToastLevel.Error, ToastLevel.Warning);
         
     }
 

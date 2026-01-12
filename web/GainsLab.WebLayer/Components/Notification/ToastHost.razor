@@ -1,0 +1,75 @@
+﻿@rendermode InteractiveServer
+@using GainsLab.WebLayer.Model.Notification
+@inject ToastService Toasts
+@implements IDisposable
+
+<div class="toast-host">
+    @foreach (var t in _toasts)
+    {
+        <div class="toast-item @CssClass(t.Level)">
+            <div class="toast-header">
+                <strong>@t.Title</strong>
+                <button class="toast-close" @onclick="() => Dismiss(t)">×</button>
+            </div>
+            <div class="toast-body">@t.Message</div>
+        </div>
+    }
+</div>
+
+@code {
+    private readonly List<ToastMessage> _toasts = new();
+
+    protected override void OnInitialized()
+    {
+        Toasts.OnShow += ShowToast;
+        Toasts.OnClear += ClearToasts;
+    }
+
+    private void ShowToast(ToastMessage msg)
+    {
+        // If service is OneAtATime, you can keep only one visible
+        if (Toasts.DisplayMode == ToastDisplayMode.OneAtATime)
+            _toasts.Clear();
+
+        _toasts.Add(msg);
+        _ = AutoDismissAsync(msg);
+        InvokeAsync(StateHasChanged);
+    }
+
+    private async Task AutoDismissAsync(ToastMessage msg)
+    {
+        if (msg.AutoHideMs <= 0) return;
+        await Task.Delay(msg.AutoHideMs);
+        Dismiss(msg);
+    }
+
+    private void Dismiss(ToastMessage msg)
+    {
+        if (_toasts.Remove(msg))
+        {
+            // Tell the service this toast is gone, so it can show the next (if queued)
+            Toasts.NotifyDismissed(msg.Id);
+            InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private void ClearToasts()
+    {
+        _toasts.Clear();
+        InvokeAsync(StateHasChanged);
+    }
+
+    private static string CssClass(ToastLevel level) => level switch
+    {
+        ToastLevel.Success => "toast-success",
+        ToastLevel.Warning => "toast-warning",
+        ToastLevel.Error   => "toast-error",
+        _                  => "toast-info"
+    };
+
+    public void Dispose()
+    {
+        Toasts.OnShow -= ShowToast;
+        Toasts.OnClear -= ClearToasts;
+    }
+}

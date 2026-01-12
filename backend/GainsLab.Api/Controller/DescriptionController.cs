@@ -1,5 +1,6 @@
 ﻿
 using GainsLab.Application.Interfaces;
+using GainsLab.Application.Interfaces.DataManagement.Repository;
 using GainsLab.Application.Results.APIResults;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;

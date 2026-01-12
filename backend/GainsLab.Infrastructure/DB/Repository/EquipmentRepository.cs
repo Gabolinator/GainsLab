@@ -3,6 +3,7 @@ using GainsLab.Application.DTOs;
 using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.DTOs.Equipment;
 using GainsLab.Application.Interfaces;
+using GainsLab.Application.Interfaces.DataManagement.Repository;
 using GainsLab.Application.Results.APIResults;
 using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;

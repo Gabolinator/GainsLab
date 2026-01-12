@@ -1,5 +1,4 @@
-﻿using GainsLab.Application.DTOs;
-using GainsLab.Application.DTOs.Description;
+﻿using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.Results.APIResults;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
@@ -7,7 +6,7 @@ using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 
-namespace GainsLab.Application.Interfaces;
+namespace GainsLab.Application.Interfaces.DataManagement.Repository;
 
 
 public interface IDescriptorRepository

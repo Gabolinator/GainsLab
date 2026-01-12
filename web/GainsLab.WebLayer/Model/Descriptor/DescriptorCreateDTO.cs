@@ -39,9 +39,10 @@ public static class DescriptorCreateDTOExtensions
             StringComparison.InvariantCultureIgnoreCase);
 
         if(logger != null)logger.Log("DescriptorCreateDTO.IsValid()", $"content {content} - comparison :{comparison} - equals: {equals}");
-
         
-        if (string.IsNullOrEmpty(dto.DescriptionContent) || equals ) return Result.Failure("Invalid Description Content");
+        if(string.IsNullOrEmpty(content)) return Result.Failure("Description cannot be empty");
+
+        if (equals) return Result.Failure("Enter a description");
 
         return Result.SuccessResult();
         

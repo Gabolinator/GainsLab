@@ -1,6 +1,7 @@
 ﻿
-@rendermode InteractiveServer
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using System.Linq
+@using System.Runtime.CompilerServices
 @using GainsLab.Application.Interfaces.DataManagement.Gateway
 @using GainsLab.Application.Results
 @using GainsLab.Contracts
@@ -8,11 +9,10 @@
 @using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Contracts.Dtos.ID
 @using GainsLab.Domain.Interfaces
+@using GainsLab.Infrastructure.Caching.Registry
 @using GainsLab.WebLayer.Model
-
-
-@attribute [StreamRendering]
-
+@using GainsLab.WebLayer.Model.Notification
+@using GainsLab.WebLayer.Model.Notification.Confirmation
 
 <p>
     @if (_equipments == null)
@@ -71,29 +71,50 @@
     private EquipmentGetDTO[]? _equipments = null;
     [Inject] private ILogger Logger { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
-    [Inject] private IEquipmentGateway Repo { get; set; } = default!;
-    
+    [Inject] private EquipmentRegistry Repo { get; set; } = default!;
+    [Inject] private IToast Toast { get; set; } = default!;
+    [Inject] private IConfirmDialog ConfirmDialog { get; set; } = default!;
+    [Inject] private EquipmentRegistry EquipmentRegistry { get; set; } = default!;
     
     private int i =1;
     private bool _error = false;
     private string? _errorMessage = null;
+    private bool _initialized;
 
-    protected override Task OnInitializedAsync()
+    protected override async Task OnInitializedAsync()
     {
-        Logger.Log("HomePage", $"Getting all equipments");
+        if (_initialized)
+        {
+            Logger.LogWarning(nameof(EquipmentDisplayComponent), $"Already initialized - {Clock.UtcNow}");
+            return ;
+        }
         
-        base.OnInitializedAsync();
-
-        return GetEquipments();
+        Logger.Log(nameof(EquipmentDisplayComponent),
+            $"Init instance hash: {RuntimeHelpers.GetHashCode(this)} - {Clock.UtcNow}");
+        _initialized = true;
+        await  base.OnInitializedAsync();
+        
+        await GetEquipments();
 
 
     }
 
+  
+
     private async Task GetEquipments()
     {
+        Logger.Log(nameof(EquipmentDisplayComponent), "Getting all equipments");
+        
         _equipments = null;
+        _error = false;
+        _errorMessage = null;
 
-        Result<IReadOnlyList<EquipmentGetDTO>> result = await Repo.GetAllEquipmentsAsync();
+        var result = await EquipmentRegistry.GetAllAsync();
+        ApplyResult(result);
+    }
+
+    private void ApplyResult(Result<IReadOnlyList<EquipmentGetDTO>> result)
+    {
         if (!result.Success)
         {
             _equipments = null;
@@ -102,7 +123,9 @@
             return;
         }
 
-        _equipments = !result.HasValue ? null : result.Value.ToArray();
+        _error = false;
+        _errorMessage = null;
+        _equipments = result.HasValue ? result.Value.ToArray() : null;
     }
 
     private string GetDescription(EquipmentGetDTO eq)
@@ -114,28 +137,61 @@
 
     private async Task DeleteEquipmentAsync(Guid equipmentId)
     {
+
         Logger.Log(nameof(EquipmentDisplayComponent), $"Deleting equipment {equipmentId}");
+
+        if (_equipments is null)
+        {
+            Toast.Error("No Equipments Found");
+            return;
+        }
+        var eq = _equipments.FirstOrDefault(e => e.Id == equipmentId);
+        if (eq == null)
+        {
+            Toast.Error($"No Equipment Found with id {equipmentId}");
+            return;
+        }
+        
+        var ok = await ConfirmDialog.ShowAsync(
+            new ConfirmRequest(
+                "Delete Item", 
+                $"Are You sure you want to delete Equipment '{eq.Name}' ? It can't be undone",
+                "Delete", 
+                "Cancel",
+                true));
+        
+       Logger.Log(nameof(EquipmentDisplayComponent), $"Confirmation {ok}");
+        
+        if (!ok)
+        {
+            
+          //  Toast.Error($"Delete {eq.Name} Cancelled");
+            return;
+        }
+
+        
         Result<EquipmentDeleteOutcome> result = await Repo.DeleteEquipmentAsync(new EquipmentEntityId(equipmentId));
         if (!result.Success || result.Value is not { Outcome: DeleteOutcome.Deleted })
         {
             _error = true;
             _errorMessage = $"Unable to delete equipment {equipmentId}: {result.GetErrorMessage()}";
             Logger.LogError(nameof(EquipmentDisplayComponent), _errorMessage);
-
+            Toast.Error(_errorMessage);
             return;
         }
 
         _error = false;
         _errorMessage = null;
 
-        if (_equipments is null)
-        {
-            return;
-        }
-
-        Logger.Log(nameof(EquipmentDisplayComponent), $"Deleted equipment {equipmentId}");
-
+      
         
-        _equipments = _equipments.Where(eq => eq.Id != equipmentId).ToArray();
+
+     
+      
+        var success = $"Deleted equipment {equipmentId}";
+        Logger.Log(nameof(EquipmentDisplayComponent), success);
+        Toast.Success(success);
+        
+        _equipments = _equipments.Where(e => e.Id != equipmentId).ToArray();
     }
 }

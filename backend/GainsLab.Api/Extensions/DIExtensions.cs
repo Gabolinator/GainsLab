@@ -1,4 +1,5 @@
 ﻿using GainsLab.Application.Interfaces;
+using GainsLab.Application.Interfaces.DataManagement.Repository;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB;

@@ -82,7 +82,7 @@ public static class EquipmentCombinedOutcomeExtension
         messages ??= new MessagesContainer();
 
         messages.Append(equipmentUpdate.Equipment.GetOutcomeMessages());
-        messages.Append(equipmentUpdate.DescriptorUpdateOutcome.GetOutcomeMessages());
+        messages.Append(equipmentUpdate.Descriptor.GetOutcomeMessages());
         
         return  messages;
        

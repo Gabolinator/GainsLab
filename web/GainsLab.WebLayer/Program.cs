@@ -8,10 +8,14 @@ using GainsLab.Infrastructure;
 using GainsLab.Infrastructure.Api;
 using GainsLab.Infrastructure.Api.Gateway;
 using GainsLab.Infrastructure.Api.Interface;
+using GainsLab.Infrastructure.Caching.QueryCache;
+using GainsLab.Infrastructure.Caching.Registry;
 using GainsLab.Infrastructure.Logging;
 using GainsLab.Infrastructure.SyncService;
 using GainsLab.Infrastructure.Utilities;
 using GainsLab.WebLayer.Components;
+using GainsLab.WebLayer.Model.Notification;
+using GainsLab.WebLayer.Model.Notification.Confirmation;
 using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +27,11 @@ webLogger.ToggleDecoration(true);
 
 builder.Services.AddSingleton<ILogger>(webLogger);
 builder.Services.AddSingleton<IClock,Clock>();
+builder.Services.AddSingleton<ToastService>();
+builder.Services.AddSingleton<IToast,AppToast>();
+
+builder.Services.AddSingleton<IConfirmDialog,ConfirmDialogService>();
+
 
 Uri ResolveSyncBaseAddress(ILogger? logger)
 {
@@ -35,14 +44,14 @@ Uri ResolveSyncBaseAddress(ILogger? logger)
     {
         var message =
             $"GAINS_SYNC_BASE_URL must be an absolute http/https URL. Current value: '{candidate}'.";
-        logger?.LogError("Blazor Main", message);
+        logger?.LogError("WebLayer.Program", message);
         throw new InvalidOperationException(message);
     }
 
     var normalized = uri.ToString();
     if (!normalized.EndsWith("/")) normalized += "/";
 
-    logger?.Log("Blazor Main", $"Using sync server base address {normalized}");
+    logger?.Log(typeof(Program).Assembly.FullName, $"Using sync server base address {normalized}");
     return new Uri(normalized);
 }
 
@@ -86,6 +95,17 @@ builder.Services.AddScoped<IEntitySyncClient, EntitySyncClient>();
 
 AddProvider(builder.Services);
 AddGateway(builder.Services);
+AddCacheRegistries(builder.Services);
+
+void AddCacheRegistries(IServiceCollection builderServices)
+{
+    builderServices.AddSingleton<EquipmentQueryCache>();
+    builderServices.AddSingleton<DescriptorQueryCache>();
+    builderServices.AddScoped<EquipmentRegistry>();
+    builderServices.AddScoped<DescriptorRegistry>();
+}
+
+
 
 // Add services to the container.
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();

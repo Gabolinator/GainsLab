@@ -8,11 +8,14 @@
 @using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Contracts.Dtos.ID
 @using GainsLab.Domain.Interfaces
+@using GainsLab.Infrastructure.Caching.Registry
 @using GainsLab.Infrastructure.Utilities
 @using GainsLab.WebLayer.Components.Control
 @using GainsLab.WebLayer.Model
 @using GainsLab.WebLayer.Model.Descriptor
 @using GainsLab.WebLayer.Model.Equipment
+@using GainsLab.WebLayer.Model.Notification
+@implements IDisposable
 
 
 
@@ -70,6 +73,9 @@
     [Inject] private ILogger Logger { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
     [Inject] private IEquipmentGateway Repo { get; set; } = default!;
+    [Inject] private EquipmentRegistry EquipmentRegistry { get; set; } = default!;
+    [Inject] private DescriptorRegistry DescriptorRegistry { get; set; } = default!;
+    [Inject] private IToast Toast { get; set; } = default!;
 
     public EquipmentGetDTO? Equipment { get; set; } = null;
     public EquipmentEditFormDTO? EditEquipment { get; set; } = null;
@@ -116,7 +122,7 @@
         _isEditValid = false;
 
         //we cache all the equipments - so we can filter for same name
-        var eqs = await Repo.GetAllEquipmentsAsync();
+        var eqs = await EquipmentRegistry.GetAllAsync();
         if (eqs.Value == null || eqs.Value.Count == 0)
         {
             Messages.AddError("No Equipments Found");
@@ -276,13 +282,25 @@
         Messages.ClearAll();
         
         var outcome= await Repo.UpdateEquipmentAsync(request, EditEquipment.Descriptor.ToUpdateRequest());
-        if (!outcome.Success)
+        if (!outcome.Success || outcome.Value == null)
         {
-            Messages.AddError("Could not update equipment: ");
+            var message = "Could not update equipment: ";
+            Messages.AddError(message);
             Messages.Append(outcome.GetMessages());
+            Toast.FromMessages(Messages);
         }
 
-        else Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
+        else
+        {
+            Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
+         
+            if (outcome.Value.Equipment != null && outcome.Value.Equipment.Outcome == UpdateOutcome.Updated)
+                Toast.Success($"Equipment updated to {outcome.Value.Equipment.UpdatedState!.Name}");
+            
+            if (outcome.Value.Descriptor != null && outcome.Value.Descriptor.Outcome == UpdateOutcome.Updated)
+                Toast.Success($"Equipment Description updated to {outcome.Value.Descriptor.UpdatedState!.content}");
+
+        }
         
     }
 
@@ -310,6 +328,7 @@
         }
         
         Messages.AddInfo($"Equipment {outcome.Value.Id} Deleted");
+        EquipmentRegistry.Invalidate();
         
         
 

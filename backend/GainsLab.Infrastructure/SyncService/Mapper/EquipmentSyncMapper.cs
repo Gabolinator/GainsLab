@@ -59,15 +59,32 @@ public static class EquipmentSyncMapper
             e.Authority);
     }
 
-    public static EquipmentGetDTO? ToGetDTO(EquipmentSyncDTO? dto ,DescriptorRecord? descriptor, DateTimeOffset createdAtUtc, string sync)
+    // public static EquipmentGetDTO? ToGetDTO(EquipmentSyncDTO? dto ,DescriptorRecord? descriptor, DateTimeOffset createdAtUtc, string sync)
+    // {
+    //     if (dto == null) return null;
+    //
+    //     return new EquipmentGetDTO(
+    //         dto.GUID,
+    //         dto.Name,
+    //         dto.DescriptorGUID,
+    //         descriptor.ToGetDTO(),
+    //         createdAtUtc,
+    //         dto.UpdatedAtUtc,
+    //         dto.UpdatedSeq,
+    //         dto.IsDeleted,
+    //         dto.Authority);
+    // }
+    
+    public static async Task<EquipmentGetDTO?> ToGetDTOAsync(EquipmentSyncDTO? dto ,Task<DescriptorGetDTO?> descriptor, DateTimeOffset createdAtUtc, string sync)
     {
         if (dto == null) return null;
-
+        var d = await descriptor;
+      
         return new EquipmentGetDTO(
             dto.GUID,
             dto.Name,
             dto.DescriptorGUID,
-            descriptor.ToGetDTO(),
+            d,
             createdAtUtc,
             dto.UpdatedAtUtc,
             dto.UpdatedSeq,

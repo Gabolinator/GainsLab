@@ -1,5 +1,6 @@
 ﻿using GainsLab.Application.DTOs;
 using GainsLab.Application.DTOs.Description;
+using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Infrastructure.Utilities;
 
@@ -31,6 +32,23 @@ public static class DescriptorSyncMapper
         entity.DeletedAt = dto.IsDeleted ? dto.UpdatedAtUtc : null;
         entity.DeletedBy = dto.IsDeleted ? syncActor : null;
 
+        return entity;
+    }
+    
+    public static DescriptorGetDTO ToGetDTO(DescriptorSyncDTO dto,string syncActor)
+    {
+        var entity = new DescriptorGetDTO
+            (
+                dto.GUID,
+                dto.DescriptionContent,
+                dto.UpdatedAtUtc,
+                dto.UpdatedAtUtc,
+                dto.UpdatedSeq,
+                dto.IsDeleted,
+                dto.Authority);
+        
+      //  CoreUtilities.Logger.Log(nameof(DescriptorSyncMapper), $"mapping desc sync dto {dto.DescriptionContent} - {dto.GUID}");
+        
         return entity;
     }
     
