@@ -252,6 +252,7 @@ public class GainLabPgDBContext(DbContextOptions< GainLabPgDBContext> options) :
             e.HasOne(x => x.Descriptor)
                 .WithMany()
                 .HasForeignKey(x => x.DescriptorID);
+                
 
             // GUID unique index
             e.HasIndex(x => x.GUID).IsUnique();

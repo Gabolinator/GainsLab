@@ -13,7 +13,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GainsLab.Infrastructure.SyncService;
 
-public class MovementCategorySyncService : ISyncService<MovementCategorySyncDto>
+public class MovementCategorySyncService : ISyncService<MovementCategorySyncDTO>
 {
     private readonly GainLabPgDBContext _db;
     private readonly ILogger _log;
@@ -35,16 +35,16 @@ public class MovementCategorySyncService : ISyncService<MovementCategorySyncDto>
     /// <summary>
     /// Gets the DTO type used for serialization.
     /// </summary>
-    public Type DtoType => typeof(MovementCategorySyncDto);
+    public Type DtoType => typeof(MovementCategorySyncDTO);
     
     Task<PushResult> ISyncService.PushBoxedAsync(IEnumerable<ISyncDto> dtos, CancellationToken ct)
-        => PushAsync(dtos.Cast<MovementCategorySyncDto>(), ct);
+        => PushAsync(dtos.Cast<MovementCategorySyncDTO>(), ct);
 
     async Task<object> ISyncService.PullBoxedAsync(SyncCursor cur, int take, CancellationToken ct)
         => await PullAsync(cur, take, ct);
 
 
-    public async Task<SyncPage<MovementCategorySyncDto>> PullAsync(SyncCursor cur, int take, CancellationToken ct)
+    public async Task<SyncPage<MovementCategorySyncDTO>> PullAsync(SyncCursor cur, int take, CancellationToken ct)
     {
         var serverTime = DateTimeOffset.UtcNow;
         take = Math.Clamp(take, 1, 500);
@@ -89,7 +89,7 @@ public class MovementCategorySyncService : ISyncService<MovementCategorySyncDto>
             ? null
             : new SyncCursor(items[^1].UpdatedAtUtc, items[^1].UpdatedSeq);
 
-        return new SyncPage<MovementCategorySyncDto>(serverTime, next, items);
+        return new SyncPage<MovementCategorySyncDTO>(serverTime, next, items);
     }
 
     private async Task<Dictionary<Guid, eMovementCategories>> LoadBaseCategoriesAsync(CancellationToken ct)
@@ -350,7 +350,7 @@ public class MovementCategorySyncService : ISyncService<MovementCategorySyncDto>
                     .ToList());
     }
 
-    public async Task<PushResult> PushAsync(IEnumerable<MovementCategorySyncDto> items, CancellationToken ct)
+    public async Task<PushResult> PushAsync(IEnumerable<MovementCategorySyncDTO> items, CancellationToken ct)
     {
         _descriptorCache.Clear();
         _categoryIdCache.Clear();

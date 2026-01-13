@@ -16,7 +16,7 @@ public static class MovementCategorySyncMapper
     /// should be handled by the caller once the referenced categories are resolved.
     /// </summary>
     public static MovementCategoryRecord FromSyncDTO(
-        MovementCategorySyncDto dto,
+        MovementCategorySyncDTO dto,
         DescriptorRecord? descriptor,
         string syncActor)
     {
@@ -39,11 +39,11 @@ public static class MovementCategorySyncMapper
     /// <summary>
     /// Projects an EF DTO and the denormalized relationship metadata to the sync contract.
     /// </summary>
-    public static MovementCategorySyncDto ToSyncDTO(
+    public static MovementCategorySyncDTO ToSyncDTO(
         MovementCategoryRecord dto,
         (Guid? parentCategoryGuid, IReadOnlyList<eMovementCategories>? baseCategories) parentAndBase)
     {
-        return new MovementCategorySyncDto(
+        return new MovementCategorySyncDTO(
             dto.GUID,
             dto.Name,
             dto.Descriptor?.GUID,

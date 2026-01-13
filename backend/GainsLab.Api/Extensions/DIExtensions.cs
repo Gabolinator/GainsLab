@@ -33,6 +33,8 @@ public static class DIExtensions
     {
         services.AddSingleton<IDescriptorRepository, DescriptorRepository>();
         services.AddSingleton<IEquipmentRepository, EquipmentRepository>();
+        services.AddSingleton<IMuscleRepository, MuscleRepository>();
+        services.AddSingleton<IMovementCategoryRepository, MovementCategoryRepository>();
     }
 
 
@@ -41,7 +43,7 @@ public static class DIExtensions
   
         services.AddScoped<ISyncService<EquipmentSyncDTO>, EquipmentSyncService>();
         services.AddScoped<ISyncService<DescriptorSyncDTO>, DescriptorSyncService>();
-        services.AddScoped<ISyncService<MovementCategorySyncDto>, MovementCategorySyncService>();
+        services.AddScoped<ISyncService<MovementCategorySyncDTO>, MovementCategorySyncService>();
         services.AddScoped<ISyncService<MuscleSyncDTO>, MuscleSyncService>(); 
         services.AddScoped<ISyncService<MovementSyncDTO>, MovementSyncService>();
 
@@ -50,7 +52,7 @@ public static class DIExtensions
         services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<EquipmentSyncDTO>>());
         services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<DescriptorSyncDTO>>());
         services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<MuscleSyncDTO>>());
-        services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<MovementCategorySyncDto>>());
+        services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<MovementCategorySyncDTO>>());
         services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<MovementSyncDTO>>());
 
             

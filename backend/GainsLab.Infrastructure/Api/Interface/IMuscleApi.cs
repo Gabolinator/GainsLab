@@ -8,9 +8,9 @@ using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Contracts.Interface;
 
-namespace GainsLab.Application.Interfaces.DataManagement.Provider;
+namespace GainsLab.Infrastructure.Api.Interface;
 
-public interface IMuscleProvider
+public interface IMuscleApi
 {
     Task<Result<ISyncPage<ISyncDto>>> PullMusclePageAsync(ISyncCursor cursor, int take, CancellationToken ct);
     

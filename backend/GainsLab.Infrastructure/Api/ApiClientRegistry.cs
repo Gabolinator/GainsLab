@@ -13,5 +13,6 @@ public class ApiClientRegistry : IApiClientRegistry
 
     public IDescriptorApi DescriptorApi { get; init; }
     public IEquipmentApi EquipmentApi { get; init; }
-   
+    public IMuscleApi MuscleApi { get; init; }
+    public IMovementCategoryApi MovementCategoryApi { get; init; }
 }

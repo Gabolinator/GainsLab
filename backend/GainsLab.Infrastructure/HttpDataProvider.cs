@@ -30,7 +30,8 @@ public class HttpDataProvider:
     IRemoteProvider, 
     IEquipmentProvider, 
     IDescriptorProvider,
-    IMuscleProvider
+    IMuscleProvider,
+    IMovementCategoryProvider
 {
     
     private readonly HttpClient _http;
@@ -38,6 +39,10 @@ public class HttpDataProvider:
     private readonly IApiClientRegistry _apiClient;
     private IEquipmentApi Equipments => _apiClient.EquipmentApi;
     private IDescriptorApi Descriptors =>  _apiClient.DescriptorApi;
+
+    private IMuscleApi Muscles => _apiClient.MuscleApi;
+    private IMovementCategoryApi MovementCategories => _apiClient.MovementCategoryApi;
+    
     
    
 
@@ -90,9 +95,11 @@ public class HttpDataProvider:
 
     }
 
-    #region MovementsCategory
+  
 
-    private async Task<Result<ISyncPage<ISyncDto>>> PullMovementCategoryPageAsync(ISyncCursor cursor, int take, CancellationToken ct)
+    #region MovementCategory
+
+    public async Task<Result<ISyncPage<ISyncDto>>> PullMovementCategoryPageAsync(ISyncCursor cursor, int take, CancellationToken ct)
     {
         try
         {
@@ -105,7 +112,7 @@ public class HttpDataProvider:
 
             _logger.Log(nameof(HttpDataProvider), $"Pull MovementCategory page - take {take} - {res.Content}" );
         
-            var payload = await res.Content.ReadFromJsonAsync<SyncPage<MovementCategorySyncDto>>(cancellationToken: ct);
+            var payload = await res.Content.ReadFromJsonAsync<SyncPage<MovementCategorySyncDTO>>(cancellationToken: ct);
         
             _logger.Log(nameof(HttpDataProvider), $"Pull MovementCategory page - take {take} - payload items count: {payload?.Items.Count ?? 0} payload items[0] {(payload?.Items.Count>0 ?payload?.Items[0] : "none" )} " );
 
@@ -125,12 +132,29 @@ public class HttpDataProvider:
             return Result<ISyncPage<ISyncDto>>.Failure(message);
         }
     }
+    
+    public Task<Result<MovementCategoryGetDTO>> GetMovementCategoryAsync(MovementCategoryEntityId entity,
+        CancellationToken ct)
+        => MovementCategories.GetMovementCategoryAsync(entity, ct);
+
+    public Task<Result<MovementCategoryCreateOutcome>> CreateMovementCategoryAsync(MovementCategoryPostDTO entity,
+        CancellationToken ct)
+        => MovementCategories.CreateMovementCategoryAsync(entity, ct);
+
+    public Task<Result<MovementCategoryUpdateOutcome>> UpdateMovementCategoryAsync(
+        MovementCategoryUpdateRequest request, CancellationToken ct)
+        => MovementCategories.UpdateMovementCategoryAsync(request, ct);
+
+    public Task<Result<MovementCategoryDeleteOutcome>> DeleteMovementCategoryAsync(MovementCategoryEntityId entity,
+        CancellationToken ct)
+        => MovementCategories.DeleteMovementCategoryAsync(entity, ct);
 
 
     #endregion
+    
 
-    #region Muscle 
-
+    
+    #region Muscle
     public async Task<Result<ISyncPage<ISyncDto>>> PullMusclePageAsync(
         ISyncCursor cursor, int take = 200, CancellationToken ct = default)
     {
@@ -157,8 +181,20 @@ public class HttpDataProvider:
             return Result<ISyncPage<ISyncDto>>.Failure(message);
         }
     }
+    
+    public Task<Result<MuscleGetDTO>> GetMuscleAsync(MuscleEntityId entity, CancellationToken ct)
+    => Muscles.GetMuscleAsync(entity, ct);
 
+    public Task<Result<MuscleCreateOutcome>> CreateMuscleAsync(MusclePostDTO entity, CancellationToken ct)
+        => Muscles.CreateMuscleAsync(entity, ct);
+
+    public Task<Result<MuscleUpdateOutcome>> UpdateMuscleAsync(MuscleUpdateRequest request, CancellationToken ct)
+   => Muscles.UpdateMuscleAsync(request, ct);
+
+    public Task<Result<MuscleDeleteOutcome>> DeleteMuscleAsync(MuscleEntityId entity, CancellationToken ct)
+    => Muscles.DeleteMuscleAsync(entity, ct);
     #endregion
+
     
     #region Descriptor
 

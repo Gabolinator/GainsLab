@@ -17,3 +17,15 @@ public record EquipmentEntityId(
     Guid? Id,
     string? Name = null   //by name not yet supported 
 ) :EntityId(Id, Name);
+
+
+public record MuscleEntityId(
+    Guid? Id,
+    string? Name = null   //by name not yet supported 
+) :EntityId(Id, Name);
+
+
+public record MovementCategoryEntityId(
+    Guid? Id,
+    string? Name = null   //by name not yet supported 
+) :EntityId(Id, Name);

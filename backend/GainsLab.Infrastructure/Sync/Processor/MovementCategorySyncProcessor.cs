@@ -37,12 +37,12 @@ public class MovementCategorySyncProcessor : ISyncEntityProcessor
         
         if (items.Count == 0) return Result.SuccessResult();
 
-        var typed = items.OfType<MovementCategorySyncDto>().ToList();
+        var typed = items.OfType<MovementCategorySyncDTO>().ToList();
         if (typed.Count == 0) return Result.SuccessResult();
         
           try
         {
-            _logger?.Log(nameof(MovementCategorySyncProcessor), $"Applying Async for {items.Count} {nameof(MovementCategorySyncDto)}");
+            _logger?.Log(nameof(MovementCategorySyncProcessor), $"Applying Async for {items.Count} {nameof(MovementCategorySyncDTO)}");
 
             await using var dbContext = await _dbContextFactory.CreateDbContextAsync(ct).ConfigureAwait(false);
             var descriptorCache = new Dictionary<Guid, DescriptorRecord>();
@@ -56,7 +56,7 @@ public class MovementCategorySyncProcessor : ISyncEntityProcessor
                 ct.ThrowIfCancellationRequested();
 
                 _logger?.Log(nameof(MovementCategorySyncProcessor),
-                    $"Applying Async for {nameof(MovementCategorySyncDto)} : {dto.Name} | {dto.GUID} | {(dto.DescriptorGUID == null ? "null descriptor guid" : dto.DescriptorGUID)}");
+                    $"Applying Async for {nameof(MovementCategorySyncDTO)} : {dto.Name} | {dto.GUID} | {(dto.DescriptorGUID == null ? "null descriptor guid" : dto.DescriptorGUID)}");
                 
                 var descriptor = await _descriptorResolver.ResolveDescriptorAsync(dbContext, dto.DescriptorGUID, descriptorCache, ct)
                     .ConfigureAwait(false);
@@ -155,7 +155,7 @@ public class MovementCategorySyncProcessor : ISyncEntityProcessor
            .ToList();
     }
 
-    private IReadOnlyList<eMovementCategories> NormalizeBaseCategories(MovementCategorySyncDto dto)
+    private IReadOnlyList<eMovementCategories> NormalizeBaseCategories(MovementCategorySyncDTO dto)
     {
           if (dto.IsDeleted)
             return Array.Empty<eMovementCategories>();
@@ -168,7 +168,7 @@ public class MovementCategorySyncProcessor : ISyncEntityProcessor
     }
 
   
-    private (eMovementCategories, Guid) NormalizeBaseCategoryGuid(MovementCategorySyncDto dto)
+    private (eMovementCategories, Guid) NormalizeBaseCategoryGuid(MovementCategorySyncDTO dto)
     {
         if (dto.IsDeleted)
             return (eMovementCategories.undefined, Guid.Empty);
@@ -177,7 +177,7 @@ public class MovementCategorySyncProcessor : ISyncEntityProcessor
     }
     
     
-    public eMovementCategories ParseToBaseCategory(MovementCategorySyncDto dto)
+    public eMovementCategories ParseToBaseCategory(MovementCategorySyncDTO dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Name)) return eMovementCategories.undefined;
         
