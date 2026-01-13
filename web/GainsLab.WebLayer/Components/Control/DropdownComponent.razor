@@ -1,0 +1,35 @@
+﻿@using GainsLab.WebLayer.Model
+
+<InputSelect class="@CssClass"
+             disabled="@Disabled"
+             @bind-Value="BoundValue">
+
+    @if (!string.IsNullOrWhiteSpace(Placeholder))
+    {
+        <option value="">@Placeholder</option>
+    }
+
+    @foreach (var item in Items)
+    {
+        <option value="@item">@item</option>
+    }
+</InputSelect>
+
+@code {
+   
+    [Parameter] public string? Value { get; set; }
+    [Parameter] public EventCallback<string?> ValueChanged { get; set; }
+
+    [Parameter] public DropdownConfig? Config { get; set; } = null;
+
+    private IEnumerable<string> Items => Config?.Items ?? Array.Empty<string>();
+    private string? Placeholder => Config?.Placeholder;
+    private string CssClass => Config?.CssClass ?? "form-select";
+    private bool Disabled => Config?.Disabled ?? false;
+    
+    private string? BoundValue
+    {
+        get => Value;
+        set => ValueChanged.InvokeAsync(value);
+    }
+}
