@@ -1,12 +1,31 @@
 # GainsLab
 
-End-to-end playground for GainsLab’s workout content stack. The repo hosts:
+End-to-end playground for GainsLab’s workout content stack. The repo ships:
 
-- a PostgreSQL-backed sync API,
-- shared domain/contract libraries,
-- an Avalonia desktop editor with local SQLite caching and an offline outbox.
+- **GainsLab.Domain** — immutable aggregates, identifiers, enums, and cross-layer interfaces.
+- **GainsLab.Contracts** — DTOs + sync interfaces consumed by the API, editor, and web layer.
+- **GainsLab.Infrastructure** — EF Core contexts, repositories, seeders, sync/outbox services, HTTP providers.
+- **GainsLab.Api** — ASP.NET Core sync API (health checks, CRUD endpoints, migrations).
+- **Desktop editor** (`desktop/GainsLab.Editor`) — Avalonia app with SQLite caching/offline outbox.
+- **Web layer** (`web/GainsLab.WebLayer`) — Blazor Server data-management front end for CRUD workflows.
 
-Everything targets **.NET 9.0** and is wired together through shared interfaces so either side can evolve independently.
+Everything targets **.NET 9.0** and composes through shared interfaces so components can evolve independently.
+
+---
+
+## Documentation Map
+
+Each project includes a focused README:
+
+- [`backend/GainsLab.Domain/README.md`](backend/GainsLab.Domain/README.md) – domain aggregates, value objects, interfaces.
+- [`backend/GainsLab.Contracts/README.md`](backend/GainsLab.Contracts/README.md) – DTO families, sync interfaces, enums.
+- [`backend/GainsLab.Infrastructure/README.md`](backend/GainsLab.Infrastructure/README.md) – contexts, repositories, migrations, caches, outbox, sync services.
+- [`backend/GainsLab.Api/README.md`](backend/GainsLab.Api/README.md) – API configuration, endpoints, prerequisites.
+- [`backend/GainsLab.Application/README.md`](backend/GainsLab.Application/README.md) – shared application-layer DTOs, mappers, factories, result helpers.
+- [`web/GainsLab.WebLayer/README.md`](web/GainsLab.WebLayer/README.md) – Blazor-based management UI configuration and feature set.
+- `Core-API-Editor-README.txt` – architectural walkthrough spanning core, API, and desktop editor.
+
+Use this root README for a high-level summary and jump into the project-specific docs when you need deeper implementation details.
 
 ---
 
@@ -14,12 +33,14 @@ Everything targets **.NET 9.0** and is wired together through shared interfaces 
 
 | Path | Description |
 | --- | --- |
-| `backend/GainsLab.Core` | Domain primitives, identifiers, logging utilities, and shared interfaces. |
-| `backend/GainsLab.Contracts` | Sync DTOs, HTTP providers, outbox interceptor, API-facing sync services. |
-| `backend/GainsLab.Infrastructure` | EF Core contexts (Postgres + SQLite), DTOs, migrations, seeds, repositories. |
-| `backend/GainsLab.Api` | ASP.NET Core host exposing sync endpoints and health checks. |
-| `desktop/GainsLab.Editor` | Avalonia desktop client, sync orchestrator, local caches, UI shell. |
-| `Core-API-Editor-README.txt` | Deep dive into how the layers fit together. |
+| `backend/GainsLab.Domain` | Core domain primitives, enums, identifiers, and interfaces (see README for aggregates). |
+| `backend/GainsLab.Contracts` | Sync/CRUD DTOs, shared interfaces, and enums consumed across projects. |
+| `backend/GainsLab.Application` | DTO records, domain mappers, factories, repository/data-management contracts, result helpers. |
+| `backend/GainsLab.Infrastructure` | EF Core contexts (Postgres + SQLite), repositories, migrations, caches, sync/outbox services, HTTP providers. |
+| `backend/GainsLab.Api` | ASP.NET Core host exposing sync + CRUD endpoints, migrations, health checks. |
+| `desktop/GainsLab.Editor` | Avalonia desktop client with SQLite caching, offline outbox, and sync orchestration. |
+| `web/GainsLab.WebLayer` | Blazor Server data-management UI (create/edit/delete entities via the API). |
+| `docs/` | Additional design notes and supporting documentation. |
 
 ---
 
@@ -27,85 +48,100 @@ Everything targets **.NET 9.0** and is wired together through shared interfaces 
 
 - .NET SDK **9.0.100** or newer.
 - PostgreSQL 14+ reachable via `ConnectionStrings:GainsLabDb`.
-- SQLite (bundled with .NET) for the editor’s local cache.
-- Optional: `dotnet-ef` global tool for managing migrations.
+- SQLite (bundled) for the editor’s local cache.
+- Optional: `dotnet-ef` global tool when authoring migrations.
+- For the web layer/editor, a running API base URL (defaults to `https://localhost:5001/` or override via `GAINS_SYNC_BASE_URL`).
 
 ---
 
 ## Quick Start
 
-1. **Restore and build**
+1. **Restore and build everything**
    ```bash
    dotnet restore GainsLab.sln
    dotnet build GainsLab.sln
    ```
 
-2. **Run database migrations**
+2. **Prepare the database**
    ```bash
    dotnet ef database update \
      --project backend/GainsLab.Infrastructure \
      --startup-project backend/GainsLab.Api \
      --context GainLabPgDBContext
    ```
-   The API automatically runs migrations on startup as well, but applying them ahead of time keeps logs clean.
+   The API also migrates on startup, but running this explicitly keeps logs tidy and surfaces schema issues early.
 
 3. **Launch the API**
    ```bash
    dotnet run --project backend/GainsLab.Api/GainsLab.Api.csproj
    ```
-   - Environment defaults to `Development`.
-   - Connection string is read from `appsettings.Development.json` or user secrets.
-   - On boot the app logs migration status and seeds baseline data through `DBDataInitializer`.
+   - Defaults to the `Development` environment and loads `ConnectionStrings:GainsLabDb` from appsettings or user secrets.
+   - Logs connection info, migration status, and seeding operations via `GainsLabLogger`.
 
-4. **Launch the editor (optional)**
-   ```bash
-   dotnet run --project desktop/GainsLab.Editor/GainsLab.Editor.csproj
-   ```
-   - The editor seeds a local SQLite DB under `%LOCALAPPDATA%/GainsLab/`.
-   - Configure the API base URL via DI or environment (`GAINS_SYNC_BASE_URL`).
+4. **Launch a client**
+   - **Desktop editor**
+     ```bash
+     dotnet run --project desktop/GainsLab.Editor/GainsLab.Editor.csproj
+     ```
+     Creates a SQLite cache under `%LOCALAPPDATA%/GainsLab/`, hydrates local repositories, and syncs via `HttpDataProvider`.
+   - **Web layer**
+     ```bash
+     dotnet run --project web/GainsLab.WebLayer/GainsLab.WebLayer.csproj
+     ```
+     Ensure `GAINS_SYNC_BASE_URL` points at the API (falls back to `https://localhost:5001/`). Provides CRUD dashboards for equipment, descriptors, muscles, and movement categories.
 
 ---
 
 ## Database & Migrations
 
 - **Contexts**
-  - `GainLabPgDBContext` (Postgres) — tables `descriptors`, `equipments`, `outbox_changes`, etc.
-  - `GainLabSQLDBContext` (SQLite) — mirrors the schema as closely as possible for offline editing.
-- **DataAuthority**
-  - Both DTOs now expose an `Authority` enum (`Upstream`, `Downstream`, `Bidirectional`) so the server can reject edits originating from the wrong tier.
-  - Defaults to `Bidirectional` through code and database defaults; reseed after schema changes.
-- **Commands**
-  - Add migration: `dotnet ef migrations add <Name> --project backend/GainsLab.Infrastructure --startup-project backend/GainsLab.Api`.
-  - Update DB: `dotnet ef database update --context GainLabPgDBContext` (or `GainLabSQLDBContext` for local).
+  - `GainLabPgDBContext` (Postgres) — main API database (tables: `descriptors`, `equipments`, `movement_*`, `outbox_changes`, etc.).
+  - `GainLabSQLDBContext` (SQLite) — mirrors schema locally for the editor.
+- **Authority & audit metadata**
+  - `DataAuthority` defaults to `Bidirectional` to gate upstream/downstream writes. Ensure migrations + seeds keep defaults in sync.
+- **Common commands**
+  - Add migration:
+    ```bash
+    dotnet ef migrations add <Name> \
+      --project backend/GainsLab.Infrastructure \
+      --startup-project backend/GainsLab.Api \
+      --context GainLabPgDBContext
+    ```
+  - Update Postgres:
+    ```bash
+    dotnet ef database update --context GainLabPgDBContext
+    ```
+  - Update SQLite:
+    ```bash
+    dotnet ef database update --context GainLabSQLDBContext
+    ```
+  - See the infrastructure README for more details about seeds, context factories, and migration layout.
 
 ---
 
-## Sync Pipeline Overview
+## Sync & Data Flow Snapshot
 
-1. Entities implement `ISyncDto` (e.g., `EquipmentSyncDTO`) with metadata such as `UpdatedAtUtc`, `UpdatedSeq`, `Authority`, and tombstone flags.
-2. The API registers `ISyncService<T>` for each entity. Each service:
-   - Pulls: returns ordered `SyncPage<T>` batches based on a cursor.
-   - Pushes: validates payloads, enforces `DataAuthority`, stamps server metadata, persists via EF Core, and writes to the outbox.
-3. The desktop editor hosts:
-   - `HttpDataProvider` (from `GainsLab.Contracts`) for remote calls.
-   - `ISyncEntityProcessor` implementations that materialize DTOs into SQLite entities.
-   - An outbox interceptor that normalizes payloads (ignoring timestamps/row versions) to prevent duplicates.
+1. **Contracts** — All entities implement `ISyncDto` (e.g., `EquipmentSyncDTO`) exposing GUIDs, timestamps, `UpdatedSeq`, tombstone flags, and `DataAuthority`.
+2. **API services** — Each entity registers an `ISyncService<T>` that returns ordered `SyncPage<T>` slices and validates push payloads before persisting and enqueueing outbox changes.
+3. **Infrastructure** — `HttpDataProvider`, repositories, and caches coordinate remote pulls, local persistence, and outbox dispatch. `SyncState` remembers per-entity cursors.
+4. **Clients** — Desktop and web layer resolve providers/gateways to hydrate UI state, trigger saves, and show toast/confirmation messages. Both can seed local state using the shared sync pipeline.
 
 ---
 
-## Troubleshooting
+## Troubleshooting & Tips
 
-- **`relation "public.equipments" does not exist`** — the database was dropped without rerunning migrations. Apply migrations again or delete/recreate the database entirely before restarting the API.
-- **Authority warnings during migrations** — EF complains because enum defaults clash with database defaults. Safe to ignore since `BaseDto` sets the value explicitly; suppress by configuring a sentinel or making the column nullable if desired.
-- **Duplicate outbox rows** — ensure the database is on the latest schema; the interceptor now normalizes payloads before insert.
+- **`relation "public.equipments" does not exist`** — Run migrations again (Postgres database likely dropped).
+- **Authority warnings during migrations** — EF default clashes are safe to ignore because the DTO base sets explicit values; adjust migrations if noise becomes problematic.
+- **Duplicate outbox rows** — Ensure the app + database are on matching migrations; the interceptor normalizes payloads but old schemas can still create duplicates.
+- **Desktop/Web cannot reach API** — Check `GAINS_SYNC_BASE_URL`, ensure HTTPS dev certificates are trusted, and verify `NetworkChecker` is satisfied (logs appear in console via `GainsLabLogger`).
 
 ---
 
 ## Contributing
 
-1. Keep XML documentation up to date when touching shared contracts or domain types.
-2. Add/verify migrations for both Postgres and SQLite when changing DTOs.
-3. Extend the architecture doc (`Core-API-Editor-README.txt`) when adding new layers or workflows.
-4. Prefer functional, isolated changes—API, contracts, editor, and infrastructure all ship together.
+1. Touch the smallest layer that solves the problem—API, contracts, application, domain, infrastructure, and clients all rely on each other.
+2. Update XML docs/comments when altering shared interfaces or DTOs; downstream IntelliSense depends on them.
+3. Keep Postgres + SQLite migrations in lockstep when schema changes affect both contexts.
+4. Extend `Core-API-Editor-README.txt` or the project-specific READMEs when adding new workflows or layers so future contributors can follow along.
 
 Happy hacking!
