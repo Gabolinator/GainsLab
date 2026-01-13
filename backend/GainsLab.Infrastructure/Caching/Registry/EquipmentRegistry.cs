@@ -3,6 +3,8 @@ using GainsLab.Application.Results;
 using GainsLab.Contracts.Dtos.Delete.Outcome;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.ID;
+using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Infrastructure.Caching.QueryCache;
 
 namespace GainsLab.Infrastructure.Caching.Registry;
@@ -86,5 +88,12 @@ public sealed class EquipmentRegistry
         return result.Success && Equipments.TryGetValue(id.Value, out var refreshed)
             ? refreshed
             : null;
+    }
+
+    public async  Task<Result<EquipmentUpdateCombinedOutcome>> UpdateEquipmentAsync(EquipmentUpdateRequest request, DescriptorUpdateRequest toUpdateRequest)
+    {
+        var result = await _gateway.UpdateEquipmentAsync(request,toUpdateRequest);
+        if(result.Success) _cache.Invalidate();
+        return result;
     }
 }

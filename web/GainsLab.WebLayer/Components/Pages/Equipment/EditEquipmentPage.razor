@@ -1,7 +1,6 @@
 ﻿@rendermode InteractiveServer
 @page "/equipments/{id:guid}"
 @using GainsLab.Application.DTOs
-@using GainsLab.Application.Interfaces.DataManagement.Gateway
 @using GainsLab.Application.Results
 @using GainsLab.Contracts
 @using GainsLab.Contracts.Dtos.Delete.Outcome
@@ -11,12 +10,14 @@
 @using GainsLab.Infrastructure.Caching.Registry
 @using GainsLab.Infrastructure.Utilities
 @using GainsLab.WebLayer.Components.Control
-@using GainsLab.WebLayer.Model
 @using GainsLab.WebLayer.Model.Descriptor
 @using GainsLab.WebLayer.Model.Equipment
 @using GainsLab.WebLayer.Model.Notification
-@implements IDisposable
+@using GainsLab.WebLayer.Model.Notification.Confirmation
 
+
+@implements IDisposable
+@inject NavigationManager NavManager;
 
 
 <p>
@@ -72,10 +73,10 @@
 
     [Inject] private ILogger Logger { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
-    [Inject] private IEquipmentGateway Repo { get; set; } = default!;
     [Inject] private EquipmentRegistry EquipmentRegistry { get; set; } = default!;
     [Inject] private DescriptorRegistry DescriptorRegistry { get; set; } = default!;
     [Inject] private IToast Toast { get; set; } = default!;
+    [Inject] private IConfirmDialog ConfirmDialog { get; set; } = default!;
 
     public EquipmentGetDTO? Equipment { get; set; } = null;
     public EquipmentEditFormDTO? EditEquipment { get; set; } = null;
@@ -281,7 +282,7 @@
       
         Messages.ClearAll();
         
-        var outcome= await Repo.UpdateEquipmentAsync(request, EditEquipment.Descriptor.ToUpdateRequest());
+        var outcome= await EquipmentRegistry.UpdateEquipmentAsync(request, EditEquipment.Descriptor.ToUpdateRequest());
         if (!outcome.Success || outcome.Value == null)
         {
             var message = "Could not update equipment: ";
@@ -308,27 +309,43 @@
     private async Task Delete()
     {
         
-        
         Messages ??= new MessagesContainer();
         Messages.ClearAll();
         if (Equipment == null || Equipment.Id == Guid.Empty)
         {
             Messages.AddWarning("Invalid Equipment Id");
+            Toast.Error($"Could not delete equipment : Invalid Equipment");
             return;
         }
         
+        var ok = await ConfirmDialog.ShowAsync(
+            new ConfirmRequest(
+                "Delete Item", 
+                $"Are You sure you want to delete Equipment '{Equipment.Name}' ? It can't be undone",
+                "Delete", 
+                "Cancel",
+                true));
         
-        //show a toast style window , you sure you want to ? 
-
-        Result<EquipmentDeleteOutcome> outcome = await Repo.DeleteEquipmentAsync(new EquipmentEntityId(Equipment.Id));
-        if (outcome.Success || outcome.Value is not { Outcome: DeleteOutcome.Deleted })
+        if (!ok)
         {
-            Messages.Append(outcome.Messages);
+            Toast.Error($"Delete {Equipment.Name} Cancelled");
             return;
         }
         
-        Messages.AddInfo($"Equipment {outcome.Value.Id} Deleted");
-        EquipmentRegistry.Invalidate();
+        Result<EquipmentDeleteOutcome> outcome = await EquipmentRegistry.DeleteEquipmentAsync(new EquipmentEntityId(Equipment.Id));
+        if (!outcome.Success || outcome.Value is not { Outcome: DeleteOutcome.Deleted })
+        {
+          
+            Messages.Append(outcome.Messages);
+            Toast.Error($"Could not delete equipment : {Messages.ToString(MessageType.Error)}");
+            return;
+        }
+
+        var message = $"Equipment {outcome.Value.Id} Deleted";
+      
+        Messages.AddInfo(message);
+        Toast.Success(message);
+        NavManager.NavigateTo("equipments");
         
         
 
