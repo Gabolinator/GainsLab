@@ -17,8 +17,9 @@ public interface IEquipmentGateway
     Task<Result<EquipmentGetDTO>> GetEquipmentAsync(EquipmentEntityId id);
 
     Task<Result<EquipmentUpdateCombinedOutcome>> UpdateEquipmentAsync(EquipmentUpdateRequest request,
-        DescriptorUpdateRequest? descriptorUpdateRequest);
+        DescriptorUpdateRequest? descriptorUpdateRequest,
+        ICache? cache);
 
-    Task<Result<EquipmentDeleteOutcome>> DeleteEquipmentAsync(EquipmentEntityId id);
-    Task<Result<EquipmentCreateCombineOutcome>> CreateEquipmentAsync(EquipmentCombineCreateRequest request);
+    Task<Result<EquipmentDeleteOutcome>> DeleteEquipmentAsync(EquipmentEntityId id,ICache? cache);
+    Task<Result<EquipmentCreateCombineOutcome>> CreateEquipmentAsync(EquipmentCombineCreateRequest request, ICache? cache);
 }

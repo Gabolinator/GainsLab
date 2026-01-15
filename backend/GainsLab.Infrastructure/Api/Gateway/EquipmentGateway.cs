@@ -1,5 +1,6 @@
 ﻿using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.DTOs.Extensions;
+using GainsLab.Application.Interfaces.DataManagement;
 using GainsLab.Application.Interfaces.DataManagement.Gateway;
 using GainsLab.Application.Interfaces.DataManagement.Provider;
 using GainsLab.Application.Results;
@@ -26,15 +27,15 @@ public class EquipmentGateway : IEquipmentGateway
     private readonly IEquipmentProvider _provider;
     private readonly ILogger _logger;
     private readonly DescriptorRegistry _descriptorGateway;
-    private readonly EquipmentQueryCache _cache;
+   // private readonly EquipmentQueryCache _cache;
     
     
-    public EquipmentGateway(IEquipmentProvider equipmentProvider, DescriptorRegistry descriptorGateway ,ILogger logger, EquipmentQueryCache cache)
+    public EquipmentGateway(IEquipmentProvider equipmentProvider, DescriptorRegistry descriptorGateway ,ILogger logger)
     {
         _provider = equipmentProvider;
         _descriptorGateway = descriptorGateway;
         _logger = logger;
-        _cache = cache;
+      //  _cache = cache;
     }
 
     public async Task<Result<IReadOnlyList<EquipmentGetDTO>>> GetAllEquipmentsAsync()
@@ -95,7 +96,7 @@ public class EquipmentGateway : IEquipmentGateway
     }
         
 
-    public async Task<Result<EquipmentUpdateCombinedOutcome>> UpdateEquipmentAsync(EquipmentUpdateRequest request, DescriptorUpdateRequest? descriptorUpdateRequest)
+    public async Task<Result<EquipmentUpdateCombinedOutcome>> UpdateEquipmentAsync(EquipmentUpdateRequest request, DescriptorUpdateRequest? descriptorUpdateRequest, ICache? cache)
     {
         
        MessagesContainer message = new MessagesContainer();
@@ -136,7 +137,7 @@ public class EquipmentGateway : IEquipmentGateway
         
         else equipment = equipmentOutcome.Value!;
 
-        if(equipment != null) _cache.Invalidate();
+        if(equipment != null) cache?.Invalidate();
        
 
         return equipment == null && descriptor == null
@@ -147,7 +148,7 @@ public class EquipmentGateway : IEquipmentGateway
 
     }
 
-    public async Task<Result<EquipmentDeleteOutcome>> DeleteEquipmentAsync(EquipmentEntityId request)
+    public async Task<Result<EquipmentDeleteOutcome>> DeleteEquipmentAsync(EquipmentEntityId request, ICache? cache)
     {
         if (!request.IsValid())
         {
@@ -157,18 +158,18 @@ public class EquipmentGateway : IEquipmentGateway
         var result = await _provider.DeleteEquipmentAsync(request, default);
         if (result.Success)
         {
-           InvalidateCaches();
+           InvalidateCaches(cache);
         }
         return result;
     }
 
-    private void InvalidateCaches()
+    private void InvalidateCaches(ICache? cache)
     {
         _descriptorGateway.Invalidate();
-        _cache.Invalidate();
+        cache?.Invalidate();
     }
 
-    public async Task<Result<EquipmentCreateCombineOutcome>> CreateEquipmentAsync(EquipmentCombineCreateRequest request)
+    public async Task<Result<EquipmentCreateCombineOutcome>> CreateEquipmentAsync(EquipmentCombineCreateRequest request, ICache? cache)
     {
         MessagesContainer message = new MessagesContainer();
 
@@ -210,7 +211,7 @@ public class EquipmentGateway : IEquipmentGateway
                 descriptorCreateOutcome = createdDescriptor == null ? null : new DescriptorCreateOutcome(CreateOutcome.Created,createdDescriptor);
             }
 
-            InvalidateCaches();
+            InvalidateCaches(cache);
         }
         
         //invalid

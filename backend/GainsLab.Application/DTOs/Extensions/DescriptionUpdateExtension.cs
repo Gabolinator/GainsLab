@@ -1,10 +1,11 @@
-﻿using GainsLab.Contracts.Dtos.PutDto;
+﻿using GainsLab.Application.DTOs.Description;
+using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Domain.Interfaces;
 
-namespace GainsLab.Application.DTOs.Description;
+namespace GainsLab.Application.DTOs.Extensions;
 
-public static class DescriptionDTOExtension
+public static class DescriptionUpdateExtension
 {
     
     public static bool AnythingChanged(this DescriptorRecord record, DescriptorPutDTO dto)

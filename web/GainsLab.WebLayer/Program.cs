@@ -75,6 +75,7 @@ void AddProvider(IServiceCollection s)
     s.AddScoped<IDescriptorProvider, HttpDataProvider>();
     s.AddScoped<IEquipmentProvider,HttpDataProvider>();
     s.AddScoped<IMuscleProvider,HttpDataProvider>();
+    s.AddScoped<IMovementCategoryProvider,HttpDataProvider>();
 }
 
 void AddGateway(IServiceCollection s)
@@ -101,8 +102,12 @@ void AddCacheRegistries(IServiceCollection builderServices)
 {
     builderServices.AddSingleton<EquipmentQueryCache>();
     builderServices.AddSingleton<DescriptorQueryCache>();
+    builderServices.AddSingleton<MuscleQueryCache>();
+    builderServices.AddSingleton<MovementCategoryQueryCache>();
     builderServices.AddScoped<EquipmentRegistry>();
     builderServices.AddScoped<DescriptorRegistry>();
+    builderServices.AddScoped<MuscleRegistry>();
+    builderServices.AddScoped<MovementCategoryRegistry>();
 }
 
 

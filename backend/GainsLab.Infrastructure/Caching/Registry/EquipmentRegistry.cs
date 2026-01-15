@@ -3,6 +3,8 @@ using GainsLab.Application.Results;
 using GainsLab.Contracts.Dtos.Delete.Outcome;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.ID;
+using GainsLab.Contracts.Dtos.PostDto.Outcome;
+using GainsLab.Contracts.Dtos.PostDto.Request;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Infrastructure.Caching.QueryCache;
@@ -32,9 +34,7 @@ public sealed class EquipmentRegistry
         {
             return cached;
         }
-
-       // return _cache.GetAllAsync(() => _gateway.GetAllEquipmentsAsync());
-       
+        
        var result = await _cache.GetAllAsync(() => _gateway.GetAllEquipmentsAsync());
        if (result.Success && result.HasValue)
        {
@@ -71,7 +71,7 @@ public sealed class EquipmentRegistry
 
     public async Task<Result<EquipmentDeleteOutcome>> DeleteEquipmentAsync(EquipmentEntityId equipmentEntityId)
     {
-        var result = await _gateway.DeleteEquipmentAsync(equipmentEntityId);
+        var result = await _gateway.DeleteEquipmentAsync(equipmentEntityId, _cache);
         if(result.Success) Invalidate();
         return result;
     }
@@ -92,8 +92,11 @@ public sealed class EquipmentRegistry
 
     public async  Task<Result<EquipmentUpdateCombinedOutcome>> UpdateEquipmentAsync(EquipmentUpdateRequest request, DescriptorUpdateRequest toUpdateRequest)
     {
-        var result = await _gateway.UpdateEquipmentAsync(request,toUpdateRequest);
+        var result = await _gateway.UpdateEquipmentAsync(request,toUpdateRequest, _cache);
         if(result.Success) _cache.Invalidate();
         return result;
     }
+
+    public async Task<Result<EquipmentCreateCombineOutcome>> CreateEquipmentAsync(EquipmentCombineCreateRequest request)
+        => await _gateway.CreateEquipmentAsync(request, _cache);
 }

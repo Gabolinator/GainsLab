@@ -52,7 +52,7 @@ public sealed class DescriptorRegistry
     public async Task<Result<DescriptorUpdateOutcome>> UpdateDescriptorAsync(DescriptorUpdateRequest updateDescriptor)
     {
        //
-       var result = await _gateway.UpdateDescriptorAsync(updateDescriptor);
+       var result = await _gateway.UpdateDescriptorAsync(updateDescriptor, _cache);
        
        if(!result.Success) return result;
        Invalidate();

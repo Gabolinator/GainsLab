@@ -17,9 +17,10 @@ public class MovementCategoryRecord : BaseRecord
 
     public DescriptorRecord? Descriptor { get; set; }
 
-    public int? ParentCategoryDbId { get; set; }
-
-    public MovementCategoryRecord? ParentCategory { get; set; }
+    // //is this still used ? 
+     public int? ParentCategoryDbId { get; set; }
+    //
+     public MovementCategoryRecord? ParentCategory { get; set; }
 
     //base categories for this category - we will have one category parent created for each of the base enum elements eMovementCategories - they will be used here
     public ICollection<MovementCategoryRelationRecord> BaseCategoryLinks { get; set; } = new List<MovementCategoryRelationRecord>();
@@ -41,6 +42,8 @@ public class MovementCategoryRecord : BaseRecord
     public IEnumerable<Guid> ChildGUIDs => ChildCategoryLinks.Select(link => link.ChildCategory.GUID).Distinct();
 
     public IEnumerable<Guid> BaseCategoryGUIDs => BaseCategoryLinks.Select(link => link.ParentCategory.GUID).Distinct();
+    
+    public IEnumerable<Guid> ParentAndBaseCategoryGUIDs => ParentCategory == null? BaseCategoryGUIDs : new List<Guid>(BaseCategoryGUIDs).Append(ParentCategory.GUID).Distinct();
 
     // public bool TryGetBaseCategoryFromThis(out eMovementCategories category)
     // {

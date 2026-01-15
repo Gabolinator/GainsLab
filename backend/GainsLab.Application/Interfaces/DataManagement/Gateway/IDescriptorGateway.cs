@@ -12,6 +12,6 @@ namespace GainsLab.Application.Interfaces.DataManagement.Gateway;
 public interface IDescriptorGateway
 {
     public Task<Result<IReadOnlyList<DescriptorGetDTO>>> GetAllDescriptorAsync();
-    Task<Result<DescriptorUpdateOutcome>> UpdateDescriptorAsync(DescriptorUpdateRequest updateDescriptor);
-    Task<Result<DescriptorCreateOutcome>> CreateDescriptorAsync(DescriptorPostDTO descriptorPostDto);
+    Task<Result<DescriptorUpdateOutcome>> UpdateDescriptorAsync(DescriptorUpdateRequest updateDescriptor,  ICache? cache);
+    Task<Result<DescriptorCreateOutcome>> CreateDescriptorAsync(DescriptorPostDTO descriptorPostDto,  ICache? cache);
 }

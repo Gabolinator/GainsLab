@@ -13,7 +13,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Components\Control\MovementCategory\" />
       <Folder Include="Components\Pages\Muscle\" />
       <Folder Include="wwwroot\css\" />
     </ItemGroup>

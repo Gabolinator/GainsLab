@@ -1,4 +1,5 @@
 ﻿using GainsLab.Application.DTOs.Description;
+using GainsLab.Application.Interfaces.DataManagement;
 using GainsLab.Application.Interfaces.DataManagement.Gateway;
 using GainsLab.Application.Interfaces.DataManagement.Provider;
 using GainsLab.Application.Results;
@@ -37,14 +38,21 @@ public class DescriptorGateway : IDescriptorGateway
     }
 
     
-    public async Task<Result<DescriptorUpdateOutcome>> UpdateDescriptorAsync(DescriptorUpdateRequest updateDescriptor)
+    public async Task<Result<DescriptorUpdateOutcome>> UpdateDescriptorAsync(DescriptorUpdateRequest updateDescriptor,  ICache? cache)
     {
        var result = await _provider.UpdateDescriptorAsync(updateDescriptor, default);
        return result;
-    } 
+       if(result.Success) cache?.Invalidate();
+       return result;
+    }
 
-    public Task<Result<DescriptorCreateOutcome>> CreateDescriptorAsync(DescriptorPostDTO descriptorPostDto)
-        => _provider.CreateDescriptorAsync(descriptorPostDto, default);
+    public async Task<Result<DescriptorCreateOutcome>> CreateDescriptorAsync(DescriptorPostDTO descriptorPostDto,
+        ICache? cache)
+    {
+       var result = await _provider.CreateDescriptorAsync(descriptorPostDto, default);
+       if(result.Success) cache?.Invalidate();
+       return result;
+    }
 
 
     public async Task<Result<IReadOnlyList<DescriptorSyncDTO>>> GetAllDescriptorSyncDtoAsync()

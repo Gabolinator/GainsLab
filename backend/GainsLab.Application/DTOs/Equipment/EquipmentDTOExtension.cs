@@ -1,4 +1,5 @@
 ﻿using GainsLab.Application.DTOs.Description;
+using GainsLab.Application.DTOs.Extensions;
 using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Domain.Interfaces;

@@ -1,10 +1,11 @@
 ﻿
+using GainsLab.Application.Interfaces.DataManagement;
 using GainsLab.Application.Results;
 using GainsLab.Contracts.Dtos.GetDto;
 
 namespace GainsLab.Infrastructure.Caching.QueryCache;
 
-public sealed class EquipmentQueryCache
+public sealed class EquipmentQueryCache :ICache
 {
     private readonly object _lock = new();
     private Task<Result<IReadOnlyList<EquipmentGetDTO>>>? _task;

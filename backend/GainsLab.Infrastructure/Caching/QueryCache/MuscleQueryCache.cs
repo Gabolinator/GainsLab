@@ -1,17 +1,15 @@
-﻿using GainsLab.Application.DTOs.Description;
-using GainsLab.Application.Interfaces.DataManagement;
-using GainsLab.Application.Results;
-using GainsLab.Contracts.Dtos.GetDto;
+﻿using GainsLab.Application.Results;
+﻿using GainsLab.Contracts.Dtos.GetDto;
 
 namespace GainsLab.Infrastructure.Caching.QueryCache;
 
-public sealed class DescriptorQueryCache : ICache
+public sealed class MuscleQueryCache
 {
     private readonly object _lock = new();
-    private Task<Result<IReadOnlyList<DescriptorGetDTO>>>? _task;
+    private Task<Result<IReadOnlyList<MuscleGetDTO>>>? _task;
 
-    public Task<Result<IReadOnlyList<DescriptorGetDTO>>> GetAllAsync(
-        Func<Task<Result<IReadOnlyList<DescriptorGetDTO>>>> factory)
+    public Task<Result<IReadOnlyList<MuscleGetDTO>>> GetAllAsync(
+        Func<Task<Result<IReadOnlyList<MuscleGetDTO>>>> factory)
     {
         lock (_lock)
         {
@@ -19,7 +17,7 @@ public sealed class DescriptorQueryCache : ICache
         }
     }
 
-    public bool TryGetCompleted(out Result<IReadOnlyList<DescriptorGetDTO>> result)
+    public bool TryGetCompleted(out Result<IReadOnlyList<MuscleGetDTO>> result)
     {
         lock (_lock)
         {

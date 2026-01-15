@@ -1,0 +1,47 @@
+﻿@using GainsLab.WebLayer.Model
+@rendermode InteractiveServer
+
+<td>@Index</td>
+<td>@Name</td>
+<td>@Description</td>
+<td>@Parent</td>
+<td>@FormatList(BaseCategories)</td>
+<td>@FormatList(ChildCategories)</td>
+<td>@Parent</td>
+<td>@UpdatedAtUtc</td>
+
+<td><LinkComponent Link="EditLink"></LinkComponent></td>
+<td>
+    <button class="btn btn-link p-0 text-danger" type="button" @onclick="OnDeleteClicked">
+        Delete
+    </button>
+</td>
+
+@code {
+    [Parameter] public int Index { get; set; } = 0;
+    [Parameter] public string Name { get; set; } = "Unknown";
+    [Parameter] public string Description { get; set; } = "Description";
+    [Parameter] public string Parent { get; set; } = "Parent Category";
+    [Parameter] public List<string> BaseCategories { get; set; } = new();
+    [Parameter] public List<string> ChildCategories { get; set; } = new();
+    [Parameter] public string UpdatedAtUtc { get; set; } = "UpdatedAtUtc";
+    [Parameter] public Link? EditLink { get; set; }
+    [Parameter] public Guid Id { get; set; } = Guid.Empty;
+    [Parameter] public EventCallback<Guid> DeleteRequested { get; set; }
+
+    private string FormatList(List<string> list)
+    {
+        if(!list.Any()) return "None";
+        return string.Join(", ", list);
+    }
+
+    private async Task OnDeleteClicked()
+    {
+        if (!DeleteRequested.HasDelegate || Id == Guid.Empty)
+        {
+            return;
+        }
+
+        await DeleteRequested.InvokeAsync(Id);
+    }
+}

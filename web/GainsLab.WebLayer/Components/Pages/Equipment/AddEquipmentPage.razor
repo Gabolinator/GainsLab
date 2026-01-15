@@ -65,8 +65,7 @@
     [Inject] private ILogger Logger { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
     [Inject] private IToast Toast{ get; set; }
-
-    [Inject] private IEquipmentGateway Repo { get; set; } = default!;
+    
     [Inject] private EquipmentRegistry EquipmentRegistry { get; set; } = default!;
     [Inject] private DescriptorRegistry DescriptorRegistry { get; set; } = default!;
     
@@ -276,7 +275,7 @@
         EquipmentCombineCreateRequest request = CreateEquipment.ToCombineCreateRequest();
         
      
-        Result<EquipmentCreateCombineOutcome> outcome= await Repo.CreateEquipmentAsync(request);
+        Result<EquipmentCreateCombineOutcome> outcome= await EquipmentRegistry.CreateEquipmentAsync(request);
         if (!outcome.Success)
         {
             Messages.AddError("Could not update equipment: ");

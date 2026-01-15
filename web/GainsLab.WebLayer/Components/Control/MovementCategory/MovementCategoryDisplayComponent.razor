@@ -1,8 +1,6 @@
-﻿
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+﻿@rendermode @(new InteractiveServerRenderMode(prerender: false))
 @using System.Linq
 @using System.Runtime.CompilerServices
-@using GainsLab.Application.Interfaces.DataManagement.Gateway
 @using GainsLab.Application.Results
 @using GainsLab.Contracts
 @using GainsLab.Contracts.Dtos.Delete.Outcome
@@ -15,7 +13,7 @@
 @using GainsLab.WebLayer.Model.Notification.Confirmation
 
 <p>
-    @if (_equipments == null)
+    @if (_categories == null)
     {
         @if (_error)
         {
@@ -32,30 +30,36 @@
     }
     else
     {
-        <table class="tableEquipment">
+        <table class="tableMovementCategory">
             <thead>
             <tr>
                 <th>Index</th>
                 <th>Name</th>
                 <th aria-label="Description">Desc</th>
+                <th aria-label="Parent">Parent</th>
+                <th aria-label="Bases">Bases</th>
+                <th aria-label="Childs">Childs</th>
                 <th>Date Updated</th>
                 <th>Edit</th>
                 <th>Remove</th>
             </tr>
             </thead>
             <tbody>
-            @foreach (var eq in _equipments)
+            @foreach (var eq in _categories)
             {
 
                 <tr>
-                    <EquipmentTableLine Index="i"
+                    <MovementCategoryTableLine Index="i"
                                         Name="@eq.Name"
                                         Description="@GetDescription(eq)"
+                                        Parent="@GetParent(eq)"
+                                        BaseCategories="@GetBaseCategories(eq)"
+                                        ChildCategories="@GetChildCategories(eq)"
                                         UpdatedAtUtc="@eq.UpdatedAtUtc.ToString()"
                                         EditLink="@GetEditLink(eq)"
                                         EquipmentId="@eq.Id"
-                                        DeleteRequested="DeleteEquipmentAsync">
-                    </EquipmentTableLine>
+                                        DeleteRequested="DeleteCategoryAsync">
+                    </MovementCategoryTableLine>
 
                 </tr>
                 i++;
@@ -68,13 +72,13 @@
 
 @code
 {
-    private EquipmentGetDTO[]? _equipments = null;
+    private MovementCategoryGetDTO[]? _categories = null;
     [Inject] private ILogger Logger { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
-    [Inject] private EquipmentRegistry Repo { get; set; } = default!;
+    [Inject] private MovementCategoryRegistry Repo { get; set; } = default!;
     [Inject] private IToast Toast { get; set; } = default!;
     [Inject] private IConfirmDialog ConfirmDialog { get; set; } = default!;
-   // [Inject] private EquipmentRegistry EquipmentRegistry { get; set; } = default!;
+  
     
     private int i =1;
     private bool _error = false;
@@ -85,27 +89,27 @@
     {
         if (_initialized)
         {
-            Logger.LogWarning(nameof(EquipmentDisplayComponent), $"Already initialized - {Clock.UtcNow}");
+            Logger.LogWarning(nameof(MovementCategoryDisplayComponent), $"Already initialized - {Clock.UtcNow}");
             return ;
         }
         
-        Logger.Log(nameof(EquipmentDisplayComponent),
+        Logger.Log(nameof(MovementCategoryDisplayComponent),
             $"Init instance hash: {RuntimeHelpers.GetHashCode(this)} - {Clock.UtcNow}");
         _initialized = true;
         await  base.OnInitializedAsync();
         
-        await GetEquipments();
+        await GetCategories();
 
 
     }
 
   
 
-    private async Task GetEquipments()
+    private async Task GetCategories()
     {
-        Logger.Log(nameof(EquipmentDisplayComponent), "Getting all equipments");
+        Logger.Log(nameof(MovementCategoryDisplayComponent), "Getting all Categories");
         
-        _equipments = null;
+        _categories = null;
         _error = false;
         _errorMessage = null;
 
@@ -113,11 +117,11 @@
         ApplyResult(result);
     }
 
-    private void ApplyResult(Result<IReadOnlyList<EquipmentGetDTO>> result)
+    private void ApplyResult(Result<IReadOnlyList<MovementCategoryGetDTO>> result)
     {
         if (!result.Success)
         {
-            _equipments = null;
+            _categories = null;
             _error = true;
             _errorMessage = result.GetErrorMessage();
             return;
@@ -125,27 +129,27 @@
 
         _error = false;
         _errorMessage = null;
-        _equipments = result.HasValue ? result.Value.ToArray() : null;
+        _categories = result.HasValue ? result.Value.ToArray() : null;
     }
 
-    private string GetDescription(EquipmentGetDTO eq)
+    private string GetDescription(MovementCategoryGetDTO eq)
     {
         return eq.Descriptor?.content ?? "Description not found";
     }
 
-    private Link? GetEditLink(EquipmentGetDTO eq) => new Link { Text = $" Edit: {eq.Name}", Page = $@"equipments/{eq.Id}" };
+    private Link? GetEditLink(MovementCategoryGetDTO eq) => new Link { Text = $" Edit: {eq.Name}", Page = $@"equipments/{eq.Id}" };
 
-    private async Task DeleteEquipmentAsync(Guid equipmentId)
+    private async Task DeleteCategoryAsync(Guid equipmentId)
     {
 
-        Logger.Log(nameof(EquipmentDisplayComponent), $"Deleting equipment {equipmentId}");
+        Logger.Log(nameof(MovementCategoryDisplayComponent), $"Deleting equipment {equipmentId}");
 
-        if (_equipments is null)
+        if (_categories is null)
         {
             Toast.Error("No Equipments Found");
             return;
         }
-        var eq = _equipments.FirstOrDefault(e => e.Id == equipmentId);
+        var eq = _categories.FirstOrDefault(e => e.Id == equipmentId);
         if (eq == null)
         {
             Toast.Error($"No Equipment Found with id {equipmentId}");
@@ -160,7 +164,7 @@
                 "Cancel",
                 true));
         
-       Logger.Log(nameof(EquipmentDisplayComponent), $"Confirmation {ok}");
+       Logger.Log(nameof(MovementCategoryDisplayComponent), $"Confirmation {ok}");
         
         if (!ok)
         {
@@ -169,12 +173,12 @@
         }
 
         
-        Result<EquipmentDeleteOutcome> result = await Repo.DeleteEquipmentAsync(new EquipmentEntityId(equipmentId));
+        Result<MovementCategoryDeleteOutcome> result = await Repo.DeleteCategoryAsync(new MovementCategoryEntityId(equipmentId));
         if (!result.Success || result.Value is not { Outcome: DeleteOutcome.Deleted })
         {
             _error = true;
             _errorMessage = $"Unable to delete equipment {equipmentId}: {result.GetErrorMessage()}";
-            Logger.LogError(nameof(EquipmentDisplayComponent), _errorMessage);
+            Logger.LogError(nameof(MovementCategoryDisplayComponent), _errorMessage);
             Toast.Error(_errorMessage);
             return;
         }
@@ -188,9 +192,27 @@
      
       
         var success = $"Deleted equipment {equipmentId}";
-        Logger.Log(nameof(EquipmentDisplayComponent), success);
+        Logger.Log(nameof(MovementCategoryDisplayComponent), success);
         Toast.Success(success);
         
-        _equipments = _equipments.Where(e => e.Id != equipmentId).ToArray();
+        _categories = _categories.Where(e => e.Id != equipmentId).ToArray();
+    }
+
+    private string GetParent(MovementCategoryGetDTO c)
+    {
+        if (c.ParentCategory == null) return "None";
+        return c.ParentCategory.Name;
+    }
+
+    private List<string> GetBaseCategories(MovementCategoryGetDTO c)
+    {
+        if (c.BaseCategories == null || !c.BaseCategories.Any()) return new();
+        return c.BaseCategories.Select(c => c.Name).ToList();
+    }
+
+    private List<string> GetChildCategories(MovementCategoryGetDTO c)
+    {
+        if (c.ChildCategories == null || !c.ChildCategories.Any()) return new();
+        return c.ChildCategories.Select(c => c.Name).ToList();
     }
 }

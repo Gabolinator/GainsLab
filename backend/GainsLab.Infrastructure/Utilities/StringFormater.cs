@@ -24,4 +24,10 @@ public static class StringFormater
                 .ToArray()
         );
     }
+
+    public static string Normalize(string? text, params char[] args)
+    {
+        var t = RemoveUnwantedChar(text, args);
+        return t.ToLowerInvariant().Trim(args);
+    }
 }

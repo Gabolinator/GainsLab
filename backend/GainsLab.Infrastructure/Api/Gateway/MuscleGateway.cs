@@ -2,6 +2,7 @@
 using GainsLab.Application.Interfaces.DataManagement.Gateway;
 using GainsLab.Application.Interfaces.DataManagement.Provider;
 using GainsLab.Application.Results;
+using GainsLab.Contracts.Dtos.GetDto;
 
 namespace GainsLab.Infrastructure.Api.Gateway;
 
@@ -14,8 +15,8 @@ public class MuscleGateway : IMuscleGateway
         _provider = provider;
     }
 
-    public async Task<Result<IReadOnlyList<MuscleRecord>>> GetAllMusclesAsync()
+    public async Task<Result<IReadOnlyList<MuscleGetDTO>>> GetAllMusclesAsync()
     {
-        return Result<IReadOnlyList<MuscleRecord>>.NotImplemented(nameof(GetAllMusclesAsync));
+        return Result<IReadOnlyList<MuscleGetDTO>>.NotImplemented(nameof(GetAllMusclesAsync));
     }
 }

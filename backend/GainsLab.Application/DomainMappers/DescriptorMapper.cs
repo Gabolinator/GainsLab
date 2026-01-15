@@ -17,11 +17,18 @@ namespace GainsLab.Application.DomainMappers;
 public static class DescriptorMapper
 {
 
-    public static DescriptorGetDTO? ToGetDTO(this DescriptorRecord? dto)
-    {
-        if (dto == null) return null;
+    public static DescriptorGetDTO? ToGetDTO(this DescriptorRecord? dto) =>
+        dto.TryMapToGetDTO(out var mapped) ? mapped : null;
 
-        return new DescriptorGetDTO(
+    public static bool TryMapToGetDTO(this DescriptorRecord? dto, out DescriptorGetDTO? mapped)
+    {
+        if (dto == null)
+        {
+            mapped = null;
+            return false;
+        }
+
+        mapped = new DescriptorGetDTO(
             dto.GUID,
             dto.Content,
             dto.CreatedAtUtc,
@@ -29,50 +36,78 @@ public static class DescriptorMapper
             dto.UpdatedSeq,
             dto.IsDeleted,
             dto.Authority);
-
+        return true;
     }
     
-    public static DescriptorRecord? ToEntity(this DescriptorPostDTO? dto, IClock clock)
-    {
-        if (dto == null) return null;
+    public static DescriptorRecord? ToEntity(this DescriptorPostDTO? dto, IClock clock) =>
+        dto.TryMapToEntity(clock, out var mapped) ? mapped : null;
 
-        return new DescriptorRecord
+    public static bool TryMapToEntity(this DescriptorPostDTO? dto, IClock clock, out DescriptorRecord? mapped)
+    {
+        if (dto == null)
+        {
+            mapped = null;
+            return false;
+        }
+
+        mapped = new DescriptorRecord
         {
             GUID = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
             Content = dto.DescriptionContent,
             CreatedAtUtc = clock.UtcNow,
-            CreatedBy = !string.IsNullOrWhiteSpace(dto.CreatedBy)? dto.CreatedBy : "system",
+            CreatedBy = !string.IsNullOrWhiteSpace(dto.CreatedBy) ? dto.CreatedBy : "system",
             UpdatedAtUtc = clock.UtcNow,
             UpdatedSeq = 1,
             UpdatedBy = dto.CreatedBy,
-            Authority =  dto.Authority
+            Authority = dto.Authority
         };
 
-
+        return true;
     }
     
-    public static DescriptorPutDTO? ToPutDTO(this DescriptorRecord? dto, IClock clock, UpsertOutcome outcome)
-    {
-        if (dto == null) return null;
+    public static DescriptorPutDTO? ToPutDTO(this DescriptorRecord? dto, IClock clock, UpsertOutcome outcome) =>
+        dto.TryMapToPutDTO(clock, outcome, out var mapped) ? mapped : null;
 
-        return new DescriptorPutDTO{
-           Id= dto.GUID,
-           DescriptionContent = dto.Content,
+    public static bool TryMapToPutDTO(this DescriptorRecord? dto, IClock clock, UpsertOutcome outcome, out DescriptorPutDTO? mapped)
+    {
+        if (dto == null)
+        {
+            mapped = null;
+            return false;
+        }
+
+        mapped = new DescriptorPutDTO
+        {
+            Id = dto.GUID,
+            DescriptionContent = dto.Content,
             Notes = null,
-            Tags =  null,
-           Authority = dto.Authority,
-           UpdatedBy = dto.UpdatedBy,
-           Outcome = outcome,
+            Tags = null,
+            Authority = dto.Authority,
+            UpdatedBy = dto.UpdatedBy,
+            Outcome = outcome,
         };
-        
+
+        return true;
     }
     
     
-    public static DescriptorRecord? ToEntity(this DescriptorPutDTO? dto, IClock clock, Guid? id = null, DescriptorRecord? record= null)
-    {
-        if (dto == null) return null;
+    public static DescriptorRecord? ToEntity(this DescriptorPutDTO? dto, IClock clock, Guid? id = null, DescriptorRecord? record= null) =>
+        dto.TryMapToEntity(clock, out var mapped, id, record) ? mapped : null;
 
-        return new DescriptorRecord
+    public static bool TryMapToEntity(
+        this DescriptorPutDTO? dto,
+        IClock clock,
+        out DescriptorRecord? mapped,
+        Guid? id = null,
+        DescriptorRecord? record = null)
+    {
+        if (dto == null)
+        {
+            mapped = null;
+            return false;
+        }
+
+        mapped = new DescriptorRecord
         {
             
             GUID = id == null || id.Value.Equals(Guid.Empty) ? Guid.NewGuid() : id.Value,
@@ -85,7 +120,7 @@ public static class DescriptorMapper
             Authority =  dto.Authority
         };
 
-
+        return true;
     }
 
 
@@ -94,9 +129,20 @@ public static class DescriptorMapper
     /// </summary>
     /// <param name="domain">Descriptor entity to convert.</param>
     /// <returns>A DTO containing descriptor fields.</returns>
-    public static DescriptorRecord ToRecord(this BaseDescriptorEntity domain, IClock clock)
+    public static DescriptorRecord ToRecord(this BaseDescriptorEntity domain, IClock clock) =>
+        domain.TryMapToRecord(clock, out var record)
+            ? record!
+            : throw new ArgumentNullException(nameof(domain));
+
+    public static bool TryMapToRecord(this BaseDescriptorEntity? domain, IClock clock, out DescriptorRecord? record)
     {
-        return new DescriptorRecord
+        if (domain == null)
+        {
+            record = null;
+            return false;
+        }
+
+        record = new DescriptorRecord
         {
             Id = domain.DbId > 0 ? domain.DbId : 0,
             GUID = domain.Id,
@@ -110,6 +156,8 @@ public static class DescriptorMapper
             DeletedAt = domain.CreationInfo.DeletedAt,
             DeletedBy = domain.CreationInfo.DeletedBy
         };
+
+        return true;
     }
 
     /// <summary>
@@ -117,20 +165,22 @@ public static class DescriptorMapper
     /// </summary>
     /// <param name="dto">DTO retrieved from storage.</param>
     /// <returns>The reconstructed domain entity or <c>null</c> when the DTO is absent.</returns>
-    public static BaseDescriptorEntity? ToDomain(this DescriptorRecord? dto)
+    public static BaseDescriptorEntity? ToDomain(this DescriptorRecord? dto) =>
+        dto.TryMapToDomain(out var entity) ? entity : null;
+
+    public static bool TryMapToDomain(this DescriptorRecord? dto, out BaseDescriptorEntity? entity)
     {
         if (dto == null)
         {
-            return null;
+            entity = null;
+            return false;
         }
 
         var description = new Description(dto.Content);
         var content = new BaseDescriptorContent { Description = description };
         var creation = new AuditedInfo(dto.CreatedAtUtc, dto.CreatedBy, dto.UpdatedAtUtc, dto.UpdatedBy, dto.Version, dto.IsDeleted, dto.DeletedAt, dto.DeletedBy);
 
-        return new BaseDescriptorEntity(new DescriptorId(dto.GUID), content, creation, dto.Id);
-
-        
-
+        entity = new BaseDescriptorEntity(new DescriptorId(dto.GUID), content, creation, dto.Id);
+        return true;
     }
 }
