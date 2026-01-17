@@ -1,0 +1,13 @@
+﻿
+@page "/movement-categories/{id:guid}"
+
+<h3>Edit Movement Category</h3>
+<br>
+<p> @Id</p>
+
+@code {
+    
+    [Parameter]
+    public Guid Id { get; set; } = Guid.Empty;
+    
+}

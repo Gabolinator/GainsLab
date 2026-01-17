@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using GainsLab.Application.Interfaces;
 using GainsLab.Application.Interfaces.DataManagement.Provider;
 using GainsLab.Application.Interfaces.Sync;
 using GainsLab.Application.Results;
@@ -19,7 +20,7 @@ using GainsLab.Infrastructure.Api;
 using GainsLab.Infrastructure.Api.Interface;
 using GainsLab.Infrastructure.SyncService;
 using GainsLab.Infrastructure.Utilities;
-using GainsLab.Models.Utilities;
+using IDescriptorApi = GainsLab.Infrastructure.Api.Interface.IDescriptorApi;
 
 namespace GainsLab.Infrastructure;
 
@@ -36,15 +37,14 @@ public class HttpDataProvider:
     
     private readonly HttpClient _http;
     private readonly ILogger _logger;
+    private readonly INetworkChecker _networkChecker;
     private readonly IApiClientRegistry _apiClient;
     private IEquipmentApi Equipments => _apiClient.EquipmentApi;
     private IDescriptorApi Descriptors =>  _apiClient.DescriptorApi;
 
     private IMuscleApi Muscles => _apiClient.MuscleApi;
     private IMovementCategoryApi MovementCategories => _apiClient.MovementCategoryApi;
-    
-    
-   
+
 
     /// <summary>
     /// Creates a provider that uses the supplied <see cref="HttpClient"/> (preconfigured via DI).
@@ -52,10 +52,12 @@ public class HttpDataProvider:
     /// <param name="http">The HTTP client configured with the sync API base address.</param>
     /// <param name="apiClientRegistry"></param>
     /// <param name="logger">Logger used to capture diagnostic information.</param>
-    public HttpDataProvider(HttpClient http, IApiClientRegistry apiClientRegistry ,ILogger logger)
+    /// <param name="networkChecker"></param>
+    public HttpDataProvider(HttpClient http, IApiClientRegistry apiClientRegistry ,ILogger logger, INetworkChecker networkChecker)
     {
         _http = http;
         _logger = logger;
+        _networkChecker = networkChecker;
         _apiClient = apiClientRegistry;
     }
 
@@ -69,7 +71,7 @@ public class HttpDataProvider:
         _logger.Log(nameof(HttpDataProvider), $"Pull Entity Of Type : {type} from {_http.BaseAddress}");
 
 
-        if (!await NetworkChecker.HasInternetAsync(_logger))
+        if (!await _networkChecker.HasInternetAsync(_logger))
         {
             var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
             _logger.LogWarning(nameof(HttpDataProvider), message);
@@ -107,6 +109,8 @@ public class HttpDataProvider:
             var syncType = type.ToString().ToLowerInvariant();
             
             var url = $"/sync/{syncType}?ts={Uri.EscapeDataString(cursor.ITs.ToString("o"))}&seq={cursor.ISeq}&take={take}";
+            _logger.Log(nameof(HttpDataProvider), $"Trying to access {url}");
+            
             using var res = await _http.GetAsync(url, ct);
             res.EnsureSuccessStatusCode();
 

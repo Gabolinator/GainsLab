@@ -26,8 +26,12 @@ public sealed record MuscleGetDTO(
     Guid? DescriptorId,
     DescriptorGetDTO? Descriptor,
     IReadOnlyList<Guid>? AntagonistIds,
+    IReadOnlyList<MuscleRefDTO>? Antagonists,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,
     long UpdatedSeq,
     bool IsDeleted = false,
     DataAuthority Authority = DataAuthority.Bidirectional);
+
+
+public sealed record MuscleRefDTO(Guid Id, string Name, string? LatinName ="");

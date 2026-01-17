@@ -24,10 +24,10 @@ namespace GainsLab.Application.DomainMappers;
 /// </summary>
 public static class MovementCategoryMapper
 {
-    public static MovementCategoryGetDTO? ToGetDTO(this MovementCategoryRecord? record, IEnumerable<MovementCategoryRecord> allRecords) =>
-        record.TryMapToGetDTO(allRecords.ToList(),out var dto) ? dto : null;
+    public static MovementCategoryGetDTO? ToGetDTO(this MovementCategoryRecord? record) =>
+        record.TryMapToGetDTO(out var dto) ? dto : null;
 
-    public static bool TryMapToGetDTO(this MovementCategoryRecord? record, IReadOnlyList<MovementCategoryRecord> allRecords,out MovementCategoryGetDTO? dto)
+    public static bool TryMapToGetDTO(this MovementCategoryRecord? record,out MovementCategoryGetDTO? dto)
     {
         if (record == null)
         {
@@ -35,28 +35,50 @@ public static class MovementCategoryMapper
             return false;
         }
 
-        var baseCategories = ExtractCategoriesFromLinks(record.BaseCategoryLinks, allRecords).ToArray();
-       
-        var  bases = baseCategories.Select(c=>ToGetDTO(c.parent,allRecords)).Where(c=>c !=null)!;
         
-        var childCategories = ExtractCategoriesFromLinks(record.ChildCategoryLinks, allRecords).ToArray();
-        IEnumerable<MovementCategoryGetDTO> childs = childCategories.Select(c=>ToGetDTO(c.child,allRecords)).Where(c=>c !=null)!;
         
+     //   var baseCategories = ExtractCategoriesFromLinks(record.BaseCategoryLinks, allRecords).ToArray();
+        //
+        // var  bases = baseCategories.Select(c=>ToGetDTO(c.parent,allRecords)).Where(c=>c !=null)!;
+        //
+        // var childCategories = ExtractCategoriesFromLinks(record.ChildCategoryLinks, allRecords).ToArray();
+        // IEnumerable<MovementCategoryGetDTO> childs = childCategories.Select(c=>ToGetDTO(c.child,allRecords)).Where(c=>c !=null)!;
+        //
 
         dto = new MovementCategoryGetDTO(
             record.GUID,
             record.Name,
             record.Descriptor?.GUID,
             record.Descriptor.ToGetDTO(),
-            record.ParentCategory.ToGetDTO(allRecords),
-            bases.ToList(),
-            childs.ToList(),
+            record.ParentCategory?.GUID,
+            ExtractCategoriesFromLinks(record.BaseCategoryLinks),
             record.CreatedAtUtc,
             record.UpdatedAtUtc,
             record.UpdatedSeq,
             record.IsDeleted,
-            record.Authority);
+            record.Authority)
+            {
+                ParentCategory = record.ParentCategory.ToRefDTO()
+            };
+        
         return true;
+    }
+
+    public static MovementCategoryRefDTO? ToRefDTO(this MovementCategoryRecord? record)
+    {
+        if(record == null) return null;
+        
+        return new MovementCategoryRefDTO(record.GUID, record.Name);
+    }
+
+    private static IReadOnlyList<eMovementCategories>? ExtractCategoriesFromLinks(ICollection<MovementCategoryRelationRecord> links)
+    {
+        if (!links.Any()) return null;
+        
+        return links
+            .Select(l=> Enum.TryParse(l.ParentCategory.Name, out eMovementCategories cat)? cat:eMovementCategories.undefined )
+            .Where(c=>c!=eMovementCategories.undefined).ToList();
+
     }
 
     public static MovementCategoryRecord? ToEntity(
@@ -390,23 +412,23 @@ public static class MovementCategoryMapper
         buffer.Add(relation);
     }
 
-    private static IEnumerable<(MovementCategoryRecord? parent, MovementCategoryRecord? child)>  ExtractCategoriesFromLinks( IEnumerable<MovementCategoryRelationRecord>? links, IEnumerable<MovementCategoryRecord> allRecords)
-    {
-        if (links == null || !links.Any() || !allRecords.Any())
-        {
-            return  Enumerable.Empty<(MovementCategoryRecord, MovementCategoryRecord)>();
-        }
-
-        var list= new List<(MovementCategoryRecord? parent, MovementCategoryRecord? child)>(); 
-        foreach (var link in links)
-        {
-         var parent = allRecords.FirstOrDefault(r=> r.Id == link.ParentCategoryId);
-         var child = allRecords.FirstOrDefault(r=> r.Id == link.ChildCategoryId);
-         list.Add((parent, child));
-        }
-        
-        return list;
-    }
+    // private static IEnumerable<(MovementCategoryRecord? parent, MovementCategoryRecord? child)>  ExtractCategoriesFromLinks( IEnumerable<MovementCategoryRelationRecord>? links, IEnumerable<MovementCategoryRecord> allRecords)
+    // {
+    //     if (links == null || !links.Any() || !allRecords.Any())
+    //     {
+    //         return  Enumerable.Empty<(MovementCategoryRecord, MovementCategoryRecord)>();
+    //     }
+    //
+    //     var list= new List<(MovementCategoryRecord? parent, MovementCategoryRecord? child)>(); 
+    //     foreach (var link in links)
+    //     {
+    //      var parent = allRecords.FirstOrDefault(r=> r.Id == link.ParentCategoryId);
+    //      var child = allRecords.FirstOrDefault(r=> r.Id == link.ChildCategoryId);
+    //      list.Add((parent, child));
+    //     }
+    //     
+    //     return list;
+    // }
 
     private static eMovementCategories[] InferFallbackBaseCategories(MovementCategoryRecord dto)
     {

@@ -1,25 +1,31 @@
-Core (backend/GainsLab.Core)
-1. Models/Core/CreationInfo/CreationInfo.cs:47 – Replace the hardcoded BaseAuditedInfo.Clock reference with a real clock abstraction (inject IClock/CoreUtilities) so audit metadata uses the configurable clock.
-2. Models/Core/Interfaces/Component/IWorkoutComponent.cs:19 – If the legacy IWorkoutComponent contract is brought back, enumerate all supported component polymorphic types (equipment, muscles, movements, etc.) instead of leaving the placeholder todo.
-3. Models/Core/Entities/Descriptor/BaseDescriptor.cs:56 – Implement BaseDescriptorContent.Validate() so descriptor data (Description/Notes/Tags/Media) is actually validated before persistence.
-4. Models/Core/Interfaces/Entity/IEntity.cs:9 – Finish the refactor to the new IEntity architecture and port existing aggregates onto the shared base types.
-5. Models/Core/EnumExtensions.cs:5 – Replace the "define me" placeholder descriptions with real text for each eMovementCategories value.
+GainsLab.Domain (backend/GainsLab.Domain, README.md + todo.txt)
+1. Implement full aggregates for Exercise, ExerciseBlock, Workout, Program, and any remaining training artifacts so the domain continues to provide canonical immutable models, identifiers, and descriptors (Entities/, CoreEnums, Entities/Identifier, builder interfaces).
+2. Introduce/extend value objects, relationship modeling, and builders (CreationInfo, Descriptor attachments, identifier lists) so downstream layers can persist and hydrate these training entities consistently.
+3. Update EntityType/DataAuthority enums, seed resolver hooks, and domain interfaces so the new entities participate in the same persistence-agnostic workflows described in the README.
+4. Design robust User aggregates (account info, roles, credentials metadata) under `Entities/User` so identity data matches the same immutable/value-object standards.
 
-Infrastructure & API
-6. backend/GainsLab.Api/Program.cs:29 – Remove the forced Development environment override (or make it configurable) before production deployment.
-7. backend/GainsLab.Contracts/Outbox/OutboxDispatcher.cs:45 – Add retry/recheck logic for failed dispatch attempts so transient network issues don’t drop changes.
-8. backend/GainsLab.Infrastructure/DB/DataRepository.cs:320 – Populate _handlers for every EntityType (movement categories, movements, workouts, etc.) instead of just equipment/descriptors/muscles.
-9. backend/GainsLab.Infrastructure/DB/Handlers/DescriptorService.cs:19 & :29 – Implement BaseDescriptorService.CreateFor/Update so descriptors are persisted/updated properly instead of returning empty shells.
-10. backend/GainsLab.Infrastructure/DB/Context/GainLabPgDBContext.cs:296 – Complete the SaveChangesAsync override (or remove the todo) so timestamps/metadata are consistently applied via the injected clock.
-11. backend/GainsLab.Infrastructure/Caching/ComponentCacheRegistry.cs:56-118 – Implement all cache registry operations (TryGetCache, TryGetComponent(s), Store/StoreAll, Remove, Clear, etc.) and the TODO placeholders inside StoreAll overloads.
+GainsLab.Application (backend/GainsLab.Application, README.md + todo.txt)
+5. Create CRUD + sync DTO suites for Exercise, ExerciseBlock, Workout, and Program under DTOs/, mirroring the patterns documented in the README (records, request/response models, sync DTOs).
+6. Add domain mappers (DomainMappers/<Entity>Mapper.cs) and wire them through EntityDomainMapper so DTOs ↔ aggregates translation is covered.
+7. Expose repositories/providers/gateways/services for the new training entities (Interfaces/…) and ensure Result/APIResult flows back controllers as described in the README.
+8. Introduce user DTOs, mappers, gateways, and application services handling account management and authentication-facing workflows.
+9. Extend factories/seeders where necessary so seeding/bootstrap stories remain aligned with the new training and user entities.
 
-Desktop (GainsLab.Editor)
-12. Models/DataManagement/DataManager.cs:131 – Implement CheckForUpdatesFromUpstream() so the editor actually pulls deltas when online.
-13. Models/DataManagement/DataManager.cs:224 – Implement file loading logic before batch database insertion (currently marked //todo - not implemented).
-14. Models/DataManagement/DataManager.cs:229 – Implement BatchSaveComponentsAsync invocation handling (currently placeholder comment) so file data persists locally.
-15. Models/DataManagement/DataManager.cs:247 – Implement _local.GetAllComponentsAsync() caching flow before storing in-memory caches.
-16. Models/DataManagement/FileAccess/FileDataService.cs:37-69 – Implement SaveToFileAsync, LoadFromFileAsync, LoadAllComponentsAsync, and WriteAllComponentsAsync so offline persistence actually works.
-17. Models/DataManagement/FileAccess/ComponentJsonHelper.cs:19 – When re-enabling file serialization, register all component derived types with the System.Text.Json polymorphism metadata instead of leaving the placeholder todo.
+GainsLab.Infrastructure (backend/GainsLab.Infrastructure, README.md + todo.txt)
+10. Extend GainLabPgDBContext/GainLabSQLDBContext with DbSets/configuration/migrations for each training entity and ensure SeedResolver/DataRepository handler maps know about them.
+11. Implement repositories, DB handlers, sync services, caches, registries, and HTTP gateway implementations covering Exercise, ExerciseBlock, Workout, and Program as outlined in the README (SyncService/, DB/, Caching/, Api/).
+12. Add EF models, repositories, sync/auth plumbing, and supporting services for User accounts/roles (password hashing, token storage, etc.).
+13. Register the new services/providers in DI, update `HttpDataProvider`/`IApiClientRegistry`, and ensure outbox/sync pipelines handle the new DTOs (training + user) end to end.
 
-General
-18. Seed the databases with the real baseline data set (replace current test data) once the models and sync flows above are implemented and stable.
+GainsLab.Api (backend/GainsLab.Api, README.md + todo.txt)
+14. Add ASP.NET controllers for each training entity (CRUD + /sync endpoints) that leverage the application services, DTOs, and APIResultValidation helpers documented in the README.
+15. Introduce authentication/authorization (identity provider, JWT/bearer config, policies) plus User management controllers.
+16. Wire routes/Swagger descriptions, validation, and DI registrations so the controllers expose the same shape as existing descriptor/equipment endpoints while reflecting auth requirements.
+
+GainsLab.WebLayer (web/GainsLab.WebLayer, README.md + todo.txt)
+17. Build Razor pages/components for listing, viewing, creating, editing, and deleting each training entity, following the layout/component patterns in Components/ and Model/.
+18. Hook the pages into the registered gateways/providers, ensure toast/confirmation UX handles the new flows, and add nav menu entries so the entities are discoverable from the editor shell.
+19. Implement authentication UX (login/logout, token refresh) and user management pages tied into the backend identity services.
+
+Testing & Quality
+20. Stand up unit test projects (Domain/Application/Infrastructure/API/WebLayer) covering aggregates, DTO mappers, repositories, services, controllers, and UI logic; ensure CI runs them so new training/user/auth code is validated continuously.

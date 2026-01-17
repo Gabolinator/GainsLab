@@ -1,0 +1,9 @@
+TODO
+====
+- Flesh out Exercise entity (value objects, descriptors, relationships).
+- Model ExerciseBlock entity (grouping, sequencing, metadata).
+- Build Workout entity tying blocks, scheduling, tracking fields.
+- Expand Program entity aggregating workouts and progression rules.
+- Audit remaining training entities to ensure every training artifact has a concrete domain entity.
+- Design rich User aggregates (account info, roles, auth metadata) and align with existing `Entities/User` folder patterns.
+- Add unit tests covering the new training/user aggregates, value objects, and builders.

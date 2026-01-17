@@ -37,6 +37,7 @@ public static class MuscleMapper
             record.Descriptor?.GUID,
             descriptorDto,
             antagonistIds,
+            null,
             record.CreatedAtUtc,
             record.UpdatedAtUtc,
             record.UpdatedSeq,
@@ -45,6 +46,11 @@ public static class MuscleMapper
         return true;
     }
 
+    public static MuscleRefDTO ToRefDto(this MuscleGetDTO syncDto)
+    {
+        return new MuscleRefDTO(syncDto.Id, syncDto.Name, syncDto.LatinName);
+    }
+    
     public static MuscleRecord? ToEntity(this MusclePostDTO? dto, IClock clock) =>
         dto.TryMapToEntity(clock, out var record) ? record : null;
 

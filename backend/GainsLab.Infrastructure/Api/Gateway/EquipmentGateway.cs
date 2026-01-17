@@ -11,12 +11,10 @@ using GainsLab.Contracts.Dtos.ID;
 using GainsLab.Contracts.Dtos.PostDto.Outcome;
 using GainsLab.Contracts.Dtos.PostDto.Request;
 using GainsLab.Contracts.Dtos.SyncDto;
-using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Contracts.SyncService.Mapper;
 using GainsLab.Domain.Interfaces;
-using GainsLab.Infrastructure.Caching.QueryCache;
 using GainsLab.Infrastructure.Caching.Registry;
 using GainsLab.Infrastructure.SyncService;
 
@@ -27,7 +25,6 @@ public class EquipmentGateway : IEquipmentGateway
     private readonly IEquipmentProvider _provider;
     private readonly ILogger _logger;
     private readonly DescriptorRegistry _descriptorGateway;
-   // private readonly EquipmentQueryCache _cache;
     
     
     public EquipmentGateway(IEquipmentProvider equipmentProvider, DescriptorRegistry descriptorGateway ,ILogger logger)
@@ -35,7 +32,6 @@ public class EquipmentGateway : IEquipmentGateway
         _provider = equipmentProvider;
         _descriptorGateway = descriptorGateway;
         _logger = logger;
-      //  _cache = cache;
     }
 
     public async Task<Result<IReadOnlyList<EquipmentGetDTO>>> GetAllEquipmentsAsync()

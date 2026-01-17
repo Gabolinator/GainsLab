@@ -10,6 +10,7 @@ public sealed class MuscleRegistry
 {
     private readonly IMuscleGateway _gateway;
     private readonly MuscleQueryCache _cache;
+    
 
     public Dictionary<Guid, MuscleGetDTO> Muscles { get; private set; } = new();
 

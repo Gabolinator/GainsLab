@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using GainsLab.Application.Interfaces;
 using GainsLab.Application.Results;
 using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
@@ -10,10 +11,9 @@ using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
 using GainsLab.Domain.Interfaces;
-using GainsLab.Infrastructure.Api.Interface;
 using GainsLab.Infrastructure.SyncService;
 using GainsLab.Infrastructure.Utilities;
-using GainsLab.Models.Utilities;
+using IDescriptorApi = GainsLab.Infrastructure.Api.Interface.IDescriptorApi;
 
 namespace GainsLab.Infrastructure.Api;
 
@@ -21,11 +21,13 @@ public class DescriptorApi : IDescriptorApi
 {
     private readonly HttpClient _http;
     private readonly ILogger _logger;
+    private readonly INetworkChecker _networkChecker;
 
-    public DescriptorApi(HttpClient http, ILogger logger)
+    public DescriptorApi(HttpClient http, ILogger logger, INetworkChecker networkChecker)
     {
         _http = http;
         _logger = logger;
+        _networkChecker = networkChecker;
     }
     
     
@@ -37,7 +39,7 @@ public class DescriptorApi : IDescriptorApi
     /// <param name="ct">Cancellation token propagated from the caller.</param>
     public async Task<Result<ISyncPage<ISyncDto>>> PullDescriptorPageAsync(ISyncCursor cursor, int take, CancellationToken ct)
     {
-        if (!await NetworkChecker.HasInternetAsync(_logger))
+        if (!await _networkChecker.HasInternetAsync(_logger))
         {
             var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
             _logger.LogWarning(nameof(DescriptorApi), message);
@@ -96,7 +98,7 @@ public class DescriptorApi : IDescriptorApi
             return  Result<DescriptorCreateOutcome>.Failure("Did not create descriptor - content empty");
         }
         
-        if (!await NetworkChecker.HasInternetAsync(_logger))
+        if (!await _networkChecker.HasInternetAsync(_logger))
         {
             var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
             _logger.LogWarning(nameof(DescriptorApi), message);
@@ -156,7 +158,7 @@ public class DescriptorApi : IDescriptorApi
             return  Result<DescriptorUpdateOutcome>.Failure("Did not update descriptor - ID invalid");
         }
         
-        if (!await NetworkChecker.HasInternetAsync(_logger))
+        if (!await _networkChecker.HasInternetAsync(_logger))
         {
             var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
             _logger.LogWarning(nameof(DescriptorApi), message);

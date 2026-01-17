@@ -1,24 +1,22 @@
-﻿@page "/movementcategories"
+﻿@page "/movement-categories"
 @rendermode InteractiveServer
-@using GainsLab.Domain.Interfaces
-@using GainsLab.WebLayer.Components.Control
-@using GainsLab.WebLayer.Model
+
+@using GainsLab.WebLayer.Components.Control.MovementCategory
 
 
-<DropdownComponent Config="Dropdown" @bind-Value="SelectItem"></DropdownComponent>
+<p>Movement Categories</p>
+
+<br/>
+
+<MovementCategoryDisplayComponent></MovementCategoryDisplayComponent>
+
+<br/>
+
+<br/> <a href = "/movement-categories/new" class="btn btn-primary">Create New</a>
+<br/>
 
 @code {
-
-    [Inject] ILogger Logger { get; set; } = default!;
-
-    public DropdownConfig? Dropdown { get; set; } = new DropdownConfig();
     
-    public string? SelectedItem { get; set; }
-    public string? SelectItem { get => SelectedItem; set => OnDropdownSelected(SelectedItem = value); }
     
-    private void OnDropdownSelected(string? obj)
-    {
-       Logger.Log(nameof(MovementCategoryPage), $"OnDropdownSelected: {obj}");
-    }
-
+    
 }

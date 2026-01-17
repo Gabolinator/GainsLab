@@ -1,0 +1,10 @@
+TODO
+====
+- Implement gateway/service surfaces for each missing training entity to orchestrate API calls.
+- Ensure SyncService variants push/pull entity data and reconcile conflicts.
+- Extend DbContext with tables/sets for the new entities and add migrations as needed.
+- Introduce repositories encapsulating persistence logic for each entity.
+- Register services, repositories, and caches in the DI registry for discovery.
+- Provide caching strategies plus API endpoints/adapters so infrastructure fully supports the new entities.
+- Add EF models/repositories/sync + auth plumbing for User accounts/roles plus supporting services (password hashing, tokens, etc.).
+- Add unit tests/integration tests for repositories, sync services, auth plumbing, and caching behaviors.

@@ -1,0 +1,7 @@
+TODO
+====
+- Add controllers (and supporting DTO/model bindings) for each new training entity.
+- Wire routes, validation, and swagger descriptions for the new endpoints.
+- Call into application/infrastructure services so controllers expose full CRUD/sync capabilities.
+- Introduce authentication/authorization (identity provider, JWT/bearer, policies) and expose User management controllers.
+- Add unit/integration tests for controllers and auth policies/handlers.

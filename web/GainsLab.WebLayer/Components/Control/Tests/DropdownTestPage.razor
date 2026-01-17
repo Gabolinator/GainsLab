@@ -1,0 +1,24 @@
+﻿@page "/dropdownTest"
+@rendermode InteractiveServer
+@using GainsLab.Domain.Interfaces
+@using GainsLab.WebLayer.Components.Control
+@using GainsLab.WebLayer.Model
+
+
+<DropdownComponent Config="Dropdown" @bind-Value="SelectItem"></DropdownComponent>
+
+@code {
+
+    [Inject] ILogger Logger { get; set; } = default!;
+
+    public DropdownConfig? Dropdown { get; set; } = new DropdownConfig();
+    
+    public string? SelectedItem { get; set; }
+    public string? SelectItem { get => SelectedItem; set => OnDropdownSelected(SelectedItem = value); }
+    
+    private void OnDropdownSelected(string? obj)
+    {
+        Logger.Log(nameof(DropdownTestPage), $"OnDropdownSelected: {obj}");
+    }
+
+}

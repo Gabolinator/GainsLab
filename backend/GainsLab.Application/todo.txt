@@ -1,0 +1,7 @@
+TODO
+====
+- Define CRUD DTOs for each missing training entity.
+- Implement/extend mappers translating between DTOs and domain models.
+- Ensure application services expose operations backing the API controllers.
+- Introduce user DTOs/mappers/services (accounts, roles, auth profiles) so higher layers can manage identities.
+- Add unit tests for DTOs, mappers, and services covering both training and user flows.

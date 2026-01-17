@@ -1,4 +1,5 @@
 
+using GainsLab.Application.Interfaces;
 using GainsLab.Application.Interfaces.DataManagement.Gateway;
 using GainsLab.Application.Interfaces.DataManagement.Provider;
 using GainsLab.Application.Interfaces.Sync;
@@ -16,6 +17,7 @@ using GainsLab.Infrastructure.Utilities;
 using GainsLab.WebLayer.Components;
 using GainsLab.WebLayer.Model.Notification;
 using GainsLab.WebLayer.Model.Notification.Confirmation;
+using IDescriptorApi = GainsLab.Infrastructure.Api.Interface.IDescriptorApi;
 using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -67,24 +69,27 @@ void AddApis(IServiceCollection s)
 {
     s.AddHttpClient<IDescriptorApi, DescriptorApi>(ConfigureSyncClient);
     s.AddHttpClient<IEquipmentApi, EquipmentApi>(ConfigureSyncClient);
+    s.AddHttpClient<IMovementCategoryApi, MovementCategoryApi>(ConfigureSyncClient);
     s.AddScoped<IApiClientRegistry, ApiClientRegistry>();
 }
 
 void AddProvider(IServiceCollection s)
 {
-    s.AddScoped<IDescriptorProvider, HttpDataProvider>();
-    s.AddScoped<IEquipmentProvider,HttpDataProvider>();
-    s.AddScoped<IMuscleProvider,HttpDataProvider>();
-    s.AddScoped<IMovementCategoryProvider,HttpDataProvider>();
+    s.AddHttpClient<IDescriptorProvider, HttpDataProvider>(ConfigureSyncClient);
+    s.AddHttpClient<IEquipmentProvider, HttpDataProvider>(ConfigureSyncClient);
+    s.AddHttpClient<IMuscleProvider, HttpDataProvider>(ConfigureSyncClient);
+    s.AddHttpClient<IMovementCategoryProvider, HttpDataProvider>(ConfigureSyncClient);
 }
 
 void AddGateway(IServiceCollection s)
 {
     s.AddScoped<IDescriptorGateway, DescriptorGateway>();
     s.AddScoped<IEquipmentGateway,EquipmentGateway>();
-    s.AddScoped<IMuscleGateway,MuscleGateway>();
+    s.AddScoped<IMovementCategoryGateway, MovementCategoryGateway>();
+    s.AddScoped<IMuscleGateway, MuscleGateway>();
 }
 
+builder.Services.AddSingleton<INetworkChecker, NetworkChecker>();
 
 AddApis(builder.Services);
 
@@ -104,6 +109,7 @@ void AddCacheRegistries(IServiceCollection builderServices)
     builderServices.AddSingleton<DescriptorQueryCache>();
     builderServices.AddSingleton<MuscleQueryCache>();
     builderServices.AddSingleton<MovementCategoryQueryCache>();
+    
     builderServices.AddScoped<EquipmentRegistry>();
     builderServices.AddScoped<DescriptorRegistry>();
     builderServices.AddScoped<MuscleRegistry>();

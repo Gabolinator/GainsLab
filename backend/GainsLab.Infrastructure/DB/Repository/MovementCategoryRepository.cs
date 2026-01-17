@@ -55,7 +55,7 @@ public class MovementCategoryRepository : IMovementCategoryRepository
                .FirstOrDefaultAsync(c=>c.GUID == id, ct);
 
            return entry !=null ? 
-               APIResult<MovementCategoryGetDTO>.Found(entry.ToGetDTO(allCategories)!):
+               APIResult<MovementCategoryGetDTO>.Found(entry.ToGetDTO()!):
                APIResult<MovementCategoryGetDTO>.NotFound(id.ToString());
            
        }
@@ -104,7 +104,7 @@ public class MovementCategoryRepository : IMovementCategoryRepository
             var record = await CreateAsync(entity, ct);
             
             //if success => value != null
-            return record.Success  ? APIResult<MovementCategoryGetDTO>.Created(record.Value.ToGetDTO(allCategories)!) : APIResult<MovementCategoryGetDTO>.NotCreated("Failed to create record");
+            return record.Success  ? APIResult<MovementCategoryGetDTO>.Created(record.Value.ToGetDTO()!) : APIResult<MovementCategoryGetDTO>.NotCreated("Failed to create record");
             
         }
         catch (Exception e)
@@ -375,7 +375,7 @@ public class MovementCategoryRepository : IMovementCategoryRepository
 
             await _db.SaveChangesAsync(ct).ConfigureAwait(false);
 
-            var updatedState = category.ToGetDTO(allCategories);
+            var updatedState = category.ToGetDTO();
             var outcome = new MovementCategoryUpdateOutcome(
                 categoryChanged ? UpdateOutcome.Updated : UpdateOutcome.NotUpdated,
                 descriptorOutcomeState,
@@ -407,7 +407,7 @@ public class MovementCategoryRepository : IMovementCategoryRepository
                 return APIResult<MovementCategoryGetDTO>.NotFound($"Movement category {id} not found for deletion");
             }
 
-            var dto = existing.ToGetDTO(new List<MovementCategoryRecord>());
+            var dto = existing.ToGetDTO();
 
             _db.MovementCategories.Remove(existing);
             await _db.SaveChangesAsync(ct).ConfigureAwait(false);

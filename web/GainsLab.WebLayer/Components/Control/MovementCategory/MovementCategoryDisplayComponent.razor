@@ -38,7 +38,7 @@
                 <th aria-label="Description">Desc</th>
                 <th aria-label="Parent">Parent</th>
                 <th aria-label="Bases">Bases</th>
-                <th aria-label="Childs">Childs</th>
+                <th aria-label="Childs">Childs</th> 
                 <th>Date Updated</th>
                 <th>Edit</th>
                 <th>Remove</th>
@@ -57,7 +57,6 @@
                                         ChildCategories="@GetChildCategories(eq)"
                                         UpdatedAtUtc="@eq.UpdatedAtUtc.ToString()"
                                         EditLink="@GetEditLink(eq)"
-                                        EquipmentId="@eq.Id"
                                         DeleteRequested="DeleteCategoryAsync">
                     </MovementCategoryTableLine>
 
@@ -137,7 +136,7 @@
         return eq.Descriptor?.content ?? "Description not found";
     }
 
-    private Link? GetEditLink(MovementCategoryGetDTO eq) => new Link { Text = $" Edit: {eq.Name}", Page = $@"equipments/{eq.Id}" };
+    private Link? GetEditLink(MovementCategoryGetDTO eq) => new Link { Text = $" Edit: {eq.Name}", Page = $@"movement-categories/{eq.Id}" };
 
     private async Task DeleteCategoryAsync(Guid equipmentId)
     {

@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using System.Text.Json;
+using GainsLab.Application.Interfaces;
 using GainsLab.Application.Outbox;
 using GainsLab.Application.Results;
 using GainsLab.Domain;
@@ -7,7 +8,6 @@ using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.DB.Outbox;
 using GainsLab.Infrastructure.SyncService;
-using GainsLab.Models.Utilities;
 using Microsoft.EntityFrameworkCore;
 
 
@@ -20,6 +20,7 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
 {
     private readonly IDbContextFactory<GainLabSQLDBContext> _dbContextFactory;
     private readonly ILogger _logger;
+    private readonly INetworkChecker _networkChecker;
     private readonly HttpClient _httpClient;
 
     /// <summary>
@@ -27,14 +28,17 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
     /// </summary>
     /// <param name="dbContextFactory">Factory used to create scoped database contexts.</param>
     /// <param name="logger">Logger used for diagnostic output.</param>
+    /// <param name="networkChecker"></param>
     /// <param name="httpClient">HTTP client configured to point at the sync API.</param>
     public OutboxDispatcher(
         IDbContextFactory<GainLabSQLDBContext> dbContextFactory,
         ILogger logger,
+        INetworkChecker networkChecker,
         HttpClient httpClient)
     {
         _dbContextFactory = dbContextFactory;
         _logger = logger;
+        _networkChecker = networkChecker;
         _httpClient = httpClient;
     }
 
@@ -43,7 +47,7 @@ public sealed class OutboxDispatcher : IOutboxDispatcher
     {
         
         //todo- add rechecks when failed
-        if (!await NetworkChecker.HasInternetAsync(_logger))
+        if (!await _networkChecker.HasInternetAsync(_logger))
         {
             return Result.Failure($"Dispatch Failed - Not internet Connection.");
         }

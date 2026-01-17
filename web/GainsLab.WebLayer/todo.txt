@@ -1,0 +1,8 @@
+TODO
+====
+- Create list/detail pages for each training entity (view, edit, delete, add).
+- Flesh out dedicated components/forms backing those pages.
+- Hook pages/components into existing services to load/save entities.
+- Add navigation menu entries pointing to each new entity page.
+- Add authentication UX (login/logout, token refresh) and User management pages that integrate with the backend services.
+- Add component/unit tests (e.g., bUnit/test host) for the new CRUD/auth flows.

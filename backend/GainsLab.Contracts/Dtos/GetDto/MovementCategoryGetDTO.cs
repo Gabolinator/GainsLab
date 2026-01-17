@@ -22,11 +22,18 @@ public record MovementCategoryGetDTO(
     string Name,
     Guid? DescriptorId,
     DescriptorGetDTO? Descriptor,
-    MovementCategoryGetDTO? ParentCategory,
-    IReadOnlyList<MovementCategoryGetDTO>? BaseCategories,
-    IReadOnlyList<MovementCategoryGetDTO>? ChildCategories,
+    Guid? ParentCategoryId,
+    IReadOnlyList<eMovementCategories>? BaseCategoriesEnum,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,
     long UpdatedSeq,
     bool IsDeleted = false,
-    DataAuthority Authority = DataAuthority.Bidirectional);
+    DataAuthority Authority = DataAuthority.Bidirectional)
+{
+    public MovementCategoryRefDTO? ParentCategory { get; set; }
+    public  IReadOnlyList<MovementCategoryRefDTO>? BaseCategories { get; set; }
+    public IReadOnlyList<MovementCategoryRefDTO>? ChildCategories { get; set; }
+}
+
+
+public sealed record MovementCategoryRefDTO(Guid Id, string Name);

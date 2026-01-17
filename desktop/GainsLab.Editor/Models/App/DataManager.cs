@@ -18,7 +18,6 @@ using GainsLab.Infrastructure.DB.Handlers;
 using GainsLab.Infrastructure.Sync;
 using GainsLab.Infrastructure.Utilities;
 using GainsLab.Models.App.LifeCycle;
-using GainsLab.Models.Utilities;
 using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
 
@@ -47,11 +46,12 @@ public class DataManager : IDataManager
     private readonly ISyncOrchestrator _syncOrchestrator;
     
     private readonly IEntitySeedResolver _resolver;
+    private readonly INetworkChecker _networkChecker;
 
     private string fileDirectory;
     private readonly IAppLifeCycle _lifeCycle;
     private Task<bool>? _seedTask;
-   
+
 
     /// <summary>
     /// Creates a new <see cref="DataManager"/> wired up with the required infrastructure services.
@@ -63,6 +63,8 @@ public class DataManager : IDataManager
     /// <param name="cache">Registry that exposes component caches to the desktop application.</param>
     /// <param name="fileDataService">File service responsible for serializing components to disk.</param>
     /// <param name="syncOrchestrator">Coordinator that performs the actual seed/delta synchronization.</param>
+    /// <param name="resolver"></param>
+    /// <param name="networkChecker"></param>
     public DataManager(
         IAppLifeCycle lifeCycle,
         ILogger logger,
@@ -71,7 +73,8 @@ public class DataManager : IDataManager
         IComponentCacheRegistry cache,
         IFileDataService fileDataService,
         ISyncOrchestrator syncOrchestrator,
-        IEntitySeedResolver resolver)
+        IEntitySeedResolver resolver,
+        INetworkChecker networkChecker)
     {
         _logger = logger;
         _remote = remoteProvider;
@@ -81,7 +84,7 @@ public class DataManager : IDataManager
         _lifeCycle = lifeCycle;
         _syncOrchestrator = syncOrchestrator;
         _resolver = resolver;
-
+        _networkChecker = networkChecker;
     }
 
     /// <summary>
@@ -128,7 +131,7 @@ public class DataManager : IDataManager
         
     }
 
-    private Task<bool> HasInternetConnection() => NetworkChecker.HasInternetAsync(_logger);
+    private Task<bool> HasInternetConnection() => _networkChecker.HasInternetAsync(_logger);
   
 
     /// <summary>

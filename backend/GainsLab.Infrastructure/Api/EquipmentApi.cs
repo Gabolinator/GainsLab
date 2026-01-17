@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using GainsLab.Application.Interfaces;
 using GainsLab.Application.Results;
 using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.Delete.Outcome;
@@ -15,7 +16,6 @@ using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.Api.Interface;
 using GainsLab.Infrastructure.SyncService;
 using GainsLab.Infrastructure.Utilities;
-using GainsLab.Models.Utilities;
 
 namespace GainsLab.Infrastructure.Api;
 
@@ -23,11 +23,13 @@ public class EquipmentApi :IEquipmentApi
 {
     private readonly HttpClient _http;
     private readonly ILogger _logger;
+    private readonly INetworkChecker _networkChecker;
 
-    public EquipmentApi(HttpClient http, ILogger logger)
+    public EquipmentApi(HttpClient http, ILogger logger, INetworkChecker networkChecker)
     {
        _http = http;
        _logger = logger;
+       _networkChecker = networkChecker;
     }
     
     
@@ -41,7 +43,7 @@ public class EquipmentApi :IEquipmentApi
         ISyncCursor cursor, int take = 200, CancellationToken ct = default)
     {
         
-        if (!await NetworkChecker.HasInternetAsync(_logger))
+        if (!await _networkChecker.HasInternetAsync(_logger))
         {
             var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
             _logger.LogWarning(nameof(EquipmentApi), message);
@@ -80,7 +82,7 @@ public class EquipmentApi :IEquipmentApi
 
     public async Task<Result<EquipmentGetDTO>> GetEquipmentAsync(EquipmentEntityId requestDto, CancellationToken ct)
     {
-        if (!await NetworkChecker.HasInternetAsync(_logger))
+        if (!await _networkChecker.HasInternetAsync(_logger))
         {
             var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
             _logger.LogWarning(nameof(EquipmentApi), message);
@@ -137,7 +139,7 @@ public class EquipmentApi :IEquipmentApi
             return  Result<EquipmentCreateOutcome>.Failure("Did not create Equipment - name empty");
         }
         
-        if (!await NetworkChecker.HasInternetAsync(_logger))
+        if (!await _networkChecker.HasInternetAsync(_logger))
         {
             var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
             _logger.LogWarning(nameof(EquipmentApi), message);
@@ -198,7 +200,7 @@ public class EquipmentApi :IEquipmentApi
             return  Result<EquipmentUpdateOutcome>.Failure("Did not update Equipment - ID invalid");
         }
         
-        if (!await NetworkChecker.HasInternetAsync(_logger))
+        if (!await _networkChecker.HasInternetAsync(_logger))
         {
             var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
             _logger.LogWarning(nameof(EquipmentApi), message);
@@ -258,7 +260,7 @@ public class EquipmentApi :IEquipmentApi
             return Result<EquipmentDeleteOutcome>.Failure("Invalid entity ID");
         }
         
-        if (!await NetworkChecker.HasInternetAsync(_logger))
+        if (!await _networkChecker.HasInternetAsync(_logger))
         {
             var message = $"Unable to reach sync server at {_http.DescribeBaseAddress()} - no internet connection detected.";
             _logger.LogWarning(nameof(EquipmentApi), message);

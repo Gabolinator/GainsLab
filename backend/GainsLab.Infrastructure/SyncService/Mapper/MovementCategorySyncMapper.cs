@@ -1,6 +1,7 @@
 ﻿using GainsLab.Application.DTOs;
 using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.DTOs.MovementCategory;
+using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Domain;
 
@@ -54,4 +55,41 @@ public static class MovementCategorySyncMapper
             dto.IsDeleted,
             dto.Authority);
     }
+
+    public static MovementCategoryRefDTO ToRefDto(this MovementCategorySyncDTO dto)
+    {
+        return new(dto.GUID, dto.Name);
+    }
+
+    public static async Task<MovementCategoryGetDTO?> ToGetDTOAsync(
+        MovementCategorySyncDTO? dto, 
+        Task<DescriptorGetDTO?> descriptor,
+        DateTimeOffset createdAtUtc,
+        string sync, 
+        MovementCategoryRefDTO? parent,  
+        IReadOnlyList< MovementCategoryRefDTO>? baseCategories,
+        IReadOnlyList< MovementCategoryRefDTO>? childCategories)
+    {
+        if (dto == null) return null;
+        var d = await descriptor;
+      
+        return new MovementCategoryGetDTO(
+            dto.GUID,
+            dto.Name,
+            dto.DescriptorGUID,
+            d,
+            dto.ParentCategoryGUID,
+            dto.BaseCategories,
+            createdAtUtc,
+            dto.UpdatedAtUtc,
+            dto.UpdatedSeq,
+            dto.IsDeleted,
+            dto.Authority)
+        {
+            ChildCategories = childCategories ,
+            ParentCategory = parent,
+            BaseCategories = baseCategories ,
+        };
+    }
+    
 }

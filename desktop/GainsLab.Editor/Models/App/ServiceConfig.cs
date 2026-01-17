@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Http;
+using GainsLab.Application.Interfaces;
 using GainsLab.Application.Interfaces.DataManagement;
 using GainsLab.Application.Outbox;
 using GainsLab.Domain.Interfaces;
@@ -62,7 +63,7 @@ public static class ServiceConfig
         services.AddDbContext<GainLabSQLDBContext>(ConfigureSqlite);
         services.AddDbContextFactory<GainLabSQLDBContext>(ConfigureSqlite);
 
-        
+        services.AddSingleton<INetworkChecker,NetworkChecker>();
         services.AddSingleton<IAppLifeCycle,AppLifecycleService>();
         services.AddSingleton<GainsLab.Application.Interfaces.DataManagement.ILocalRepository, DataRepository>();
         void ConfigureSyncClient(IServiceProvider sp, HttpClient client)
@@ -82,13 +83,15 @@ public static class ServiceConfig
         services.AddSingleton<IEntitySeedResolver, EntitySeedResolver>();
         services.AddSingleton<GainsLab.Application.Interfaces.DataManagement.IDataManager, DataManager>();
         services.AddSingleton<ISyncCursorStore, FileSyncCursorStore>();
+        
         services.AddSingleton<IOutboxDispatcher>(sp =>
         {
             var factory = sp.GetRequiredService<IDbContextFactory<GainLabSQLDBContext>>();
             var logger = sp.GetRequiredService<ILogger>();
             var httpFactory = sp.GetRequiredService<IHttpClientFactory>();
+            var networkChecker = sp.GetRequiredService<INetworkChecker>();
             var client = httpFactory.CreateClient("SyncApi");
-            return new OutboxDispatcher(factory, logger, client);
+            return new OutboxDispatcher(factory, logger, networkChecker ,client);
         });
 
 

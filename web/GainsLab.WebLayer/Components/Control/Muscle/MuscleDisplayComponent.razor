@@ -1,13 +1,12 @@
-﻿@using GainsLab.Application.DTOs
-@using GainsLab.Application.DTOs.Muscle
-@using GainsLab.Application.Interfaces.DataManagement.Gateway
-@using GainsLab.Application.Interfaces.Sync
-
-
+﻿
+@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Domain.Interfaces
-@attribute [StreamRendering]
+@using GainsLab.Infrastructure.Caching.Registry
+@using GainsLab.WebLayer.Model
+@using GainsLab.WebLayer.Model.Notification.Confirmation
 
-<h3>MuscleDisplayComponent</h3>
+@using GainsLab.WebLayer.Model.Notification
 
 <p>
     @if (_muscles == null)
@@ -35,19 +34,29 @@
                 <th>Desc</th>
                 <th>Section</th>
                 <th>Antagonists</th>
-                <th>Date</th>
+                <th>AntagonistsOf</th>
+                <th>Date Updated</th>
+                <th>Edit</th>
+                <th>Remove</th>
+                
             </tr>
             </thead>
             <tbody>
-            @foreach (var m in _muscles)
+            @foreach (var eq in _muscles)
             {
+
                 <tr>
-                    <td>@i</td>
-                    <td>@m.Name</td>
-                    <td>@GetDescription(m)</td>
-                    <td>@m.BodySection</td>
-                    <td>@GetAntagonist(m)</td>
-                    <td>@m.UpdatedAtUtc</td>
+                    <MuscleTableLine Index="i"
+                                               Name="@eq.Name"
+                                               Description="@GetDescription(eq)"
+                                               BodySection="@eq.BodySection.ToString()"
+                                               Antagonist="@GetAntagonists(eq.Antagonists).ToList()"
+                                               AntagonistOf="@GetAntagonistOf(eq)"
+                                               UpdatedAtUtc="@eq.UpdatedAtUtc.ToString()"
+                                               EditLink="@GetEditLink(eq)"
+                                               DeleteRequested="DeleteMuscleAsync">
+                    </MuscleTableLine>
+
                 </tr>
                 i++;
             }
@@ -59,11 +68,12 @@
 
 @code
 {
-    private MuscleRecord[]? _muscles = null;
+    private IReadOnlyList<MuscleGetDTO>? _muscles = null;
     [Inject] private ILogger Logger { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
-    [Inject] private IMuscleGateway SyncClient { get; set; } = default!;
-    
+    [Inject] private MuscleRegistry Repo { get; set; } = default!;
+    [Inject] private IToast Toast { get; set; } = default!;
+    [Inject] private IConfirmDialog ConfirmDialog { get; set; } = default!;
     
     private int i =1;
     private bool _error = false;
@@ -75,16 +85,16 @@
         
         base.OnInitializedAsync();
 
-        return GetEquipments();
+        return GetMuscles();
 
 
     }
 
-    private async Task GetEquipments()
+    private async Task GetMuscles()
     {
         _muscles = null;
 
-        var result = await SyncClient.GetAllMusclesAsync();
+        var result = await Repo.GetAllAsync();
         if (!result.Success)
         {
             _muscles = null;
@@ -92,19 +102,98 @@
             _errorMessage = result.GetErrorMessage();
             return;
         }
-//todo
-       // _muscles = !result.HasValue ? null : result.Value.ToArray();
+
+        _muscles = !result.HasValue ? null : result.Value;
     }
 
-    private string GetDescription(MuscleRecord eq)
+    private string GetDescription(MuscleGetDTO eq)
     {
-        return eq.Descriptor?.Content ?? "Description not found";
+        return eq.Descriptor?.content ?? "Description not found";
     }
 
-    private string GetAntagonist(MuscleRecord muscleRecord)
+    private string GetAntagonist(MuscleGetDTO muscleRecord)
     {
-        if (muscleRecord.Antagonists.Count == 0) return "None";
-        return string.Join(',', muscleRecord.Antagonists.Select(a=>a.Antagonist.Name));
+        if (muscleRecord.AntagonistIds == null || !muscleRecord.AntagonistIds.Any()) return "None";
+      //  IEnumerable<MuscleGetDTO> antagonist = GetAntagonists(muscleRecord.AntagonistIds.ToHashSet());
+        var antagonist = GetAntagonists(muscleRecord.Antagonists);
+        return string.Join(',', antagonist);
     }
+
+    private IEnumerable<string> GetAntagonists(IReadOnlyList<MuscleRefDTO>? antagonists)
+    {
+        return antagonists != null ? antagonists.Select(a => a.Name) : new List<string>();
+    }
+
+    private List<string> GetAntagonistOf(MuscleGetDTO eq)
+    {
+        if (_muscles == null || !_muscles.Any()) return new();
+        
+        return _muscles.Where(m =>m.AntagonistIds !=null && m.AntagonistIds.Contains(eq.Id)).Select(m=>m.Name).ToList();
+    }
+    
+    private Link? GetEditLink(MuscleGetDTO eq) => new Link { Text = $" Edit: {eq.Name}", Page = $@"muscles/{eq.Id}" };
+
+    
+    private async Task DeleteMuscleAsync(Guid equipmentId)
+    {
+
+        Logger.Log(nameof(MuscleDisplayComponent), $"Deleting equipment {equipmentId}- not implemented");
+
+        return;
+        // if (_categories is null)
+        // {
+        //     Toast.Error("No Equipments Found");
+        //     return;
+        // }
+        // var eq = _categories.FirstOrDefault(e => e.Id == equipmentId);
+        // if (eq == null)
+        // {
+        //     Toast.Error($"No Equipment Found with id {equipmentId}");
+        //     return;
+        // }
+        //
+        // var ok = await ConfirmDialog.ShowAsync(
+        //     new ConfirmRequest(
+        //         "Delete Item", 
+        //         $"Are You sure you want to delete Equipment '{eq.Name}' ? It can't be undone",
+        //         "Delete", 
+        //         "Cancel",
+        //         true));
+        //
+        // Logger.Log(nameof(MovementCategoryDisplayComponent), $"Confirmation {ok}");
+        //
+        // if (!ok)
+        // {
+        //     Toast.Error($"Delete {eq.Name} Cancelled");
+        //     return;
+        // }
+        //
+        //
+        // Result<MovementCategoryDeleteOutcome> result = await Repo.DeleteCategoryAsync(new MovementCategoryEntityId(equipmentId));
+        // if (!result.Success || result.Value is not { Outcome: DeleteOutcome.Deleted })
+        // {
+        //     _error = true;
+        //     _errorMessage = $"Unable to delete equipment {equipmentId}: {result.GetErrorMessage()}";
+        //     Logger.LogError(nameof(MovementCategoryDisplayComponent), _errorMessage);
+        //     Toast.Error(_errorMessage);
+        //     return;
+        // }
+        //
+        // _error = false;
+        // _errorMessage = null;
+        //
+        //
+        //
+        //
+        //
+        //
+        // var success = $"Deleted equipment {equipmentId}";
+        // Logger.Log(nameof(MovementCategoryDisplayComponent), success);
+        // Toast.Success(success);
+        //
+        // _categories = _categories.Where(e => e.Id != equipmentId).ToArray();
+    }
+
+    
 }
 

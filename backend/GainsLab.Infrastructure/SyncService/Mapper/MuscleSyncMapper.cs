@@ -1,6 +1,7 @@
 ﻿using GainsLab.Application.DTOs;
 using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.DTOs.Muscle;
+using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 
 namespace GainsLab.Infrastructure.SyncService.Mapper;
@@ -47,5 +48,35 @@ public static class MuscleSyncMapper
             dto.UpdatedSeq,
             dto.IsDeleted,
             dto.Authority);
+    }
+
+    public static MuscleRefDTO ToRefDto(this MuscleSyncDTO syncDto)
+    {
+            return new MuscleRefDTO(syncDto.GUID, syncDto.Name);
+    }
+
+    
+    
+    public static async Task<MuscleGetDTO> ToGetDTOAsync(MuscleSyncDTO syncDto, Task<DescriptorGetDTO?> getDescriptorAsync, IReadOnlyList<MuscleRefDTO>? antagonist, DateTimeOffset updatedAtUtc, string sync)
+    {
+        var descriptor = await getDescriptorAsync;
+        
+        //get the antagonists 
+        return new MuscleGetDTO
+            (
+                syncDto.GUID,
+                syncDto.Name,
+                "",
+                syncDto.BodySection,
+                syncDto.DescriptorGUID,
+                descriptor,
+                syncDto.AntagonistGuids,
+                antagonist,
+                updatedAtUtc,
+                syncDto.UpdatedAtUtc,
+                syncDto.UpdatedSeq,
+                syncDto.IsDeleted,
+                syncDto.Authority);
+
     }
 }

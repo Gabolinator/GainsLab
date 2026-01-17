@@ -1,17 +1,11 @@
-﻿
-
-
+﻿using GainsLab.Application.Interfaces;
 using GainsLab.Domain.Interfaces;
 
-namespace GainsLab.Models.Utilities;
+namespace GainsLab.Infrastructure;
 
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-
-public static class NetworkChecker
+public class NetworkChecker :INetworkChecker
 {
-    public static async Task<bool> HasInternetAsync(ILogger? logger, int timeoutMs = 3000)
+    public async Task<bool> HasInternetAsync(ILogger? logger, int timeoutMs = 3000)
     {
         try
         {
