@@ -5,6 +5,63 @@ using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 
 namespace GainsLab.Application.DTOs;
 
+#region Update
+
+
+
+
+public static class MovementCategoryUpdateOutcomeExtension
+{
+    public static MessagesContainer GetOutcomeMessages (this MovementCategoryUpdateCombinedOutcome equipmentUpdate,
+        MessagesContainer? messages =null)
+    {
+        messages ??= new MessagesContainer();
+
+        messages.Append(equipmentUpdate.MovementCategory.GetOutcomeMessages());
+        messages.Append(equipmentUpdate.Descriptor.GetOutcomeMessages());
+        
+        return  messages;
+    }
+    
+    
+}
+
+public static class MovementCategoryUpdateOutcomeExtensions
+{
+   
+    
+    public static MessagesContainer  GetOutcomeMessages (this MovementCategoryUpdateOutcome? equipment)
+    {
+        var messages = new MessagesContainer();
+        
+        if (equipment == null)
+        {
+            messages.AddError($"Failed to Update Movement Category");
+        }
+
+        
+        else  switch (equipment.Outcome)
+        {
+            case UpdateOutcome.NotUpdated or UpdateOutcome.NotRequested:
+                messages.AddInfo($"Movement Category {equipment.UpdatedState!.Name} Not Updated");
+                break;
+            case UpdateOutcome.Updated:
+                messages.AddInfo($"Movement Category Updated to {equipment.UpdatedState!.Name}");
+                break;
+            case UpdateOutcome.Failed:
+                messages.AddError($"Failed to Update Movement Category");
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
+        return messages;
+    }
+    
+}
+
+
+
 public static class DescriptorUpdateOutcomeExtensions
 {
     public static MessagesContainer GetOutcomeMessages(this DescriptorUpdateOutcome? descriptor)
@@ -90,6 +147,68 @@ public static class EquipmentCombinedOutcomeExtension
 
 }
 
+#endregion
+
+#region Create
+
+
+
+
+
+public static class MovementCategoryCombinedOutcomeExtension
+{
+    public static MessagesContainer GetOutcomeMessages (this MovementCategoryCreateCombineOutcome equipmentUpdate,
+        MessagesContainer? messages =null)
+    {
+        messages ??= new MessagesContainer();
+
+        messages.Append(equipmentUpdate.MovementCategory.GetOutcomeMessages());
+        messages.Append(equipmentUpdate.Descriptor.GetOutcomeMessages());
+        
+        return  messages;
+       
+    }
+
+}
+
+
+public static class MovementCategoryOutcomeExtension
+{
+    public static MessagesContainer GetOutcomeMessages (this MovementCategoryCreateOutcome? equipment)
+    {
+      
+       var messages = new MessagesContainer();
+        
+        if (equipment == null)
+        {
+            messages.AddError($"Failed to Update MovementCategory");
+        }
+
+        
+        else  switch (equipment.Outcome)
+        {
+            case CreateOutcome.AlreadyExist or CreateOutcome.Canceled:
+                messages.AddInfo($"MovementCategory {equipment.CreatedMovementCategory!.Name} Not Updated");
+                break;
+            case CreateOutcome.Created:
+                messages.AddInfo($"MovementCategoryt Updated to {equipment.CreatedMovementCategory!.Name}");
+                break;
+            case CreateOutcome.Failed:
+                messages.AddError($"Failed to Update MovementCategory");
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
+        return messages;
+    }
+
+}
+
+
+
+
+
 public static partial class DescriptorCreateOutcomeExtensions
 {
     public static MessagesContainer GetOutcomeMessages(this DescriptorCreateOutcome? descriptor)
@@ -173,5 +292,8 @@ public static class EquipmentCreateCombinedOutcomeExtension
         return  messages;
        
     }
+    
+    
 
 }
+#endregion

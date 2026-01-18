@@ -1,0 +1,24 @@
+﻿
+<p>
+    
+    <InputCheckbox @bind-Value="BoundValue" />
+    @if (!string.IsNullOrEmpty(Label))
+    {
+        @Label;
+    }
+</p>
+
+@code {
+    [Parameter] public string? Label { get; set; } = null;
+    [Parameter] public bool Value { get; set; } = false;
+    [Parameter] public EventCallback<bool> ValueChanged { get; set; }
+  
+    private bool BoundValue
+    {
+        get => Value;
+        set => ValueChanged.InvokeAsync(value);
+    }
+
+
+
+}

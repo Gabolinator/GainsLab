@@ -1,13 +1,493 @@
 ﻿
 @page "/movement-categories/{id:guid}"
 
-<h3>Edit Movement Category</h3>
-<br>
-<p> @Id</p>
+@rendermode InteractiveServer
+@using GainsLab.Application.DTOs
+@using GainsLab.Application.Results
+@using GainsLab.Contracts
+@using GainsLab.Contracts.Dtos.Delete.Outcome
+@using GainsLab.Contracts.Dtos.GetDto
+@using GainsLab.Contracts.Dtos.ID
+@using GainsLab.Domain
+@using GainsLab.Domain.Interfaces
+@using GainsLab.Infrastructure.Caching.Registry
+@using GainsLab.Infrastructure.Utilities
+@using GainsLab.WebLayer.Components.Control
+@using GainsLab.WebLayer.Model.Descriptor
+@using GainsLab.WebLayer.Model.Dropdown
+@using GainsLab.WebLayer.Model.Equipment
+@using GainsLab.WebLayer.Model.MovementCategory
+@using GainsLab.WebLayer.Model.Notification
+@using GainsLab.WebLayer.Model.Notification.Confirmation
+@implements IDisposable
+@inject NavigationManager NavManager;
+
+
+<p>
+    @if (EditCategory != null)
+    {
+        <EditForm EditContext="FormContext" FormName="formEditCategory" OnValidSubmit="SubmitHandler">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary></ValidationSummary>
+        
+            
+            <div class="mb-2">
+                <label>Name</label>
+                <InputText Value="@EditCategory.Name"
+                           ValueChanged="OnNameChanged"
+                           ValueExpression="@(() => EditCategory.Name)"
+                           @oninput="OnNameInput" />
+                <ValidationMessage For="(() => EditCategory.Name)"/>
+            </div>
+            
+            <div class="mb-2">
+                <label>Description</label>
+                <InputText class="form-control"
+                           @bind-Value="EditDescriptor.DescriptionContent"/>
+            </div>
+            
+            <div class="mb-2">
+                <label>Parent</label>
+                <DropdownComponent Config="ParentDropdown"
+                                   @bind-Value="SelectedParent"/>
+            </div>
+            
+            <div class="mb-2">
+                <label>Bases </label>
+                <p>  @GetBaseCategoriesText()   </p>
+                @foreach (var category in GetAllBaseCategories().OrderBy(c=>c.ToString()))
+                {
+                    
+                    if(category == eMovementCategories.undefined) continue;
+                    
+                    <div>
+                        <CheckboxComponent
+                            Label="@category.ToString()"
+                            Value="@IsBaseCategorySelected(category)"
+                            ValueChanged="(isChecked) => OnBaseCategoryChanged(category, isChecked)" />
+                    </div>
+                }
+                
+            </div>
+            
+            @if (_isEditValid)
+          {
+              <button class="btn btn-primary" type="submit">Update</button>
+          }
+
+          <br/>
+          <br/> <a href="/movement-categories" class="btn btn-primary">Close</a>
+          <br/>
+          
+          <br/>
+       
+            
+        </EditForm>
+    }
+    <br/>
+    <br/>  @if (Category != null)
+           {
+               <button class="btn btn-primary" @onclick="Delete">Delete</button>
+           }
+
+    <MessageComponent Messages="@Messages"></MessageComponent>
+
+</p>
 
 @code {
+    [Parameter] public Guid Id { get; set; } = Guid.Empty;
+
+    [Inject] private ILogger Logger { get; set; } = default!;
+    [Inject] private IClock Clock { get; set; } = default!;
+    [Inject] private MovementCategoryRegistry Repo { get; set; } = default!;
+    [Inject] private DescriptorRegistry DescriptorRegistry { get; set; } = default!;
+    [Inject] private IToast Toast { get; set; } = default!;
+    [Inject] private IConfirmDialog ConfirmDialog { get; set; } = default!;
+
+    public MovementCategoryGetDTO? Category { get; set; } = null;
+    public MovementCategoryEditFormDTO? EditCategory { get; set; } = null;
+    public DescriptorEditDTO EditDescriptor { get; set; } = new();
+
+    public DropdownConfig? ParentDropdown { get; set; } = null;
+    private HashSet<eMovementCategories> SelectedBaseCategories = new();
     
-    [Parameter]
-    public Guid Id { get; set; } = Guid.Empty;
+    
+    private EditContext? FormContext;
+    private ValidationMessageStore? _validationMessages;
+    private FieldIdentifier _nameField;
+
+    private bool _isEditValid = false;
+    private string _normalizedOriginalName = string.Empty;
+    private string _originalDescriptorContent = string.Empty;
+    private IReadOnlyList<MovementCategoryGetDTO> _categories;
+    private string _parentFieldID;
+    public MovementCategoryRefDTO? ParentRef { get; set; } = null;
+
+    private HashSet<string> ExistingEquipmentNames { get; set; } = new HashSet<string>();
+
+    public MessagesContainer? Messages { get; set; } = new MessagesContainer();
+    public string SelectedParent { get => _parentFieldID;  set => OnParentChanged(value); }
+
+   
+    private string GetBaseCategoriesText()
+    {
+        if(SelectedBaseCategories == null || SelectedBaseCategories.Count == 0) return "None";
+        
+        return string.Join(',', SelectedBaseCategories.OrderBy(c=>c.ToString()).Select(c => c.ToString()));
+
+    }
+    
+   
+    private void OnParentChanged(string value)
+    {
+        _parentFieldID = value;
+        if (string.IsNullOrEmpty(value))
+        {
+            Logger.LogWarning(nameof(EditMovementCategoryPage), $"Parent Selected : none");
+        }
+        Logger.Log(nameof(EditMovementCategoryPage), $"Parent Selected: {value}");
+        SetParent(_parentFieldID);
+    }
+
+    private void SetParent(string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            Logger.LogWarning(nameof(EditMovementCategoryPage), $"Parent Selected : none");
+            ParentRef = null;
+            return;
+        }
+
+        if (!Guid.TryParse(value, out Guid parsedGuid))
+        {
+            Logger.LogWarning(nameof(EditMovementCategoryPage), $"Could not parse {value} to GUID");
+            ParentRef = null;
+            return;
+        }
+
+        var cat = _categories.FirstOrDefault(c => c.Id == parsedGuid);
+        if (cat == null)
+        {
+            Logger.LogWarning(nameof(EditMovementCategoryPage), $"Could find category with ID {parsedGuid}");
+            ParentRef = null;
+            return; 
+        }
+        Logger.Log(nameof(EditMovementCategoryPage), $"Parent Selected: {cat.Name}");
+        ParentRef = new MovementCategoryRefDTO(parsedGuid, cat.Name);
+
+    }
+
+   
+
+
+    private Task OnNameChanged(string value)
+    {
+        // This is what EditContext uses for standard change notifications
+        EditCategory!.Name = value;
+        return Task.CompletedTask;
+    }
+
+    private void OnNameInput(ChangeEventArgs e)
+    {
+        EditCategory!.Name = e.Value?.ToString();
+
+        FormContext?.NotifyFieldChanged(_nameField);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Logger.Log(nameof(EditEquipmentPage),$"On Parameter set");
+
+
+        await base.OnParametersSetAsync();
+        Messages ??= new MessagesContainer();
+
+        Messages.ClearAll();
+
+        _isEditValid = false;
+
+        //we cache all the equipments - so we can filter for same name
+        var eqs = await Repo.GetAllAsync();
+        if (eqs.Value == null || eqs.Value.Count == 0)
+        {
+            Messages.AddError("No Equipments Found");
+            return;
+        }
+
+        _categories = eqs.Value!;
+        
+        var options = _categories
+            .Where(c => c.Id != Id)
+            .Select(c => new DropdownItem { Label = c.Name, Value = c.Id.ToString() })
+            .OrderBy(x => x.Label)
+            .ToList();
+        options.Insert(0, new DropdownItem { Label = "None", Value = string.Empty });
+       
+        
+        var eq =   _categories.FirstOrDefault(e => e.Id == Id);
+        if (eq == null)
+        {
+            Messages.AddError("Equipment not found");
+            return;
+        }
+
+        ParentDropdown = new DropdownConfig { Items = options, Placeholder = "Select parent…", InitialSelectedLabel = eq.ParentCategory?.Name };
+        
+        Category = eq;
+        SelectedBaseCategories = Category.BaseCategoriesEnum != null ? Category.BaseCategoriesEnum.ToHashSet() : new();
+        
+        EditCategory = Category!.FromGetDTO();
+        EditDescriptor = EditCategory.Descriptor ?? new DescriptorEditDTO();
+
+        _normalizedOriginalName = Normalize(Category!.Name);
+        _originalDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
+
+        ExistingEquipmentNames = eqs.Value
+            .Select(e => Normalize(e.Name))
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Where(n => !string.Equals(n, _normalizedOriginalName, StringComparison.InvariantCultureIgnoreCase))
+            .ToHashSet(StringComparer.InvariantCultureIgnoreCase);
+
+        BuildEditContext();
+
+        // Messages.AddInfo($"Equipments Names : {string.Join(",", ExistingEquipmentNames)}");
+
+
+    }
+
+
+
+    private void BuildEditContext()
+    {
+        if (FormContext != null)
+        {
+            FormContext.OnFieldChanged -= HandleFieldChanged;
+            FormContext.OnValidationRequested -= HandleValidationRequested;
+        }
+
+        FormContext = new EditContext(EditCategory!);
+        _validationMessages = new ValidationMessageStore(FormContext);
+
+        _nameField = FieldIdentifier.Create(() => EditCategory!.Name);
+
+        FormContext.OnFieldChanged += HandleFieldChanged;
+        FormContext.OnValidationRequested += HandleValidationRequested;
+
+        ValidateUniqueName();
+    }
+
+    private void HandleFieldChanged(object? sender, FieldChangedEventArgs e)
+    {
+        if (e.FieldIdentifier.FieldName == nameof(EquipmentEditFormDTO.Name))
+        {
+            ValidateUniqueName();
+        }
+
+
+    }
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
+    {
+        ValidateUniqueName();
+    }
+
+    private void ValidateUniqueName()
+    {
+        if (FormContext == null || _validationMessages == null || EditCategory == null)
+            return;
+
+
+        _validationMessages.Clear(_nameField);
+
+        Messages ??= new MessagesContainer();
+
+        Messages.Clear(MessageType.Warning);
+
+        var candidate = Normalize(EditCategory.Name);
+
+        if (string.IsNullOrWhiteSpace(candidate))
+        {
+            _isEditValid = false;
+            EditCategory.UpdateRequest = UpdateRequest.DontUpdate;
+            FormContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        if (ExistingEquipmentNames.Contains(candidate))
+        {
+            _validationMessages.Add(_nameField, "An equipment with this name already exists.");
+            _isEditValid = false;
+            EditCategory.UpdateRequest = UpdateRequest.DontUpdate;
+            FormContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        if (string.Equals(candidate, _normalizedOriginalName, StringComparison.InvariantCultureIgnoreCase))
+        {
+            var warning = $"Validated Equipment Name - unchanged candidate {candidate}";
+            Messages.AddWarning(warning);
+            Logger.Log(nameof(EditMovementCategoryPage), warning);
+            _validationMessages.Clear(_nameField);
+            _isEditValid = true;
+            EditCategory.UpdateRequest = UpdateRequest.DontUpdate;
+            FormContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        _isEditValid = true;
+        EditCategory.UpdateRequest = UpdateRequest.Update;
+        FormContext.NotifyValidationStateChanged();
+    }
+
+
+    private static string Normalize(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return string.Empty;
+
+        var t = StringFormater.RemoveUnwantedChar(name);
+
+        return t;
+    }
+
+    public void Dispose()
+    {
+        if (FormContext != null)
+        {
+            FormContext.OnFieldChanged -= HandleFieldChanged;
+            FormContext.OnValidationRequested -= HandleValidationRequested;
+        }
+    }
+
+
+    private async Task SubmitHandler()
+    {
+        Messages ??= new MessagesContainer();
+        var currentDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
+        if (string.Equals(currentDescriptorContent, _originalDescriptorContent, StringComparison.InvariantCultureIgnoreCase))
+        {
+            Messages.AddError($"Equipment {Category!.Name} description content did not change");
+            EditDescriptor.UpdateRequest = UpdateRequest.DontUpdate;
+        }
+        else
+        {
+            EditDescriptor.UpdateRequest = UpdateRequest.Update;
+        }
+
+        EditCategory!.Descriptor = EditDescriptor;
+
+        //todo check if changed
+        EditCategory.Parent = ParentRef;
+        
+        //todo check if changed
+        EditCategory.BasesCategory = GetCategoryRefs(SelectedBaseCategories.Select(c=>c.ToString()));
+        
+        var request = EditCategory.ToUpdateRequest();
+      
+        Logger.Log(nameof(EditMovementCategoryPage), $"Submitting MovementCategory : {EditCategory} ");
+
+        Messages.ClearAll();
+
+        //todo
+        
+        
+        return;
+        
+        var outcome = await Repo.UpdateMovementCategoryAsync(request, EditCategory.Descriptor.ToUpdateRequest());
+        if (!outcome.Success || outcome.Value == null)
+        {
+            var message = "Could not update equipment: ";
+            Messages.AddError(message);
+            Messages.Append(outcome.GetMessages());
+            Toast.FromMessages(Messages);
+        }
+
+        else
+        {
+            Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
+
+            if (outcome.Value.MovementCategory != null && outcome.Value.MovementCategory.Outcome == UpdateOutcome.Updated)
+                Toast.Success($"Equipment updated to {outcome.Value.MovementCategory.UpdatedState!.Name}");
+
+            if (outcome.Value.Descriptor != null && outcome.Value.Descriptor.Outcome == UpdateOutcome.Updated)
+                Toast.Success($"Equipment Description updated to {outcome.Value.Descriptor.UpdatedState!.content}");
+
+        }
+
+    }
+
+    private List<MovementCategoryRefDTO>? GetCategoryRefs(IEnumerable<string>? names)
+    {
+        if (names == null || !names.Any())  return null;
+        return _categories.Where(c => names.Contains(c.Name)).Select(c=>new MovementCategoryRefDTO(c.Id, c.Name)).ToList();
+    }
+
+
+    private async Task Delete()
+    {
+
+        Messages ??= new MessagesContainer();
+        Messages.ClearAll();
+        if (Category == null || Category.Id == Guid.Empty)
+        {
+            Messages.AddWarning("Invalid Equipment Id");
+            Toast.Error($"Could not delete equipment : Invalid Equipment");
+            return;
+        }
+
+        var ok = await ConfirmDialog.ShowAsync(
+            new ConfirmRequest(
+                "Delete Item",
+                $"Are You sure you want to delete Equipment '{Category.Name}' ? It can't be undone",
+                "Delete",
+                "Cancel",
+                true));
+
+        if (!ok)
+        {
+            Toast.Error($"Delete {Category.Name} Cancelled");
+            return;
+        }
+
+        //
+        Toast.Error($"Delete {Category.Name} Not Yet Implemented");
+        return;
+        
+        
+        Result<MovementCategoryDeleteOutcome> outcome = await Repo.DeleteCategoryAsync(new MovementCategoryEntityId(Category.Id));
+        if (!outcome.Success || outcome.Value is not { Outcome: DeleteOutcome.Deleted })
+        {
+
+            Messages.Append(outcome.Messages);
+            Toast.Error($"Could not delete equipment : {Messages.ToString(MessageType.Error)}");
+            return;
+        }
+
+        var message = $"Equipment {outcome.Value.Id} Deleted";
+
+        Messages.AddInfo(message);
+        Toast.Success(message);
+        NavManager.NavigateTo("equipments");
+
+
+
+
+    }
+
+    private IEnumerable<eMovementCategories> GetAllBaseCategories()
+        => Enum.GetValues<eMovementCategories>();
+
+    private void OnBaseCategoryChanged(eMovementCategories category, bool isChecked)
+    {
+        if (isChecked)
+            SelectedBaseCategories.Add(category);
+        else
+            SelectedBaseCategories.Remove(category);
+        
+        Logger.Log(nameof(EditMovementCategoryPage), $"Category {category} => {isChecked}");
+    }
+
+    private bool IsBaseCategorySelected(eMovementCategories category)
+        => SelectedBaseCategories.Contains(category);
     
 }

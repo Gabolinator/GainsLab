@@ -307,14 +307,14 @@ public class MovementCategoryRepository : IMovementCategoryRepository
             }
 
             MovementCategoryRecord? requestedParent = null;
-            if (payload.ParentCategoryId.HasValue && payload.ParentCategoryId.Value != Guid.Empty)
+            if (payload.ParentCategory !=null && payload.ParentCategory.Id != Guid.Empty)
             {
                 requestedParent = await _db.MovementCategories
-                    .FirstOrDefaultAsync(c => c.GUID == payload.ParentCategoryId.Value && !c.IsDeleted, ct);
+                    .FirstOrDefaultAsync(c => c.GUID == payload.ParentCategory.Id && !c.IsDeleted, ct);
 
                 if (requestedParent == null)
                 {
-                    return APIResult<MovementCategoryUpdateOutcome>.BadRequest($"Parent category {payload.ParentCategoryId} not found");
+                    return APIResult<MovementCategoryUpdateOutcome>.BadRequest($"Parent category {payload.ParentCategory} not found");
                 }
             }
 
@@ -350,7 +350,7 @@ public class MovementCategoryRepository : IMovementCategoryRepository
             var categoryChanged = category.TryUpdate(
                 payload,
                 _clock,
-                payload.ParentCategoryId.HasValue ? requestedParent : null,
+                payload.ParentCategory != null ? requestedParent : null,
                 requestedBaseRelations);
             var descriptorOutcomeState = payload.Descriptor == null ? UpdateOutcome.NotRequested : UpdateOutcome.NotUpdated;
             var descriptorChanged = false;

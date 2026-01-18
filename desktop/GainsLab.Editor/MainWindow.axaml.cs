@@ -25,6 +25,7 @@ public partial class MainWindow : Window
     public MainWindow(ILogger logger)
     {
         _logger = logger;
+      
         InitializeComponent();
         this.Show();      // Forces the window to show
         this.Activate();  // Brings it to front

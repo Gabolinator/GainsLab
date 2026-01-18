@@ -49,7 +49,7 @@ public static class MovementCategoryUpdateExtension
                    dto.Name,
                    StringComparison.InvariantCultureIgnoreCase)
                || record.Authority != dto.Authority
-               || ParentChanged(record, dto.ParentCategoryId)
+               || ParentChanged(record, dto.ParentCategory?.Id)
                || ListChanged(record.BaseCategoryGUIDs, bases)
                || ListChanged(record.ChildGUIDs , childs);
     }
@@ -74,9 +74,9 @@ public static class MovementCategoryUpdateExtension
             anyUpdate = true;
         }
 
-        if (dto.ParentCategoryId.HasValue)
+        if (dto.ParentCategory !=null)
         {
-            if (dto.ParentCategoryId.Value == Guid.Empty)
+            if (dto.ParentCategory.Id == Guid.Empty)
             {
                 if (record.ParentCategory != null || record.ParentCategoryDbId.HasValue)
                 {

@@ -130,4 +130,6 @@ public sealed class MovementCategoryRegistry
 
         return result;
     }
+
+  
 }

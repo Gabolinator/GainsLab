@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Domain;
 
 namespace GainsLab.Contracts.Dtos.UpdateDto;
@@ -12,10 +13,10 @@ public record MovementCategoryUpdateDTO
     [StringLength(256, MinimumLength = 2)]
     public string? Name { get; init; }
 
-    public Guid? ParentCategoryId { get; init; }
+    public MovementCategoryRefDTO? ParentCategory { get; init; }
 
     [MinLength(1)]
-    public IReadOnlyList<eMovementCategories>? BaseCategories { get; init; }
+    public IReadOnlyList<MovementCategoryRefDTO>? BaseCategories { get; init; }
 
     public DescriptorUpdateDTO? Descriptor { get; init; }
 

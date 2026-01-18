@@ -1,17 +1,18 @@
-﻿@using GainsLab.WebLayer.Model
+﻿
+@using GainsLab.WebLayer.Model.Dropdown
 
 <InputSelect class="@CssClass"
              disabled="@Disabled"
              @bind-Value="BoundValue">
 
-    @if (!string.IsNullOrWhiteSpace(Placeholder))
+    @if (!string.IsNullOrWhiteSpace(InitialValue) )
     {
-        <option value="">@Placeholder</option>
+        <option value="">@InitialValue</option>
     }
 
     @foreach (var item in Items)
     {
-        <option value="@item">@item</option>
+        <option value="@item.Value">@item.Label</option>
     }
 </InputSelect>
 
@@ -22,8 +23,8 @@
 
     [Parameter] public DropdownConfig? Config { get; set; } = null;
 
-    private IEnumerable<string> Items => Config?.Items ?? Array.Empty<string>();
-    private string? Placeholder => Config?.Placeholder;
+    private IEnumerable<DropdownItem> Items => Config?.Items ?? [];
+    private string? InitialValue => Config?.InitialValue;
     private string CssClass => Config?.CssClass ?? "form-select";
     private bool Disabled => Config?.Disabled ?? false;
     
