@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using GainsLab.Application.DTOs.Description;
 using GainsLab.Domain;
 

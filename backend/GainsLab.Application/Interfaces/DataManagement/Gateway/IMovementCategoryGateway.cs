@@ -16,9 +16,10 @@ public interface IMovementCategoryGateway
     Task<Result<MovementCategoryGetDTO>> GetMovementCategoryAsync(MovementCategoryEntityId id);
 
     Task<Result<MovementCategoryUpdateCombinedOutcome>> UpdateMovementCategoryAsync(MovementCategoryUpdateRequest request,
-        DescriptorUpdateRequest? descriptorUpdateRequest);
+        DescriptorUpdateRequest? descriptorUpdateRequest,
+        ICache? cache);
 
-    Task<Result<MovementCategoryDeleteOutcome>> DeleteMovementCategoryAsync(MovementCategoryEntityId id);
-    Task<Result<MovementCategoryCreateCombineOutcome>> CreateMovementCategoryAsync(MovementCategoryCombineCreateRequest request);
+    Task<Result<MovementCategoryDeleteOutcome>> DeleteMovementCategoryAsync(MovementCategoryEntityId id, ICache? cache);
+    Task<Result<MovementCategoryCreateCombineOutcome>> CreateMovementCategoryAsync(MovementCategoryCombineCreateRequest request, ICache? cache);
 
 }

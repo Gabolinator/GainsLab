@@ -4,6 +4,7 @@ using GainsLab.Application.Results;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
+using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.Caching.QueryCache;
 
 namespace GainsLab.Infrastructure.Caching.Registry;
@@ -12,12 +13,14 @@ public sealed class DescriptorRegistry
 {
     private readonly IDescriptorGateway _gateway;
     private readonly DescriptorQueryCache _cache;
+    private readonly ILogger _logger;
     public Dictionary<Guid,DescriptorGetDTO> Descriptors { get; private set; } = new Dictionary<Guid, DescriptorGetDTO>();
 
-    public DescriptorRegistry(IDescriptorGateway gateway, DescriptorQueryCache cache)
+    public DescriptorRegistry(IDescriptorGateway gateway, DescriptorQueryCache cache, ILogger logger)
     {
         _gateway = gateway;
         _cache = cache;
+        _logger = logger;
     }
 
     public async Task<Result<IReadOnlyList<DescriptorGetDTO>>> GetAllAsync(bool forceRefresh = false)
@@ -28,6 +31,10 @@ public sealed class DescriptorRegistry
         }
         else if (_cache.TryGetCompleted(out var cached))
         {
+            if ( cached.Success &&  cached.HasValue)
+            {
+                Descriptors =  cached.Value.ToDictionary(d => d.Id, d => d);
+            }
             return cached;
         }
 
@@ -45,6 +52,7 @@ public sealed class DescriptorRegistry
     public void Invalidate()
     {
         _cache.Invalidate();
+        Descriptors.Clear();
     }
 
 
@@ -62,10 +70,15 @@ public sealed class DescriptorRegistry
 
     public async Task<DescriptorGetDTO?> GetDescriptorByIdAsync(Guid? id)
     {
+      
+        _logger.Log(nameof(GetDescriptorByIdAsync), $"Trying  to get descriptor for id {(id!=null ?id.ToString():"null" )}");
         if (id is null || id == Guid.Empty) return null;
 
+        _logger.Log(nameof(GetDescriptorByIdAsync), $"Trying to get descriptor from descriptor cache");
         if (Descriptors.TryGetValue(id.Value, out var cached))
             return cached;
+
+        _logger.Log(nameof(GetDescriptorByIdAsync), $"Didnt find in cache - Trying to get descriptor from query cache");
 
         var result = await GetAllAsync();
         return result.Success && Descriptors.TryGetValue(id.Value, out var refreshed)

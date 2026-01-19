@@ -14,8 +14,7 @@ public record MovementCategoryUpdateDTO
     public string? Name { get; init; }
 
     public MovementCategoryRefDTO? ParentCategory { get; init; }
-
-    [MinLength(1)]
+    
     public IReadOnlyList<MovementCategoryRefDTO>? BaseCategories { get; init; }
 
     public DescriptorUpdateDTO? Descriptor { get; init; }
@@ -24,4 +23,8 @@ public record MovementCategoryUpdateDTO
     public DataAuthority? Authority { get; init; }
 
     public string? UpdatedBy { get; init; }
+    
 }
+
+
+

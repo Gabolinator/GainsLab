@@ -1,4 +1,4 @@
-﻿@rendermode @(new InteractiveServerRenderMode(prerender: false))
+﻿@rendermode InteractiveServer
 @using System.Linq
 @using System.Runtime.CompilerServices
 @using GainsLab.Application.Results
@@ -50,6 +50,7 @@
 
                 <tr>
                     <MovementCategoryTableLine Index="i"
+                                               Id="eq.Id"
                                         Name="@eq.Name"
                                         Description="@GetDescription(eq)"
                                         Parent="@GetParent(eq)"
@@ -138,27 +139,27 @@
 
     private Link? GetEditLink(MovementCategoryGetDTO eq) => new Link { Text = $" Edit: {eq.Name}", Page = $@"movement-categories/{eq.Id}" };
 
-    private async Task DeleteCategoryAsync(Guid equipmentId)
+    private async Task DeleteCategoryAsync(Guid MovementCategoryId)
     {
 
-        Logger.Log(nameof(MovementCategoryDisplayComponent), $"Deleting equipment {equipmentId}");
+        Logger.Log(nameof(MovementCategoryDisplayComponent), $"Deleting MovementCategory {MovementCategoryId}");
 
         if (_categories is null)
         {
-            Toast.Error("No Equipments Found");
+            Toast.Error("No MovementCategory Found");
             return;
         }
-        var eq = _categories.FirstOrDefault(e => e.Id == equipmentId);
+        var eq = _categories.FirstOrDefault(e => e.Id == MovementCategoryId);
         if (eq == null)
         {
-            Toast.Error($"No Equipment Found with id {equipmentId}");
+            Toast.Error($"No MovementCategory Found with id {MovementCategoryId}");
             return;
         }
         
         var ok = await ConfirmDialog.ShowAsync(
             new ConfirmRequest(
                 "Delete Item", 
-                $"Are You sure you want to delete Equipment '{eq.Name}' ? It can't be undone",
+                $"Are You sure you want to delete MovementCategory '{eq.Name}' ? It can't be undone",
                 "Delete", 
                 "Cancel",
                 true));
@@ -172,11 +173,11 @@
         }
 
         
-        Result<MovementCategoryDeleteOutcome> result = await Repo.DeleteCategoryAsync(new MovementCategoryEntityId(equipmentId));
+        Result<MovementCategoryDeleteOutcome> result = await Repo.DeleteCategoryAsync(new MovementCategoryEntityId(MovementCategoryId));
         if (!result.Success || result.Value is not { Outcome: DeleteOutcome.Deleted })
         {
             _error = true;
-            _errorMessage = $"Unable to delete equipment {equipmentId}: {result.GetErrorMessage()}";
+            _errorMessage = $"Unable to delete MovementCategory {MovementCategoryId}: {result.GetErrorMessage()}";
             Logger.LogError(nameof(MovementCategoryDisplayComponent), _errorMessage);
             Toast.Error(_errorMessage);
             return;
@@ -190,11 +191,11 @@
 
      
       
-        var success = $"Deleted equipment {equipmentId}";
+        var success = $"Deleted MovementCategory {MovementCategoryId}";
         Logger.Log(nameof(MovementCategoryDisplayComponent), success);
         Toast.Success(success);
         
-        _categories = _categories.Where(e => e.Id != equipmentId).ToArray();
+        _categories = _categories.Where(e => e.Id != MovementCategoryId).ToArray();
     }
 
     private string GetParent(MovementCategoryGetDTO c)

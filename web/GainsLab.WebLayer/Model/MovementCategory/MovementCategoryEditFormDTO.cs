@@ -70,7 +70,6 @@ public static class MovementCategoryEditFormDTOExtensions
             Name = dto.Name,
             Authority = dto.Authority,
             UpdatedBy = dto.UpdatedBy,
-            
             Descriptor = dto.Descriptor is null
                 ? null
                 : dto.Descriptor.ToUpdateDTO()

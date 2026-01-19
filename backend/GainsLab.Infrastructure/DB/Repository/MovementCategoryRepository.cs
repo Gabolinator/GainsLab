@@ -71,24 +71,31 @@ public class MovementCategoryRepository : IMovementCategoryRepository
     {
         try
         {
-            MovementCategoryRecord? parentCategory = null;
-            if (payload.ParentCategoryId.HasValue && payload.ParentCategoryId.Value != Guid.Empty)
-            {
-                parentCategory = await _db.MovementCategories
-                    .FirstOrDefaultAsync(c => c.GUID == payload.ParentCategoryId.Value && !c.IsDeleted, ct);
-
-                if (parentCategory == null)
-                {
-                    return APIResult<MovementCategoryGetDTO>.BadRequest(
-                        $"Parent category {payload.ParentCategoryId} not found");
-                }
-            }
-
             var allCategories = await _db.MovementCategories
                 .AsNoTracking()
                 .ToListAsync(ct);
             
+            MovementCategoryRecord? parentCategory = null;
+            if (payload.ParentCategoryId.HasValue && payload.ParentCategoryId.Value != Guid.Empty)
+            {
+                _log.Log(nameof(MovementCategoryRepository), $"Trying to find parent for {payload.Id}");
+                parentCategory = allCategories.FirstOrDefault(c => c.GUID == payload.ParentCategoryId.Value && !c.IsDeleted);
+
+                if (parentCategory == null)
+                {
+                    _log.LogError(nameof(MovementCategoryRepository), $"Trying to find parent for {payload.Id} Failed - {payload.ParentCategoryId} not found");
+
+                    return APIResult<MovementCategoryGetDTO>.BadRequest(
+                        $"Parent category {payload.ParentCategoryId} not found");
+                }
+                
+                _db.Attach(parentCategory);
+            }
+
+        
+            
             ICollection<MovementCategoryRecord>? baseCategoryRecords = null;
+            
             if (payload.BaseCategories?.Count > 0)
             {
                 var normalized = payload.BaseCategories
@@ -96,10 +103,31 @@ public class MovementCategoryRepository : IMovementCategoryRepository
                     .ToHashSet();
                 
                 baseCategoryRecords = (await GetCategoriesByNames(normalized, allCategories))?.ToList();
+                
+                _log.Log(nameof(MovementCategoryRepository), $"Found bases for {payload.Id}  -  { (baseCategoryRecords != null &&  baseCategoryRecords.Count > 0 ? string.Join(", ",  baseCategoryRecords.Select(c=> c.Id.ToString())):"none")} ");
+
+                if (baseCategoryRecords != null)
+                {
+                    foreach (var baseCategory in baseCategoryRecords)
+                    {
+                        _db.Attach(baseCategory);
+                    }
+                }
+                
+            }
+            else
+            {
+                _log.Log(nameof(MovementCategoryRepository), $"No bases for {payload.Id} ");
+                baseCategoryRecords = new List<MovementCategoryRecord>();
             }
 
             var entity = payload.ToEntity(_clock, parentCategory, baseCategoryRecords);           // GUID created here
-            if (entity == null) return APIResult<MovementCategoryGetDTO>.BadRequest("Could not create record from dto");
+            if (entity == null)
+            {
+                _log.LogError(nameof(MovementCategoryRepository), $"Could not conver payload  {payload.Id} to entity");
+
+                return APIResult<MovementCategoryGetDTO>.BadRequest("Could not create record from dto");
+            }
        
             var record = await CreateAsync(entity, ct);
             
@@ -197,7 +225,13 @@ public class MovementCategoryRepository : IMovementCategoryRepository
             
             // update branch
             existing.Descriptor = payload.Descriptor.ToEntity(_clock);
-            existing.BaseCategoryLinks = GetOrCreateRelations(existing, baseCat, allRelations);
+            var baseRelations = GetOrCreateRelations(existing, baseCat, allRelations);
+            var mergedBaseRelations = MergeBaseRelations(existing, baseRelations);
+            existing.BaseCategoryLinks.Clear();
+            foreach (var relation in mergedBaseRelations)
+            {
+                existing.BaseCategoryLinks.Add(relation);
+            }
             existing.ChildCategoryLinks =  GetOrCreateRelations(existing, childCat, allRelations);
             existing.UpdatedAtUtc = _clock.UtcNow;
             existing.UpdatedBy = payload.UpdatedBy;
@@ -288,6 +322,40 @@ public class MovementCategoryRepository : IMovementCategoryRepository
        return StringFormater.Normalize(argName);
     }
 
+    private ICollection<MovementCategoryRelationRecord> MergeBaseRelations(
+        MovementCategoryRecord category,
+        ICollection<MovementCategoryRelationRecord>? requestedRelations)
+    {
+        if (requestedRelations == null || requestedRelations.Count == 0)
+        {
+            return new List<MovementCategoryRelationRecord>();
+        }
+
+        var existingByParentChild = category.BaseCategoryLinks?
+            .Where(link => link.ParentCategoryId > 0 && link.ChildCategoryId > 0)
+            .ToDictionary(
+                link => (link.ParentCategoryId, link.ChildCategoryId),
+                link => link)
+            ?? new Dictionary<(int ParentId, int ChildId), MovementCategoryRelationRecord>();
+
+        var merged = new List<MovementCategoryRelationRecord>();
+        foreach (var relation in requestedRelations)
+        {
+            var key = (relation.ParentCategoryId, relation.ChildCategoryId);
+            if (existingByParentChild.TryGetValue(key, out var trackedRelation))
+            {
+                merged.Add(trackedRelation);
+                existingByParentChild.Remove(key);
+            }
+            else
+            {
+                merged.Add(relation);
+            }
+        }
+
+        return merged;
+    }
+
 
     public async Task<APIResult<MovementCategoryUpdateOutcome>> PatchAsync(Guid id, MovementCategoryUpdateDTO payload, CancellationToken ct)
     {
@@ -318,40 +386,78 @@ public class MovementCategoryRepository : IMovementCategoryRepository
                 }
             }
 
-            
-            var allCategories = await _db.MovementCategories
-                .AsNoTracking()
-                .ToListAsync(ct);
+            var requestedBaseGuids = payload.BaseCategories == null || payload.BaseCategories.Count == 0
+                ? new HashSet<Guid>()
+                : payload.BaseCategories
+                    .Select(b => b.Id)
+                    .Where(id => id != Guid.Empty)
+                    .ToHashSet();
 
-            ICollection<MovementCategoryRelationRecord>? requestedBaseRelations = null;
-            if (payload.BaseCategories != null)
+            _log.Log(nameof(MovementCategoryRepository),
+                $"Base categories requested: {requestedBaseGuids.Count}, existing: {category.BaseCategoryLinks?.Count ?? 0}");
+
+            var existingLinks = category.BaseCategoryLinks ?? new List<MovementCategoryRelationRecord>();
+            var existingGuids = existingLinks
+                .Select(link => link.ParentCategory?.GUID)
+                .Where(g => g.HasValue && g.Value != Guid.Empty)
+                .Select(g => g!.Value)
+                .ToList();
+
+            var guidsToRemove = existingGuids.Where(g => !requestedBaseGuids.Contains(g)).ToList();
+            var guidsToAdd = requestedBaseGuids.Where(g => !existingGuids.Contains(g)).ToList();
+
+            var basesChanged = guidsToRemove.Any() || guidsToAdd.Any();
+
+            if (basesChanged)
             {
-                if (payload.BaseCategories.Count == 0)
+                var toRemove = existingLinks
+                    .Where(link => link.ParentCategory?.GUID is Guid guid && guidsToRemove.Contains(guid))
+                    .ToList();
+                
+                if (category.BaseCategoryLinks != null)
+                    foreach (var relation in toRemove)
+                    {
+                        category.BaseCategoryLinks.Remove(relation);
+                    }
+
+                foreach (var guidToAdd in guidsToAdd)
                 {
-                    requestedBaseRelations = new List<MovementCategoryRelationRecord>();
+                    var parent = _db.MovementCategories.Local.FirstOrDefault(c => c.GUID == guidToAdd);
+                    parent ??= await _db.MovementCategories
+                        .FirstOrDefaultAsync(c => c.GUID == guidToAdd && !c.IsDeleted, ct);
+
+                    if (parent == null)
+                    {
+                        _log.LogWarning(nameof(MovementCategoryRepository),
+                            $"Base category {guidToAdd} not found when patching {category.GUID}");
+                        continue;
+                    }
+
+                    var relation = new MovementCategoryRelationRecord
+                    {
+                        ParentCategory = parent,
+                        ParentCategoryId = parent.Id,
+                        ChildCategory = category,
+                        ChildCategoryId = category.Id
+                    };
+                    category.BaseCategoryLinks ??= new List<MovementCategoryRelationRecord>();
+                    category.BaseCategoryLinks.Add(relation);
                 }
-                else
-                {
-                    var normalizedNames = payload.BaseCategories
-                        .Select(b => Normalize(b.ToString()))
-                        .ToHashSet();
 
-                 
-                    var baseCategories = await GetCategoriesByNames(normalizedNames, allCategories);
-
-                    var allRelations = await _db.MovementCategoryRelations
-                        .AsNoTracking()
-                        .ToListAsync(ct);
-
-                    requestedBaseRelations = GetOrCreateRelations(category, baseCategories, allRelations);
-                }
+                _log.Log(nameof(MovementCategoryRepository),
+                    $"Base diff: removed {guidsToRemove.Count}, added {guidsToAdd.Count}");
             }
 
             var categoryChanged = category.TryUpdate(
                 payload,
                 _clock,
                 payload.ParentCategory != null ? requestedParent : null,
-                requestedBaseRelations);
+                null,
+                _log);
+            categoryChanged = categoryChanged || basesChanged;
+            
+            _log.Log(nameof(MovementCategoryRepository), $"Category Changed : {categoryChanged}");
+            
             var descriptorOutcomeState = payload.Descriptor == null ? UpdateOutcome.NotRequested : UpdateOutcome.NotUpdated;
             var descriptorChanged = false;
             DescriptorUpdateOutcome? descriptorOutcome = null;
@@ -360,6 +466,8 @@ public class MovementCategoryRepository : IMovementCategoryRepository
             {
                 if (category.Descriptor == null)
                 {
+                    _log.LogWarning(nameof(MovementCategoryRepository), $"No descriptor provided");
+
                     return APIResult<MovementCategoryUpdateOutcome>.Problem("Descriptor missing for movement category");
                 }
 
@@ -386,6 +494,8 @@ public class MovementCategoryRepository : IMovementCategoryRepository
         }
         catch (Exception e)
         {
+            _log.LogError(nameof(MovementCategoryRepository), $"Exception: {e.GetBaseException().Message}");
+
             return APIResult<MovementCategoryUpdateOutcome>.Exception(e.Message);
         }
     }
@@ -424,6 +534,9 @@ public class MovementCategoryRepository : IMovementCategoryRepository
     {
         try
         {
+            _log.Log(nameof(MovementCategoryRepository), $"Trying to add MovementCategory Entity {entity.Id} - {entity.Name} - {entity.Iguid} " );
+
+            
             var entry = await _db.MovementCategories.AddAsync(entity, ct).ConfigureAwait(false);
             if (entry is { State: EntityState.Added, Entity: not null })
             {
@@ -435,6 +548,8 @@ public class MovementCategoryRepository : IMovementCategoryRepository
         }
         catch (Exception e)
         {
+            _log.LogError(nameof(MovementCategoryRepository), $"An exception happened while trying to add MovementCategory Entity {entity.Id} - {entity.Name} - {entity.Iguid} :  {e.GetBaseException().Message}" );
+
             return APIResult<MovementCategoryRecord>.Exception(e.Message);
         }
     }

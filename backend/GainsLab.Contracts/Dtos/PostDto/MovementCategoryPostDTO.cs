@@ -20,7 +20,6 @@ public record MovementCategoryPostDTO
     public Guid? ParentCategoryId { get; init; }
 
     [Required]
-    [MinLength(1)]
     public IReadOnlyList<eMovementCategories> BaseCategories { get; init; } =
         Array.Empty<eMovementCategories>();
 

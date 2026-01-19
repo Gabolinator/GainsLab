@@ -57,8 +57,8 @@ public static class DescriptorMapper
             CreatedAtUtc = clock.UtcNow,
             CreatedBy = !string.IsNullOrWhiteSpace(dto.CreatedBy) ? dto.CreatedBy : "system",
             UpdatedAtUtc = clock.UtcNow,
-            UpdatedSeq = 1,
             UpdatedBy = dto.CreatedBy,
+            UpdatedSeq = 1,
             Authority = dto.Authority
         };
 

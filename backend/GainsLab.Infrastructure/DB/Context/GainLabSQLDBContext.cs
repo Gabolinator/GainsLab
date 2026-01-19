@@ -151,6 +151,8 @@ public class GainLabSQLDBContext : DbContext
         {
             m.ToTable("movement_category");
             m.HasKey(x => x.Id);
+            m.Property(x => x.Id)
+                .ValueGeneratedOnAdd();
 
             m.Property(x => x.Name).IsRequired();
             

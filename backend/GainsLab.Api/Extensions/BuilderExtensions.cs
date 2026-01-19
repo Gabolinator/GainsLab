@@ -13,9 +13,9 @@ public static class BuilderExtensions
         // TODO: remove or make configurable before shipping to production.
         builder.Environment.EnvironmentName = Environments.Development;
         builder.Configuration.AddUserSecrets<Program>(optional: true);
-
+       
         logger.Log($"ENV: {builder.Environment.EnvironmentName}");
-        logger.Log($"Conn (pre): '{builder.Configuration.GetConnectionString("GainsLabDb") ?? "<null>"}'");
+     
     }
     
     
@@ -38,8 +38,19 @@ public static class BuilderExtensions
                 "Missing ConnectionStrings:GainsLabDb. Add it to appsettings.Development.json or user-secrets.");
         }
 
+        else logger.Log($"Conn (pre): '{connectionString}'");
+        
+       
+        
         services.AddDbContext<GainLabPgDBContext>(options =>
-            options.UseNpgsql(connectionString, npgsql => npgsql.EnableRetryOnFailure()));
+            options.UseNpgsql(
+                connectionString, 
+                npgsql => npgsql.EnableRetryOnFailure())
+                .EnableSensitiveDataLogging()
+                .EnableDetailedErrors().LogTo(
+                    message => logger.Log(message),
+                    LogLevel.Debug)
+            );
 
         
         services.ConfigureServicesPostDBContext(logger, clock);

@@ -1,4 +1,5 @@
-﻿using GainsLab.Application.Interfaces.DataManagement.Repository;
+﻿using GainsLab.Application.Interfaces;
+using GainsLab.Application.Interfaces.DataManagement.Repository;
 using GainsLab.Application.Results.APIResults;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
@@ -8,6 +9,7 @@ using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Infrastructure.SyncService;
 using Microsoft.AspNetCore.Mvc;
+using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
 namespace GainsLab.Api.Controller;
 
@@ -17,12 +19,14 @@ public class MovementCategoryController : ControllerBase
 {
     private readonly IMovementCategoryRepository _repo;
     private readonly ISyncService<MovementCategorySyncDTO> _svc;
-   
+    private readonly ILogger _log;
 
-    public MovementCategoryController(IMovementCategoryRepository repo, ISyncService<MovementCategorySyncDTO> svc)
+
+    public MovementCategoryController(IMovementCategoryRepository repo, ISyncService<MovementCategorySyncDTO> svc, ILogger logger)
     {
         _repo = repo;
         _svc = svc;
+        _log = logger;
     }
 
 
@@ -56,9 +60,14 @@ public class MovementCategoryController : ControllerBase
     public async Task<IActionResult> PostCategory(
         [FromBody] MovementCategoryPostDTO? payload, CancellationToken ct = default)
     {
+
+        if (payload == null)
+        {
+            _log.LogError(nameof(MovementCategoryController), "No Payload provided");
+            return BadRequest();
+        }
         
-        if(payload == null)  return BadRequest();
-        
+        _log.Log(nameof(MovementCategoryController), $"Try to post {payload.Name} - {payload.Id}");
         var result = await _repo.PostAsync(payload,ct);
    
         return APIResultValidation.ValidateResult<MovementCategoryGetDTO>(this, result,

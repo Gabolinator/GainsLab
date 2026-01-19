@@ -115,8 +115,8 @@ public static class MovementCategoryMapper
             CreatedBy = string.IsNullOrWhiteSpace(dto.CreatedBy) ? "system" : dto.CreatedBy!,
             UpdatedAtUtc = clock.UtcNow,
             UpdatedBy = dto.CreatedBy,
-            UpdatedSeq = 1,
             Authority = dto.Authority,
+            UpdatedSeq = 1,
             ParentCategory = parentCategory,
             ParentCategoryDbId = parentCategory?.Id
         };

@@ -43,7 +43,12 @@ public sealed class EquipmentRegistry
        return result;
     }
 
-    public void Invalidate() => _cache.Invalidate();
+    public void Invalidate()
+    {
+        
+        _cache.Invalidate();
+        Equipments.Clear();
+    }
 
     public async Task<Result<EquipmentGetDTO>> GetByIdAsync(Guid id, bool forceRefresh = false)
     {

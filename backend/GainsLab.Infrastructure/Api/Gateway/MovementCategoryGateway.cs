@@ -1,6 +1,9 @@
-﻿using GainsLab.Application.Interfaces.DataManagement.Gateway;
+﻿using GainsLab.Application.DTOs.Extensions;
+using GainsLab.Application.Interfaces.DataManagement;
+using GainsLab.Application.Interfaces.DataManagement.Gateway;
 using GainsLab.Application.Interfaces.DataManagement.Provider;
 using GainsLab.Application.Results;
+using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.Delete.Outcome;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.ID;
@@ -145,22 +148,144 @@ public class MovementCategoryGateway : IMovementCategoryGateway
     
     public async Task<Result<MovementCategoryGetDTO>> GetMovementCategoryAsync(MovementCategoryEntityId id)
     {
-        return Result<MovementCategoryGetDTO>.NotImplemented(nameof(GetMovementCategoryAsync));
+        if(!id.IsValid()) return Result<MovementCategoryGetDTO>.Failure("Invalid id");
+        
+        return await  _provider.GetMovementCategoryAsync(id, default);
+        
+        
     }
 
-    public async Task<Result<MovementCategoryUpdateCombinedOutcome>> UpdateMovementCategoryAsync(MovementCategoryUpdateRequest request,
-        DescriptorUpdateRequest? descriptorUpdateRequest)
+    public async Task<Result<MovementCategoryUpdateCombinedOutcome>> UpdateMovementCategoryAsync(
+        MovementCategoryUpdateRequest request,
+        DescriptorUpdateRequest? descriptorUpdateRequest,
+        ICache? cache)
     {
-        return Result<MovementCategoryUpdateCombinedOutcome>.NotImplemented(nameof(UpdateMovementCategoryAsync));
+        //return Result<MovementCategoryUpdateCombinedOutcome>.NotImplemented(nameof(UpdateMovementCategoryAsync));
+        MessagesContainer message = new MessagesContainer();
+        DescriptorUpdateOutcome? descriptor = null;
+        
+        //start by trying to update description
+        if (descriptorUpdateRequest != null &&
+            descriptorUpdateRequest!.UpdateRequest == UpdateRequest.Update)
+        {
+            var descriptorOutcome = await _descriptorGateway.UpdateDescriptorAsync(descriptorUpdateRequest);
+            
+            if (!descriptorOutcome.Success || descriptorOutcome.Value == null ||
+                descriptorOutcome.Value.Outcome == UpdateOutcome.Failed)
+            {
+                _logger.LogWarning(nameof(EquipmentGateway), $"Did not update descriptor {descriptorOutcome.GetMessages()}");
+                message.Append(descriptorOutcome.GetMessages());
+            }
+            
+            else 
+            {
+                descriptor = descriptorOutcome.Value!;
+            }
+        }
+        
+        if(descriptor == null) message.AddWarning("Did not update descriptor");
+        else _descriptorGateway.Invalidate();
+        
+        MovementCategoryUpdateOutcome? category = null;
+        var categoryOutcome =  await _provider.UpdateMovementCategoryAsync(request, default);
+        
+        if (!categoryOutcome.Success
+            || categoryOutcome.Value == null
+            || categoryOutcome.Value.Outcome == UpdateOutcome.Failed)
+        {
+            message.Append(categoryOutcome.GetMessages());
+        }
+        else category = categoryOutcome.Value!;
+        
+        if(category != null) cache?.Invalidate();
+        
+        return category == null && descriptor == null
+            ? Result<MovementCategoryUpdateCombinedOutcome>.Failure(message)
+            : Result<MovementCategoryUpdateCombinedOutcome>.SuccessResult(new MovementCategoryUpdateCombinedOutcome(category, descriptor,
+                message));
+        
     }
 
-    public async Task<Result<MovementCategoryDeleteOutcome>> DeleteMovementCategoryAsync(MovementCategoryEntityId id)
+    public async Task<Result<MovementCategoryDeleteOutcome>> DeleteMovementCategoryAsync(MovementCategoryEntityId id, ICache? cache)
     {
-        return Result<MovementCategoryDeleteOutcome>.NotImplemented(nameof(DeleteMovementCategoryAsync));
+        if (!id.IsValid())
+        {
+            return Result<MovementCategoryDeleteOutcome>.Failure("Invalid id");
+        }
+        
+        var result = await _provider.DeleteMovementCategoryAsync(id, default);
+        if (result.Success)
+        {
+            InvalidateCaches(cache);
+        }
+        return result;
     }
 
-    public async Task<Result<MovementCategoryCreateCombineOutcome>> CreateMovementCategoryAsync(MovementCategoryCombineCreateRequest request)
+    public async Task<Result<MovementCategoryCreateCombineOutcome>> CreateMovementCategoryAsync(MovementCategoryCombineCreateRequest request, ICache? cache)
     {
-        return Result<MovementCategoryCreateCombineOutcome>.NotImplemented(nameof(CreateMovementCategoryAsync));
+     //   return Result<MovementCategoryCreateCombineOutcome>.NotImplemented(nameof(CreateMovementCategoryAsync));
+     MessagesContainer message = new MessagesContainer();
+
+     DescriptorCreateOutcome? descriptorCreateOutcome = null;
+     MovementCategoryCreateOutcome? equipmentCreateOutcome = null;
+     var createDescriptorRequest = request.Descriptor;
+     var createCategoryRequest = request.MovementCategory;
+
+     var createDescriptorValidation = createDescriptorRequest.IsCreateRequestValid();
+     
+     //request is invalid - just get the errors
+     if (!createDescriptorValidation.Success)
+     {
+         message.Append(createDescriptorValidation.Messages);
+     }
+        
+     var createCategoryValidation = createCategoryRequest.IsCreateRequestValid();
+     
+     //valid
+     if (createCategoryValidation.Success)
+     {
+         Result<MovementCategoryCreateOutcome> equipmentOutcome =
+             await _provider.CreateMovementCategoryAsync(createCategoryRequest.MovementCategory!, default); //validated earlier
+            
+            
+         if (!equipmentOutcome.Success ||equipmentOutcome.Value == null ||
+             equipmentOutcome.Value.Outcome != CreateOutcome.Created)
+         {
+             _logger.LogWarning(nameof(MovementCategoryGateway),
+                 $"Did not create MovementCategory {equipmentOutcome.GetMessages()}");
+             message.Append(equipmentOutcome.GetMessages());
+         }
+
+         else
+         {
+             equipmentCreateOutcome = equipmentOutcome.Value!;
+             var createdDescriptor = equipmentCreateOutcome.CreatedMovementCategory?.Descriptor;
+             descriptorCreateOutcome = createdDescriptor == null ? null : new DescriptorCreateOutcome(CreateOutcome.Created,createdDescriptor);
+         }
+
+         InvalidateCaches(cache);
+     }
+        
+     //invalid
+     else
+     {
+         message.Append(createCategoryValidation.Messages);
+     }
+
+        
+
+     return equipmentCreateOutcome == null && descriptorCreateOutcome == null
+         ? Result<MovementCategoryCreateCombineOutcome>.Failure(message)
+         : Result<MovementCategoryCreateCombineOutcome>.SuccessResult(new MovementCategoryCreateCombineOutcome(equipmentCreateOutcome, descriptorCreateOutcome,
+             message));
+
+     
     }
+    
+    private void InvalidateCaches(ICache? cache)
+    {
+        _descriptorGateway.Invalidate();
+        cache?.Invalidate();
+    }
+
 }

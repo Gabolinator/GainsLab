@@ -122,7 +122,7 @@ public class EquipmentGateway : IEquipmentGateway
         if(descriptor == null) message.AddWarning("Did not update descriptor");
         else _descriptorGateway.Invalidate();
         
-        EquipmentUpdateOutcome equipment = null;
+        EquipmentUpdateOutcome? equipment = null;
         //them update this 
         var equipmentOutcome = await _provider.UpdateEquipmentAsync(request, CancellationToken.None);
         if (!equipmentOutcome.Success || equipmentOutcome.Value == null ||

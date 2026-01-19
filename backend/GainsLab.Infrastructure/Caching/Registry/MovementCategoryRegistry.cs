@@ -38,6 +38,7 @@ public sealed class MovementCategoryRegistry
         }
 
         var result = await _cache.GetAllAsync(() => _gateway.GetAllCategoryAsync());
+        
         if (result.Success && result.HasValue && result.Value is not null)
         {
             MovementCategories = result.Value.ToDictionary(category => category.Id, category => category);
@@ -46,7 +47,12 @@ public sealed class MovementCategoryRegistry
         return result;
     }
 
-    public void Invalidate() => _cache.Invalidate();
+    public void Invalidate()
+    {
+        _cache.Invalidate();
+        MovementCategories.Clear();
+    }
+    
 
     public async Task<Result<MovementCategoryGetDTO>> GetByIdAsync(Guid id, bool forceRefresh = false)
     {
@@ -93,7 +99,7 @@ public sealed class MovementCategoryRegistry
     public async Task<Result<MovementCategoryDeleteOutcome>> DeleteCategoryAsync(
         MovementCategoryEntityId movementCategoryEntityId)
     {
-        var result = await _gateway.DeleteMovementCategoryAsync(movementCategoryEntityId);
+        var result = await _gateway.DeleteMovementCategoryAsync(movementCategoryEntityId, _cache);
         if (result.Success)
         {
             Invalidate();
@@ -110,7 +116,7 @@ public sealed class MovementCategoryRegistry
         MovementCategoryUpdateRequest request,
         DescriptorUpdateRequest? descriptorRequest)
     {
-        var result = await _gateway.UpdateMovementCategoryAsync(request, descriptorRequest);
+        var result = await _gateway.UpdateMovementCategoryAsync(request, descriptorRequest, _cache);
         if (result.Success)
         {
             Invalidate();
@@ -122,7 +128,7 @@ public sealed class MovementCategoryRegistry
     public async Task<Result<MovementCategoryCreateCombineOutcome>> CreateMovementCategoryAsync(
         MovementCategoryCombineCreateRequest request)
     {
-        var result = await _gateway.CreateMovementCategoryAsync(request);
+        var result = await _gateway.CreateMovementCategoryAsync(request, _cache);
         if (result.Success)
         {
             Invalidate();

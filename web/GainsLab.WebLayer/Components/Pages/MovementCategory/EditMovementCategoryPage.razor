@@ -15,7 +15,6 @@
 @using GainsLab.WebLayer.Components.Control
 @using GainsLab.WebLayer.Model.Descriptor
 @using GainsLab.WebLayer.Model.Dropdown
-@using GainsLab.WebLayer.Model.Equipment
 @using GainsLab.WebLayer.Model.MovementCategory
 @using GainsLab.WebLayer.Model.Notification
 @using GainsLab.WebLayer.Model.Notification.Confirmation
@@ -123,7 +122,7 @@
     private string _parentFieldID;
     public MovementCategoryRefDTO? ParentRef { get; set; } = null;
 
-    private HashSet<string> ExistingEquipmentNames { get; set; } = new HashSet<string>();
+    private HashSet<string> ExistingCategoryNames { get; set; } = new HashSet<string>();
 
     public MessagesContainer? Messages { get; set; } = new MessagesContainer();
     public string SelectedParent { get => _parentFieldID;  set => OnParentChanged(value); }
@@ -196,7 +195,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        // Logger.Log(nameof(EditEquipmentPage),$"On Parameter set");
+        // Logger.Log(nameof(EditCategoryPage),$"On Parameter set");
 
 
         await base.OnParametersSetAsync();
@@ -206,11 +205,11 @@
 
         _isEditValid = false;
 
-        //we cache all the equipments - so we can filter for same name
+        //we cache all the Categorys - so we can filter for same name
         var eqs = await Repo.GetAllAsync();
         if (eqs.Value == null || eqs.Value.Count == 0)
         {
-            Messages.AddError("No Equipments Found");
+            Messages.AddError("No Categorys Found");
             return;
         }
 
@@ -227,7 +226,7 @@
         var eq =   _categories.FirstOrDefault(e => e.Id == Id);
         if (eq == null)
         {
-            Messages.AddError("Equipment not found");
+            Messages.AddError("Category not found");
             return;
         }
 
@@ -242,7 +241,7 @@
         _normalizedOriginalName = Normalize(Category!.Name);
         _originalDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
 
-        ExistingEquipmentNames = eqs.Value
+        ExistingCategoryNames = eqs.Value
             .Select(e => Normalize(e.Name))
             .Where(n => !string.IsNullOrWhiteSpace(n))
             .Where(n => !string.Equals(n, _normalizedOriginalName, StringComparison.InvariantCultureIgnoreCase))
@@ -250,7 +249,7 @@
 
         BuildEditContext();
 
-        // Messages.AddInfo($"Equipments Names : {string.Join(",", ExistingEquipmentNames)}");
+        // Messages.AddInfo($"Categorys Names : {string.Join(",", ExistingCategoryNames)}");
 
 
     }
@@ -278,7 +277,7 @@
 
     private void HandleFieldChanged(object? sender, FieldChangedEventArgs e)
     {
-        if (e.FieldIdentifier.FieldName == nameof(EquipmentEditFormDTO.Name))
+        if (e.FieldIdentifier.FieldName == nameof(MovementCategoryGetDTO.Name))
         {
             ValidateUniqueName();
         }
@@ -313,9 +312,9 @@
             return;
         }
 
-        if (ExistingEquipmentNames.Contains(candidate))
+        if (ExistingCategoryNames.Contains(candidate))
         {
-            _validationMessages.Add(_nameField, "An equipment with this name already exists.");
+            _validationMessages.Add(_nameField, "An Category with this name already exists.");
             _isEditValid = false;
             EditCategory.UpdateRequest = UpdateRequest.DontUpdate;
             FormContext.NotifyValidationStateChanged();
@@ -324,7 +323,7 @@
 
         if (string.Equals(candidate, _normalizedOriginalName, StringComparison.InvariantCultureIgnoreCase))
         {
-            var warning = $"Validated Equipment Name - unchanged candidate {candidate}";
+            var warning = $"Validated Category Name - unchanged candidate {candidate}";
             Messages.AddWarning(warning);
             Logger.Log(nameof(EditMovementCategoryPage), warning);
             _validationMessages.Clear(_nameField);
@@ -366,7 +365,7 @@
         var currentDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
         if (string.Equals(currentDescriptorContent, _originalDescriptorContent, StringComparison.InvariantCultureIgnoreCase))
         {
-            Messages.AddError($"Equipment {Category!.Name} description content did not change");
+            Messages.AddError($"Category {Category!.Name} description content did not change");
             EditDescriptor.UpdateRequest = UpdateRequest.DontUpdate;
         }
         else
@@ -377,26 +376,46 @@
         EditCategory!.Descriptor = EditDescriptor;
 
         //todo check if changed
+        bool anythingChanged = false;
+        if (!IsSameParent(EditCategory.Parent, ParentRef))
+        {
+            anythingChanged = true;
+        }
+        else
+        {
+            Toast.Warning("Parent Did not change");
+        }
+        
         EditCategory.Parent = ParentRef;
         
-        //todo check if changed
-        EditCategory.BasesCategory = GetCategoryRefs(SelectedBaseCategories.Select(c=>c.ToString()));
+        var selectedBaseCat = SelectedBaseCategories == null || SelectedBaseCategories.Count ==0 ? new() :  GetCategoryRefs(SelectedBaseCategories.Select(c=>c.ToString())) ?? new();
+
+        if (!IsSameBaseCategory(EditCategory.BasesCategory, selectedBaseCat))
+        {
+            anythingChanged = true;
+            Logger.Log(nameof(EditMovementCategoryPage), $"Not Same Base Categories : {EditCategory} ");
+        }
+        else
+        {
+            Toast.Warning("Base Category did not change");
+        }
+
+        EditCategory.BasesCategory =  selectedBaseCat;
+
+        EditCategory.UpdateRequest = anythingChanged ? UpdateRequest.Update : UpdateRequest.DontUpdate;
+        
         
         var request = EditCategory.ToUpdateRequest();
-      
+     
         Logger.Log(nameof(EditMovementCategoryPage), $"Submitting MovementCategory : {EditCategory} ");
 
         Messages.ClearAll();
 
-        //todo
-        
-        
-        return;
-        
+       
         var outcome = await Repo.UpdateMovementCategoryAsync(request, EditCategory.Descriptor.ToUpdateRequest());
         if (!outcome.Success || outcome.Value == null)
         {
-            var message = "Could not update equipment: ";
+            var message = "Could not update Category: ";
             Messages.AddError(message);
             Messages.Append(outcome.GetMessages());
             Toast.FromMessages(Messages);
@@ -407,13 +426,28 @@
             Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
 
             if (outcome.Value.MovementCategory != null && outcome.Value.MovementCategory.Outcome == UpdateOutcome.Updated)
-                Toast.Success($"Equipment updated to {outcome.Value.MovementCategory.UpdatedState!.Name}");
+                Toast.Success($"Category updated to {outcome.Value.MovementCategory.UpdatedState!.Name}");
 
             if (outcome.Value.Descriptor != null && outcome.Value.Descriptor.Outcome == UpdateOutcome.Updated)
-                Toast.Success($"Equipment Description updated to {outcome.Value.Descriptor.UpdatedState!.content}");
+                Toast.Success($"Category Description updated to {outcome.Value.Descriptor.UpdatedState!.content}");
 
         }
 
+    }
+
+    private bool IsSameBaseCategory(List<MovementCategoryRefDTO> editCategoryBasesCategory, List<MovementCategoryRefDTO> selectedBaseCat)
+    {
+        if(editCategoryBasesCategory.Count == 0 && selectedBaseCat.Count == 0)  return true;
+        if(editCategoryBasesCategory.Count != selectedBaseCat.Count) return false;
+        
+        return editCategoryBasesCategory.SequenceEqual(selectedBaseCat);
+    }
+
+    private bool IsSameParent(MovementCategoryRefDTO? editCategoryParent, MovementCategoryRefDTO? parentRef)
+    {
+        if (editCategoryParent == null && parentRef == null) return true;
+        if((editCategoryParent == null && parentRef != null) || (editCategoryParent != null && parentRef == null)) return false;
+        return editCategoryParent!.Id == parentRef!.Id;
     }
 
     private List<MovementCategoryRefDTO>? GetCategoryRefs(IEnumerable<string>? names)
@@ -430,15 +464,15 @@
         Messages.ClearAll();
         if (Category == null || Category.Id == Guid.Empty)
         {
-            Messages.AddWarning("Invalid Equipment Id");
-            Toast.Error($"Could not delete equipment : Invalid Equipment");
+            Messages.AddWarning("Invalid Category Id");
+            Toast.Error($"Could not delete Category : Invalid Category");
             return;
         }
 
         var ok = await ConfirmDialog.ShowAsync(
             new ConfirmRequest(
                 "Delete Item",
-                $"Are You sure you want to delete Equipment '{Category.Name}' ? It can't be undone",
+                $"Are You sure you want to delete Category '{Category.Name}' ? It can't be undone",
                 "Delete",
                 "Cancel",
                 true));
@@ -448,10 +482,6 @@
             Toast.Error($"Delete {Category.Name} Cancelled");
             return;
         }
-
-        //
-        Toast.Error($"Delete {Category.Name} Not Yet Implemented");
-        return;
         
         
         Result<MovementCategoryDeleteOutcome> outcome = await Repo.DeleteCategoryAsync(new MovementCategoryEntityId(Category.Id));
@@ -459,15 +489,15 @@
         {
 
             Messages.Append(outcome.Messages);
-            Toast.Error($"Could not delete equipment : {Messages.ToString(MessageType.Error)}");
+            Toast.Error($"Could not delete Category : {Messages.ToString(MessageType.Error)}");
             return;
         }
 
-        var message = $"Equipment {outcome.Value.Id} Deleted";
+        var message = $"Category {outcome.Value.Id} Deleted";
 
         Messages.AddInfo(message);
         Toast.Success(message);
-        NavManager.NavigateTo("equipments");
+        NavManager.NavigateTo("Categorys");
 
 
 

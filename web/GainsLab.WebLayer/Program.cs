@@ -70,6 +70,7 @@ void AddApis(IServiceCollection s)
     s.AddHttpClient<IDescriptorApi, DescriptorApi>(ConfigureSyncClient);
     s.AddHttpClient<IEquipmentApi, EquipmentApi>(ConfigureSyncClient);
     s.AddHttpClient<IMovementCategoryApi, MovementCategoryApi>(ConfigureSyncClient);
+    s.AddHttpClient<IMuscleApi, MuscleApi>(ConfigureSyncClient);
     s.AddScoped<IApiClientRegistry, ApiClientRegistry>();
 }
 
