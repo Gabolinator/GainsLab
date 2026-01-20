@@ -6,7 +6,7 @@ using GainsLab.Contracts.Dtos.PostDto.Request;
 using GainsLab.Infrastructure.Utilities;
 using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
-namespace GainsLab.WebLayer.Model.Descriptor;
+namespace GainsLab.WebLayer.Model.Dto.Descriptor;
 
 public class DescriptorCreateDTO
 {

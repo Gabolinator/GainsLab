@@ -6,10 +6,9 @@ using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PostDto.Request;
 using GainsLab.Domain;
 using GainsLab.Infrastructure.Utilities;
-using GainsLab.WebLayer.Model.Descriptor;
+using GainsLab.WebLayer.Model.Dto.Descriptor;
 
-
-namespace GainsLab.WebLayer.Model.MovementCategory;
+namespace GainsLab.WebLayer.Model.Dto.MovementCategory;
 
 public class MovementCategoryCreateDTO
 {

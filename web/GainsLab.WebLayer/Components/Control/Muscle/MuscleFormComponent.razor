@@ -1,0 +1,303 @@
+﻿
+@rendermode InteractiveServer
+@using GainsLab.Application.Results
+@using GainsLab.Contracts.Dtos.GetDto
+@using GainsLab.Domain
+@using GainsLab.Domain.Interfaces
+@using GainsLab.Infrastructure.Utilities
+@using GainsLab.WebLayer.Model.Dropdown
+@using GainsLab.WebLayer.Model.Dto.Descriptor
+@using GainsLab.WebLayer.Model.Dto.Muscle
+@using ILogger = Domain.Interfaces.ILogger
+
+@implements IDisposable
+
+<h3>MuscleForm</h3>
+
+  
+<EditForm EditContext="FormContext" FormName=@FormName OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator></DataAnnotationsValidator>
+    <ValidationSummary></ValidationSummary>
+        
+            
+    <div class="mb-2">
+        <label>Name</label>
+        <InputText Value="@Model.Name"
+                   ValueChanged="OnNameChanged"
+                   ValueExpression="@(() => Model.Name)"
+                   @oninput="OnNameInput" />
+        <ValidationMessage For="(() => Model.Name)"/>
+    </div>
+            
+    <div class="mb-2">
+        <label>Description</label>
+        <InputText class="form-control"
+                   @bind-Value="EditDescriptor.DescriptionContent"/>
+    </div>
+            
+    <div class="mb-2">
+        <label>BodySection</label>
+        <DropdownComponent Config="BodySectionDropdown"
+                           @bind-Value="SelectedBodySection"/>
+    </div>
+            
+            
+    <div class="mb-2">
+        <label>Antagonists </label>
+        <p>  @GetAntagonistText()   </p>
+               
+                
+    </div>
+    
+    
+    
+    @if (IsValid())
+    {
+        <a href=@BackAddress class="btn btn-primary" type="submit">@SubmitButtonText</a>
+    }
+    
+   @if (DisplayBackButton)
+    {
+        <a href=@BackAddress class="btn btn-primary">@BackButtonText</a>
+    }
+    
+
+</EditForm>
+
+@code
+{
+    
+    
+    [Inject] private ILogger Logger { get; set; } = default!;
+    [Inject] private IClock Clock { get; set; } = default!;
+    
+    [Parameter] public string FormName { get; set; } = "MuscleForm";
+    [Parameter] public MuscleFormDTO Model { get; set; } = new();
+    [Parameter] public string SubmitButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback<MuscleFormDTO> OnSubmit { get; set; }= default;
+    [Parameter] public bool DisplayBackButton { get; set; } = false; 
+    [Parameter] public string BackButtonText { get; set; } = "Close";
+    [Parameter] public string BackAddress { get; set; } = "/muscles";
+    [Parameter] public IReadOnlyList<string>? MuscleNames { get; set; } = default;
+    
+    public DropdownConfig BodySectionDropdown { get; set; } = default!;
+
+
+    [Parameter] public EventCallback<MessagesContainer> OnMessages { get; set; } = default;
+    
+    public MessagesContainer? Messages { get; set; } = new MessagesContainer();
+    public DescriptorEditDTO EditDescriptor { get; set; } = new();
+    
+    public string SelectedBodySection { get => SelectedBodySectionEnum.ToString();  set => OnBodySectionChanged(value); }
+    private string _selectedBodySection;
+    
+    private eBodySection SelectedBodySectionEnum { get; set; } = eBodySection.undefined;
+    private HashSet<string> ExistingMuscleNames { get; set; } = new HashSet<string>();
+
+    
+    private HashSet<MuscleRefDTO>? SelectedAntagonistsRef { get; set; } = null;
+ 
+
+    private EditContext? FormContext;
+    private ValidationMessageStore? _validationMessages;
+    private FieldIdentifier _nameField;
+    private bool _isEditValid;
+    private string? _normalizedOriginalName;
+    private string _originalDescriptorContent;
+
+
+    private Task OnNameChanged(string value)
+    {
+        // This is what EditContext uses for standard change notifications
+        Model!.Name = value;
+        return Task.CompletedTask;
+    }
+
+    private void OnNameInput(ChangeEventArgs e)
+    {
+       Model!.Name = e.Value?.ToString();
+
+        FormContext?.NotifyFieldChanged(_nameField);
+    }
+
+ 
+    
+    private void OnBodySectionChanged(string value)
+    {
+        _selectedBodySection = value;
+        Logger.Log(nameof(MuscleFormComponent), $"Setting body section: {value}");
+       
+        if (string.IsNullOrEmpty(value) || !Enum.TryParse(value, out eBodySection selectedBodySection))
+        {
+            Logger.LogWarning(nameof(MuscleFormComponent), $"Invalid body section: {value}");
+            SelectedBodySectionEnum = eBodySection.undefined;
+        }
+
+        else
+        {
+            Logger.Log(nameof(MuscleFormComponent), $"Body Section changed to : {selectedBodySection}");
+            SelectedBodySectionEnum = selectedBodySection;
+        }
+
+        if (!IsBodySectionValid())
+        {
+            Messages ??= new MessagesContainer();
+            Messages.ClearAll();
+            var message = "BodySection Can't be undefined";
+            Messages.AddWarning(message);
+            OnMessages.InvokeAsync(Messages);
+        }
+    }
+    
+    private bool IsBodySectionValid() => SelectedBodySectionEnum != eBodySection.undefined;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        
+        EditDescriptor = Model.Descriptor;
+        SelectedBodySectionEnum = Model.BodySection;
+        SelectedAntagonistsRef = Model.Antagonists == null ? new HashSet<MuscleRefDTO>() : Model.Antagonists.ToHashSet();
+        
+        //create drowdown options 
+        List<DropdownItem> bodySectionOptions = GetBodySections();
+        
+        BodySectionDropdown = new DropdownConfig { Items = bodySectionOptions}; //Placeholder =  "Select BodySection..." , InitialSelectedLabel = m.BodySection.ToString()
+        
+        _normalizedOriginalName = Normalize(Model!.Name);
+        _originalDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
+
+        
+        BuildEditContext();
+
+        
+    }
+
+    private List<DropdownItem> GetBodySections()
+    {
+        var bodySection = Enum.GetValues<eBodySection>();
+        var bodySectionString = bodySection.Select(b=>b.ToString()).OrderBy(c=>c).ToList();
+        return bodySectionString.Select(s=>new DropdownItem{Label = s, Value = s}).ToList();
+    }
+    
+    private string GetAntagonistText()
+    {
+        if (SelectedAntagonistsRef == null || SelectedAntagonistsRef.Count == 0) return "None";
+
+        return string.Join(',', SelectedAntagonistsRef.OrderBy(c => c.Name.ToString()).Select(c => c.Name.ToString()));
+
+    }
+    
+     private void BuildEditContext()
+    {
+        if (FormContext != null)
+        {
+            FormContext.OnFieldChanged -= HandleFieldChanged;
+            FormContext.OnValidationRequested -= HandleValidationRequested;
+        }
+
+        FormContext = new EditContext(Model!);
+        _validationMessages = new ValidationMessageStore(FormContext);
+
+        _nameField = FieldIdentifier.Create(() => Model!.Name);
+
+        FormContext.OnFieldChanged += HandleFieldChanged;
+        FormContext.OnValidationRequested += HandleValidationRequested;
+
+        ValidateUniqueName();
+    }
+
+    private void HandleFieldChanged(object? sender, FieldChangedEventArgs e)
+    {
+        if (e.FieldIdentifier.FieldName == nameof(MuscleGetDTO.Name))
+        {
+            ValidateUniqueName();
+        }
+
+
+    }
+
+    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
+    {
+        ValidateUniqueName();
+    }
+
+    private void ValidateUniqueName()
+    {
+        if (FormContext == null || _validationMessages == null)
+            return;
+
+
+        _validationMessages.Clear(_nameField);
+
+        Messages ??= new MessagesContainer();
+
+        Messages.Clear(MessageType.Warning);
+
+        var candidate = Normalize(Model.Name);
+
+        if (string.IsNullOrWhiteSpace(candidate))
+        {
+            _isEditValid = false;
+          //  EditMuscle.UpdateRequest = UpdateRequest.DontUpdate;
+            FormContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        if (ExistingMuscleNames.Contains(candidate))
+        {
+            _validationMessages.Add(_nameField, "An Muscle with this name already exists.");
+            _isEditValid = false;
+          //  EditMuscle.UpdateRequest = UpdateRequest.DontUpdate;
+            FormContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        if (string.Equals(candidate, _normalizedOriginalName, StringComparison.InvariantCultureIgnoreCase))
+        {
+            var warning = $"Validated Muscle Name - unchanged candidate {candidate}";
+            Messages.AddWarning(warning);
+            Logger.Log(nameof(MuscleFormComponent), warning);
+            _validationMessages.Clear(_nameField);
+            _isEditValid = true;
+         //   EditMuscle.UpdateRequest = UpdateRequest.DontUpdate;
+            FormContext.NotifyValidationStateChanged();
+            return;
+        }
+
+        _isEditValid = true;
+      //  EditMuscle.UpdateRequest = UpdateRequest.Update;
+        FormContext.NotifyValidationStateChanged();
+    }
+
+    
+    private static string Normalize(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return string.Empty;
+
+        var t = StringFormater.RemoveUnwantedChar(name);
+
+        return t;
+    }
+
+    public void Dispose()
+    {
+        if (FormContext != null)
+        {
+            FormContext.OnFieldChanged -= HandleFieldChanged;
+            FormContext.OnValidationRequested -= HandleValidationRequested;
+        }
+    }
+    
+    private async Task HandleSubmit()
+    {
+        await OnSubmit.InvokeAsync(Model)!;
+    }
+
+    private bool IsValid()
+    {
+        //todo
+        return true;
+    }
+}

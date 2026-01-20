@@ -6,3 +6,5 @@ public sealed record MuscleUpdateCombinedOutcome(
     MuscleUpdateOutcome? Muscle,
     DescriptorUpdateOutcome? Descriptor,
     IMessagesContainer? Message = null);
+
+

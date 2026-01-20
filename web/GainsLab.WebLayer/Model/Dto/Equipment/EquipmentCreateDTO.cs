@@ -4,11 +4,11 @@ using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PostDto.Request;
 using GainsLab.Infrastructure.Utilities;
-using GainsLab.WebLayer.Model.Descriptor;
+using GainsLab.WebLayer.Model.Dto.Descriptor;
 using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
 
-namespace GainsLab.WebLayer.Model.Equipment;
+namespace GainsLab.WebLayer.Model.Dto.Equipment;
 
 public class EquipmentCreateDTO
 {

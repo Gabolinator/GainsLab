@@ -4,9 +4,9 @@ using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Domain;
-using GainsLab.WebLayer.Model.Descriptor;
+using GainsLab.WebLayer.Model.Dto.Descriptor;
 
-namespace GainsLab.WebLayer.Model.Equipment;
+namespace GainsLab.WebLayer.Model.Dto.Equipment;
 
 //used to gather the data from a form 
 public class EquipmentEditFormDTO

@@ -30,7 +30,7 @@
     
     private string? BoundValue
     {
-        get => Value;
+        get => Value ?? InitialValue;
         set => ValueChanged.InvokeAsync(value);
     }
 }

@@ -4,9 +4,9 @@ using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Domain;
-using GainsLab.WebLayer.Model.Descriptor;
+using GainsLab.WebLayer.Model.Dto.Descriptor;
 
-namespace GainsLab.WebLayer.Model.MovementCategory;
+namespace GainsLab.WebLayer.Model.Dto.MovementCategory;
 
 public class MovementCategoryEditFormDTO
 {

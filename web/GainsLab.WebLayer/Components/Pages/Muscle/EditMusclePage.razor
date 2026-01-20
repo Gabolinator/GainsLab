@@ -1,13 +1,170 @@
 ﻿
 @page "/muscles/{id:guid}"
+@rendermode InteractiveServer
 
-<h3>Edit Muscle</h3>
-<br>
-<p> @Id</p>
+@using GainsLab.Application.Results
+@using GainsLab.Contracts
+@using GainsLab.Contracts.Dtos.Delete.Outcome
+@using GainsLab.Contracts.Dtos.GetDto
+@using GainsLab.Contracts.Dtos.ID
+@using GainsLab.Domain.Interfaces
+@using GainsLab.Infrastructure.Caching.Registry
+@using GainsLab.WebLayer.Components.Control
+@using GainsLab.WebLayer.Components.Control.Muscle
+@using GainsLab.WebLayer.Model.Dto.Muscle
+@using GainsLab.WebLayer.Model.Notification
+@using GainsLab.WebLayer.Model.Notification.Confirmation
+@using ILogger = Domain.Interfaces.ILogger
+
+@implements IDisposable
+@inject NavigationManager NavManager;
+
+
+<p>
+    @if (EditMuscle != null)
+    {
+      
+        <MuscleFormComponent FormName="muscleEditForm"
+                             Model="EditMuscle"
+                             OnMessages="OnMessageFromForm"
+                             DisplayBackButton=@true
+                             BackButtonText="Close"
+                             SubmitButtonText="Update"
+                             MuscleNames=@GetMuscleNames()
+                             OnSubmit="Update"></MuscleFormComponent>
+        
+    }
+    <br/>
+    <br/>  @if (Muscle != null)
+           {
+               <button class="btn btn-primary" @onclick="Delete">Delete</button>
+           }
+
+    <MessageComponent Messages="@Messages"></MessageComponent>
+
+</p>
 
 @code {
+    [Parameter] public Guid Id { get; set; } = Guid.Empty;
+
+    [Inject] private ILogger Logger { get; set; } = default!;
+    [Inject] private IClock Clock { get; set; } = default!;
+    [Inject] private MuscleRegistry Repo { get; set; } = default!;
+    [Inject] private DescriptorRegistry DescriptorRegistry { get; set; } = default!;
+    [Inject] private IToast Toast { get; set; } = default!;
+    [Inject] private IConfirmDialog ConfirmDialog { get; set; } = default!;
+
+    public MuscleGetDTO? Muscle { get; set; } = null;
+    public MuscleEditFormDTO? EditMuscle { get; set; } = null;
     
-    [Parameter]
-    public Guid Id { get; set; } = Guid.Empty;
+    private IReadOnlyList<MuscleGetDTO> _muscles;
     
+    public MessagesContainer? Messages { get; set; } = new MessagesContainer();
+
+   
+    public IReadOnlyList<string>? GetMuscleNames()
+    {
+        return _muscles.Select(m => m.Name).ToList();
+    }
+
+
+    
+    protected override async Task OnParametersSetAsync()
+    {
+      
+        await base.OnParametersSetAsync();
+        Messages ??= new MessagesContainer();
+
+        Messages.ClearAll();
+        
+        var eqs = await Repo.GetAllAsync();
+        if (eqs.Value == null || eqs.Value.Count == 0)
+        {
+            Messages.AddError("No Muscles Found");
+            return;
+        }
+
+        _muscles = eqs.Value!;
+        
+        var m = _muscles.FirstOrDefault(e => e.Id == Id);
+        if (m == null)
+        {
+            Messages.AddError("Muscle not found");
+            return;
+        }
+
+        Logger.Log(nameof(EditMusclePage), $"Initial body section : {m.BodySection.ToString()} ");
+        Muscle = m;
+        EditMuscle = Muscle!.FromGetDTO();
+    }
+
+  
+    
+    public void Dispose()
+    {
+     
+    }
+    
+    private async Task Delete()
+    {
+        Messages ??= new MessagesContainer();
+        Messages.ClearAll();
+        
+        Messages.AddWarning("Delete not implemented");
+        Toast.Error($"Delete not implemented");
+        return;
+
+     
+        if (Muscle == null || Muscle.Id == Guid.Empty)
+        {
+            Messages.AddWarning("Invalid Muscle Id");
+            Toast.Error($"Could not delete Muscle : Invalid Muscle");
+            return;
+        }
+
+        var ok = await ConfirmDialog.ShowAsync(
+            new ConfirmRequest(
+                "Delete Item",
+                $"Are You sure you want to delete Muscle '{Muscle.Name}' ? It can't be undone",
+                "Delete",
+                "Cancel",
+                true));
+
+        if (!ok)
+        {
+            Toast.Error($"Delete {Muscle.Name} Cancelled");
+            return;
+        }
+
+
+        Result<MuscleDeleteOutcome> outcome = await Repo.DeleteMuscleAsync(new MuscleEntityId(Muscle.Id));
+        if (!outcome.Success || outcome.Value is not { Outcome: DeleteOutcome.Deleted })
+        {
+
+            Messages.Append(outcome.Messages);
+            Toast.Error($"Could not delete Muscle : {Messages.ToString(MessageType.Error)}");
+            return;
+        }
+
+        var message = $"Muscle {outcome.Value.Id} Deleted";
+
+        Messages.AddInfo(message);
+        Toast.Success(message);
+        NavManager.NavigateTo("Muscles");
+
+
+
+
+    }
+    
+    private void OnMessageFromForm(MessagesContainer obj)
+    {
+        Messages = obj;
+    }
+
+    private void Update(MuscleFormDTO obj)
+    {
+      Toast.Warning("Not Implemented");
+    }
+
 }

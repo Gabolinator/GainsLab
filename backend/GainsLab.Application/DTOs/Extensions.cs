@@ -7,59 +7,106 @@ namespace GainsLab.Application.DTOs;
 
 #region Update
 
+#region Muscle
+
+public static class MuscleUpdateOutcomeExtensions
+{
+    public static MessagesContainer GetOutcomeMessages (this MuscleUpdateCombinedOutcome equipmentUpdate,
+        MessagesContainer? messages =null)
+    {
+        messages ??= new MessagesContainer();
+
+        messages.Append(equipmentUpdate.Muscle.GetOutcomeMessages());
+        messages.Append(equipmentUpdate.Descriptor.GetOutcomeMessages());
+        
+        return  messages;
+    }
+
+    public static MessagesContainer GetOutcomeMessages(this MuscleUpdateOutcome? muscle)
+    {
+        var messages = new MessagesContainer();
+
+        if (muscle == null)
+        {
+            messages.AddError($"Failed to Update Movement Category");
+        }
 
 
+        else
+            switch (muscle.Outcome)
+            {
+                case UpdateOutcome.NotUpdated or UpdateOutcome.NotRequested:
+                    messages.AddInfo($"Movement Category {muscle.UpdatedState!.Name} Not Updated");
+                    break;
+                case UpdateOutcome.Updated:
+                    messages.AddInfo($"Movement Category Updated to {muscle.UpdatedState!.Name}");
+                    break;
+                case UpdateOutcome.Failed:
+                    messages.AddError($"Failed to Update Movement Category");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+        return messages;
+
+    }
+}
+
+#endregion
+
+
+
+#region Category
 
 public static class MovementCategoryUpdateOutcomeExtension
 {
-    public static MessagesContainer GetOutcomeMessages (this MovementCategoryUpdateCombinedOutcome equipmentUpdate,
-        MessagesContainer? messages =null)
+    public static MessagesContainer GetOutcomeMessages(this MovementCategoryUpdateCombinedOutcome equipmentUpdate,
+        MessagesContainer? messages = null)
     {
         messages ??= new MessagesContainer();
 
         messages.Append(equipmentUpdate.MovementCategory.GetOutcomeMessages());
         messages.Append(equipmentUpdate.Descriptor.GetOutcomeMessages());
-        
-        return  messages;
-    }
-    
-    
-}
 
-public static class MovementCategoryUpdateOutcomeExtensions
-{
-   
-    
-    public static MessagesContainer  GetOutcomeMessages (this MovementCategoryUpdateOutcome? equipment)
+        return messages;
+    }
+
+
+    public static MessagesContainer GetOutcomeMessages(this MovementCategoryUpdateOutcome? equipment)
     {
         var messages = new MessagesContainer();
-        
+
         if (equipment == null)
         {
             messages.AddError($"Failed to Update Movement Category");
         }
 
-        
-        else  switch (equipment.Outcome)
-        {
-            case UpdateOutcome.NotUpdated or UpdateOutcome.NotRequested:
-                messages.AddInfo($"Movement Category {equipment.UpdatedState!.Name} Not Updated");
-                break;
-            case UpdateOutcome.Updated:
-                messages.AddInfo($"Movement Category Updated to {equipment.UpdatedState!.Name}");
-                break;
-            case UpdateOutcome.Failed:
-                messages.AddError($"Failed to Update Movement Category");
-                break;
-            default:
-                throw new ArgumentOutOfRangeException();
-        }
-        
+
+        else
+            switch (equipment.Outcome)
+            {
+                case UpdateOutcome.NotUpdated or UpdateOutcome.NotRequested:
+                    messages.AddInfo($"Movement Category {equipment.UpdatedState!.Name} Not Updated");
+                    break;
+                case UpdateOutcome.Updated:
+                    messages.AddInfo($"Movement Category Updated to {equipment.UpdatedState!.Name}");
+                    break;
+                case UpdateOutcome.Failed:
+                    messages.AddError($"Failed to Update Movement Category");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
         return messages;
+
     }
-    
 }
 
+#endregion
+
+#region Descriptor
 
 
 public static class DescriptorUpdateOutcomeExtensions
@@ -96,9 +143,25 @@ public static class DescriptorUpdateOutcomeExtensions
     }
 }
 
-public static class EquipmentUpdateOutcomeExtensions
+
+#endregion
+
+#region Equipment
+
+
+public static class EquipmentOutcomeExtensions
 {
-   
+    public static MessagesContainer GetOutcomeMessages (this EquipmentUpdateCombinedOutcome equipmentUpdate,
+        MessagesContainer? messages =null)
+    {
+        messages ??= new MessagesContainer();
+
+        messages.Append(equipmentUpdate.Equipment.GetOutcomeMessages());
+        messages.Append(equipmentUpdate.Descriptor.GetOutcomeMessages());
+        
+        return  messages;
+       
+    }
     
     public static MessagesContainer  GetOutcomeMessages (this EquipmentUpdateOutcome? equipment)
     {
@@ -127,35 +190,17 @@ public static class EquipmentUpdateOutcomeExtensions
         
         return messages;
     }
-    
-}
-
-
-public static class EquipmentCombinedOutcomeExtension
-{
-    public static MessagesContainer GetOutcomeMessages (this EquipmentUpdateCombinedOutcome equipmentUpdate,
-        MessagesContainer? messages =null)
-    {
-        messages ??= new MessagesContainer();
-
-        messages.Append(equipmentUpdate.Equipment.GetOutcomeMessages());
-        messages.Append(equipmentUpdate.Descriptor.GetOutcomeMessages());
-        
-        return  messages;
-       
-    }
 
 }
+#endregion
 
 #endregion
 
 #region Create
 
+#region Category
 
-
-
-
-public static class MovementCategoryCombinedOutcomeExtension
+public static class MovementCategoryOutcomeExtensions
 {
     public static MessagesContainer GetOutcomeMessages (this MovementCategoryCreateCombineOutcome equipmentUpdate,
         MessagesContainer? messages =null)
@@ -168,12 +213,8 @@ public static class MovementCategoryCombinedOutcomeExtension
         return  messages;
        
     }
+    
 
-}
-
-
-public static class MovementCategoryOutcomeExtension
-{
     public static MessagesContainer GetOutcomeMessages (this MovementCategoryCreateOutcome? equipment)
     {
       
@@ -206,8 +247,9 @@ public static class MovementCategoryOutcomeExtension
 }
 
 
+#endregion
 
-
+#region Descriptor
 
 public static partial class DescriptorCreateOutcomeExtensions
 {
@@ -243,10 +285,14 @@ public static partial class DescriptorCreateOutcomeExtensions
     }
 }
 
+
+#endregion
+
+#region Equipment
+
 public static  partial class EquipmentCreateOutcomeExtensions
 {
-   
-   
+    
     public static MessagesContainer  GetOutcomeMessages (this EquipmentCreateOutcome? equipment)
     {
         var messages = new MessagesContainer();
@@ -275,11 +321,8 @@ public static  partial class EquipmentCreateOutcomeExtensions
         return messages;
     }
     
-}
 
-
-public static class EquipmentCreateCombinedOutcomeExtension
-{
+    
     
     public static MessagesContainer GetOutcomeMessages (this EquipmentCreateCombineOutcome equipmentCreated,
         MessagesContainer? messages =null)
@@ -293,7 +336,8 @@ public static class EquipmentCreateCombinedOutcomeExtension
        
     }
     
-    
-
 }
+
+#endregion
+
 #endregion

@@ -1,7 +1,13 @@
 ﻿using GainsLab.Application.DomainMappers;
 ﻿using GainsLab.Application.Interfaces.DataManagement.Gateway;
 ﻿using GainsLab.Application.Results;
+using GainsLab.Contracts.Dtos.Delete.Outcome;
 ﻿using GainsLab.Contracts.Dtos.GetDto;
+using GainsLab.Contracts.Dtos.ID;
+using GainsLab.Contracts.Dtos.PostDto.Outcome;
+using GainsLab.Contracts.Dtos.PostDto.Request;
+using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Contracts.Dtos.UpdateDto.Request;
 ﻿using GainsLab.Infrastructure.Caching.QueryCache;
 
 namespace GainsLab.Infrastructure.Caching.Registry;
@@ -99,4 +105,53 @@ public sealed class MuscleRegistry
             ? refreshed
             : null;
     }
+    
+    
+    public async Task<Result<MuscleUpdateCombinedOutcome>> UpdateMuscleAsync(
+        MuscleUpdateRequest request,
+        DescriptorUpdateRequest? descriptorRequest)
+    {
+        // var result = await _gateway.UpdateMuscleAsync(request, descriptorRequest, _cache);
+        // if (result.Success)
+        // {
+        //     Invalidate();
+        // }
+        //
+        // return result;
+        
+        return Result<MuscleUpdateCombinedOutcome>.NotImplemented(nameof(UpdateMuscleAsync));
+    }
+
+    public async Task<Result<MuscleCreateCombineOutcome>> CreateMuscleAsync(
+        MuscleCombineCreateRequest request)
+    {
+        // var result = await _gateway.CreateMuscleAsync(request, _cache);
+        // if (result.Success)
+        // {
+        //     Invalidate();
+        // }
+        //
+        // return result;
+
+        return Result<MuscleCreateCombineOutcome>.NotImplemented(nameof(CreateMuscleAsync));
+    }
+
+    public async Task<Result<MuscleDeleteOutcome>> DeleteMuscleAsync(
+        MuscleEntityId movementCategoryEntityId)
+    {
+        // var result = await _gateway.DeleteMuscleAsync(movementCategoryEntityId, _cache);
+        // if (result.Success)
+        // {
+        //     Invalidate();
+        //     if (movementCategoryEntityId.Id.HasValue)
+        //     {
+        //         Muscles.Remove(movementCategoryEntityId.Id.Value);
+        //     }
+        // }
+        //
+        // return result;
+        
+        return Result<MuscleDeleteOutcome>.NotImplemented(nameof(DeleteMuscleAsync));
+    }
+    
 }

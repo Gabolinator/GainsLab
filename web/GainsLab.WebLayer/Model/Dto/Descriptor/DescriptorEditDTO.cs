@@ -5,7 +5,7 @@ using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Domain;
 
-namespace GainsLab.WebLayer.Model.Descriptor;
+namespace GainsLab.WebLayer.Model.Dto.Descriptor;
 
 public class DescriptorEditDTO
 {

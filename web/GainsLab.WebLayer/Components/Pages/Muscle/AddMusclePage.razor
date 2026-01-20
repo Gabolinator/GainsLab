@@ -1,7 +1,104 @@
 ﻿@page "/muscles/new"
 
-<h3>Add Muscle</h3>
+
+@rendermode InteractiveServer
+
+@using GainsLab.Application.Results
+@using GainsLab.Contracts
+@using GainsLab.Contracts.Dtos.Delete.Outcome
+@using GainsLab.Contracts.Dtos.GetDto
+@using GainsLab.Contracts.Dtos.ID
+@using GainsLab.Domain
+@using GainsLab.Domain.Interfaces
+@using GainsLab.Infrastructure.Caching.Registry
+@using GainsLab.WebLayer.Components.Control
+@using GainsLab.WebLayer.Components.Control.Muscle
+@using GainsLab.WebLayer.Model.Dto.Muscle
+@using GainsLab.WebLayer.Model.Notification
+@using GainsLab.WebLayer.Model.Notification.Confirmation
+@using ILogger = Domain.Interfaces.ILogger
+
+@implements IDisposable
+
+
+<p>
+    @if (CreateMuscle != null)
+    {
+      
+        <MuscleFormComponent FormName="muscleAddForm"
+                             Model="CreateMuscle"
+                             OnMessages="OnMessageFromForm"
+                             DisplayBackButton=@true
+                             BackButtonText="Close"
+                             SubmitButtonText="Add"
+                             MuscleNames=@GetMuscleNames()
+                             OnSubmit="Create"></MuscleFormComponent>
+    }
+    <br/>
+    
+    <MessageComponent Messages="@Messages"></MessageComponent>
+
+</p>
 
 @code {
+   
+    [Inject] private ILogger Logger { get; set; } = default!;
+    [Inject] private IClock Clock { get; set; } = default!;
+    [Inject] private MuscleRegistry Repo { get; set; } = default!;
+    [Inject] private DescriptorRegistry DescriptorRegistry { get; set; } = default!;
+    [Inject] private IToast Toast { get; set; } = default!;
+    [Inject] private IConfirmDialog ConfirmDialog { get; set; } = default!;
+
+  
+    public MuscleCreateDTO? CreateMuscle { get; set; } = null;
     
+    private IReadOnlyList<MuscleGetDTO> _muscles;
+    
+    public MessagesContainer? Messages { get; set; } = new MessagesContainer();
+
+   
+    public IReadOnlyList<string>? GetMuscleNames()
+    {
+        return _muscles.Select(m => m.Name).ToList();
+    }
+
+    
+    protected override async Task OnParametersSetAsync()
+    {
+      
+        await base.OnParametersSetAsync();
+        Messages ??= new MessagesContainer();
+
+        Messages.ClearAll();
+        
+        var eqs = await Repo.GetAllAsync();
+        if (eqs.Value == null || eqs.Value.Count == 0)
+        {
+            Messages.AddError("No Muscles Found");
+            return;
+        }
+
+        _muscles = eqs.Value!;
+        
+        CreateMuscle = new();
+        CreateMuscle.Descriptor = new();
+        CreateMuscle.BodySection = eBodySection.undefined;
+        CreateMuscle.Name = "New Muscle";
+    }
+    
+    public void Dispose()
+    {
+     
+    }
+    
+    private void OnMessageFromForm(MessagesContainer obj)
+    {
+        Messages = obj;
+    }
+
+    private void Create(MuscleFormDTO obj)
+    {
+      Toast.Warning("Not Implemented");
+    }
+
 }
