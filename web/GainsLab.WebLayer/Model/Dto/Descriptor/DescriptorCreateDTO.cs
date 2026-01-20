@@ -8,20 +8,14 @@ using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
 namespace GainsLab.WebLayer.Model.Dto.Descriptor;
 
-public class DescriptorCreateDTO
+public class DescriptorCreateDTO : DescriptorFormDTO
 {
-    public Guid  Id { get; init; } = Guid.NewGuid();
-    
-    [StringLength(1024, MinimumLength = 3)]
-    public string? DescriptionContent { get; set; } = "new description";
+    public override FormType FormType => FormType.Edit;
+ 
+    public string? CreatedBy => FilledBy;
 
-    [StringLength(2048)] public string? Notes { get; set; } = null;
-
-    [MaxLength(20)] public ICollection<string>? Tags { get; set; } = null;
-    
-    public string? CreatedBy { get; set; }
-    
-    public CreateRequest CreateRequest { get; set; } = CreateRequest.Create;
+    public CreateRequest CreateRequest =>
+        ApplyRequest  == Request.ApplyRequest ? CreateRequest.Create : CreateRequest.DontCreate;
     
 }
 

@@ -1,22 +1,17 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using GainsLab.Contracts;
-using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Domain;
 using GainsLab.WebLayer.Model.Dto.Descriptor;
 
-namespace GainsLab.WebLayer.Model.Dto.Muscle;
+namespace GainsLab.WebLayer.Model.Dto.Equipment;
 
-public class MuscleFormDTO
+public class EquipmentFormDTO
 {
-    public Guid  Id { get; set; }
+    public Guid  Id { get; init; } = Guid.NewGuid();
     
     [StringLength(256, MinimumLength = 2), Required]
-    public string? Name { get; set; }
+    public string? Name { get; set; } = "new name";
 
-    public virtual DescriptorFormDTO Descriptor { get; set; } = new DescriptorEditDTO();
-    
-    [Required] public eBodySection BodySection { get; set; }
-    public List<MuscleRefDTO>? Antagonists { get; set; }
+    public virtual DescriptorFormDTO? Descriptor { get; set; }
     
     [EnumDataType(typeof(DataAuthority))]
     public DataAuthority? Authority { get; set; } 
@@ -26,5 +21,4 @@ public class MuscleFormDTO
     public Request ApplyRequest { get; set; }
 
     public string? FilledBy { get; set; }
-
 }

@@ -294,7 +294,7 @@
         if (string.IsNullOrWhiteSpace(candidate))
         {
             _isEditValid = false;
-            CreateCategory.CreateRequest = CreateRequest.DontCreate;
+           // CreateCategory.CreateRequest = CreateRequest.DontCreate;
             FormContext.NotifyValidationStateChanged();
             return;
         }
@@ -303,7 +303,7 @@
         {
             _validationMessages.Add(_nameField, "An MovementCategory with this name already exists.");
             _isEditValid = false;
-            CreateCategory.CreateRequest = CreateRequest.DontCreate;
+           // CreateCategory.CreateRequest = CreateRequest.DontCreate;
             FormContext.NotifyValidationStateChanged();
             return;
         }
@@ -317,13 +317,13 @@
             Logger.Log(nameof(EditMovementCategoryPage), warning);
             _validationMessages.Clear(_nameField);
             _isEditValid = false;
-            CreateCategory.CreateRequest = CreateRequest.DontCreate;
+          //  CreateCategory.CreateRequest = CreateRequest.DontCreate;
             FormContext.NotifyValidationStateChanged();
             return;
         }
 
         _isEditValid = true;
-        CreateCategory.CreateRequest = CreateRequest.Create;
+       //CreateCategory.CreateRequest = CreateRequest.Create;
         FormContext.NotifyValidationStateChanged();
     }
 
@@ -361,9 +361,9 @@
         {
             Messages.AddError($"MovementCategory name invalid");
             Messages.Append(MovementCategoryValid.Messages);
-            CreateCategory.CreateRequest = CreateRequest.DontCreate;
+           // CreateCategory.CreateRequest = CreateRequest.DontCreate;
         }
-        else CreateCategory.CreateRequest = CreateRequest.Create;
+    //    else CreateCategory.CreateRequest = CreateRequest.Create;
 
         var descriptorValid = CreateDescriptor.IsValid(Logger);
 
@@ -372,12 +372,12 @@
         {
             Messages.AddError($"MovementCategory description content invalid");
             Messages.Append(descriptorValid.Messages);
-            CreateDescriptor.CreateRequest = CreateRequest.DontCreate;
+          //  CreateDescriptor.CreateRequest = CreateRequest.DontCreate;
             Toast.Error($"MovementCategory description content invalid  : {descriptorValid.GetErrorMessage()}");
             return;
         }
 
-        CreateDescriptor.CreateRequest = CreateRequest.Create;
+       // CreateDescriptor.CreateRequest = CreateRequest.Create;
 
 
         CreateCategory!.Descriptor = CreateDescriptor;

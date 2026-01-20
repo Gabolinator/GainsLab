@@ -8,7 +8,7 @@ namespace GainsLab.WebLayer.Model.Dto.Muscle;
 
 public class MuscleCreateDTO : MuscleFormDTO
 {
-    
+    public override DescriptorFormDTO Descriptor { get; set; } = new DescriptorCreateDTO();
     public override FormType FormType => FormType.Edit;
     
     public string? CreateBy => FilledBy;

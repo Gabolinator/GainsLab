@@ -7,25 +7,14 @@ using GainsLab.Domain;
 
 namespace GainsLab.WebLayer.Model.Dto.Descriptor;
 
-public class DescriptorEditDTO
+public class DescriptorEditDTO : DescriptorFormDTO
 {
-    public Guid Id { get; set; }
+    public override FormType FormType => FormType.Edit;
+ 
+    public string? UpdatedBy => FilledBy;
 
-    [StringLength(1024, MinimumLength = 3)]
-    public string? DescriptionContent { get; set; } = "new description";
-
-    [StringLength(2048)]
-    public string? Notes { get; set; }
-
-    [MaxLength(20)]
-    public ICollection<string>? Tags { get; set; }
-
-    [EnumDataType(typeof(DataAuthority))]
-    public DataAuthority? Authority { get; set; }
-
-    public string? UpdatedBy { get; set; }
-
-    public UpdateRequest UpdateRequest { get; set; } = UpdateRequest.DontUpdate;
+    public UpdateRequest UpdateRequest =>
+        ApplyRequest  == Request.ApplyRequest ? UpdateRequest.Update : UpdateRequest.DontUpdate;
 }
 
 
@@ -42,7 +31,6 @@ public static class DescriptorEditDTOExtensions
             Notes = null,
             Tags = null,
             Authority = dto.Authority,
-            UpdatedBy = null
         };
     }
 

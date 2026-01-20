@@ -8,27 +8,17 @@ using GainsLab.WebLayer.Model.Dto.Descriptor;
 
 namespace GainsLab.WebLayer.Model.Dto.MovementCategory;
 
-public class MovementCategoryEditFormDTO
+public class MovementCategoryEditFormDTO : MovementCategoryFormDTO
 {
-    public Guid  Id { get; set; }
+   
+    public override DescriptorFormDTO Descriptor { get; set; } = new DescriptorEditDTO();
     
-    [StringLength(256, MinimumLength = 2), Required]
-    public string? Name { get; set; } = "new name";
+    public override FormType FormType => FormType.Edit;
+ 
+    public string? UpdatedBy => FilledBy;
 
-    public DescriptorEditDTO Descriptor { get; set; } = new DescriptorEditDTO();
-
-    
-    public MovementCategoryRefDTO? Parent { get; set; }
-
-    public List<MovementCategoryRefDTO> BasesCategory { get; set; } = new();
-
-    
-    [EnumDataType(typeof(DataAuthority))]
-    public DataAuthority? Authority { get; set; } 
-
-    public string? UpdatedBy { get; set; }
-    
-    public UpdateRequest UpdateRequest { get; set; } = UpdateRequest.DontUpdate;
+    public UpdateRequest UpdateRequest =>
+        ApplyRequest  == Request.ApplyRequest ? UpdateRequest.Update : UpdateRequest.DontUpdate;
 
     public override string ToString()
     {
@@ -52,7 +42,6 @@ public static class MovementCategoryEditFormDTOExtensions
             Parent = dto.ParentCategory,
             BasesCategory = dto.BaseCategories != null? dto.BaseCategories.ToList() : new(),
             Authority = dto.Authority,
-            UpdatedBy = null, // not present on Get DTO (unless you want to set from context elsewhere)
             Descriptor = dto.Descriptor is null
                 ? new DescriptorEditDTO()
                 : dto.Descriptor.FromGetDTO()
@@ -63,6 +52,9 @@ public static class MovementCategoryEditFormDTOExtensions
     {
         if (dto is null) throw new ArgumentNullException(nameof(dto));
 
+        var descriptor = dto.Descriptor is DescriptorEditDTO descriptorEditDto ?  descriptorEditDto : new DescriptorEditDTO();
+
+        
         return new MovementCategoryUpdateDTO
         {
             ParentCategory = dto.Parent,
@@ -70,9 +62,7 @@ public static class MovementCategoryEditFormDTOExtensions
             Name = dto.Name,
             Authority = dto.Authority,
             UpdatedBy = dto.UpdatedBy,
-            Descriptor = dto.Descriptor is null
-                ? null
-                : dto.Descriptor.ToUpdateDTO()
+            Descriptor = descriptor.ToUpdateDTO()
         };
     }
 

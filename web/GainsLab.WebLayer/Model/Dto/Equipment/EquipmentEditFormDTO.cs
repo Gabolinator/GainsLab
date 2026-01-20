@@ -9,21 +9,20 @@ using GainsLab.WebLayer.Model.Dto.Descriptor;
 namespace GainsLab.WebLayer.Model.Dto.Equipment;
 
 //used to gather the data from a form 
-public class EquipmentEditFormDTO
+public class EquipmentEditFormDTO : EquipmentFormDTO
 {
-    public Guid  Id { get; set; }
     
-    [StringLength(256, MinimumLength = 2), Required]
-    public string? Name { get; set; } = "new name";
-
-    public DescriptorEditDTO Descriptor { get; set; } = new DescriptorEditDTO();
+    public override DescriptorFormDTO Descriptor { get; set; } = new DescriptorEditDTO();
 
     [EnumDataType(typeof(DataAuthority))]
     public DataAuthority? Authority { get; set; } 
 
-    public string? UpdatedBy { get; set; }
-    
-    public UpdateRequest UpdateRequest { get; set; } = UpdateRequest.DontUpdate;
+    public override FormType FormType => FormType.Edit;
+ 
+    public string? UpdatedBy => FilledBy;
+
+    public UpdateRequest UpdateRequest =>
+        ApplyRequest  == Request.ApplyRequest ? UpdateRequest.Update : UpdateRequest.DontUpdate;
 }
 
 
@@ -38,7 +37,6 @@ public static class EquipmentEditFormDTOExtensions
             Id = dto.Id,
             Name = dto.Name,
             Authority = dto.Authority,
-            UpdatedBy = null, // not present on Get DTO (unless you want to set from context elsewhere)
             Descriptor = dto.Descriptor is null
                 ? new DescriptorEditDTO()
                 : dto.Descriptor.FromGetDTO()
@@ -49,14 +47,15 @@ public static class EquipmentEditFormDTOExtensions
     {
         if (dto is null) throw new ArgumentNullException(nameof(dto));
 
+        var descriptor = dto.Descriptor is DescriptorEditDTO descriptorEditDto ?  descriptorEditDto : new DescriptorEditDTO();
+
+        
         return new EquipmentUpdateDTO
         {
             Name = dto.Name,
             Authority = dto.Authority,
             UpdatedBy = dto.UpdatedBy,
-            Descriptor = dto.Descriptor is null
-                ? null
-                : dto.Descriptor.ToUpdateDTO()
+            Descriptor = descriptor.ToUpdateDTO()
         };
     }
     

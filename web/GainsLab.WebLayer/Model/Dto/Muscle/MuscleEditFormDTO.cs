@@ -11,6 +11,8 @@ namespace GainsLab.WebLayer.Model.Dto.Muscle;
 public class MuscleEditFormDTO : MuscleFormDTO
 {
 
+    
+    public override DescriptorFormDTO Descriptor { get; set; } = new DescriptorEditDTO();
     public override FormType FormType => FormType.Edit;
  
     public string? UpdatedBy => FilledBy;
@@ -52,6 +54,7 @@ public static class MuscleEditFormDTOExtensions
     {
         if (dto is null) throw new ArgumentNullException(nameof(dto));
 
+        var descriptor = dto.Descriptor is DescriptorEditDTO descriptorEditDto ?  descriptorEditDto : new DescriptorEditDTO();
         return new MuscleUpdateDTO
         {
             BodySection = dto.BodySection,
@@ -61,9 +64,7 @@ public static class MuscleEditFormDTOExtensions
             Name = dto.Name,
             Authority = dto.Authority,
             UpdatedBy = dto.UpdatedBy,
-            Descriptor = dto.Descriptor is null
-                ? null
-                : dto.Descriptor.ToUpdateDTO()
+            Descriptor = descriptor.ToUpdateDTO() 
         };
     }
 

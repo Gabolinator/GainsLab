@@ -10,22 +10,16 @@ using GainsLab.WebLayer.Model.Dto.Descriptor;
 
 namespace GainsLab.WebLayer.Model.Dto.MovementCategory;
 
-public class MovementCategoryCreateDTO
+public class MovementCategoryCreateDTO :  MovementCategoryFormDTO
 {
-    public Guid  Id { get; init; } = Guid.NewGuid();
-    
-    [StringLength(256, MinimumLength = 2), Required]
-    public string? Name { get; set; } = "new name";
+    public override DescriptorFormDTO Descriptor { get; set; } = new DescriptorCreateDTO();
+    public override FormType FormType => FormType.Edit;
+ 
+    public string? CreatedBy => FilledBy;
 
-    public DescriptorCreateDTO? Descriptor { get; set; } = new DescriptorCreateDTO();
+    public CreateRequest CreateRequest =>
+        ApplyRequest  == Request.ApplyRequest ? CreateRequest.Create : CreateRequest.DontCreate;
     
-    public MovementCategoryRefDTO? Parent { get; set; }
-
-    public List<MovementCategoryRefDTO> BasesCategory { get; set; } = new();
-    
-    public string? CreatedBy { get; set; }
-    
-    public CreateRequest CreateRequest { get; set; } = CreateRequest.Create;
     
     public override string ToString()
     {
@@ -41,7 +35,9 @@ public static class MovementCategoryCreateDTOExtensions
 
     public static MovementCategoryCombineCreateRequest ToCombineCreateRequest(this MovementCategoryCreateDTO dto)
     {
-        return new MovementCategoryCombineCreateRequest(dto.ToCreateRequest(), dto.Descriptor.ToCreateRequest());
+        var descriptor = dto.Descriptor is DescriptorCreateDTO descriptorEditDto ?  descriptorEditDto : new  DescriptorCreateDTO();
+
+        return new MovementCategoryCombineCreateRequest(dto.ToCreateRequest(), descriptor.ToCreateRequest());
     }
 
     public static Result IsValid(this MovementCategoryCreateDTO dto, Domain.Interfaces.ILogger? logger = null)
@@ -79,6 +75,9 @@ public static class MovementCategoryCreateDTOExtensions
             .Select(c => Enum.Parse<eMovementCategories>(c.Name))
             .Where(c => c != eMovementCategories.undefined);
         
+        var descriptor = dto.Descriptor is DescriptorCreateDTO descriptorEditDto ?  descriptorEditDto : new  DescriptorCreateDTO();
+
+        
         return new MovementCategoryPostDTO
         {
             Id = dto.Id,
@@ -86,7 +85,7 @@ public static class MovementCategoryCreateDTOExtensions
             ParentCategoryId =  dto.Parent?.Id,
             BaseCategories = basecat.ToList(),
             CreatedBy = dto.CreatedBy,
-            Descriptor = dto.Descriptor.ToPostDTO()
+            Descriptor = descriptor.ToPostDTO()
         };
     }
 }

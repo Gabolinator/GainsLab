@@ -10,18 +10,16 @@ using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
 namespace GainsLab.WebLayer.Model.Dto.Equipment;
 
-public class EquipmentCreateDTO
+public class EquipmentCreateDTO : EquipmentFormDTO
 {
-    public Guid  Id { get; init; } = Guid.NewGuid();
-    
-    [StringLength(256, MinimumLength = 2), Required]
-    public string? Name { get; set; } = "new name";
+  
+    public override DescriptorFormDTO Descriptor { get; set; } = new DescriptorCreateDTO();
+    public override FormType FormType => FormType.Edit;
+ 
+    public string? CreatedBy => FilledBy;
 
-    public DescriptorCreateDTO? Descriptor { get; set; } = new DescriptorCreateDTO();
-    
-    public string? CreatedBy { get; set; }
-    
-    public CreateRequest CreateRequest { get; set; } = CreateRequest.Create;
+    public CreateRequest CreateRequest =>
+        ApplyRequest  == Request.ApplyRequest ? CreateRequest.Create : CreateRequest.DontCreate;
     
    
 }
@@ -32,7 +30,10 @@ public static class EquipmentCreateDTOExtensions
 
     public static EquipmentCombineCreateRequest ToCombineCreateRequest(this EquipmentCreateDTO dto)
     {
-        return new EquipmentCombineCreateRequest(dto.ToCreateRequest(), dto.Descriptor.ToCreateRequest());
+        var descriptor = dto.Descriptor is DescriptorCreateDTO descriptorEditDto ?  descriptorEditDto : new  DescriptorCreateDTO();
+
+        
+        return new EquipmentCombineCreateRequest(dto.ToCreateRequest(), descriptor.ToCreateRequest());
     }
 
     public static Result IsValid(this EquipmentCreateDTO dto, ILogger? logger = null)
@@ -61,12 +62,15 @@ public static class EquipmentCreateDTOExtensions
     
     public static EquipmentPostDTO ToPostDTO(this EquipmentCreateDTO dto)
     {
+        var descriptor = dto.Descriptor is DescriptorCreateDTO descriptorEditDto ?  descriptorEditDto : new  DescriptorCreateDTO();
+
+        
         return new EquipmentPostDTO
         {
             Id = dto.Id,
             Name = dto.Name,
             CreatedBy = dto.CreatedBy,
-            Descriptor = dto.Descriptor.ToPostDTO()
+            Descriptor = descriptor.ToPostDTO()
         };
     }
 }

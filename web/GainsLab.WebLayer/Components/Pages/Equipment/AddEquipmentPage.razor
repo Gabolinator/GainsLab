@@ -184,7 +184,7 @@
         if (string.IsNullOrWhiteSpace(candidate))
         {
             _isEditValid = false;
-            CreateEquipment.CreateRequest = CreateRequest.DontCreate;
+         //   CreateEquipment.CreateRequest = CreateRequest.DontCreate;
             FormContext.NotifyValidationStateChanged();
             return;
         }
@@ -193,7 +193,7 @@
         {
             _validationMessages.Add(_nameField, "An equipment with this name already exists.");
             _isEditValid = false;
-            CreateEquipment.CreateRequest = CreateRequest.DontCreate;
+        ///    CreateEquipment.CreateRequest = CreateRequest.DontCreate;
             FormContext.NotifyValidationStateChanged();
             return;
         }
@@ -207,13 +207,13 @@
             Logger.Log(nameof(EditEquipmentPage),warning);
             _validationMessages.Clear(_nameField);
             _isEditValid = false;
-            CreateEquipment.CreateRequest = CreateRequest.DontCreate;
+          //  CreateEquipment.CreateRequest = CreateRequest.DontCreate;
             FormContext.NotifyValidationStateChanged();
             return;
         }
 
         _isEditValid = true;
-        CreateEquipment.CreateRequest = CreateRequest.Create;
+      //  CreateEquipment.CreateRequest = CreateRequest.Create;
         FormContext.NotifyValidationStateChanged();
     }
     
@@ -251,9 +251,9 @@
         {
             Messages.AddError($"Equipment name invalid");
             Messages.Append(equipmentValid.Messages);
-            CreateEquipment.CreateRequest = CreateRequest.DontCreate;
+          //  CreateEquipment.CreateRequest = CreateRequest.DontCreate;
         }
-        else CreateEquipment.CreateRequest = CreateRequest.Create;
+      //  else CreateEquipment.CreateRequest = CreateRequest.Create;
 
         var descriptorValid = CreateDescriptor.IsValid(Logger);
         
@@ -262,12 +262,12 @@
         {
             Messages.AddError($"Equipment description content invalid");
             Messages.Append(descriptorValid.Messages);
-            CreateDescriptor.CreateRequest = CreateRequest.DontCreate;
+          //  CreateDescriptor.CreateRequest = CreateRequest.DontCreate;
             Toast.Error($"Equipment description content invalid  : {descriptorValid.GetErrorMessage()}");
             return;
         }
        
-        CreateDescriptor.CreateRequest = CreateRequest.Create;
+        //CreateDescriptor.CreateRequest = CreateRequest.Create;
         
         
         CreateEquipment!.Descriptor = CreateDescriptor;

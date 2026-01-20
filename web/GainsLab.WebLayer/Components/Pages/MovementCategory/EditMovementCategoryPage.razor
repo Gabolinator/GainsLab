@@ -2,18 +2,18 @@
 @page "/movement-categories/{id:guid}"
 
 @rendermode InteractiveServer
+
 @using GainsLab.Application.DTOs
 @using GainsLab.Application.Results
 @using GainsLab.Contracts
 @using GainsLab.Contracts.Dtos.Delete.Outcome
 @using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Contracts.Dtos.ID
-@using GainsLab.Domain
+@using GainsLab.Contracts.Dtos.UpdateDto.Request
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Caching.Registry
-@using GainsLab.Infrastructure.Utilities
 @using GainsLab.WebLayer.Components.Control
-@using GainsLab.WebLayer.Model.Dropdown
+@using GainsLab.WebLayer.Components.Control.MovementCategory
 @using GainsLab.WebLayer.Model.Dto.Descriptor
 @using GainsLab.WebLayer.Model.Dto.MovementCategory
 @using GainsLab.WebLayer.Model.Notification
@@ -25,63 +25,16 @@
 <p>
     @if (EditCategory != null)
     {
-        <EditForm EditContext="FormContext" FormName="formEditCategory" OnValidSubmit="SubmitHandler">
-            <DataAnnotationsValidator></DataAnnotationsValidator>
-            <ValidationSummary></ValidationSummary>
-        
+        <MovementCategoryFormComponent FormName="muscleEditForm"
+                                       Model="EditCategory"
+                                       OnMessages="OnMessageFromForm"
+                                       DisplayBackButton=@true
+                                       BackButtonText="Close"
+                                       SubmitButtonText="Update"
+                                       AllCategories ="AllCategories"
+                                       OnSubmit=@Update>
             
-            <div class="mb-2">
-                <label>Name</label>
-                <InputText Value="@EditCategory.Name"
-                           ValueChanged="OnNameChanged"
-                           ValueExpression="@(() => EditCategory.Name)"
-                           @oninput="OnNameInput" />
-                <ValidationMessage For="(() => EditCategory.Name)"/>
-            </div>
-            
-            <div class="mb-2">
-                <label>Description</label>
-                <InputText class="form-control"
-                           @bind-Value="EditDescriptor.DescriptionContent"/>
-            </div>
-            
-            <div class="mb-2">
-                <label>Parent</label>
-                <DropdownComponent Config="ParentDropdown"
-                                   @bind-Value="SelectedParent"/>
-            </div>
-            
-            <div class="mb-2">
-                <label>Bases </label>
-                <p>  @GetBaseCategoriesText()   </p>
-                @foreach (var category in GetAllBaseCategories().OrderBy(c=>c.ToString()))
-                {
-                    
-                    if(category == eMovementCategories.undefined) continue;
-                    
-                    <div>
-                        <CheckboxComponent
-                            Label="@category.ToString()"
-                            Value="@IsBaseCategorySelected(category)"
-                            ValueChanged="(isChecked) => OnBaseCategoryChanged(category, isChecked)" />
-                    </div>
-                }
-                
-            </div>
-            
-            @if (_isEditValid)
-          {
-              <button class="btn btn-primary" type="submit">Update</button>
-          }
-
-          <br/>
-          <br/> <a href="/movement-categories" class="btn btn-primary">Close</a>
-          <br/>
-          
-          <br/>
-       
-            
-        </EditForm>
+        </MovementCategoryFormComponent>
     }
     <br/>
     <br/>  @if (Category != null)
@@ -105,10 +58,6 @@
 
     public MovementCategoryGetDTO? Category { get; set; } = null;
     public MovementCategoryEditFormDTO? EditCategory { get; set; } = null;
-    public DescriptorEditDTO EditDescriptor { get; set; } = new();
-
-    public DropdownConfig? ParentDropdown { get; set; } = null;
-    private HashSet<eMovementCategories> SelectedBaseCategories = new();
     
     
     private EditContext? FormContext;
@@ -116,88 +65,18 @@
     private FieldIdentifier _nameField;
 
     private bool _isEditValid = false;
-    private string _normalizedOriginalName = string.Empty;
-    private string _originalDescriptorContent = string.Empty;
+  
     private IReadOnlyList<MovementCategoryGetDTO> _categories;
     private string _parentFieldID;
-    public MovementCategoryRefDTO? ParentRef { get; set; } = null;
-
-    private HashSet<string> ExistingCategoryNames { get; set; } = new HashSet<string>();
-
+   
     public MessagesContainer? Messages { get; set; } = new MessagesContainer();
-    public string SelectedParent { get => _parentFieldID;  set => OnParentChanged(value); }
 
-   
-    private string GetBaseCategoriesText()
-    {
-        if(SelectedBaseCategories == null || SelectedBaseCategories.Count == 0) return "None";
-        
-        return string.Join(',', SelectedBaseCategories.OrderBy(c=>c.ToString()).Select(c => c.ToString()));
+    public IReadOnlyList<MovementCategoryRefDTO> AllCategories { get; set; }
 
-    }
-    
-   
-    private void OnParentChanged(string value)
-    {
-        _parentFieldID = value;
-        if (string.IsNullOrEmpty(value))
-        {
-            Logger.LogWarning(nameof(EditMovementCategoryPage), $"Parent Selected : none");
-        }
-        Logger.Log(nameof(EditMovementCategoryPage), $"Parent Selected: {value}");
-        SetParent(_parentFieldID);
-    }
-
-    private void SetParent(string? value)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            Logger.LogWarning(nameof(EditMovementCategoryPage), $"Parent Selected : none");
-            ParentRef = null;
-            return;
-        }
-
-        if (!Guid.TryParse(value, out Guid parsedGuid))
-        {
-            Logger.LogWarning(nameof(EditMovementCategoryPage), $"Could not parse {value} to GUID");
-            ParentRef = null;
-            return;
-        }
-
-        var cat = _categories.FirstOrDefault(c => c.Id == parsedGuid);
-        if (cat == null)
-        {
-            Logger.LogWarning(nameof(EditMovementCategoryPage), $"Could find category with ID {parsedGuid}");
-            ParentRef = null;
-            return; 
-        }
-        Logger.Log(nameof(EditMovementCategoryPage), $"Parent Selected: {cat.Name}");
-        ParentRef = new MovementCategoryRefDTO(parsedGuid, cat.Name);
-
-    }
-
-   
-
-
-    private Task OnNameChanged(string value)
-    {
-        // This is what EditContext uses for standard change notifications
-        EditCategory!.Name = value;
-        return Task.CompletedTask;
-    }
-
-    private void OnNameInput(ChangeEventArgs e)
-    {
-        EditCategory!.Name = e.Value?.ToString();
-
-        FormContext?.NotifyFieldChanged(_nameField);
-    }
 
     protected override async Task OnParametersSetAsync()
     {
-        // Logger.Log(nameof(EditCategoryPage),$"On Parameter set");
-
-
+     
         await base.OnParametersSetAsync();
         Messages ??= new MessagesContainer();
 
@@ -214,14 +93,8 @@
         }
 
         _categories = eqs.Value!;
-        
-        var options = _categories
-            .Where(c => c.Id != Id)
-            .Select(c => new DropdownItem { Label = c.Name, Value = c.Id.ToString() })
-            .OrderBy(x => x.Label)
-            .ToList();
-        options.Insert(0, new DropdownItem { Label = "None", Value = string.Empty });
-       
+        AllCategories=_categories.Select(c => new MovementCategoryRefDTO(c.Id, c.Name)).ToList();
+
         
         var eq =   _categories.FirstOrDefault(e => e.Id == Id);
         if (eq == null)
@@ -229,190 +102,45 @@
             Messages.AddError("Category not found");
             return;
         }
-
-        ParentDropdown = new DropdownConfig { Items = options, Placeholder = "Select parent…", InitialSelectedLabel = eq.ParentCategory?.Name };
-        
         Category = eq;
-        SelectedBaseCategories = Category.BaseCategoriesEnum != null ? Category.BaseCategoriesEnum.ToHashSet() : new();
-        
         EditCategory = Category!.FromGetDTO();
-        EditDescriptor = EditCategory.Descriptor ?? new DescriptorEditDTO();
-
-        _normalizedOriginalName = Normalize(Category!.Name);
-        _originalDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
-
-        ExistingCategoryNames = eqs.Value
-            .Select(e => Normalize(e.Name))
-            .Where(n => !string.IsNullOrWhiteSpace(n))
-            .Where(n => !string.Equals(n, _normalizedOriginalName, StringComparison.InvariantCultureIgnoreCase))
-            .ToHashSet(StringComparer.InvariantCultureIgnoreCase);
-
-        BuildEditContext();
-
-        // Messages.AddInfo($"Categorys Names : {string.Join(",", ExistingCategoryNames)}");
-
-
+        
     }
 
 
 
-    private void BuildEditContext()
-    {
-        if (FormContext != null)
-        {
-            FormContext.OnFieldChanged -= HandleFieldChanged;
-            FormContext.OnValidationRequested -= HandleValidationRequested;
-        }
-
-        FormContext = new EditContext(EditCategory!);
-        _validationMessages = new ValidationMessageStore(FormContext);
-
-        _nameField = FieldIdentifier.Create(() => EditCategory!.Name);
-
-        FormContext.OnFieldChanged += HandleFieldChanged;
-        FormContext.OnValidationRequested += HandleValidationRequested;
-
-        ValidateUniqueName();
-    }
-
-    private void HandleFieldChanged(object? sender, FieldChangedEventArgs e)
-    {
-        if (e.FieldIdentifier.FieldName == nameof(MovementCategoryGetDTO.Name))
-        {
-            ValidateUniqueName();
-        }
-
-
-    }
-
-    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
-    {
-        ValidateUniqueName();
-    }
-
-    private void ValidateUniqueName()
-    {
-        if (FormContext == null || _validationMessages == null || EditCategory == null)
-            return;
-
-
-        _validationMessages.Clear(_nameField);
-
-        Messages ??= new MessagesContainer();
-
-        Messages.Clear(MessageType.Warning);
-
-        var candidate = Normalize(EditCategory.Name);
-
-        if (string.IsNullOrWhiteSpace(candidate))
-        {
-            _isEditValid = false;
-            EditCategory.UpdateRequest = UpdateRequest.DontUpdate;
-            FormContext.NotifyValidationStateChanged();
-            return;
-        }
-
-        if (ExistingCategoryNames.Contains(candidate))
-        {
-            _validationMessages.Add(_nameField, "An Category with this name already exists.");
-            _isEditValid = false;
-            EditCategory.UpdateRequest = UpdateRequest.DontUpdate;
-            FormContext.NotifyValidationStateChanged();
-            return;
-        }
-
-        if (string.Equals(candidate, _normalizedOriginalName, StringComparison.InvariantCultureIgnoreCase))
-        {
-            var warning = $"Validated Category Name - unchanged candidate {candidate}";
-            Messages.AddWarning(warning);
-            Logger.Log(nameof(EditMovementCategoryPage), warning);
-            _validationMessages.Clear(_nameField);
-            _isEditValid = true;
-            EditCategory.UpdateRequest = UpdateRequest.DontUpdate;
-            FormContext.NotifyValidationStateChanged();
-            return;
-        }
-
-        _isEditValid = true;
-        EditCategory.UpdateRequest = UpdateRequest.Update;
-        FormContext.NotifyValidationStateChanged();
-    }
-
-
-    private static string Normalize(string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return string.Empty;
-
-        var t = StringFormater.RemoveUnwantedChar(name);
-
-        return t;
-    }
+  
 
     public void Dispose()
     {
-        if (FormContext != null)
-        {
-            FormContext.OnFieldChanged -= HandleFieldChanged;
-            FormContext.OnValidationRequested -= HandleValidationRequested;
-        }
+   
     }
 
 
-    private async Task SubmitHandler()
+    private async Task Update(MovementCategoryFormDTO form)
     {
-        Messages ??= new MessagesContainer();
-        var currentDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
-        if (string.Equals(currentDescriptorContent, _originalDescriptorContent, StringComparison.InvariantCultureIgnoreCase))
-        {
-            Messages.AddError($"Category {Category!.Name} description content did not change");
-            EditDescriptor.UpdateRequest = UpdateRequest.DontUpdate;
-        }
-        else
-        {
-            EditDescriptor.UpdateRequest = UpdateRequest.Update;
-        }
-
-        EditCategory!.Descriptor = EditDescriptor;
-
-        //todo check if changed
-        bool anythingChanged = false;
-        if (!IsSameParent(EditCategory.Parent, ParentRef))
-        {
-            anythingChanged = true;
-        }
-        else
-        {
-            Toast.Warning("Parent Did not change");
-        }
-        
-        EditCategory.Parent = ParentRef;
-        
-        var selectedBaseCat = SelectedBaseCategories == null || SelectedBaseCategories.Count ==0 ? new() :  GetCategoryRefs(SelectedBaseCategories.Select(c=>c.ToString())) ?? new();
-
-        if (!IsSameBaseCategory(EditCategory.BasesCategory, selectedBaseCat))
-        {
-            anythingChanged = true;
-            Logger.Log(nameof(EditMovementCategoryPage), $"Not Same Base Categories : {EditCategory} ");
-        }
-        else
-        {
-            Toast.Warning("Base Category did not change");
-        }
-
-        EditCategory.BasesCategory =  selectedBaseCat;
-
-        EditCategory.UpdateRequest = anythingChanged ? UpdateRequest.Update : UpdateRequest.DontUpdate;
-        
-        
-        var request = EditCategory.ToUpdateRequest();
-     
-        Logger.Log(nameof(EditMovementCategoryPage), $"Submitting MovementCategory : {EditCategory} ");
-
-        Messages.ClearAll();
-
        
-        var outcome = await Repo.UpdateMovementCategoryAsync(request, EditCategory.Descriptor.ToUpdateRequest());
+        Messages ??= new MessagesContainer();
+       
+
+        if (form is not MovementCategoryEditFormDTO editForm)
+        {
+            Toast.Error($"Form type mismatch");
+            return;
+        }
+
+
+        DescriptorUpdateRequest? descriptorUpdateRequest = null;
+        if (editForm.Descriptor is DescriptorEditDTO descriptor)
+        {
+            descriptorUpdateRequest = descriptor.ToUpdateRequest();
+        }
+        
+         var request = editForm.ToUpdateRequest();
+       
+         Messages.ClearAll();
+        
+         var outcome = await Repo.UpdateMovementCategoryAsync(request,  descriptorUpdateRequest);
         if (!outcome.Success || outcome.Value == null)
         {
             var message = "Could not update Category: ";
@@ -420,46 +148,27 @@
             Messages.Append(outcome.GetMessages());
             Toast.FromMessages(Messages);
         }
-
+        
         else
         {
             Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
-
+        
             if (outcome.Value.MovementCategory != null && outcome.Value.MovementCategory.Outcome == UpdateOutcome.Updated)
                 Toast.Success($"Category updated to {outcome.Value.MovementCategory.UpdatedState!.Name}");
-
+        
             if (outcome.Value.Descriptor != null && outcome.Value.Descriptor.Outcome == UpdateOutcome.Updated)
                 Toast.Success($"Category Description updated to {outcome.Value.Descriptor.UpdatedState!.content}");
-
+        
         }
 
     }
 
-    private bool IsSameBaseCategory(List<MovementCategoryRefDTO> editCategoryBasesCategory, List<MovementCategoryRefDTO> selectedBaseCat)
-    {
-        if(editCategoryBasesCategory.Count == 0 && selectedBaseCat.Count == 0)  return true;
-        if(editCategoryBasesCategory.Count != selectedBaseCat.Count) return false;
-        
-        return editCategoryBasesCategory.SequenceEqual(selectedBaseCat);
-    }
-
-    private bool IsSameParent(MovementCategoryRefDTO? editCategoryParent, MovementCategoryRefDTO? parentRef)
-    {
-        if (editCategoryParent == null && parentRef == null) return true;
-        if((editCategoryParent == null && parentRef != null) || (editCategoryParent != null && parentRef == null)) return false;
-        return editCategoryParent!.Id == parentRef!.Id;
-    }
-
-    private List<MovementCategoryRefDTO>? GetCategoryRefs(IEnumerable<string>? names)
-    {
-        if (names == null || !names.Any())  return null;
-        return _categories.Where(c => names.Contains(c.Name)).Select(c=>new MovementCategoryRefDTO(c.Id, c.Name)).ToList();
-    }
-
+   
 
     private async Task Delete()
     {
 
+       
         Messages ??= new MessagesContainer();
         Messages.ClearAll();
         if (Category == null || Category.Id == Guid.Empty)
@@ -483,6 +192,8 @@
             return;
         }
         
+        Toast.Error("Not Implemented");
+        return;
         
         Result<MovementCategoryDeleteOutcome> outcome = await Repo.DeleteCategoryAsync(new MovementCategoryEntityId(Category.Id));
         if (!outcome.Success || outcome.Value is not { Outcome: DeleteOutcome.Deleted })
@@ -504,20 +215,11 @@
 
     }
 
-    private IEnumerable<eMovementCategories> GetAllBaseCategories()
-        => Enum.GetValues<eMovementCategories>();
-
-    private void OnBaseCategoryChanged(eMovementCategories category, bool isChecked)
+   
+    private void OnMessageFromForm(MessagesContainer obj)
     {
-        if (isChecked)
-            SelectedBaseCategories.Add(category);
-        else
-            SelectedBaseCategories.Remove(category);
-        
-        Logger.Log(nameof(EditMovementCategoryPage), $"Category {category} => {isChecked}");
+       Messages = obj;
+       Toast.FromMessages(Messages);
     }
 
-    private bool IsBaseCategorySelected(eMovementCategories category)
-        => SelectedBaseCategories.Contains(category);
-    
 }

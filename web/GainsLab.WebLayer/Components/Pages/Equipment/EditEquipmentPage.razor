@@ -139,7 +139,7 @@
         
         Equipment = eq;
         EditEquipment = Equipment!.FromGetDTO();
-        EditDescriptor = EditEquipment.Descriptor ?? new DescriptorEditDTO();
+      //  EditDescriptor = EditEquipment.Descriptor ?? new DescriptorEditDTO();
 
         _normalizedOriginalName = Normalize(Equipment!.Name);
         _originalDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
@@ -208,7 +208,7 @@
         if (string.IsNullOrWhiteSpace(candidate))
         {
             _isEditValid = false;
-            EditEquipment.UpdateRequest = UpdateRequest.DontUpdate;
+         //   EditEquipment.UpdateRequest = UpdateRequest.DontUpdate;
             FormContext.NotifyValidationStateChanged();
             return;
         }
@@ -217,7 +217,7 @@
         {
             _validationMessages.Add(_nameField, "An equipment with this name already exists.");
             _isEditValid = false;
-            EditEquipment.UpdateRequest = UpdateRequest.DontUpdate;
+        //    EditEquipment.UpdateRequest = UpdateRequest.DontUpdate;
             FormContext.NotifyValidationStateChanged();
             return;
         }
@@ -229,13 +229,13 @@
             Logger.Log(nameof(EditEquipmentPage),warning);
             _validationMessages.Clear(_nameField);
             _isEditValid = true;
-            EditEquipment.UpdateRequest = UpdateRequest.DontUpdate;
+          //  EditEquipment.UpdateRequest = UpdateRequest.DontUpdate;
             FormContext.NotifyValidationStateChanged();
             return;
         }
 
         _isEditValid = true;
-        EditEquipment.UpdateRequest = UpdateRequest.Update;
+      //  EditEquipment.UpdateRequest = UpdateRequest.Update;
         FormContext.NotifyValidationStateChanged();
     }
     
@@ -267,11 +267,11 @@
         if (string.Equals(currentDescriptorContent, _originalDescriptorContent, StringComparison.InvariantCultureIgnoreCase))
         {
             Messages.AddError($"Equipment {Equipment!.Name} description content did not change");
-            EditDescriptor.UpdateRequest = UpdateRequest.DontUpdate;
+          //  EditDescriptor.UpdateRequest = UpdateRequest.DontUpdate;
         }
         else
         {
-            EditDescriptor.UpdateRequest = UpdateRequest.Update;
+          //  EditDescriptor.UpdateRequest = UpdateRequest.Update;
         }
         
         EditEquipment!.Descriptor = EditDescriptor;
@@ -282,26 +282,26 @@
       
         Messages.ClearAll();
         
-        var outcome= await EquipmentRegistry.UpdateEquipmentAsync(request, EditEquipment.Descriptor.ToUpdateRequest());
-        if (!outcome.Success || outcome.Value == null)
-        {
-            var message = "Could not update equipment: ";
-            Messages.AddError(message);
-            Messages.Append(outcome.GetMessages());
-            Toast.FromMessages(Messages);
-        }
-
-        else
-        {
-            Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
-         
-            if (outcome.Value.Equipment != null && outcome.Value.Equipment.Outcome == UpdateOutcome.Updated)
-                Toast.Success($"Equipment updated to {outcome.Value.Equipment.UpdatedState!.Name}");
-            
-            if (outcome.Value.Descriptor != null && outcome.Value.Descriptor.Outcome == UpdateOutcome.Updated)
-                Toast.Success($"Equipment Description updated to {outcome.Value.Descriptor.UpdatedState!.content}");
-
-        }
+        // var outcome= await EquipmentRegistry.UpdateEquipmentAsync(request, EditEquipment.Descriptor.ToUpdateRequest());
+        // if (!outcome.Success || outcome.Value == null)
+        // {
+        //     var message = "Could not update equipment: ";
+        //     Messages.AddError(message);
+        //     Messages.Append(outcome.GetMessages());
+        //     Toast.FromMessages(Messages);
+        // }
+        //
+        // else
+        // {
+        //     Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
+        //  
+        //     if (outcome.Value.Equipment != null && outcome.Value.Equipment.Outcome == UpdateOutcome.Updated)
+        //         Toast.Success($"Equipment updated to {outcome.Value.Equipment.UpdatedState!.Name}");
+        //     
+        //     if (outcome.Value.Descriptor != null && outcome.Value.Descriptor.Outcome == UpdateOutcome.Updated)
+        //         Toast.Success($"Equipment Description updated to {outcome.Value.Descriptor.UpdatedState!.content}");
+        //
+        // }
         
     }
 

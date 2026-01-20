@@ -86,7 +86,7 @@
     [Parameter] public EventCallback<MessagesContainer> OnMessages { get; set; } = default;
     
     public MessagesContainer? Messages { get; set; } = new MessagesContainer();
-    public DescriptorEditDTO EditDescriptor { get; set; } = new();
+    public DescriptorFormDTO EditDescriptor { get; set; } = new();
     
     public string SelectedBodySection { get => SelectedBodySectionEnum.ToString();  set => OnBodySectionChanged(value); }
     private string _selectedBodySection;
