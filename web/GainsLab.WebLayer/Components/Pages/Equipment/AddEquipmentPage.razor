@@ -1,61 +1,36 @@
-﻿@rendermode InteractiveServer
-@page "/equipments/new"
+﻿@page "/equipments/new"
+
+
+@rendermode InteractiveServer
+
 @using GainsLab.Application.DTOs
-@using GainsLab.Application.Interfaces.DataManagement.Gateway
 @using GainsLab.Application.Results
-@using GainsLab.Contracts
+@using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Contracts.Dtos.PostDto.Outcome
-@using GainsLab.Contracts.Dtos.PostDto.Request
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Caching.Registry
-@using GainsLab.Infrastructure.Utilities
 @using GainsLab.WebLayer.Components.Control
+@using GainsLab.WebLayer.Components.Control.Equipment
 @using GainsLab.WebLayer.Model.Dto.Descriptor
 @using GainsLab.WebLayer.Model.Dto.Equipment
 @using GainsLab.WebLayer.Model.Notification
-@implements IDisposable
-
+@inject NavigationManager NavManager;
 
 
 <p>
     @if (CreateEquipment != null)
     {
-        <EditForm EditContext="FormContext" FormName="formAddEquipment" OnValidSubmit="SubmitHandler">
-            <DataAnnotationsValidator></DataAnnotationsValidator>
-            <ValidationSummary></ValidationSummary>
-        
-            
-            <div class="mb-2">
-                <label>Name</label>
-                <InputText Value="@CreateEquipment.Name"
-                           ValueChanged="OnNameChanged"
-                           ValueExpression="@(() => CreateEquipment.Name)"
-                           @oninput="OnNameInput" />
-                <ValidationMessage For="(() => CreateEquipment.Name)"/>
-            </div>
-            
-            <div class="mb-2">
-                <label>Description</label>
-                <InputText class="form-control"
-                           @bind-Value="CreateDescriptor.DescriptionContent"/>
-            </div>
-            
-          @if (_isEditValid)
-          {
-              <button class="btn btn-primary" type="submit">Create</button>
-          }
-
-          <br/>
-          <br/> <a href="/equipments" class="btn btn-primary">Close</a>
-          <br/>
-          
-          <br/>
-       
-            
-        </EditForm>
+        <EquipmentFormComponent FormName="equipmentAddForm"
+                                Model="CreateEquipment"
+                                OnMessages="OnMessageFromForm"
+                                DisplayBackButton="@true"
+                                BackButtonText="Close"
+                                SubmitButtonText="Create"
+                                EquipmentNames="@EquipmentNames"
+                                OnSubmit="Create">
+        </EquipmentFormComponent>
     }
     <br/>
-   
 
     <MessageComponent Messages="@Messages"></MessageComponent>
 
@@ -63,240 +38,81 @@
 
 @code {
     [Inject] private ILogger Logger { get; set; } = default!;
-    [Inject] private IClock Clock { get; set; } = default!;
-    [Inject] private IToast Toast{ get; set; }
-    
     [Inject] private EquipmentRegistry EquipmentRegistry { get; set; } = default!;
     [Inject] private DescriptorRegistry DescriptorRegistry { get; set; } = default!;
-    
+    [Inject] private IToast Toast { get; set; } = default!;
+
     public EquipmentCreateDTO? CreateEquipment { get; set; } = null;
-    public DescriptorCreateDTO CreateDescriptor { get; set; } = new();
-
-    private EditContext? FormContext;
-    private ValidationMessageStore? _validationMessages;
-    private FieldIdentifier _nameField;
-
-    private bool _isEditValid = false;
-    
-    private HashSet<string> ExistingEquipmentNames { get; set; } = new HashSet<string>();
-
     public MessagesContainer? Messages { get; set; } = new MessagesContainer();
 
+    private IReadOnlyList<EquipmentGetDTO> _equipments = new List<EquipmentGetDTO>();
+    public IReadOnlyList<string> EquipmentNames { get; set; } = new List<string>();
 
-    private Task OnNameChanged(string value)
-    {
-        // This is what EditContext uses for standard change notifications
-        CreateEquipment!.Name = value;
-        return Task.CompletedTask;
-    }
-
-    private void OnNameInput(ChangeEventArgs e)
-    {
-        CreateEquipment!.Name = e.Value?.ToString();
-        
-        FormContext?.NotifyFieldChanged(_nameField);
-    }
-    
     protected override async Task OnParametersSetAsync()
     {
-       // Logger.Log(nameof(EditEquipmentPage),$"On Parameter set");
-
-        
         await base.OnParametersSetAsync();
         Messages ??= new MessagesContainer();
-        
-        Messages.ClearAll();
-        
-        _isEditValid = false;
 
-        //we cache all the equipments - so we can filter for same name
-        var eqs = await EquipmentRegistry.GetAllAsync();
-        if (eqs.Value == null || eqs.Value.Count == 0)
+        Messages.ClearAll();
+
+        var equipments = await EquipmentRegistry.GetAllAsync();
+        if (equipments.Value == null || equipments.Value.Count == 0)
         {
             Messages.AddError("No Equipments Found");
             return;
         }
-    
-       
-       
-        CreateEquipment = new EquipmentCreateDTO();
-        CreateDescriptor = new DescriptorCreateDTO();
 
-        
-        ExistingEquipmentNames = eqs.Value
-            .Select(e => Normalize(e.Name))
-            .Where(n => !string.IsNullOrWhiteSpace(n))
-             .ToHashSet(StringComparer.InvariantCultureIgnoreCase);
-        
-        BuildEditContext();
+        _equipments = equipments.Value!;
+        EquipmentNames = _equipments.Select(e => e.Name ?? string.Empty).ToList();
 
-       
+        CreateEquipment = BuildInitialModel();
     }
-    
-    private void BuildEditContext()
+
+    private EquipmentCreateDTO BuildInitialModel()
     {
-        if (FormContext != null)
+        return new EquipmentCreateDTO
         {
-            FormContext.OnFieldChanged -= HandleFieldChanged;
-            FormContext.OnValidationRequested -= HandleValidationRequested;
-        }
-
-        FormContext = new EditContext(CreateEquipment!);
-        _validationMessages = new ValidationMessageStore(FormContext);
-
-        _nameField = FieldIdentifier.Create(() => CreateEquipment!.Name);
-
-        FormContext.OnFieldChanged += HandleFieldChanged;
-        FormContext.OnValidationRequested += HandleValidationRequested;
-        
-        ValidateUniqueName();
+            Descriptor = new DescriptorCreateDTO()
+        };
     }
 
-    private void HandleFieldChanged(object? sender, FieldChangedEventArgs e)
-    {
-        if (e.FieldIdentifier.FieldName == nameof(EquipmentEditFormDTO.Name))
-        {
-            ValidateUniqueName();
-        }
-
-        
-    }
-
-    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
-    {
-        ValidateUniqueName();
-    }
-
-    private void ValidateUniqueName()
-    {
-        if (FormContext == null || _validationMessages == null || CreateEquipment == null)
-            return;
-     
-        
-        _validationMessages.Clear(_nameField);
-
-        Messages ??= new MessagesContainer();
-     
-        Messages.Clear(MessageType.Warning);
-        
-        var candidate = Normalize(CreateEquipment.Name);
-
-        if (string.IsNullOrWhiteSpace(candidate))
-        {
-            _isEditValid = false;
-         //   CreateEquipment.CreateRequest = CreateRequest.DontCreate;
-            FormContext.NotifyValidationStateChanged();
-            return;
-        }
-
-        if (ExistingEquipmentNames.Contains(candidate))
-        {
-            _validationMessages.Add(_nameField, "An equipment with this name already exists.");
-            _isEditValid = false;
-        ///    CreateEquipment.CreateRequest = CreateRequest.DontCreate;
-            FormContext.NotifyValidationStateChanged();
-            return;
-        }
-
-        var isValid = CreateEquipment.IsValid(Logger);
-        if (!isValid.Success)
-        {
-            var warning = $"Invalid Equipment";
-            Messages.AddWarning(warning);
-            Messages.Append(isValid.Messages);
-            Logger.Log(nameof(EditEquipmentPage),warning);
-            _validationMessages.Clear(_nameField);
-            _isEditValid = false;
-          //  CreateEquipment.CreateRequest = CreateRequest.DontCreate;
-            FormContext.NotifyValidationStateChanged();
-            return;
-        }
-
-        _isEditValid = true;
-      //  CreateEquipment.CreateRequest = CreateRequest.Create;
-        FormContext.NotifyValidationStateChanged();
-    }
-    
-
-    private static string Normalize(string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return string.Empty;
-        
-        var t = StringFormater.RemoveUnwantedChar(name);
-        
-        return t;
-    }
-
-    public void Dispose()
-    {
-        if (FormContext != null)
-        {
-            FormContext.OnFieldChanged -= HandleFieldChanged;
-            FormContext.OnValidationRequested -= HandleValidationRequested;
-        }
-    }
-
-
-    private async Task SubmitHandler()
+    private async Task Create(EquipmentFormDTO form)
     {
         Messages ??= new MessagesContainer();
         Messages.ClearAll();
-        CreateEquipment ??= new EquipmentCreateDTO();
-        
-        var equipmentValid = CreateEquipment.IsValid(Logger);
-            Logger.Log(nameof(AddEquipmentPage), $"equipment valid : {equipmentValid.Success}- {Messages.ToString()}");
-        
-            if (!equipmentValid.Success)
-        {
-            Messages.AddError($"Equipment name invalid");
-            Messages.Append(equipmentValid.Messages);
-          //  CreateEquipment.CreateRequest = CreateRequest.DontCreate;
-        }
-      //  else CreateEquipment.CreateRequest = CreateRequest.Create;
 
-        var descriptorValid = CreateDescriptor.IsValid(Logger);
-        
-        
-        if (!descriptorValid.Success)
+        if (form is not EquipmentCreateDTO createForm)
         {
-            Messages.AddError($"Equipment description content invalid");
-            Messages.Append(descriptorValid.Messages);
-          //  CreateDescriptor.CreateRequest = CreateRequest.DontCreate;
-            Toast.Error($"Equipment description content invalid  : {descriptorValid.GetErrorMessage()}");
+            Toast.Error("Form type mismatch");
             return;
         }
-       
-        //CreateDescriptor.CreateRequest = CreateRequest.Create;
-        
-        
-        CreateEquipment!.Descriptor = CreateDescriptor;
-        
-        EquipmentCombineCreateRequest request = CreateEquipment.ToCombineCreateRequest();
-        
-     
-        Result<EquipmentCreateCombineOutcome> outcome= await EquipmentRegistry.CreateEquipmentAsync(request);
-        if (!outcome.Success)
+
+        var request = createForm.ToCombineCreateRequest();
+
+        Result<EquipmentCreateCombineOutcome> outcome = await EquipmentRegistry.CreateEquipmentAsync(request);
+        if (!outcome.Success || outcome.Value == null)
         {
-            Messages.AddError("Could not update equipment: ");
+          
             Messages.Append(outcome.GetMessages());
             Toast.Error("Failed to Create Equipment");
-            
+            Toast.FromMessages(Messages, null, ToastLevel.Error, ToastLevel.Warning);
         }
-
         else
         {
             Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
             Toast.Success("Equipment successfully created!");
             EquipmentRegistry.Invalidate();
             DescriptorRegistry.Invalidate();
-           // Toast.FromMessages(Messages);
+            Toast.FromMessages(Messages, null, ToastLevel.Error, ToastLevel.Warning);
+            NavManager.NavigateTo("equipments");
         }
-        
-        Toast.FromMessages(Messages, null, ToastLevel.Error, ToastLevel.Warning);
-        
+
+       
     }
 
-    
-
+    private void OnMessageFromForm(MessagesContainer obj)
+    {
+        Messages = obj;
+        Toast.FromMessages(Messages);
+    }
 }
