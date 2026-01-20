@@ -223,7 +223,7 @@ public class MovementCategoryGateway : IMovementCategoryGateway
 
     public async Task<Result<MovementCategoryCreateCombineOutcome>> CreateMovementCategoryAsync(MovementCategoryCombineCreateRequest request, ICache? cache)
     {
-     //   return Result<MovementCategoryCreateCombineOutcome>.NotImplemented(nameof(CreateMovementCategoryAsync));
+    
      MessagesContainer message = new MessagesContainer();
 
      DescriptorCreateOutcome? descriptorCreateOutcome = null;

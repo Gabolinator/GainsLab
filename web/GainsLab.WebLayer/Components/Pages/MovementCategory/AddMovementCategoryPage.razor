@@ -1,88 +1,35 @@
-﻿@rendermode InteractiveServer
-@page "/movement-categories/new"
+﻿@page "/movement-categories/new"
+
+
+@rendermode InteractiveServer
+
 @using GainsLab.Application.DTOs
 @using GainsLab.Application.Results
-@using GainsLab.Contracts
 @using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Contracts.Dtos.PostDto.Outcome
-@using GainsLab.Contracts.Dtos.PostDto.Request
-@using GainsLab.Domain
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Caching.Registry
-@using GainsLab.Infrastructure.Utilities
 @using GainsLab.WebLayer.Components.Control
-@using GainsLab.WebLayer.Model.Dropdown
+@using GainsLab.WebLayer.Components.Control.MovementCategory
 @using GainsLab.WebLayer.Model.Dto.Descriptor
 @using GainsLab.WebLayer.Model.Dto.MovementCategory
 @using GainsLab.WebLayer.Model.Notification
-@implements IDisposable
-
-<h3>Add Movement Category</h3>
+@inject NavigationManager NavManager;
 
 <p>
     @if (CreateCategory != null)
     {
-        <EditForm EditContext="FormContext" FormName="formAddCategory" OnValidSubmit="SubmitHandler">
-            <DataAnnotationsValidator></DataAnnotationsValidator>
-            <ValidationSummary></ValidationSummary>
-        
-            
-            <div class="mb-2">
-                <label>Name</label>
-                <InputText Value="@CreateCategory.Name"
-                           ValueChanged="OnNameChanged"
-                           ValueExpression="@(() => CreateCategory.Name)"
-                           @oninput="OnNameInput" />
-                <ValidationMessage For="(() => CreateCategory.Name)"/>
-            </div>
-            
-            <div class="mb-2">
-                <label>Description</label>
-                <InputText class="form-control"
-                           @bind-Value="CreateDescriptor.DescriptionContent"/>
-            </div>
-            
-            <div class="mb-2">
-                <label>Parent</label>
-                <DropdownComponent Config="ParentDropdown"
-                                   @bind-Value="SelectedParent"/>
-            </div>
-            
-            <div class="mb-2">
-                <label>Bases </label>
-                <p>  @GetBaseCategoriesText()   </p>
-                @foreach (var category in GetAllBaseCategories().OrderBy(c=>c.ToString()))
-                {
-                    
-                    if(category == eMovementCategories.undefined) continue;
-                    
-                    <div>
-                        <CheckboxComponent
-                            Label="@category.ToString()"
-                            Value="@IsBaseCategorySelected(category)"
-                            ValueChanged="(isChecked) => OnBaseCategoryChanged(category, isChecked)" />
-                    </div>
-                }
-                
-            </div>
-
-            
-            @if (_isEditValid)
-          {
-              <button class="btn btn-primary" type="submit">Create</button>
-          }
-
-          <br/>
-          <br/> <a href="/movement-categories" class="btn btn-primary">Close</a>
-          <br/>
-          
-          <br/>
-       
-            
-        </EditForm>
+        <MovementCategoryFormComponent FormName="movementCategoryAddForm"
+                                       Model="CreateCategory"
+                                       OnMessages="OnMessageFromForm"
+                                       DisplayBackButton=@true
+                                       BackButtonText="Close"
+                                       SubmitButtonText="Add"
+                                       AllCategories="AllCategories"
+                                       OnSubmit="@Create">
+        </MovementCategoryFormComponent>
     }
     <br/>
-   
 
     <MessageComponent Messages="@Messages"></MessageComponent>
 
@@ -90,328 +37,99 @@
 
 @code {
     [Inject] private ILogger Logger { get; set; } = default!;
-    [Inject] private IClock Clock { get; set; } = default!;
-    [Inject] private IToast Toast { get; set; }
-
     [Inject] private MovementCategoryRegistry Repo { get; set; } = default!;
     [Inject] private DescriptorRegistry DescriptorRegistry { get; set; } = default!;
+    [Inject] private IToast Toast { get; set; } = default!;
 
     public MovementCategoryCreateDTO? CreateCategory { get; set; } = null;
-    public DescriptorCreateDTO CreateDescriptor { get; set; } = new();
-
-    private IReadOnlyList<MovementCategoryGetDTO> _categories;
-    private string _parentFieldID;
-    public MovementCategoryRefDTO? ParentRef { get; set; } = null;
-
-    private HashSet<string> ExistingEquipmentNames { get; set; } = new HashSet<string>();
-
-  
-    public string SelectedParent { get => _parentFieldID;  set => OnParentChanged(value); }
-
-    
-    private EditContext? FormContext;
-    private ValidationMessageStore? _validationMessages;
-    private FieldIdentifier _nameField;
-
-    private bool _isEditValid = false;
-
-    private HashSet<string> ExistingMovementCategoryNames { get; set; } = new HashSet<string>();
-
     public MessagesContainer? Messages { get; set; } = new MessagesContainer();
 
-    public DropdownConfig? ParentDropdown { get; set; } = null;
-    private HashSet<eMovementCategories> SelectedBaseCategories = new();
+    public IReadOnlyList<MovementCategoryRefDTO> AllCategories { get; set; } = new List<MovementCategoryRefDTO>();
 
-    
-    private string GetBaseCategoriesText()
-    {
-        if(SelectedBaseCategories == null || SelectedBaseCategories.Count == 0) return "None";
-        
-        return string.Join(',', SelectedBaseCategories.OrderBy(c=>c.ToString()).Select(c => c.ToString()));
-
-    }
-
-    
-    private IEnumerable<eMovementCategories> GetAllBaseCategories()
-        => Enum.GetValues<eMovementCategories>();
-
-    private void OnBaseCategoryChanged(eMovementCategories category, bool isChecked)
-    {
-        if (isChecked)
-            SelectedBaseCategories.Add(category);
-        else
-            SelectedBaseCategories.Remove(category);
-        
-        Logger.Log(nameof(EditMovementCategoryPage), $"Category {category} => {isChecked}");
-    }
-
-    private bool IsBaseCategorySelected(eMovementCategories category)
-        => SelectedBaseCategories.Contains(category);
-    
-   
-    private void OnParentChanged(string value)
-    {
-        _parentFieldID = value;
-        if (string.IsNullOrEmpty(value))
-        {
-            Logger.LogWarning(nameof(EditMovementCategoryPage), $"Parent Selected : none");
-        }
-        Logger.Log(nameof(EditMovementCategoryPage), $"Parent Selected: {value}");
-        SetParent(_parentFieldID);
-    }
-
-    private void SetParent(string? value)
-    {
-        if (string.IsNullOrEmpty(value))
-        {
-            Logger.LogWarning(nameof(EditMovementCategoryPage), $"Parent Selected : none");
-            ParentRef = null;
-            return;
-        }
-
-        if (!Guid.TryParse(value, out Guid parsedGuid))
-        {
-            Logger.LogWarning(nameof(EditMovementCategoryPage), $"Could not parse {value} to GUID");
-            ParentRef = null;
-            return;
-        }
-
-        var cat = _categories.FirstOrDefault(c => c.Id == parsedGuid);
-        if (cat == null)
-        {
-            Logger.LogWarning(nameof(EditMovementCategoryPage), $"Could find category with ID {parsedGuid}");
-            ParentRef = null;
-            return; 
-        }
-        Logger.Log(nameof(EditMovementCategoryPage), $"Parent Selected: {cat.Name}");
-        ParentRef = new MovementCategoryRefDTO(parsedGuid, cat.Name);
-
-    }
-
-
-    
-    
-    private Task OnNameChanged(string value)
-    {
-        // This is what EditContext uses for standard change notifications
-        CreateCategory!.Name = value;
-        return Task.CompletedTask;
-    }
-
-    private void OnNameInput(ChangeEventArgs e)
-    {
-        CreateCategory!.Name = e.Value?.ToString();
-
-        FormContext?.NotifyFieldChanged(_nameField);
-    }
 
     protected override async Task OnParametersSetAsync()
     {
-        // Logger.Log(nameof(EditMovementCategoryPage),$"On Parameter set");
-
-
         await base.OnParametersSetAsync();
         Messages ??= new MessagesContainer();
 
         Messages.ClearAll();
 
-        _isEditValid = false;
-
-        
-        //we cache all the MovementCategorys - so we can filter for same name
-        var eqs = await Repo.GetAllAsync();
-        if (eqs.Value == null || eqs.Value.Count == 0)
+        var categories = await Repo.GetAllAsync();
+        if (categories.Value == null || categories.Value.Count == 0)
         {
-            Messages.AddError("No MovementCategories Found");
+            Messages.AddError("No Movement Categories Found");
             return;
         }
 
+        AllCategories = categories.Value!.Select(c => new MovementCategoryRefDTO(c.Id, c.Name)).ToList();
 
-        
-        CreateCategory = new MovementCategoryCreateDTO();
-        CreateDescriptor = new DescriptorCreateDTO();
-       
-        _categories = eqs.Value;
-
-        ExistingMovementCategoryNames = eqs.Value
-            .Select(e => Normalize(e.Name))
-            .Where(n => !string.IsNullOrWhiteSpace(n))
-            .ToHashSet(StringComparer.InvariantCultureIgnoreCase);
-
-        BuildEditContext();
-
-
+        CreateCategory = BuildInitialModel();
     }
 
-    private void BuildEditContext()
+    private MovementCategoryCreateDTO BuildInitialModel()
     {
-        if (FormContext != null)
+        return new MovementCategoryCreateDTO
         {
-            FormContext.OnFieldChanged -= HandleFieldChanged;
-            FormContext.OnValidationRequested -= HandleValidationRequested;
-        }
-
-        FormContext = new EditContext(CreateCategory!);
-        _validationMessages = new ValidationMessageStore(FormContext);
-
-        _nameField = FieldIdentifier.Create(() => CreateCategory!.Name);
-
-        FormContext.OnFieldChanged += HandleFieldChanged;
-        FormContext.OnValidationRequested += HandleValidationRequested;
-
-        ValidateUniqueName();
+            Id = Guid.NewGuid(),
+            Descriptor = new DescriptorCreateDTO()
+        };
     }
 
-    private void HandleFieldChanged(object? sender, FieldChangedEventArgs e)
-    {
-        if (e.FieldIdentifier.FieldName == nameof(MovementCategoryEditFormDTO.Name))
-        {
-            ValidateUniqueName();
-        }
-
-
-    }
-
-    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs e)
-    {
-        ValidateUniqueName();
-    }
-
-    private void ValidateUniqueName()
-    {
-        if (FormContext == null || _validationMessages == null || CreateCategory == null)
-            return;
-
-
-        _validationMessages.Clear(_nameField);
-
-        Messages ??= new MessagesContainer();
-
-        Messages.Clear(MessageType.Warning);
-
-        var candidate = Normalize(CreateCategory.Name);
-
-        if (string.IsNullOrWhiteSpace(candidate))
-        {
-            _isEditValid = false;
-           // CreateCategory.CreateRequest = CreateRequest.DontCreate;
-            FormContext.NotifyValidationStateChanged();
-            return;
-        }
-
-        if (ExistingMovementCategoryNames.Contains(candidate))
-        {
-            _validationMessages.Add(_nameField, "An MovementCategory with this name already exists.");
-            _isEditValid = false;
-           // CreateCategory.CreateRequest = CreateRequest.DontCreate;
-            FormContext.NotifyValidationStateChanged();
-            return;
-        }
-
-        var isValid = CreateCategory.IsValid(Logger);
-        if (!isValid.Success)
-        {
-            var warning = $"Invalid MovementCategory";
-            Messages.AddWarning(warning);
-            Messages.Append(isValid.Messages);
-            Logger.Log(nameof(EditMovementCategoryPage), warning);
-            _validationMessages.Clear(_nameField);
-            _isEditValid = false;
-          //  CreateCategory.CreateRequest = CreateRequest.DontCreate;
-            FormContext.NotifyValidationStateChanged();
-            return;
-        }
-
-        _isEditValid = true;
-       //CreateCategory.CreateRequest = CreateRequest.Create;
-        FormContext.NotifyValidationStateChanged();
-    }
-
-
-    private static string Normalize(string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return string.Empty;
-
-        var t = StringFormater.RemoveUnwantedChar(name);
-
-        return t;
-    }
-
-    public void Dispose()
-    {
-        if (FormContext != null)
-        {
-            FormContext.OnFieldChanged -= HandleFieldChanged;
-            FormContext.OnValidationRequested -= HandleValidationRequested;
-        }
-    }
-
-
-    private async Task SubmitHandler()
+    private async Task Create(MovementCategoryFormDTO form)
     {
         Messages ??= new MessagesContainer();
         Messages.ClearAll();
-        CreateCategory ??= new MovementCategoryCreateDTO();
 
-        var MovementCategoryValid = CreateCategory.IsValid(Logger);
-        Logger.Log(nameof(AddMovementCategoryPage), $"MovementCategory valid : {MovementCategoryValid.Success}- {Messages.ToString()}");
-
-        if (!MovementCategoryValid.Success)
+        if (form is not MovementCategoryCreateDTO createForm)
         {
-            Messages.AddError($"MovementCategory name invalid");
-            Messages.Append(MovementCategoryValid.Messages);
-           // CreateCategory.CreateRequest = CreateRequest.DontCreate;
-        }
-    //    else CreateCategory.CreateRequest = CreateRequest.Create;
-
-        var descriptorValid = CreateDescriptor.IsValid(Logger);
-
-
-        if (!descriptorValid.Success)
-        {
-            Messages.AddError($"MovementCategory description content invalid");
-            Messages.Append(descriptorValid.Messages);
-          //  CreateDescriptor.CreateRequest = CreateRequest.DontCreate;
-            Toast.Error($"MovementCategory description content invalid  : {descriptorValid.GetErrorMessage()}");
+            Toast.Error("Form type mismatch");
             return;
         }
 
-       // CreateDescriptor.CreateRequest = CreateRequest.Create;
-
-
-        CreateCategory!.Descriptor = CreateDescriptor;
-        CreateCategory.Parent = ParentRef;
-        CreateCategory.BasesCategory = SelectedBaseCategories.Count == 0 ? new(): GetCategoryRefs(SelectedBaseCategories.Select(c=>c.ToString())) ?? new();
-        MovementCategoryCombineCreateRequest request = CreateCategory.ToCombineCreateRequest();
-
-
-        Result<MovementCategoryCreateCombineOutcome> outcome = await Repo.CreateMovementCategoryAsync(request);
-        if (!outcome.Success)
+        if (createForm.Id == Guid.Empty)
         {
-            Messages.AddError("Could not update MovementCategory: ");
-            Messages.Append(outcome.GetMessages());
-            Toast.Error("Failed to Create MovementCategory");
+            createForm.Id = Guid.NewGuid();
+        }
 
+        var movementCategoryValid = createForm.IsValid(Logger);
+        if (!movementCategoryValid.Success)
+        {
+            Messages.AddError("Movement Category invalid");
+            Messages.Append(movementCategoryValid.Messages);
+            Toast.FromMessages(Messages);
+            return;
+        }
+
+        var request = createForm.ToCombineCreateRequest();
+
+        
+        //todo still issue when more than one base categories posted, the parent category might also cause issues
+        Result<MovementCategoryCreateCombineOutcome> outcome = await Repo.CreateMovementCategoryAsync(request);
+        if (!outcome.Success || outcome.Value == null)
+        {
+            Messages.AddError("Could not create Movement Category");
+            Messages.Append(outcome.GetMessages());
+            Toast.Error("Failed to Create Movement Category");
+            Toast.FromMessages(Messages, null, ToastLevel.Error, ToastLevel.Warning);
         }
 
         else
         {
             Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
-            Toast.Success("MovementCategory successfully created!");
+            Toast.Success("Movement Category successfully created!");
             Repo.Invalidate();
             DescriptorRegistry.Invalidate();
-            // Toast.FromMessages(Messages);
+            Toast.FromMessages(Messages, null, ToastLevel.Error, ToastLevel.Warning);
+            NavManager.NavigateTo("movement-categories");
         }
 
-        Toast.FromMessages(Messages, null, ToastLevel.Error, ToastLevel.Warning);
+      
 
     }
-    
-    private List<MovementCategoryRefDTO>? GetCategoryRefs(IEnumerable<string>? names)
+
+    private void OnMessageFromForm(MessagesContainer obj)
     {
-        if (names == null || !names.Any())  return null;
-        return _categories.Where(c => names.Contains(c.Name)).Select(c=>new MovementCategoryRefDTO(c.Id, c.Name)).ToList();
+        Messages = obj;
+        Toast.FromMessages(Messages);
     }
-
 }

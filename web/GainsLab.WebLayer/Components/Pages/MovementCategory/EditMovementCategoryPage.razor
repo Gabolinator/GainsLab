@@ -159,6 +159,7 @@
             if (outcome.Value.Descriptor != null && outcome.Value.Descriptor.Outcome == UpdateOutcome.Updated)
                 Toast.Success($"Category Description updated to {outcome.Value.Descriptor.UpdatedState!.content}");
         
+            NavManager.NavigateTo("movement-categories");
         }
 
     }
@@ -192,9 +193,7 @@
             return;
         }
         
-        Toast.Error("Not Implemented");
-        return;
-        
+       
         Result<MovementCategoryDeleteOutcome> outcome = await Repo.DeleteCategoryAsync(new MovementCategoryEntityId(Category.Id));
         if (!outcome.Success || outcome.Value is not { Outcome: DeleteOutcome.Deleted })
         {
@@ -208,11 +207,7 @@
 
         Messages.AddInfo(message);
         Toast.Success(message);
-        NavManager.NavigateTo("Categorys");
-
-
-
-
+        NavManager.NavigateTo("movement-categories");
     }
 
    
