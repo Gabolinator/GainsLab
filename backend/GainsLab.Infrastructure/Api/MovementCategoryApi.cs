@@ -144,7 +144,7 @@ public class MovementCategoryApi : IMovementCategoryApi
 
         try
         {
-            _logger.Log(nameof(MovementCategoryApi), $"Try Post MovementCategory - id {id} - {entity.Name}" );
+            _logger.Log(nameof(MovementCategoryApi), $"Try Post MovementCategory - {entity.Print()}" );
 
             var url = $"/movementcategories/";
             using var res = await _http.PostAsync(url, JsonContent.Create(entity), ct);
@@ -173,7 +173,7 @@ public class MovementCategoryApi : IMovementCategoryApi
         catch (Exception e)
         {
             var message =
-                $"Remote patch for MovementCategory failed while contacting {_http.DescribeBaseAddress()}: {e.GetBaseException().Message}";
+                $"Remote post for MovementCategory failed while contacting {_http.DescribeBaseAddress()}: {e.GetBaseException().Message}";
             _logger.LogError(nameof(MovementCategoryApi), message);
             return  Result<MovementCategoryCreateOutcome>.Failure(message);
         }

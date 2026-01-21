@@ -67,9 +67,9 @@ public class MovementCategoryController : ControllerBase
             return BadRequest();
         }
         
-        _log.Log(nameof(MovementCategoryController), $"Try to post {payload.Name} - {payload.Id}");
+        _log.Log(nameof(MovementCategoryController), $"Try to post {payload.Print()}");
         var result = await _repo.PostAsync(payload,ct);
-   
+        
         return APIResultValidation.ValidateResult<MovementCategoryGetDTO>(this, result,
             result.Value != null ? new ActionResultInfo(GetActionName(), result.Value.Id) : null);
     }

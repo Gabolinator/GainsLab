@@ -31,10 +31,10 @@ public static class DIExtensions
 
     private static void AddEntitiesRepositories(IServiceCollection services)
     {
-        services.AddSingleton<IDescriptorRepository, DescriptorRepository>();
-        services.AddSingleton<IEquipmentRepository, EquipmentRepository>();
-        services.AddSingleton<IMuscleRepository, MuscleRepository>();
-        services.AddSingleton<IMovementCategoryRepository, MovementCategoryRepository>();
+        services.AddScoped<IDescriptorRepository, DescriptorRepository>();
+        services.AddScoped<IEquipmentRepository, EquipmentRepository>();
+        services.AddScoped<IMuscleRepository, MuscleRepository>();
+        services.AddScoped<IMovementCategoryRepository, MovementCategoryRepository>();
     }
 
 

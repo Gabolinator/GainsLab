@@ -45,20 +45,21 @@
             </tr>
             </thead>
             <tbody>
+            @{ i = 1; }
             @foreach (var eq in _categories)
             {
 
                 <tr>
                     <MovementCategoryTableLine Index="i"
                                                Id="eq.Id"
-                                        Name="@eq.Name"
-                                        Description="@GetDescription(eq)"
-                                        Parent="@GetParent(eq)"
-                                        BaseCategories="@GetBaseCategories(eq)"
-                                        ChildCategories="@GetChildCategories(eq)"
-                                        UpdatedAtUtc="@eq.UpdatedAtUtc.ToString()"
-                                        EditLink="@GetEditLink(eq)"
-                                        DeleteRequested="DeleteCategoryAsync">
+                                               Name="@eq.Name"
+                                               Description="@GetDescription(eq)"
+                                               Parent="@GetParent(eq)"
+                                               BaseCategories="@GetBaseCategories(eq)"
+                                               ChildCategories="@GetChildCategories(eq)"
+                                               UpdatedAtUtc="@eq.UpdatedAtUtc.ToString()"
+                                               EditLink="@GetEditLink(eq)"
+                                               DeleteRequested="DeleteCategoryAsync">
                     </MovementCategoryTableLine>
 
                 </tr>
@@ -143,7 +144,7 @@
     {
 
         Logger.Log(nameof(MovementCategoryDisplayComponent), $"Deleting MovementCategory {MovementCategoryId}");
-
+        
         if (_categories is null)
         {
             Toast.Error("No MovementCategory Found");
@@ -192,6 +193,7 @@
         Toast.Success(success);
         
         _categories = _categories.Where(e => e.Id != MovementCategoryId).ToArray();
+       
     }
 
     private string GetParent(MovementCategoryGetDTO c)
@@ -211,4 +213,6 @@
         if (c.ChildCategories == null || !c.ChildCategories.Any()) return new();
         return c.ChildCategories.Select(c => c.Name).ToList();
     }
+
+   
 }

@@ -71,8 +71,11 @@ public class MovementCategoryRepository : IMovementCategoryRepository
     {
         try
         {
+            _log.Log(nameof(MovementCategoryRepository), $"Try to post {payload.Print()}");
             var allCategories = await _db.MovementCategories
                 .AsNoTracking()
+                .Include(c=>c.ParentCategory)
+                .Include(c=>c.BaseCategoryLinks)
                 .ToListAsync(ct);
             
             MovementCategoryRecord? parentCategory = null;
@@ -89,6 +92,7 @@ public class MovementCategoryRepository : IMovementCategoryRepository
                         $"Parent category {payload.ParentCategoryId} not found");
                 }
                 
+                _log.Log(nameof(MovementCategoryRepository), $"Parent {parentCategory.Name} found for {payload.Id}");
                 _db.Attach(parentCategory);
             }
 
@@ -518,7 +522,8 @@ public class MovementCategoryRepository : IMovementCategoryRepository
             }
 
             var dto = existing.ToGetDTO();
-
+            _log.Log(nameof(MovementCategoryRepository),$"Deleted {existing.Name} with descriptor id : {(existing.Descriptor != null ? existing.Descriptor.Iguid : "null")}");
+            
             _db.MovementCategories.Remove(existing);
             await _db.SaveChangesAsync(ct).ConfigureAwait(false);
 
@@ -543,8 +548,10 @@ public class MovementCategoryRepository : IMovementCategoryRepository
                 await _db.SaveChangesAsync(ct).ConfigureAwait(false);
                 return APIResult<MovementCategoryRecord>.Created(entry.Entity);
             }
+            
+            _log.LogError(nameof(MovementCategoryRepository), $"Could not Insert MovementCategory Entity {entity.GUID} - {entity.Name} - State : {entry.State} " );
 
-            return APIResult<MovementCategoryRecord>.Problem("Not inserted");
+            return APIResult<MovementCategoryRecord>.Problem($"Not inserted - State : {entry.State}");
         }
         catch (Exception e)
         {
