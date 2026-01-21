@@ -1,9 +1,10 @@
-﻿using GainsLab.Application.Results;
+﻿using GainsLab.Application.Interfaces.DataManagement;
+using GainsLab.Application.Results;
 ﻿using GainsLab.Contracts.Dtos.GetDto;
 
 namespace GainsLab.Infrastructure.Caching.QueryCache;
 
-public sealed class MuscleQueryCache
+public sealed class MuscleQueryCache : ICache
 {
     private readonly object _lock = new();
     private Task<Result<IReadOnlyList<MuscleGetDTO>>>? _task;

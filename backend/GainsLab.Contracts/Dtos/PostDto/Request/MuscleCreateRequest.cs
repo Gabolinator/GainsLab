@@ -8,3 +8,8 @@ public sealed record MuscleCreateRequest(
 public sealed record MuscleCombineCreateRequest(
     MuscleCreateRequest Muscle,
     DescriptorCreateRequest? Descriptor);
+
+
+
+
+

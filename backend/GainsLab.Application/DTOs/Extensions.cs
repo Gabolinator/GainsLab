@@ -198,6 +198,56 @@ public static class EquipmentOutcomeExtensions
 
 #region Create
 
+#region Muscle
+
+public static class MuscleOutcomeExtensions
+{
+    public static MessagesContainer GetOutcomeMessages (this MuscleCreateCombineOutcome equipmentUpdate,
+        MessagesContainer? messages =null)
+    {
+        messages ??= new MessagesContainer();
+
+        messages.Append(equipmentUpdate.Muscle.GetOutcomeMessages());
+        messages.Append(equipmentUpdate.Descriptor.GetOutcomeMessages());
+        
+        return  messages;
+       
+    }
+    
+
+    public static MessagesContainer GetOutcomeMessages (this MuscleCreateOutcome? muscle)
+    {
+      
+        var messages = new MessagesContainer();
+        
+        if (muscle == null)
+        {
+            messages.AddError($"Failed to Update Muscle");
+        }
+
+        
+        else  switch (muscle.Outcome)
+        {
+            case CreateOutcome.AlreadyExist or CreateOutcome.Canceled:
+                messages.AddInfo($"Muscle {muscle.CreatedMuscle!.Name} Not Updated");
+                break;
+            case CreateOutcome.Created:
+                messages.AddInfo($"Muscle Updated to {muscle.CreatedMuscle!.Name}");
+                break;
+            case CreateOutcome.Failed:
+                messages.AddError($"Failed to Update Muscle");
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+        
+        return messages;
+    }
+
+}
+
+#endregion
+
 #region Category
 
 public static class MovementCategoryOutcomeExtensions

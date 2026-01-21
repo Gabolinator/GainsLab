@@ -1,6 +1,10 @@
 ﻿
-@rendermode @(new InteractiveServerRenderMode(prerender: false))
+@rendermode InteractiveServer
+@using GainsLab.Application.Results
+@using GainsLab.Contracts
+@using GainsLab.Contracts.Dtos.Delete.Outcome
 @using GainsLab.Contracts.Dtos.GetDto
+@using GainsLab.Contracts.Dtos.ID
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Caching.Registry
 @using GainsLab.WebLayer.Model
@@ -42,23 +46,31 @@
             </tr>
             </thead>
             <tbody>
+            
+            @{
+                var index = 1;
+            }
+            
             @foreach (var eq in _muscles)
             {
 
+
+
                 <tr>
-                    <MuscleTableLine Index="i"
-                                               Name="@eq.Name"
-                                               Description="@GetDescription(eq)"
-                                               BodySection="@eq.BodySection.ToString()"
-                                               Antagonist="@GetAntagonists(eq.Antagonists).ToList()"
-                                               AntagonistOf="@GetAntagonistOf(eq)"
-                                               UpdatedAtUtc="@eq.UpdatedAtUtc.ToString()"
-                                               EditLink="@GetEditLink(eq)"
-                                               DeleteRequested="DeleteMuscleAsync">
+                    <MuscleTableLine Index="index"
+                                     Id="@eq.Id"
+                                     Name="@eq.Name"
+                                     Description="@GetDescription(eq)"
+                                     BodySection="@eq.BodySection.ToString()"
+                                     Antagonist="@GetAntagonists(eq.Antagonists).ToList()"
+                                     AntagonistOf="@GetAntagonistOf(eq)"
+                                     UpdatedAtUtc="@eq.UpdatedAtUtc.ToString()"
+                                     EditLink="@GetEditLink(eq)"
+                                     DeleteRequested="DeleteMuscleAsync">
                     </MuscleTableLine>
 
                 </tr>
-                i++;
+                index++;
             }
             </tbody>
         </table>
@@ -75,13 +87,13 @@
     [Inject] private IToast Toast { get; set; } = default!;
     [Inject] private IConfirmDialog ConfirmDialog { get; set; } = default!;
     
-    private int i =1;
+    
     private bool _error = false;
     private string? _errorMessage = null;
 
     protected override Task OnInitializedAsync()
     {
-        Logger.Log("HomePage", $"Getting all equipments");
+        Logger.Log("HomePage", $"Getting all Muscle");
         
         base.OnInitializedAsync();
 
@@ -134,64 +146,60 @@
     private Link? GetEditLink(MuscleGetDTO eq) => new Link { Text = $" Edit: {eq.Name}", Page = $@"muscles/{eq.Id}" };
 
     
-    private async Task DeleteMuscleAsync(Guid equipmentId)
+    private async Task DeleteMuscleAsync(Guid MuscleId)
     {
 
-        Logger.Log(nameof(MuscleDisplayComponent), $"Deleting equipment {equipmentId}- not implemented");
-
-        return;
-        // if (_categories is null)
-        // {
-        //     Toast.Error("No Equipments Found");
-        //     return;
-        // }
-        // var eq = _categories.FirstOrDefault(e => e.Id == equipmentId);
-        // if (eq == null)
-        // {
-        //     Toast.Error($"No Equipment Found with id {equipmentId}");
-        //     return;
-        // }
-        //
-        // var ok = await ConfirmDialog.ShowAsync(
-        //     new ConfirmRequest(
-        //         "Delete Item", 
-        //         $"Are You sure you want to delete Equipment '{eq.Name}' ? It can't be undone",
-        //         "Delete", 
-        //         "Cancel",
-        //         true));
-        //
-        // Logger.Log(nameof(MovementCategoryDisplayComponent), $"Confirmation {ok}");
-        //
-        // if (!ok)
-        // {
-        //     Toast.Error($"Delete {eq.Name} Cancelled");
-        //     return;
-        // }
-        //
-        //
-        // Result<MovementCategoryDeleteOutcome> result = await Repo.DeleteCategoryAsync(new MovementCategoryEntityId(equipmentId));
-        // if (!result.Success || result.Value is not { Outcome: DeleteOutcome.Deleted })
-        // {
-        //     _error = true;
-        //     _errorMessage = $"Unable to delete equipment {equipmentId}: {result.GetErrorMessage()}";
-        //     Logger.LogError(nameof(MovementCategoryDisplayComponent), _errorMessage);
-        //     Toast.Error(_errorMessage);
-        //     return;
-        // }
-        //
-        // _error = false;
-        // _errorMessage = null;
-        //
-        //
-        //
-        //
-        //
-        //
-        // var success = $"Deleted equipment {equipmentId}";
-        // Logger.Log(nameof(MovementCategoryDisplayComponent), success);
-        // Toast.Success(success);
-        //
-        // _categories = _categories.Where(e => e.Id != equipmentId).ToArray();
+        Logger.Log(nameof(MuscleDisplayComponent), $"Deleting Muscle {MuscleId}");
+        
+        if (_muscles is null)
+        {
+            Toast.Error("No Muscle Found");
+            return;
+        }
+        var eq = _muscles.FirstOrDefault(e => e.Id == MuscleId);
+        if (eq == null)
+        {
+            Toast.Error($"No Muscle Found with id {MuscleId}");
+            return;
+        }
+        
+        var ok = await ConfirmDialog.ShowAsync(
+            new ConfirmRequest(
+                "Delete Item", 
+                $"Are You sure you want to delete Muscle '{eq.Name}' ? It can't be undone",
+                "Delete", 
+                "Cancel",
+                true));
+        
+        Logger.Log(nameof(MuscleDisplayComponent), $"Confirmation {ok}");
+        
+        if (!ok)
+        {
+            Toast.Error($"Delete {eq.Name} Cancelled");
+            return;
+        }
+        
+        
+        Result<MuscleDeleteOutcome> result = await Repo.DeleteMuscleAsync(new MuscleEntityId(MuscleId));
+        if (!result.Success || result.Value is not { Outcome : DeleteOutcome.Deleted })
+        {
+            _error = true;
+            _errorMessage = $"Unable to delete Muscle {MuscleId}: {result.GetErrorMessage()}";
+            Logger.LogError(nameof(MuscleDisplayComponent), _errorMessage);
+            Toast.Error(_errorMessage);
+            return;
+        }
+        
+        _error = false;
+        _errorMessage = null;
+        
+        
+        
+        var success = $"Deleted Muscle {MuscleId}";
+        Logger.Log(nameof(MuscleDisplayComponent), success);
+        Toast.Success(success);
+        
+        _muscles = _muscles.Where(e => e.Id != MuscleId).ToArray();
     }
 
     

@@ -43,8 +43,7 @@ public class MovementCategoryRepository : IMovementCategoryRepository
        
        try
        {
-           var allCategories = await _db.MovementCategories
-               .AsNoTracking().ToListAsync(ct);
+        
            
            var entry = await _db.MovementCategories
                .AsNoTracking()

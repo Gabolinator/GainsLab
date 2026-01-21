@@ -111,47 +111,43 @@ public sealed class MuscleRegistry
         MuscleUpdateRequest request,
         DescriptorUpdateRequest? descriptorRequest)
     {
-        // var result = await _gateway.UpdateMuscleAsync(request, descriptorRequest, _cache);
-        // if (result.Success)
-        // {
-        //     Invalidate();
-        // }
-        //
-        // return result;
+        var result = await _gateway.UpdateMuscleAsync(request, descriptorRequest, _cache);
+        if (result.Success)
+        {
+            Invalidate();
+        }
         
-        return Result<MuscleUpdateCombinedOutcome>.NotImplemented(nameof(UpdateMuscleAsync));
+        return result;
     }
 
     public async Task<Result<MuscleCreateCombineOutcome>> CreateMuscleAsync(
         MuscleCombineCreateRequest request)
     {
-        // var result = await _gateway.CreateMuscleAsync(request, _cache);
-        // if (result.Success)
-        // {
-        //     Invalidate();
-        // }
-        //
-        // return result;
-
-        return Result<MuscleCreateCombineOutcome>.NotImplemented(nameof(CreateMuscleAsync));
+        var result = await _gateway.CreateMuscleAsync(request, _cache);
+        if (result.Success)
+        {
+            Invalidate();
+        }
+        
+        return result;
+        
     }
 
     public async Task<Result<MuscleDeleteOutcome>> DeleteMuscleAsync(
         MuscleEntityId movementCategoryEntityId)
     {
-        // var result = await _gateway.DeleteMuscleAsync(movementCategoryEntityId, _cache);
-        // if (result.Success)
-        // {
-        //     Invalidate();
-        //     if (movementCategoryEntityId.Id.HasValue)
-        //     {
-        //         Muscles.Remove(movementCategoryEntityId.Id.Value);
-        //     }
-        // }
-        //
-        // return result;
+        var result = await _gateway.DeleteMuscleAsync(movementCategoryEntityId, _cache);
+        if (result.Success)
+        {
+            Invalidate();
+            if (movementCategoryEntityId.Id.HasValue)
+            {
+                Muscles.Remove(movementCategoryEntityId.Id.Value);
+            }
+        }
         
-        return Result<MuscleDeleteOutcome>.NotImplemented(nameof(DeleteMuscleAsync));
+        return result;
+        
     }
     
 }

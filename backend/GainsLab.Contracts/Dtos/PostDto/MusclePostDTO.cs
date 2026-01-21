@@ -32,3 +32,27 @@ public record MusclePostDTO
 
     public string? CreatedBy { get; init; }
 }
+
+public static class MusclePostDTOExtensions
+{
+    public static string Print(this MusclePostDTO entity)
+    {
+        if (entity is null)
+        {
+            return "MusclePostDTO <null>";
+        }
+
+        var antagonists = entity.AntagonistIds is { Count: > 0 }
+            ? string.Join(", ", entity.AntagonistIds)
+            : "none";
+
+        var descriptor = entity.Descriptor is null
+            ? "null"
+            : $"{{ Id: {entity.Descriptor.Id}, DescriptionContent: \"{entity.Descriptor.DescriptionContent}\", Notes: \"{entity.Descriptor.Notes ?? "null"}\", Tags: [{(entity.Descriptor.Tags is { Count: > 0 } tags ? string.Join(", ", tags) : "none")}], Authority: {entity.Descriptor.Authority}, CreatedBy: {entity.Descriptor.CreatedBy ?? "null"} }}";
+
+        return
+            $"MusclePostDTO {{ Id: {entity.Id}, Name: \"{entity.Name}\", BodySection  {entity.BodySection} Antagonists: [{antagonists}], Descriptor: {descriptor}, Authority: {entity.Authority}, CreatedBy: {entity.CreatedBy ?? "null"} }}";
+
+    }
+}
+

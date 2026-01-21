@@ -363,7 +363,7 @@ public class GainLabSQLDBContext : DbContext
             m.Property(x => x.BodySection)
                 .HasColumnName("body_section")
                 .HasConversion<int>()
-                .HasDefaultValue(eBodySection.undefined);
+                .ValueGeneratedNever();
 
             m.HasOne(x => x.Descriptor)
                 .WithMany()

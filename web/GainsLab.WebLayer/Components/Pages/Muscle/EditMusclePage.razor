@@ -114,10 +114,6 @@
         Messages ??= new MessagesContainer();
         Messages.ClearAll();
         
-        Messages.AddWarning("Delete not implemented");
-        Toast.Error($"Delete not implemented");
-        return;
-
      
         if (Muscle == null || Muscle.Id == Guid.Empty)
         {
@@ -125,7 +121,7 @@
             Toast.Error($"Could not delete Muscle : Invalid Muscle");
             return;
         }
-
+        
         var ok = await ConfirmDialog.ShowAsync(
             new ConfirmRequest(
                 "Delete Item",
@@ -133,30 +129,30 @@
                 "Delete",
                 "Cancel",
                 true));
-
+        
         if (!ok)
         {
             Toast.Error($"Delete {Muscle.Name} Cancelled");
             return;
         }
-
-
+        
+        
         Result<MuscleDeleteOutcome> outcome = await Repo.DeleteMuscleAsync(new MuscleEntityId(Muscle.Id));
         if (!outcome.Success || outcome.Value is not { Outcome: DeleteOutcome.Deleted })
         {
-
+        
             Messages.Append(outcome.Messages);
             Toast.Error($"Could not delete Muscle : {Messages.ToString(MessageType.Error)}");
             return;
         }
-
+        
         var message = $"Muscle {outcome.Value.Id} Deleted";
-
+        
         Messages.AddInfo(message);
         Toast.Success(message);
         NavManager.NavigateTo("Muscles");
-
-
+        
+        
 
 
     }
@@ -168,7 +164,7 @@
 
     private void Update(MuscleFormDTO obj)
     {
-      Toast.Warning("Not Implemented");
+      Toast.Warning("Update Not Implemented");
     }
 
 }

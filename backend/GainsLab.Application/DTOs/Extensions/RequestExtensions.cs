@@ -93,3 +93,34 @@ public static class DescriptorCreateRequestExtension
         return Result.SuccessResult();
       }
 }
+
+
+public static class MuscleCreateRequestExtension
+{
+
+    public static  Result IsCreateRequestValid(this MuscleCreateRequest? request)
+    {
+        var messages = new MessagesContainer();
+        
+        if (request == null)
+        {
+            var message = "Request is null";
+            messages.AddError(message);
+            return Result.Failure(messages);
+        }
+        if (request.Muscle == null)
+        {
+            var message ="MusclePostDTO is null";
+            messages.AddError(message);
+            return Result.Failure(messages);
+        }
+        if (request.CreateRequest == CreateRequest.DontCreate)
+        {
+            var message ="Labeled as DontCreate";
+            messages.AddError(message);
+            return Result.Failure(messages);
+        }
+
+        return Result.SuccessResult();
+    }
+}

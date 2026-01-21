@@ -1,4 +1,5 @@
-﻿@using GainsLab.WebLayer.Model
+﻿@using GainsLab.Domain.Interfaces
+@using GainsLab.WebLayer.Model
 @rendermode InteractiveServer
 
 <td>@Index</td>
@@ -27,6 +28,7 @@
     [Parameter] public Link? EditLink { get; set; }
     [Parameter] public Guid Id { get; set; } = Guid.Empty;
     [Parameter] public EventCallback<Guid> DeleteRequested { get; set; }
+    [Inject] public ILogger? Logger { get; set; } 
 
     private string FormatList(List<string> list)
     {
@@ -38,6 +40,7 @@
     {
         if (!DeleteRequested.HasDelegate || Id == Guid.Empty)
         {
+            Logger?.LogWarning(nameof(MuscleTableLine), $"Delete Returned for {Id} : has {DeleteRequested.HasDelegate}");
             return;
         }
 

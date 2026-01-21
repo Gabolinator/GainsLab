@@ -5,6 +5,7 @@
 @using GainsLab.Domain
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Utilities
+@using GainsLab.WebLayer.Model
 @using GainsLab.WebLayer.Model.Dropdown
 @using GainsLab.WebLayer.Model.Dto.Descriptor
 @using GainsLab.WebLayer.Model.Dto.Muscle
@@ -47,7 +48,9 @@
         <p>  @GetAntagonistText()   </p>
     </div>
     @if(OtherOptionsAvailable())
-    { <button class="btn btn-primary" @onclick="AddAntagonist" >@AddAntagonistText</button>}
+    { <button type="button" class="btn btn-primary" @onclick="AddAntagonist">
+            @AddAntagonistText
+        </button>}
    
     
     <div class="mb-2">
@@ -60,10 +63,11 @@
                                        Value="@row.Selected"
                                        ValueChanged="(v) => OnSelectedChanged(row.Id, v)" />
 
-                    <button class="btn btn-outline-danger"
+                    <button type="button" class="btn btn-outline-danger"
                             @onclick="() => RemoveAntagonist(row.Id)">
                         Remove
                     </button>
+                    
                 </div>
             </div>
         }
@@ -190,7 +194,7 @@
     }
     
     public MessagesContainer? Messages { get; set; } = new MessagesContainer();
-    public DescriptorFormDTO EditDescriptor { get; set; } = new();
+    public DescriptorFormDTO EditDescriptor { get; set; }
     
     public string SelectedBodySection { get => SelectedBodySectionEnum.ToString();  set => OnBodySectionChanged(value); }
     private string _selectedBodySection;
@@ -212,6 +216,8 @@
     private string? _normalizedOriginalName;
     private string _originalDescriptorContent;
     private bool _seededAntagonists;
+    private eBodySection _originalBodySection = eBodySection.undefined;
+    private List<MuscleRefDTO>? _originalAntagonists;
 
 
     private Task OnNameChanged(string value)
@@ -272,6 +278,8 @@
             EditDescriptor = Model.Descriptor;
             _normalizedOriginalName = Normalize(Model!.Name);
             _originalDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
+            _originalBodySection = Model.BodySection;
+            _originalAntagonists = Model.Antagonists;
         }
 
         if (!_seededAntagonists)
@@ -433,9 +441,124 @@
     
     private async Task HandleSubmit()
     {
-        await OnSubmit.InvokeAsync(Model)!;
+        Logger.Log(nameof(HandleSubmit), "Submiting.");
+        Messages ??= new MessagesContainer();
+        Messages.ClearAll();
+        
+        if (!ValidateModel(out MessagesContainer messages))
+        {
+            Logger.LogWarning(nameof(HandleSubmit), "Model not valid.");
+            Messages.Append(messages);
+            await OnMessages.InvokeAsync(Messages);
+            return;
+        }
+
+        Messages.Append(messages);
+        ConstructModel();
+        
+        await OnMessages.InvokeAsync(Messages);
+        await OnSubmit.InvokeAsync(Model);
     }
 
+      private bool ValidateModel(out MessagesContainer messages)
+    {
+        messages = new MessagesContainer();
+        var currentDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
+        
+        bool descriptionChanged = false;
+        
+        if (string.Equals(currentDescriptorContent, _originalDescriptorContent, StringComparison.InvariantCultureIgnoreCase))
+        {
+            messages.AddWarning($"Muscle {Model!.Name} description content did not change");
+            EditDescriptor.ApplyRequest = Request.DontApplyRequest;
+        }
+        else
+        {
+            EditDescriptor.ApplyRequest = Request.ApplyRequest;
+            descriptionChanged = true;
+        }
+        
+        //todo check if changed
+        bool anythingChangedInCategory = false;
+
+        if (!_normalizedOriginalName.Equals(Normalize(Model.Name), StringComparison.InvariantCultureIgnoreCase))
+        {
+            anythingChangedInCategory = true;
+            messages.AddInfo($"Changed Name to {Model.Name}");
+        }
+        else
+        {
+            messages.AddWarning($"Name Did not change");
+        }
+
+        if (_originalBodySection != SelectedBodySectionEnum)
+        {
+            anythingChangedInCategory = true;
+            messages.AddInfo($"Changed Body Section to {SelectedBodySectionEnum}");
+        }
+        else
+        {
+            messages.AddWarning($"BodySection Did not change");
+        }
+        
+        
+        if (AsAntagonistChanged(_originalAntagonists, SelectedAntagonistsRef))
+        {
+            anythingChangedInCategory = true;
+            messages.AddInfo($"Changed Antagonists to {SelectedAntagonistsRef}");
+        }
+        else
+        {
+            messages.AddWarning($"Antagonists Did not change");
+        }
+
+        
+        
+        Model.ApplyRequest = anythingChangedInCategory ? Request.ApplyRequest : Request.DontApplyRequest;
+        var nothingChanged = !anythingChangedInCategory && !descriptionChanged;
+        if(nothingChanged) messages.AddError("Wont Update : Nothing Changed in Category");
+        return  anythingChangedInCategory || descriptionChanged ;
+    }
+
+    private bool AsAntagonistChanged(List<MuscleRefDTO>? originalAntagonists, HashSet<MuscleRefDTO>? selectedAntagonistsRef)
+    {
+        if ((originalAntagonists == null || originalAntagonists.Count == 0) &&
+            (selectedAntagonistsRef == null || selectedAntagonistsRef.Count == 0))
+        {
+            return false;
+        }
+
+        if (originalAntagonists == null || selectedAntagonistsRef == null)
+        {
+            return true;
+        }
+
+        if (originalAntagonists.Count != selectedAntagonistsRef.Count)
+        {
+            return true;
+        }
+
+        var selectedIds = selectedAntagonistsRef.Select(a => a.Id).ToHashSet();
+        foreach (var antagonist in originalAntagonists)
+        {
+            if (!selectedIds.Contains(antagonist.Id))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void ConstructModel()
+    {
+        Model.Descriptor = EditDescriptor;
+        Logger.Log(nameof(MuscleFormComponent), $"Descriptor : {Model.Descriptor.DescriptionContent}");
+        Model.BodySection = SelectedBodySectionEnum;
+        Model.Antagonists = SelectedAntagonistsRef?.ToList();
+    }
+
+    
     private bool IsValid()
     {
         //todo

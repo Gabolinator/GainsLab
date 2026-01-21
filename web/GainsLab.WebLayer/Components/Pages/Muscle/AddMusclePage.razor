@@ -3,23 +3,23 @@
 
 @rendermode InteractiveServer
 
+@using GainsLab.Application.DTOs
 @using GainsLab.Application.Results
-@using GainsLab.Contracts
-@using GainsLab.Contracts.Dtos.Delete.Outcome
 @using GainsLab.Contracts.Dtos.GetDto
-@using GainsLab.Contracts.Dtos.ID
+@using GainsLab.Contracts.Dtos.PostDto.Outcome
 @using GainsLab.Domain
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Caching.Registry
 @using GainsLab.WebLayer.Components.Control
 @using GainsLab.WebLayer.Components.Control.Muscle
+@using GainsLab.WebLayer.Model.Dto.Descriptor
 @using GainsLab.WebLayer.Model.Dto.Muscle
 @using GainsLab.WebLayer.Model.Notification
 @using GainsLab.WebLayer.Model.Notification.Confirmation
 @using ILogger = Domain.Interfaces.ILogger
 
 @implements IDisposable
-
+@inject NavigationManager NavManager;
 
 <p>
     @if (CreateMuscle != null)
@@ -81,7 +81,7 @@
         _muscles = eqs.Value!;
         
         CreateMuscle = new();
-        CreateMuscle.Descriptor = new();
+        CreateMuscle.Descriptor =new DescriptorCreateDTO();
         CreateMuscle.BodySection = eBodySection.undefined;
         CreateMuscle.Name = "New Muscle";
     }
@@ -96,9 +96,64 @@
         Messages = obj;
     }
 
-    private void Create(MuscleFormDTO obj)
+    private async Task Create(MuscleFormDTO form)
     {
-      Toast.Warning("Not Implemented");
+        
+     Messages ??= new MessagesContainer();
+     Messages.ClearAll();
+
+     if (form is not MuscleCreateDTO createForm)
+     {
+         Toast.Error("Form type mismatch");
+         return;
+     }
+
+     if (createForm.Id == Guid.Empty)
+     {
+         createForm.Id = Guid.NewGuid();
+     }
+
+     
+     
+     var muscleValid = createForm.IsValid(Logger);
+     if (!muscleValid.Success)
+     {
+         Messages.AddError("Muscle invalid");
+         Messages.Append(muscleValid.Messages);
+         Toast.FromMessages(Messages);
+         return;
+     }
+
+     Logger.Log(nameof(AddMusclePage),  createForm.Descriptor.DescriptionContent);
+
+     var request = createForm.ToCombineCreateRequest();
+     Logger.Log(nameof(AddMusclePage),  request.Print());
+        
+
+     Result<MuscleCreateCombineOutcome> outcome = await Repo.CreateMuscleAsync(request);
+     if (!outcome.Success || outcome.Value == null)
+     {
+         Messages.AddError("Could not create Muscle");
+         Messages.Append(outcome.GetMessages());
+         Toast.Error("Failed to Create Muscle");
+         Toast.FromMessages(Messages, null, ToastLevel.Error, ToastLevel.Warning);
+     }
+
+     else
+     {
+         Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
+         Toast.Success($"Muscle {outcome!.Value!.Muscle!.CreatedMuscle!.Name} successfully created!");
+         Repo.Invalidate();
+         DescriptorRegistry.Invalidate();
+         Toast.FromMessages(Messages, null, ToastLevel.Error, ToastLevel.Warning);
+         NavManager.NavigateTo("muscles");
+     }
+
+
+
     }
+    
+    
+    
 
 }
