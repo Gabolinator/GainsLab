@@ -45,15 +45,35 @@
     <div class="mb-2">
         <label>Antagonists </label>
         <p>  @GetAntagonistText()   </p>
-               
-                
+    </div>
+    @if(OtherOptionsAvailable())
+    { <button class="btn btn-primary" @onclick="AddAntagonist" >@AddAntagonistText</button>}
+   
+    
+    <div class="mb-2">
+        @foreach (var row in _antagonistRows)
+        {
+            var config = BuildConfigFor(row.Id);
+            <div @key="row.Id">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <DropdownComponent Config="config"
+                                       Value="@row.Selected"
+                                       ValueChanged="(v) => OnSelectedChanged(row.Id, v)" />
+
+                    <button class="btn btn-outline-danger"
+                            @onclick="() => RemoveAntagonist(row.Id)">
+                        Remove
+                    </button>
+                </div>
+            </div>
+        }
     </div>
     
     
     
     @if (IsValid())
     {
-        <a href=@BackAddress class="btn btn-primary" type="submit">@SubmitButtonText</a>
+        <button class="btn btn-primary" type="submit">@SubmitButtonText</button>
     }
     
    @if (DisplayBackButton)
@@ -67,7 +87,7 @@
 @code
 {
     
-    
+    private Guid? _lastModelId;
     [Inject] private ILogger Logger { get; set; } = default!;
     [Inject] private IClock Clock { get; set; } = default!;
     
@@ -78,25 +98,112 @@
     [Parameter] public bool DisplayBackButton { get; set; } = false; 
     [Parameter] public string BackButtonText { get; set; } = "Close";
     [Parameter] public string BackAddress { get; set; } = "/muscles";
-    [Parameter] public IReadOnlyList<string>? MuscleNames { get; set; } = default;
+    [Parameter] public IReadOnlyList<MuscleRefDTO>? Muscles { get; set; } = default;
     
     public DropdownConfig BodySectionDropdown { get; set; } = default!;
 
 
     [Parameter] public EventCallback<MessagesContainer> OnMessages { get; set; } = default;
     
+    
+    private List<AntagonistRow> _antagonistRows = new();
+    private int _nextId = 1;
+    
+   //all muscles - expect this muscle
+   private IReadOnlyList<string> _allOptions;
+
+    private void AddAntagonist()
+    {
+        _antagonistRows.Add(new AntagonistRow { Id = _nextId++ });
+    }
+    
+    private void RemoveAntagonist(int id)
+    {
+        Logger.Log(nameof(MuscleFormComponent), $"Trying to remove row with id {id} = rows {string.Join(",", _antagonistRows.Select(r=>r.Id) )}");
+        
+        var numRemoved = _antagonistRows.RemoveAll(r => r.Id == id);
+         Logger.Log(nameof(MuscleFormComponent), $"Remove {numRemoved} row with id {id}");
+
+         
+         
+        RebuildAntagonistsRefsList();
+    }
+
+    private void RebuildAntagonistsRefsList()
+    {
+        if (!_antagonistRows.Any() || Muscles == null || !Muscles.Any()) SelectedAntagonistsRef = new();
+
+        SelectedAntagonistsRef = _antagonistRows
+            .Select(
+                r => Muscles!
+                    .FirstOrDefault(
+                        m => string.Equals(m.Name, r.Selected, StringComparison.InvariantCultureIgnoreCase)))
+            .Where(m => m != null)
+            .Select(m=>m!)
+            .ToHashSet();
+    }
+
+    private void OnSelectedChanged(int id, string? value)
+    {
+        var row = _antagonistRows.First(r => r.Id == id);
+        row.Selected = value;
+        RebuildAntagonistsRefsList();
+    }
+
+    private DropdownConfig BuildConfigFor(int rowId)
+    {
+        List<DropdownItem> items = GetAvailableItems(rowId);
+        
+        return new DropdownConfig
+        {
+            Items = items,
+            Placeholder = "Select antagonist…",
+            CssClass = "form-select"
+        };
+    }
+
+    private List<DropdownItem> GetAvailableItems(int rowId)
+    {
+        // what other rows picked (exclude current row)
+        var taken = _antagonistRows
+            .Where(r => r.Id != rowId)
+            .Select(r => r.Selected)
+            .Where(v => !string.IsNullOrWhiteSpace(v))
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        // allow current row’s own selection to stay visible
+        var current = _antagonistRows.First(r => r.Id == rowId).Selected;
+
+       return _allOptions
+            .Where(opt => !taken.Contains(opt) || string.Equals(opt, current, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(opt => opt)
+            .Select(i=>new DropdownItem{Label = i, Value = i})
+            .ToList();
+
+        
+    }
+
+    private sealed class AntagonistRow
+    {
+        public int Id { get; set; }
+        public string? Selected { get; set; }
+    }
+    
     public MessagesContainer? Messages { get; set; } = new MessagesContainer();
     public DescriptorFormDTO EditDescriptor { get; set; } = new();
     
     public string SelectedBodySection { get => SelectedBodySectionEnum.ToString();  set => OnBodySectionChanged(value); }
     private string _selectedBodySection;
-    
+   
     private eBodySection SelectedBodySectionEnum { get; set; } = eBodySection.undefined;
     private HashSet<string> ExistingMuscleNames { get; set; } = new HashSet<string>();
 
     
     private HashSet<MuscleRefDTO>? SelectedAntagonistsRef { get; set; } = null;
- 
+    private string AddAntagonistText { get; set; } = "Add Antagonist";
+    public DropdownConfig? AntagonistDropdown { get; set; }
+   
+
 
     private EditContext? FormContext;
     private ValidationMessageStore? _validationMessages;
@@ -104,6 +211,7 @@
     private bool _isEditValid;
     private string? _normalizedOriginalName;
     private string _originalDescriptorContent;
+    private bool _seededAntagonists;
 
 
     private Task OnNameChanged(string value)
@@ -155,22 +263,55 @@
     {
         await base.OnParametersSetAsync();
         
-        EditDescriptor = Model.Descriptor;
-        SelectedBodySectionEnum = Model.BodySection;
-        SelectedAntagonistsRef = Model.Antagonists == null ? new HashSet<MuscleRefDTO>() : Model.Antagonists.ToHashSet();
+        if (_lastModelId != Model.Id)
+        {
+            _lastModelId = Model.Id;
+            _seededAntagonists = false;
+            SelectedBodySectionEnum = Model.BodySection;
+            SelectedAntagonistsRef = Model.Antagonists == null ? new HashSet<MuscleRefDTO>() : Model.Antagonists.ToHashSet();
+            EditDescriptor = Model.Descriptor;
+            _normalizedOriginalName = Normalize(Model!.Name);
+            _originalDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
+        }
+
+        if (!_seededAntagonists)
+        {
+            Logger.Log(nameof(MuscleFormComponent), "Seeding Antagonist");
+            _antagonistRows.Clear();
+            _nextId = 1;
+            AddAntagonists(SelectedAntagonistsRef);
+            
+            _seededAntagonists = true;
+        }
         
         //create drowdown options 
         List<DropdownItem> bodySectionOptions = GetBodySections();
         
         BodySectionDropdown = new DropdownConfig { Items = bodySectionOptions}; //Placeholder =  "Select BodySection..." , InitialSelectedLabel = m.BodySection.ToString()
         
-        _normalizedOriginalName = Normalize(Model!.Name);
-        _originalDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
-
+       
+        _allOptions = Muscles != null ?Muscles.Where(m => m.Id != Model.Id).Select(m=>m.Name).ToList() : new List<string>();
+        
         
         BuildEditContext();
 
         
+    }
+
+    private void AddAntagonists(HashSet<MuscleRefDTO>? selectedAntagonistsRef)
+    {
+      if(selectedAntagonistsRef == null || selectedAntagonistsRef.Count == 0) return;
+      
+      foreach (var muscleRef in selectedAntagonistsRef)
+      {
+          
+          if (string.IsNullOrEmpty(muscleRef.Name)) continue;
+          
+          _antagonistRows.Add(new AntagonistRow{Id = _nextId, Selected = muscleRef.Name});
+          _nextId++;
+
+      }
+      
     }
 
     private List<DropdownItem> GetBodySections()
@@ -299,5 +440,15 @@
     {
         //todo
         return true;
+    }
+
+  
+
+    private bool OtherOptionsAvailable()
+    {
+        if (!_allOptions.Any()) return false;
+        if (!_antagonistRows.Any()) return true;
+
+        return _allOptions.Count != _antagonistRows.Count;
     }
 }

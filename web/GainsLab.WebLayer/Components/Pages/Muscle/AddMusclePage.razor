@@ -31,7 +31,7 @@
                              DisplayBackButton=@true
                              BackButtonText="Close"
                              SubmitButtonText="Add"
-                             MuscleNames=@GetMuscleNames()
+                             Muscles=@GetMusclesRefs()
                              OnSubmit="Create"></MuscleFormComponent>
     }
     <br/>
@@ -57,9 +57,9 @@
     public MessagesContainer? Messages { get; set; } = new MessagesContainer();
 
    
-    public IReadOnlyList<string>? GetMuscleNames()
+    public IReadOnlyList<MuscleRefDTO>? GetMusclesRefs()
     {
-        return _muscles.Select(m => m.Name).ToList();
+        return _muscles.Select(m => new MuscleRefDTO(m.Id, m.Name, m.LatinName)).ToList();
     }
 
     

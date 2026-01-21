@@ -30,7 +30,7 @@
                              DisplayBackButton=@true
                              BackButtonText="Close"
                              SubmitButtonText="Update"
-                             MuscleNames=@GetMuscleNames()
+                             Muscles=@GetMusclesRefs()
                              OnSubmit="Update"></MuscleFormComponent>
         
     }
@@ -98,7 +98,11 @@
         EditMuscle = Muscle!.FromGetDTO();
     }
 
-  
+    public IReadOnlyList<MuscleRefDTO>? GetMusclesRefs()
+    {
+        return _muscles.Select(m => new MuscleRefDTO(m.Id, m.Name, m.LatinName)).ToList();
+    }
+
     
     public void Dispose()
     {
