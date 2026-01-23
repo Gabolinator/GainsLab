@@ -101,23 +101,7 @@ public static class MovementCategoryUpdateExtension
             
         }
 
-        // if (baseCategoryRelations != null && HaveBaseCategoriesChanged(record.BaseCategoryLinks,baseCategoryRelations ))
-        // {
-        //     record.BaseCategoryLinks.Clear();
-        //     if (baseCategoryRelations != null)
-        //     {
-        //         foreach (var relation in baseCategoryRelations)
-        //         {
-        //             record.BaseCategoryLinks.Add(relation);
-        //         }
-        //     }
-        //     anyUpdate = true;
-        //     var existingBaseIds = record.BaseCategoryLinks.Select(link => link.ParentCategory?.GUID).Where(g => g.HasValue)
-        //         .Select(g => g!.Value).ToList();
-        //     logger?.Log(nameof(MovementCategoryUpdateExtension),
-        //         $"Base categories updated. New set: {(existingBaseIds.Any() ? string.Join(',', existingBaseIds) : "none")}");
-        // }
-        
+    
         if(!anyUpdate)
         {
             logger?.Log(nameof(MovementCategoryUpdateExtension),

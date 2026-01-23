@@ -467,6 +467,7 @@ public class MovementCategoryRepository : IMovementCategoryRepository
 
             if (payload.Descriptor != null)
             {
+                //not sure it make sense to make movement category depend on description
                 if (category.Descriptor == null)
                 {
                     _log.LogWarning(nameof(MovementCategoryRepository), $"No descriptor provided");

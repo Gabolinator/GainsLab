@@ -1,4 +1,4 @@
-﻿namespace GainsLab.Infrastructure.Utilities;
+﻿namespace GainsLab.Domain;
 
 public static class StringFormater
 {

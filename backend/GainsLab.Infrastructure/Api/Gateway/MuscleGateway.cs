@@ -75,7 +75,52 @@ public class MuscleGateway : IMuscleGateway
 
     public async Task<Result<MuscleUpdateCombinedOutcome>> UpdateMuscleAsync(MuscleUpdateRequest request, DescriptorUpdateRequest? descriptorUpdateRequest, ICache? cache)
     {
-      return Result<MuscleUpdateCombinedOutcome>.NotImplemented(nameof(UpdateMuscleAsync));
+        if(request.CorrelationId == Guid.Empty) return Result<MuscleUpdateCombinedOutcome>.Failure("Invalid correlation id");
+        
+        MessagesContainer message = new MessagesContainer();
+        DescriptorUpdateOutcome? descriptor = null;
+        
+        //start by trying to update description
+        if (descriptorUpdateRequest != null &&
+            descriptorUpdateRequest!.UpdateRequest == UpdateRequest.Update)
+        {
+            var descriptorOutcome = await _descriptorGateway.UpdateDescriptorAsync(descriptorUpdateRequest);
+            
+            if (!descriptorOutcome.Success || descriptorOutcome.Value == null ||
+                descriptorOutcome.Value.Outcome == UpdateOutcome.Failed)
+            {
+                _logger.LogWarning(nameof(MuscleGateway), $"Did not update descriptor {descriptorOutcome.GetMessages()}");
+                message.Append(descriptorOutcome.GetMessages());
+            }
+            
+            else 
+            {
+                descriptor = descriptorOutcome.Value!;
+            }
+        }
+        
+        if(descriptor == null) message.AddWarning("Did not update descriptor");
+        else _descriptorGateway.Invalidate();
+        
+        MuscleUpdateOutcome? category = null;
+        var categoryOutcome =  await _provider.UpdateMuscleAsync(request, default);
+        
+        if (!categoryOutcome.Success
+            || categoryOutcome.Value == null
+            || categoryOutcome.Value.Outcome == UpdateOutcome.Failed)
+        {
+            message.Append(categoryOutcome.GetMessages());
+        }
+        else category = categoryOutcome.Value!;
+        
+        if(category != null) cache?.Invalidate();
+        
+        return category == null && descriptor == null
+            ? Result<MuscleUpdateCombinedOutcome>.Failure(message)
+            : Result<MuscleUpdateCombinedOutcome>.SuccessResult(new MuscleUpdateCombinedOutcome(category, descriptor,
+                message));
+        
+  //    return Result<MuscleUpdateCombinedOutcome>.NotImplemented(nameof(UpdateMuscleAsync));
     }
 
     public async Task<Result<MuscleDeleteOutcome>> DeleteMuscleAsync(MuscleEntityId id, ICache? cache)
@@ -98,7 +143,7 @@ public class MuscleGateway : IMuscleGateway
         MessagesContainer message = new MessagesContainer();
 
      DescriptorCreateOutcome? descriptorCreateOutcome = null;
-     MuscleCreateOutcome? equipmentCreateOutcome = null;
+     MuscleCreateOutcome? MuscleCreateOutcome = null;
      var createDescriptorRequest = request.Descriptor;
      var createCategoryRequest = request.Muscle;
 
@@ -115,22 +160,22 @@ public class MuscleGateway : IMuscleGateway
      //valid
      if (createCategoryValidation.Success)
      {
-         Result<MuscleCreateOutcome> equipmentOutcome =
+         Result<MuscleCreateOutcome> MuscleOutcome =
              await _provider.CreateMuscleAsync(createCategoryRequest.Muscle!, default); //validated earlier
             
             
-         if (!equipmentOutcome.Success ||equipmentOutcome.Value == null ||
-             equipmentOutcome.Value.Outcome != CreateOutcome.Created)
+         if (!MuscleOutcome.Success ||MuscleOutcome.Value == null ||
+             MuscleOutcome.Value.Outcome != CreateOutcome.Created)
          {
              _logger.LogWarning(nameof(MuscleGateway),
-                 $"Did not create Muscle {equipmentOutcome.GetMessages()}");
-             message.Append(equipmentOutcome.GetMessages());
+                 $"Did not create Muscle {MuscleOutcome.GetMessages()}");
+             message.Append(MuscleOutcome.GetMessages());
          }
 
          else
          {
-             equipmentCreateOutcome = equipmentOutcome.Value!;
-             var createdDescriptor = equipmentCreateOutcome.CreatedMuscle?.Descriptor;
+             MuscleCreateOutcome = MuscleOutcome.Value!;
+             var createdDescriptor = MuscleCreateOutcome.CreatedMuscle?.Descriptor;
              descriptorCreateOutcome = createdDescriptor == null ? null : new DescriptorCreateOutcome(CreateOutcome.Created,createdDescriptor);
          }
 
@@ -145,9 +190,9 @@ public class MuscleGateway : IMuscleGateway
 
         
 
-     return equipmentCreateOutcome == null && descriptorCreateOutcome == null
+     return MuscleCreateOutcome == null && descriptorCreateOutcome == null
          ? Result<MuscleCreateCombineOutcome>.Failure(message)
-         : Result<MuscleCreateCombineOutcome>.SuccessResult(new MuscleCreateCombineOutcome(equipmentCreateOutcome, descriptorCreateOutcome,
+         : Result<MuscleCreateCombineOutcome>.SuccessResult(new MuscleCreateCombineOutcome(MuscleCreateOutcome, descriptorCreateOutcome,
              message));
      
     }

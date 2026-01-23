@@ -173,7 +173,7 @@ public class MovementCategoryGateway : IMovementCategoryGateway
             if (!descriptorOutcome.Success || descriptorOutcome.Value == null ||
                 descriptorOutcome.Value.Outcome == UpdateOutcome.Failed)
             {
-                _logger.LogWarning(nameof(EquipmentGateway), $"Did not update descriptor {descriptorOutcome.GetMessages()}");
+                _logger.LogWarning(nameof(MovementCategoryGateway), $"Did not update descriptor {descriptorOutcome.GetMessages()}");
                 message.Append(descriptorOutcome.GetMessages());
             }
             
@@ -227,7 +227,7 @@ public class MovementCategoryGateway : IMovementCategoryGateway
      MessagesContainer message = new MessagesContainer();
 
      DescriptorCreateOutcome? descriptorCreateOutcome = null;
-     MovementCategoryCreateOutcome? equipmentCreateOutcome = null;
+     MovementCategoryCreateOutcome? MovementCategoryCreateOutcome = null;
      var createDescriptorRequest = request.Descriptor;
      var createCategoryRequest = request.MovementCategory;
 
@@ -244,22 +244,22 @@ public class MovementCategoryGateway : IMovementCategoryGateway
      //valid
      if (createCategoryValidation.Success)
      {
-         Result<MovementCategoryCreateOutcome> equipmentOutcome =
+         Result<MovementCategoryCreateOutcome> MovementCategoryOutcome =
              await _provider.CreateMovementCategoryAsync(createCategoryRequest.MovementCategory!, default); //validated earlier
             
             
-         if (!equipmentOutcome.Success ||equipmentOutcome.Value == null ||
-             equipmentOutcome.Value.Outcome != CreateOutcome.Created)
+         if (!MovementCategoryOutcome.Success ||MovementCategoryOutcome.Value == null ||
+             MovementCategoryOutcome.Value.Outcome != CreateOutcome.Created)
          {
              _logger.LogWarning(nameof(MovementCategoryGateway),
-                 $"Did not create MovementCategory {equipmentOutcome.GetMessages()}");
-             message.Append(equipmentOutcome.GetMessages());
+                 $"Did not create MovementCategory {MovementCategoryOutcome.GetMessages()}");
+             message.Append(MovementCategoryOutcome.GetMessages());
          }
 
          else
          {
-             equipmentCreateOutcome = equipmentOutcome.Value!;
-             var createdDescriptor = equipmentCreateOutcome.CreatedMovementCategory?.Descriptor;
+             MovementCategoryCreateOutcome = MovementCategoryOutcome.Value!;
+             var createdDescriptor = MovementCategoryCreateOutcome.CreatedMovementCategory?.Descriptor;
              descriptorCreateOutcome = createdDescriptor == null ? null : new DescriptorCreateOutcome(CreateOutcome.Created,createdDescriptor);
          }
 
@@ -274,9 +274,9 @@ public class MovementCategoryGateway : IMovementCategoryGateway
 
         
 
-     return equipmentCreateOutcome == null && descriptorCreateOutcome == null
+     return MovementCategoryCreateOutcome == null && descriptorCreateOutcome == null
          ? Result<MovementCategoryCreateCombineOutcome>.Failure(message)
-         : Result<MovementCategoryCreateCombineOutcome>.SuccessResult(new MovementCategoryCreateCombineOutcome(equipmentCreateOutcome, descriptorCreateOutcome,
+         : Result<MovementCategoryCreateCombineOutcome>.SuccessResult(new MovementCategoryCreateCombineOutcome(MovementCategoryCreateOutcome, descriptorCreateOutcome,
              message));
 
      

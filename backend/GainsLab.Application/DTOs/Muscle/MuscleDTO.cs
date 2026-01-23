@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GainsLab.Application.DTOs.Description;
+using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Domain;
+using GainsLab.Domain.Interfaces;
 
 namespace GainsLab.Application.DTOs.Muscle;
 
@@ -40,4 +42,9 @@ public class MuscleRecord : BaseRecord
     /// Convenience accessor used by domain mappers.
     /// </summary>
     public IEnumerable<Guid> AntagonistGUIDs => Antagonists.Select(link => link.Antagonist.GUID).Distinct();
+
+   
 }
+
+
+

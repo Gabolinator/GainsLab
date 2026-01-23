@@ -1,12 +1,15 @@
 ﻿using GainsLab.Application.DomainMappers;
+using GainsLab.Application.DTOs.Extensions;
 using GainsLab.Application.DTOs.Muscle;
 using GainsLab.Application.Interfaces.DataManagement.Repository;
 using GainsLab.Application.Results.APIResults;
+using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Domain.Comparison;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
 using Microsoft.EntityFrameworkCore;
@@ -175,13 +178,210 @@ public class MuscleRepository : IMuscleRepository
 
     public async Task<APIResult<MuscleUpdateOutcome>> PatchAsync(Guid id, MuscleUpdateDTO payload, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        if(id == Guid.Empty) return APIResult<MuscleUpdateOutcome>.BadRequest("Payload ID cannot be empty");
+
+        try
+        {
+            var existing = _db.Muscles
+                .Where(c=> !c.IsDeleted)
+                .Include(m=>m.Descriptor)
+                .Include(m=>m.Antagonists)
+                    .ThenInclude(link => link.Antagonist)
+                .FirstOrDefault(c => c.GUID == id);
+            
+            if(existing is null) return APIResult<MuscleUpdateOutcome>.NotFound($"Could not find existing muscle with id: {id}");
+
+           
+            // Deduplicate antagonist IDs and prevent accidental self-references.
+            var antagonistGuids = payload.AntagonistIds?
+                .Where(g => g != Guid.Empty && g != id)
+                .Distinct()
+                .ToList();
+            
+            var existingGuid =existing.AntagonistGUIDs?
+                .Where(g => g != Guid.Empty && g != id)
+                .Distinct()
+                .ToList();
+            
+           
+            bool antagonistChanged = !SequenceComparison.SetEqualWithDiff(
+                antagonistGuids,
+                existingGuid,
+                g => g,
+                out SetDifference<Guid> difference
+            );
+            
+            var antagonistToAdd= antagonistChanged ? difference.ToAdd.ToList() : new List<Guid>();
+            var antagonistToRemove  = antagonistChanged ? difference.ToRemove.ToList() : new List<Guid>();
+                
+
+            //handle the adding of new antagonist relations
+            if (antagonistToAdd.Any())
+            {
+                await AddNewAntagonistsRelations(existing, antagonistToAdd, ct);
+            }
+            else _log.Log(nameof(MuscleRepository),"No new Antagonists to add");
+            
+            //handle the removing of new antagonist relations
+            if (antagonistToRemove.Any())
+            {
+                await RemoveAntagonistsRelations(existing, antagonistToRemove, ct);
+            }
+            else _log.Log(nameof(MuscleRepository),"No Antagonists to remove");
+                
+            var muscleContentChanged = existing.TryUpdate(payload, _clock, _log) || antagonistChanged;
+            
+            var descriptorOutcomeState = payload.Descriptor == null ? UpdateOutcome.NotRequested : UpdateOutcome.NotUpdated;
+            var descriptorChanged = false;
+            DescriptorUpdateOutcome? descriptorOutcome = null;
+
+            if (payload.Descriptor != null)
+            {
+                //not sure it make sense to make movement category depend on description
+                if (existing.Descriptor == null)
+                {
+                    _log.LogWarning(nameof(MuscleRepository), $"No descriptor provided");
+
+                    return APIResult<MuscleUpdateOutcome>.Problem("Descriptor missing for movement category");
+                }
+
+                descriptorChanged = existing.Descriptor.TryUpdate(payload.Descriptor, _clock);
+                descriptorOutcomeState = descriptorChanged ? UpdateOutcome.Updated : UpdateOutcome.NotUpdated;
+                descriptorOutcome = new DescriptorUpdateOutcome(descriptorOutcomeState, existing.Descriptor.ToGetDTO());
+            }
+
+            if (!muscleContentChanged && !descriptorChanged)
+            {
+                return APIResult<MuscleUpdateOutcome>.NothingChanged("Nothing changed");
+            }
+
+            await _db.SaveChangesAsync(ct).ConfigureAwait(false);
+
+            var updatedRecord = await _db.Muscles
+                .AsNoTracking()
+                .Where(m => m.Id == existing.Id)
+                .Include(m => m.Descriptor)
+                .Include(m => m.Antagonists)
+                    .ThenInclude(link => link.Antagonist)
+                .FirstOrDefaultAsync(ct)
+                .ConfigureAwait(false);
+
+            var updatedState = updatedRecord?.ToGetDTO();
+            var outcome = new MuscleUpdateOutcome(
+                muscleContentChanged ? UpdateOutcome.Updated : UpdateOutcome.NotUpdated,
+                descriptorOutcomeState,
+                descriptorOutcome,
+                updatedState);
+
+            return APIResult<MuscleUpdateOutcome>.Updated(outcome);
+
+
+
+        }
+        
+        
+        catch (OperationCanceledException)
+        {
+            return APIResult<MuscleUpdateOutcome>.Exception("Operation was canceled");
+        }
+        catch (Exception e)
+        {
+            return APIResult<MuscleUpdateOutcome>.Exception(e.Message);
+        }
+
     }
+
+    private async Task RemoveAntagonistsRelations(MuscleRecord existing, List<Guid> antagonistToRemove, CancellationToken ct)
+    {
+        var toRemoveRecords = existing.Antagonists
+            .Where(link => link.Antagonist != null && antagonistToRemove.Contains(link.Antagonist.GUID))
+            .ToList();
+
+        if (toRemoveRecords.Count == 0)
+        {
+            var antagonistIds = await _db.Muscles
+                .Where(m => antagonistToRemove.Contains(m.GUID) && !m.IsDeleted)
+                .Select(m => m.Id)
+                .ToListAsync(ct)
+                .ConfigureAwait(false);
+
+            if (antagonistIds.Count > 0)
+            {
+                toRemoveRecords = await _db.MuscleAntagonists
+                    .Where(link => link.MuscleId == existing.Id && antagonistIds.Contains(link.AntagonistId))
+                    .ToListAsync(ct)
+                    .ConfigureAwait(false);
+            }
+        }
+
+        if (toRemoveRecords.Count > 0)
+        {
+            _db.MuscleAntagonists.RemoveRange(toRemoveRecords);
+            foreach (var relation in toRemoveRecords)
+            {
+                existing.Antagonists.Remove(relation);
+            }
+
+            _log.Log(nameof(MuscleRepository),
+                $"Removed {toRemoveRecords.Count} antagonist relations for {existing.GUID}");
+        }
+    }
+
+    private async Task AddNewAntagonistsRelations(
+        MuscleRecord existing, 
+        List<Guid> antagonistToAdd, 
+        CancellationToken ct)
+    {
+        var resolvedAntagonists = await _db.Muscles
+            .Where(m => antagonistToAdd.Contains(m.GUID) && !m.IsDeleted)
+            .Select(m => new { m.GUID, m.Id })
+            .ToListAsync(ct)
+            .ConfigureAwait(false);
+
+        var resolved = resolvedAntagonists.ToDictionary(x => x.GUID, x => x.Id);
+        var missing = antagonistToAdd.Where(g => !resolved.ContainsKey(g)).ToList();
+        if (missing.Count > 0)
+        {
+            _log.LogWarning(nameof(MuscleRepository),
+                $"Unable to resolve antagonists for {existing.GUID}: {string.Join(", ", missing)}");
+        }
+
+        var newRelations = new List<MuscleAntagonistRecord>();
+        foreach (var guid in antagonistToAdd)
+        {
+            if (!resolved.TryGetValue(guid, out var antagonistId))
+            {
+                continue;
+            }
+
+            newRelations.Add(new MuscleAntagonistRecord
+            {
+                MuscleId = existing.Id,
+                AntagonistId = antagonistId
+            });
+        }
+
+        if (newRelations.Count > 0)
+        {
+            await _db.MuscleAntagonists.AddRangeAsync(newRelations, ct).ConfigureAwait(false);
+            foreach (var relation in newRelations)
+            {
+                existing.Antagonists.Add(relation);
+            }
+
+            _log.Log(nameof(MuscleRepository),
+                $"Added {newRelations.Count} antagonist relations for {existing.GUID}");
+        }
+    }
+
 
     public async Task<APIResult<MuscleGetDTO>> DeleteAsync(Guid id, CancellationToken ct)
     {
       if(id == Guid.Empty) return APIResult<MuscleGetDTO>.BadRequest("Payload ID cannot be empty");
 
+      _log.Log(nameof(MuscleRepository),$"Trying to delete muscle with id {id})");
+
+      
       try
       {
             
@@ -189,6 +389,7 @@ public class MuscleRepository : IMuscleRepository
               .Where(c=>!c.IsDeleted)
               .Include(m=>m.Descriptor)
               .Include(m=>m.Antagonists)
+                  .ThenInclude(link => link.Antagonist)
               .AsNoTracking()
               .FirstOrDefaultAsync(m=>m.GUID ==id,ct);
 

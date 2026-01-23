@@ -3,6 +3,7 @@ using GainsLab.Application.Results;
 using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PostDto.Request;
+using GainsLab.Domain;
 using GainsLab.Infrastructure.Utilities;
 using ILogger = GainsLab.Domain.Interfaces.ILogger;
 

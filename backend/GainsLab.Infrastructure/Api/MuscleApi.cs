@@ -99,7 +99,58 @@ public class MuscleApi : IMuscleApi
 
     public async Task<Result<MuscleUpdateOutcome>> UpdateMuscleAsync(MuscleUpdateRequest request, CancellationToken ct)
     {
-        throw new NotImplementedException();
+        if (request.UpdateRequest == UpdateRequest.DontUpdate)
+        {
+            return Result<MuscleUpdateOutcome>.Failure("Did not update Muscle - Marked as DontUpdate");
+        }
+
+        var id = request.CorrelationId;
+        
+        if (id == Guid.Empty)
+        {
+            return Result<MuscleUpdateOutcome>.Failure("Did not update Muscle - ID invalid");
+        }
+        
+        if (request.Muscle == null)
+        {
+            return Result<MuscleUpdateOutcome>.Failure("Did not update Muscle - payload missing");
+        }
+
+
+        try
+        {
+           
+            _logger.Log(nameof(MuscleApi), $"Try Update Muscle - id {id}" );
+
+            
+            var url = $"/muscles/{Uri.EscapeDataString(id.ToString()!)}";
+            
+            
+            using var res = await _http.PatchAsync(url, JsonContent.Create(request.Muscle),ct);
+            res.EnsureSuccessStatusCode();
+            
+            
+            var payload = await res.Content.ReadFromJsonAsync<MuscleUpdateOutcome>(cancellationToken: ct);
+            
+            if (payload == null)
+            {
+                return Result<MuscleUpdateOutcome>.Failure(res.ReasonPhrase ?? "Unknown error");
+            }
+
+            return Result<MuscleUpdateOutcome>.SuccessResult(payload);
+
+        }
+        
+        
+        catch (OperationCanceledException)
+        {
+            return Result<MuscleUpdateOutcome>.Failure("Operation Cancelled");
+        }
+        catch (Exception e)
+        {
+            return Result<MuscleUpdateOutcome>.Failure(e.Message);
+        }
+
     }
 
     public async Task<Result<MuscleDeleteOutcome>> DeleteMuscleAsync(MuscleEntityId entity, CancellationToken ct)

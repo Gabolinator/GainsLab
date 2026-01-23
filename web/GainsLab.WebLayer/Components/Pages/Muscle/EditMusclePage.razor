@@ -2,15 +2,19 @@
 @page "/muscles/{id:guid}"
 @rendermode InteractiveServer
 
+@using GainsLab.Application.DTOs
 @using GainsLab.Application.Results
 @using GainsLab.Contracts
 @using GainsLab.Contracts.Dtos.Delete.Outcome
 @using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Contracts.Dtos.ID
+@using GainsLab.Contracts.Dtos.UpdateDto.Outcome
+@using GainsLab.Contracts.Dtos.UpdateDto.Request
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Caching.Registry
 @using GainsLab.WebLayer.Components.Control
 @using GainsLab.WebLayer.Components.Control.Muscle
+@using GainsLab.WebLayer.Model.Dto.Descriptor
 @using GainsLab.WebLayer.Model.Dto.Muscle
 @using GainsLab.WebLayer.Model.Notification
 @using GainsLab.WebLayer.Model.Notification.Confirmation
@@ -95,6 +99,7 @@
 
         Logger.Log(nameof(EditMusclePage), $"Initial body section : {m.BodySection.ToString()} ");
         Muscle = m;
+        
         EditMuscle = Muscle!.FromGetDTO();
     }
 
@@ -162,9 +167,69 @@
         Messages = obj;
     }
 
-    private void Update(MuscleFormDTO obj)
+    private async Task Update(MuscleFormDTO form)
     {
-      Toast.Warning("Update Not Implemented");
+   
+      Messages ??= new MessagesContainer();
+      Messages.ClearAll();
+
+      if (form is not MuscleEditFormDTO editForm)
+      {
+          Toast.Error("Form type mismatch");
+          return;
+      }
+
+      if (editForm.Id == Guid.Empty)
+      {
+          editForm.Id = Guid.NewGuid();
+      }
+
+     
+     
+      var muscleValid = editForm.IsValid(Logger);
+      if (!muscleValid.Success)
+      {
+          Messages.AddError("Muscle invalid");
+          Messages.Append(muscleValid.Messages);
+          Toast.FromMessages(Messages);
+          return;
+      }
+
+      Logger.Log(nameof(AddMusclePage),  editForm.Descriptor.DescriptionContent ?? "No description");
+
+      var request = editForm.ToUpdateRequest();
+      
+      DescriptorUpdateRequest? descriptorUpdateRequest = null;
+      if (editForm.Descriptor is DescriptorEditDTO descriptor)
+      {
+          descriptorUpdateRequest = descriptor.ToUpdateRequest();
+      }
+
+      
+      Logger.Log(nameof(AddMusclePage),  request.Print());
+        
+
+      Result<MuscleUpdateCombinedOutcome> outcome = await Repo.UpdateMuscleAsync(request, descriptorUpdateRequest);
+      if (!outcome.Success || outcome.Value == null)
+      {
+          Messages.AddError("Could not create Muscle");
+          Messages.Append(outcome.GetMessages());
+          Toast.Error("Failed to Create Muscle");
+          Toast.FromMessages(Messages, null, ToastLevel.Error, ToastLevel.Warning);
+      }
+
+      else
+      {
+          var name = outcome.Value.Muscle != null && outcome.Value.Muscle.UpdatedState != null ? outcome.Value.Muscle.UpdatedState.Name : EditMuscle.Name;
+          Messages.Append(outcome.Value!.GetOutcomeMessages(outcome.GetMessages()));
+          Toast.Success($"Muscle {name} successfully created!");
+          Repo.Invalidate();
+          DescriptorRegistry.Invalidate();
+          Toast.FromMessages(Messages, null, ToastLevel.Error, ToastLevel.Warning);
+          NavManager.NavigateTo("muscles");
+      }
+
+
     }
 
 }
