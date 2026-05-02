@@ -6,7 +6,7 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}"
 EndProject
 
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "desktop", "desktop", "{7A1224A0-F22D-34FF-DE0A-A058FAFFD90C}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "frontend", "frontend", "{7A1224A0-F22D-34FF-DE0A-A058FAFFD90C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GainsLab.Editor", "desktop\GainsLab.Editor\GainsLab.Editor.csproj", "{EC2EB2A3-6D37-4D62-8C95-798B16992F48}"
 EndProject

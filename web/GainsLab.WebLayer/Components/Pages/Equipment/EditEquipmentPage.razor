@@ -136,7 +136,7 @@
                 Toast.Success($"Equipment updated to {outcome.Value.Equipment.UpdatedState!.Name}");
 
             if (outcome.Value.Descriptor != null && outcome.Value.Descriptor.Outcome == UpdateOutcome.Updated)
-                Toast.Success($"Equipment Description updated to {outcome.Value.Descriptor.UpdatedState!.content}");
+                Toast.Success($"Equipment Description updated to {outcome.Value.Descriptor.UpdatedState!.Content}");
 
             EquipmentRegistry.Invalidate();
             DescriptorRegistry.Invalidate();

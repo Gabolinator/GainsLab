@@ -35,6 +35,7 @@
 
     <ItemGroup>
       <Folder Include="Desktop\" />
+      <Folder Include="Logging\" />
     </ItemGroup>
 
 </Project>

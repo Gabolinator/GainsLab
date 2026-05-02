@@ -28,6 +28,7 @@ public static class APIResultValidation
             ApiResultStatus.BadRequest => controller.BadRequest(result.GetErrorMessage()),
             ApiResultStatus.Unauthorized => controller.Unauthorized(result.GetErrorMessage()),
             ApiResultStatus.Forbidden => controller.Forbid(),
+            ApiResultStatus.Conflict => controller.Conflict(result.GetErrorMessage()),
             _ => controller.Problem(result.GetErrorMessage())
         };
     }

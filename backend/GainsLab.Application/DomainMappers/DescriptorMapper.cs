@@ -8,6 +8,7 @@ using GainsLab.Domain.Entities.CreationInfo;
 using GainsLab.Domain.Entities.Descriptor;
 using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Interfaces;
+using GainsLab.Infrastructure.Utilities;
 
 namespace GainsLab.Application.DomainMappers;
 
@@ -16,7 +17,27 @@ namespace GainsLab.Application.DomainMappers;
 /// </summary>
 public static class DescriptorMapper
 {
+    public static DescriptorPutDTO ToPutDto(this DescriptorGetDTO dto, IClock clock)
+    {
+        return new()
+        {
+            DescriptionContent = dto.Content,
+            Authority = dto.Authority,
+            Id = dto.Id,
+        };
+    }
 
+    public static DescriptorPostDTO ToPostDto(this DescriptorPutDTO dto, Guid? id = null)
+    {
+        return new()
+        {
+            DescriptionContent = dto.DescriptionContent,
+            Authority = dto.Authority,
+            CreatedBy = dto.UpdatedBy,
+            Id = id ?? dto.Id,
+        };
+    }
+    
     public static DescriptorGetDTO? ToGetDTO(this DescriptorRecord? dto) =>
         dto.TryMapToGetDTO(out var mapped) ? mapped : null;
 
@@ -52,7 +73,7 @@ public static class DescriptorMapper
 
         mapped = new DescriptorRecord
         {
-            GUID = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
+            GUID = CoreUtilities.GetOrGenerateGuid(dto.Id),
             Content = dto.DescriptionContent,
             CreatedAtUtc = clock.UtcNow,
             CreatedBy = !string.IsNullOrWhiteSpace(dto.CreatedBy) ? dto.CreatedBy : "system",

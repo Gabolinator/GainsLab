@@ -27,7 +27,7 @@ public static class DescriptorEditDTOExtensions
         return new DescriptorEditDTO
         {
             Id =  dto.Id,
-            DescriptionContent = dto.content,
+            DescriptionContent = dto.Content,
             Notes = null,
             Tags = null,
             Authority = dto.Authority,

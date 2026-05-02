@@ -9,7 +9,9 @@ using GainsLab.Domain.Entities.CreationInfo;
 using GainsLab.Domain.Entities.Descriptor;
 using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Entities.WorkoutEntity;
+using GainsLab.Domain.Entities.WorkoutEntity.EntityContent;
 using GainsLab.Domain.Interfaces;
+using GainsLab.Infrastructure.Utilities;
 
 namespace GainsLab.Application.DomainMappers;
 
@@ -48,10 +50,10 @@ public static class EquipmentMapper
                          ?? throw new InvalidOperationException("Descriptor payload is required for equipment creation.");
 
         var createdBy = string.IsNullOrWhiteSpace(dto.CreatedBy) ? "system" : dto.CreatedBy!;
-
+        
         return new EquipmentRecord
         {
-            GUID = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
+            GUID = CoreUtilities.GetOrGenerateGuid(dto.Guid),
             Name = dto.Name,
             Descriptor = descriptor,
             DescriptorID = descriptor.Iid,

@@ -1,21 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics.Eventing.Reader;
-using System.Linq;
-using GainsLab.Application.DTOs;
-using GainsLab.Application.DTOs.Description;
-using GainsLab.Application.DTOs.MovementCategory;
+﻿using GainsLab.Application.DTOs.MovementCategory;
 using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
-using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
 using GainsLab.Domain.Entities.CreationInfo;
 using GainsLab.Domain.Entities.Descriptor;
 using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Entities.WorkoutEntity;
+using GainsLab.Domain.Entities.WorkoutEntity.EntityContent;
 using GainsLab.Domain.Interfaces;
+using GainsLab.Infrastructure.Utilities;
 
 namespace GainsLab.Application.DomainMappers;
 
@@ -24,6 +19,33 @@ namespace GainsLab.Application.DomainMappers;
 /// </summary>
 public static class MovementCategoryMapper
 {
+    public static MovementCategoryPutDTO ToPutDto(this MovementCategoryGetDTO dto, IClock clock, UpsertOutcome outcome)
+    {
+        return new()
+        {
+            Name = dto.Name,
+            ParentCategoryId = dto.ParentCategoryId,
+            Authority = dto.Authority,
+            Id = dto.Id,
+            Outcome = outcome,
+            BaseCategories = dto.BaseCategoriesEnum ?? new List<eMovementCategories>(),
+            Descriptor = dto.Descriptor?.ToPutDto(clock) ?? new DescriptorPutDTO(),
+        };
+    }
+
+    public static MovementCategoryPostDTO ToPostDto(this MovementCategoryPutDTO dto, Guid? id)
+    {
+        return new()
+        {
+            Descriptor = dto.Descriptor.ToPostDto(),
+            Name = dto.Name,
+            ParentCategoryId = dto.ParentCategoryId,
+            Authority = dto.Authority,
+            BaseCategories = dto.BaseCategories,
+            Id = id ?? dto.Id,
+        };
+    }
+    
     public static MovementCategoryGetDTO? ToGetDTO(this MovementCategoryRecord? record) =>
         record.TryMapToGetDTO(out var dto) ? dto : null;
 
@@ -34,17 +56,7 @@ public static class MovementCategoryMapper
             dto = null;
             return false;
         }
-
         
-        
-     //   var baseCategories = ExtractCategoriesFromLinks(record.BaseCategoryLinks, allRecords).ToArray();
-        //
-        // var  bases = baseCategories.Select(c=>ToGetDTO(c.parent,allRecords)).Where(c=>c !=null)!;
-        //
-        // var childCategories = ExtractCategoriesFromLinks(record.ChildCategoryLinks, allRecords).ToArray();
-        // IEnumerable<MovementCategoryGetDTO> childs = childCategories.Select(c=>ToGetDTO(c.child,allRecords)).Where(c=>c !=null)!;
-        //
-
         dto = new MovementCategoryGetDTO(
             record.GUID,
             record.Name,
@@ -107,7 +119,7 @@ public static class MovementCategoryMapper
 
         var newRecord = new MovementCategoryRecord
         {
-            GUID = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
+            GUID = CoreUtilities.GetOrGenerateGuid(dto.Id),
             Name = dto.Name,
             DescriptorID = descriptorRecord?.Id ?? 0,
             Descriptor = descriptorRecord,

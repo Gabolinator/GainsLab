@@ -23,7 +23,7 @@ public class DataRepository : ILocalRepository
     private readonly ILogger _logger;
     private readonly GainLabSQLDBContext _sqldbContext;
     private readonly IClock _clock;
-    private Dictionary<EntityType, IDBHandler> _handlers { get; set; } = new();
+    private Dictionary<EntityType, IDBHandler> Handlers { get; set; } = new();
 
 
     /// <summary>
@@ -92,7 +92,7 @@ public class DataRepository : ILocalRepository
             return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure("No entities to save.");
 
         // Make sure all handlers exist up front (fail fast)
-        var missingHandlers = entities.Keys.Where(k => !_handlers.ContainsKey(k)).ToList();
+        var missingHandlers = entities.Keys.Where(k => !Handlers.ContainsKey(k)).ToList();
     
         if (missingHandlers.Count > 0)
         {
@@ -135,7 +135,7 @@ public class DataRepository : ILocalRepository
                 }
 
            
-                var handler = _handlers[type];
+                var handler = Handlers[type];
                 Result<IReadOnlyList<IRecord>> handlerResult;
                 try
                 {
@@ -213,10 +213,10 @@ public class DataRepository : ILocalRepository
     /// <inheritdoc />
     public async Task<Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>> GetAllComponentsAsync()
     {
-        if (!_handlers.Any()) return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure("No handlers");
+        if (!Handlers.Any()) return Result<Dictionary<EntityType, IReadOnlyList<IEntity>>>.Failure("No handlers");
 
         var dict = new Dictionary<EntityType, IReadOnlyList<IEntity>>();
-        foreach (var kvp in _handlers)
+        foreach (var kvp in Handlers)
         {
             var entities = await kvp.Value.GetAllEntityAsync();
             _logger.Log(nameof(DataRepository),$"Found {entities.Count} entities of type {kvp.Key}");
@@ -315,13 +315,13 @@ public class DataRepository : ILocalRepository
         var descriptorHandler = new DescriptorIdbSQLHandler(_sqldbContext, _logger);
         
         
-        _handlers = new();
+        Handlers = new();
         
         //todo for each EntityType 
-        _handlers[EntityType.Equipment] = new EquipmentIdbHandler(_sqldbContext, descriptorHandler , _logger);
-        _handlers[EntityType.Descriptor] = descriptorHandler;
-        _handlers[EntityType.Muscle] = new MuscleIdbHandler(_sqldbContext, descriptorHandler, _logger);
-        _handlers[EntityType.MovementCategory] = new MovementCategoryIdbHandler(_sqldbContext, descriptorHandler, _logger);
+        Handlers[EntityType.Equipment] = new EquipmentIdbHandler(_sqldbContext, descriptorHandler , _logger);
+        Handlers[EntityType.Descriptor] = descriptorHandler;
+        Handlers[EntityType.Muscle] = new MuscleIdbHandler(_sqldbContext, descriptorHandler, _logger);
+        Handlers[EntityType.MovementCategory] = new MovementCategoryIdbHandler(_sqldbContext, descriptorHandler, _logger);
         
         
     }

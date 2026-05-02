@@ -6,8 +6,7 @@ namespace GainsLab.Contracts.Dtos.PostDto;
 
 public record DescriptorPostDTO
 {
-    [Required]
-    public Guid Id { get; init; }
+    public Guid? Id { get; init; }
 
     [Required]
     [StringLength(1024, MinimumLength = 3)]

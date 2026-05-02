@@ -9,7 +9,9 @@ using GainsLab.Domain.Entities.CreationInfo;
 using GainsLab.Domain.Entities.Descriptor;
 using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Entities.WorkoutEntity;
+using GainsLab.Domain.Entities.WorkoutEntity.EntityContent;
 using GainsLab.Domain.Interfaces;
+using GainsLab.Infrastructure.Utilities;
 
 namespace GainsLab.Application.DomainMappers;
 
@@ -66,7 +68,7 @@ public static class MuscleMapper
 
         record = new MuscleRecord
         {
-            GUID = dto.Id == Guid.Empty ? Guid.NewGuid() : dto.Id,
+            GUID = CoreUtilities.GetOrGenerateGuid(dto.Id),
             Name = dto.Name,
             BodySection = dto.BodySection,
             DescriptorID = descriptorRecord?.Id ?? 0,

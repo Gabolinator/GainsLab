@@ -18,4 +18,6 @@ public interface IDescriptorRepository
     Task<APIResult<DescriptorUpdateOutcome>> PatchAsync(Guid id, DescriptorUpdateDTO payload, CancellationToken ct);
 
     public Task<APIResult<DescriptorRecord>> CreateAsync(DescriptorRecord entity, CancellationToken ct);
+    
+    public Task<APIResult<DescriptorRecord>> GetOrCreateAsync(DescriptorRecord entity, CancellationToken ct);
 }

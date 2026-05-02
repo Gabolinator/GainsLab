@@ -68,8 +68,8 @@ public static class EquipmentCreateDTOExtensions
         
         return new EquipmentPostDTO
         {
-            Id = dto.Id,
-            Name = dto.Name,
+            Guid =  dto.Id,
+            Name = dto.Name ?? string.Empty,
             CreatedBy = dto.CreatedBy,
             Descriptor = descriptor.ToPostDTO()
         };

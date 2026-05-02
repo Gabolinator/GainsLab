@@ -1,5 +1,6 @@
 ﻿using GainsLab.Domain;
 using GainsLab.Domain.Interfaces;
+using GainsLab.Domain.Utilities;
 using GainsLab.Infrastructure.Logging;
 
 namespace GainsLab.Infrastructure.Utilities;
@@ -9,20 +10,27 @@ namespace GainsLab.Infrastructure.Utilities;
 /// </summary>
 public static class CoreUtilities
 {
-    
+    private static IGuidGenerator? _guidGenerator;
+
     public static ILogger? _logger;
     
     /// <summary>
     /// Lazily initialized logger used when no explicit logger is provided.
     /// </summary>
-    public static ILogger Logger => _logger ?? new GainsLabLogger();
+    public static ILogger Logger => _logger =  _logger ?? new GainsLabLogger();
 
     private static IClock? _clock;
     /// <summary>
     /// Lazily initialized clock abstraction for consistent time access.
     /// </summary>
-    public static IClock Clock => _clock ?? new Clock();
+    public static IClock Clock => _clock = _clock ?? new Clock();
     
+    public static IGuidGenerator GuidGenerator => _guidGenerator = _guidGenerator ?? new GuidGenerator();
+    
+    public static Guid GetOrGenerateGuid(Guid? guid)
+    {
+       return guid ?? GuidGenerator.New();
+    }
     
     private static readonly EntityType[] SyncOrder =
     {
@@ -47,5 +55,4 @@ public static class CoreUtilities
 
     public static int RankOf(this EntityType t) =>
         Rank.GetValueOrDefault(t, int.MaxValue); // unknowns (e.g., unidentified) go last
-    
 }

@@ -9,8 +9,8 @@ namespace GainsLab.Contracts.Dtos.PostDto;
 /// </summary>
 public record MusclePostDTO
 {
-    [Required]
-    public Guid Id { get; init; }
+   
+    public Guid? Id { get; init; }
 
     [Required]
     [StringLength(256, MinimumLength = 2)]

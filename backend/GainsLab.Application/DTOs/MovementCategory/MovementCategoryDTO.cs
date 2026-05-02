@@ -45,17 +45,7 @@ public class MovementCategoryRecord : BaseRecord
     public IEnumerable<Guid> BaseCategoryGUIDs => BaseCategoryLinks.Select(link => link.ParentCategory.GUID).Distinct();
     
     public IEnumerable<Guid> ParentAndBaseCategoryGUIDs => ParentCategory == null? BaseCategoryGUIDs : new List<Guid>(BaseCategoryGUIDs).Append(ParentCategory.GUID).Distinct();
-
-    // public bool TryGetBaseCategoryFromThis(out eMovementCategories category)
-    // {
-    //     category = eMovementCategories.undefined;
-    //     if (string.IsNullOrWhiteSpace(Name)) return false;
-    //     
-    //     return Enum.TryParse(Name, true, out category);
-    // }
-    //
-    //
- 
+    
 }
 
 public class MovementCategoryRelationRecord

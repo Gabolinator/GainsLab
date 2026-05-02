@@ -26,7 +26,7 @@ public partial class MainWindow : Window
     {
         _logger = logger;
       
-        InitializeComponent();
+       // InitializeComponent();
         this.Show();      // Forces the window to show
         this.Activate();  // Brings it to front
         
@@ -44,7 +44,7 @@ public partial class MainWindow : Window
     /// </summary>
     private async void OnButtonClick(object? sender, RoutedEventArgs e)
     {
-        MessageText.Text = "You clicked the button!";
+      //  MessageText.Text = "You clicked the button!";
         _logger.Log(nameof(MainWindow), $"Clicked button - Testing seeding remote repo");
 
         

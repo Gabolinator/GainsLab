@@ -4,6 +4,7 @@ using GainsLab.Domain.Entities.CreationInfo;
 using GainsLab.Domain.Entities.Descriptor;
 using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Entities.WorkoutEntity;
+using GainsLab.Domain.Entities.WorkoutEntity.EntityContent;
 using GainsLab.Domain.Interfaces;
 
 namespace GainsLab.Application.EntityFactory;

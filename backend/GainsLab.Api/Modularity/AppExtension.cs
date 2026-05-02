@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
 
-namespace GainsLab.Api.Extensions;
+namespace GainsLab.Api.Modularity;
 
 public static class AppExtension
 {
@@ -15,8 +15,7 @@ public static class AppExtension
     {
         if (app.Environment.IsDevelopment())
         {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            app.ConfigureSwagger();
         }
 
         app.UseHttpsRedirection();

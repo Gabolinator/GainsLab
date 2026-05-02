@@ -10,8 +10,7 @@ namespace GainsLab.Contracts.Dtos.PostDto;
 /// </summary>
 public record MovementCategoryPostDTO
 {
-    [Required]
-    public Guid Id { get; init; }
+    public Guid? Id { get; init; }
 
     [Required]
     [StringLength(256, MinimumLength = 2)]

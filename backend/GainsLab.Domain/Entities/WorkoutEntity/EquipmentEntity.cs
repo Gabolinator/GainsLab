@@ -1,24 +1,10 @@
 ﻿using GainsLab.Domain.Entities.CreationInfo;
 using GainsLab.Domain.Entities.Descriptor;
 using GainsLab.Domain.Entities.Identifier;
+using GainsLab.Domain.Entities.WorkoutEntity.EntityContent;
 using GainsLab.Domain.Interfaces.Entity;
 
 namespace GainsLab.Domain.Entities.WorkoutEntity;
-
-
-
-/// <summary>
-/// Immutable data required to describe a single equipment item.
-/// </summary>
-public record EquipmentContent( string Name) : IEntityContent<EquipmentContent>
-{
-    
-    public EquipmentContent Validate()
-    {
-        if (string.IsNullOrWhiteSpace(Name)) throw new ArgumentException("Equipment name is required.", nameof(Name));
-        return this;
-    }
-}
 
 /// <summary>
 /// Aggregate root for equipment including descriptor metadata.

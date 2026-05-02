@@ -131,7 +131,7 @@
 
     private string GetDescription(EquipmentGetDTO eq)
     {
-        return eq.Descriptor?.content ?? "Description not found";
+        return eq.Descriptor?.Content ?? "Description not found";
     }
 
     private Link? GetEditLink(EquipmentGetDTO eq) => new Link { Text = $" Edit: {eq.Name}", Page = $@"equipments/{eq.Id}" };

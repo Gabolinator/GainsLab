@@ -135,7 +135,7 @@
 
     private string GetDescription(MovementCategoryGetDTO eq)
     {
-        return eq.Descriptor?.content ?? "Description not found";
+        return eq.Descriptor?.Content ?? "Description not found";
     }
 
     private Link? GetEditLink(MovementCategoryGetDTO eq) => new Link { Text = $" Edit: {eq.Name}", Page = $@"movement-categories/{eq.Id}" };

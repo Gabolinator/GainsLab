@@ -4,7 +4,7 @@ namespace GainsLab.Contracts.Dtos.GetDto;
 
 public record DescriptorGetDTO(
     Guid Id, 
-    string content, 
+    string Content, 
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,
     long UpdatedSeq,

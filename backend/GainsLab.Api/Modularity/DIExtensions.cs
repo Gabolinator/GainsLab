@@ -1,5 +1,4 @@
-﻿using GainsLab.Application.Interfaces;
-using GainsLab.Application.Interfaces.DataManagement.Repository;
+﻿using GainsLab.Application.Interfaces.DataManagement.Repository;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB;
@@ -7,9 +6,9 @@ using GainsLab.Infrastructure.DB.Repository;
 using GainsLab.Infrastructure.SyncService;
 using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
-namespace GainsLab.Api.Extensions;
+namespace GainsLab.Api.Modularity;
 
-public static class DIExtensions
+public static class DiExtensions
 {
     public static void ConfigureServicesPreDBContext(this IServiceCollection services, ILogger logger, IClock clock)
     {
@@ -17,8 +16,7 @@ public static class DIExtensions
         services.AddSingleton<IClock>(clock);
         AddSyncServices(services);
         services.AddControllers();
-        services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services.AddSwagger();
     }
     
     public static void ConfigureServicesPostDBContext(this IServiceCollection services, ILogger logger, IClock clock)
@@ -35,6 +33,7 @@ public static class DIExtensions
         services.AddScoped<IEquipmentRepository, EquipmentRepository>();
         services.AddScoped<IMuscleRepository, MuscleRepository>();
         services.AddScoped<IMovementCategoryRepository, MovementCategoryRepository>();
+        services.AddScoped<IMovementRepository, MovementRepository>();
     }
 
 
@@ -56,5 +55,19 @@ public static class DIExtensions
         services.AddScoped<ISyncService>(sp => sp.GetRequiredService<ISyncService<MovementSyncDTO>>());
 
             
+    }
+
+    public static void AddSwagger(this IServiceCollection services)
+    {
+        services.AddEndpointsApiExplorer();
+
+        services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new()
+            {
+                Title = "GainsLab API",
+                Version = "v1"
+            });
+        });
     }
 }

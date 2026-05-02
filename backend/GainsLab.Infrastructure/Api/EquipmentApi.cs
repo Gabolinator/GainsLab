@@ -128,7 +128,7 @@ public class EquipmentApi :IEquipmentApi
 
     public async Task<Result<EquipmentCreateOutcome>> CreateEquipmentAsync(EquipmentPostDTO entity, CancellationToken ct)
     {
-            var id = entity.Id;
+            var id = entity.Guid;
         if (id == Guid.Empty)
         {
             return  Result<EquipmentCreateOutcome>.Failure("Did not create Equipment - ID invalid");

@@ -1,10 +1,9 @@
-﻿
-using GainsLab.Domain.Interfaces;
+﻿using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
 using Microsoft.EntityFrameworkCore;
 using ILogger = GainsLab.Domain.Interfaces.ILogger;
 
-namespace GainsLab.Api.Extensions;
+namespace GainsLab.Api.Modularity;
 
 public static class BuilderExtensions
 {

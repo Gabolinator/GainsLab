@@ -1,27 +1,11 @@
 ﻿using GainsLab.Domain.Entities.CreationInfo;
 using GainsLab.Domain.Entities.Descriptor;
 using GainsLab.Domain.Entities.Identifier;
+using GainsLab.Domain.Entities.WorkoutEntity.EntityContent;
+using GainsLab.Domain.Entities.WorkoutEntity.Persistence;
 using GainsLab.Domain.Interfaces.Entity;
 
 namespace GainsLab.Domain.Entities.WorkoutEntity;
-
-/// <summary>
-/// Immutable data describing a movement, including workloads and supporting equipment.
-/// </summary>
-public sealed record MovementContent(
-    string Name,
-    MovementCategoryId Category,
-    MuscleWorked MusclesWorked,
-    EquipmentIdList EquipmentRequired,
-    (string? variantOfName, MovementId? variantOfGuid) variantOf  = default //need to resolve this in some way - after all movement created
-) : IEntityContent<MovementContent>
-{
-    public MovementContent Validate()
-    {
-        if (string.IsNullOrWhiteSpace(Name)) throw new ArgumentException("Movement name is required.", nameof(Name));
-        return this;
-    }
-}
 
 /// <summary>
 /// Aggregate root representing a concrete movement definition.
@@ -124,43 +108,4 @@ public sealed class MovementEntity
             DbId = this.DbId,
             Persistence = persistence ?? MovementPersistenceModel.Empty
         };
-}
-
-public sealed class MovementPersistenceModel
-{
-    public MovementPersistenceModel(
-        int movementCategoryDbId,
-        IReadOnlyDictionary<MuscleId, int>? muscleDbIds,
-        IReadOnlyDictionary<EquipmentId, int>? equipmentDbIds)
-    {
-        MovementCategoryDbId = movementCategoryDbId;
-        MuscleDbIds = muscleDbIds != null
-            ? new Dictionary<MuscleId, int>(muscleDbIds)
-            : new Dictionary<MuscleId, int>();
-        EquipmentDbIds = equipmentDbIds != null
-            ? new Dictionary<EquipmentId, int>(equipmentDbIds)
-            : new Dictionary<EquipmentId, int>();
-    }
-
-    public int MovementCategoryDbId { get; init; }
-
-    public IReadOnlyDictionary<MuscleId, int> MuscleDbIds { get; init; }
-
-    public IReadOnlyDictionary<EquipmentId, int> EquipmentDbIds { get; init; }
-
-    public static MovementPersistenceModel Empty { get; } =
-        new(0, new Dictionary<MuscleId, int>(), new Dictionary<EquipmentId, int>());
-
-    public bool TryGetMuscleDbId(MuscleId id, out int dbId) => MuscleDbIds.TryGetValue(id, out dbId);
-
-    public bool TryGetEquipmentDbId(EquipmentId id, out int dbId) => EquipmentDbIds.TryGetValue(id, out dbId);
-
-    public MovementPersistenceModel WithCategoryDbId(int categoryDbId) =>
-        new(categoryDbId, MuscleDbIds, EquipmentDbIds);
-
-    public MovementPersistenceModel WithMuscles(IReadOnlyDictionary<MuscleId, int> muscleDbIds) =>
-        new(MovementCategoryDbId, muscleDbIds, EquipmentDbIds);
-
-    public MovementPersistenceModel WithEquipment(IReadOnlyDictionary<EquipmentId, int> equipmentDbIds) =>
-        new(MovementCategoryDbId, MuscleDbIds, equipmentDbIds);
 }

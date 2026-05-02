@@ -39,9 +39,9 @@ public static class EntityDomainMapper
             //to eventually implement others
             _ => throw new ArgumentOutOfRangeException()
         };
-        
+
     }
-    
+
     /// <summary>
     /// Maps a Persistent Record to its corresponding domain entity when supported.
     /// </summary>
@@ -50,7 +50,7 @@ public static class EntityDomainMapper
     public static IEntity? ToDomain(this IRecord? Record)
     {
         if (Record == null) return null;
-        
+
         return (Record.Type) switch
         {
             EntityType.Equipment => EquipmentMapper.ToDomain(Record as EquipmentRecord),
@@ -58,32 +58,10 @@ public static class EntityDomainMapper
             EntityType.Muscle => MuscleMapper.ToDomain(Record as MuscleRecord),
             EntityType.MovementCategory => MovementCategoryMapper.ToDomain(Record as MovementCategoryRecord),
             EntityType.Movement => MovementMapper.ToDomain(Record as MovementRecord),
-            
+
             //to eventually implement others
             _ => throw new ArgumentOutOfRangeException()
         };
-        
+
     }
-    
-    
-    
-    
 }
-//
-//     
-//     
-//     
-//     
-//     public static IWorkoutComponent ToDomain(this IRecord Record)
-//     {
-//         return (Record) switch
-//         {
-//             EquipmentRecord equipmentRecord => EquipmentMapper.ToDomain(equipmentRecord),
-//             //to eventually implement others
-//             
-//             _ => throw new ArgumentOutOfRangeException(nameof(Record))
-//         };
-//     }
-//     
-//     
-// }

@@ -157,7 +157,7 @@
                 Toast.Success($"Category updated to {outcome.Value.MovementCategory.UpdatedState!.Name}");
         
             if (outcome.Value.Descriptor != null && outcome.Value.Descriptor.Outcome == UpdateOutcome.Updated)
-                Toast.Success($"Category Description updated to {outcome.Value.Descriptor.UpdatedState!.content}");
+                Toast.Success($"Category Description updated to {outcome.Value.Descriptor.UpdatedState!.Content}");
         
             NavManager.NavigateTo("movement-categories");
         }

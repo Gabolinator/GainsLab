@@ -8,9 +8,8 @@ namespace GainsLab.Contracts.Dtos.PostDto;
 /// </summary>
 public record EquipmentPostDTO
 {
-    [Required]
-    public Guid Id { get; init; }
-
+    public Guid? Guid { get; set; }
+    
     [Required]
     [StringLength(256, MinimumLength = 2)]
     public string Name { get; init; } = string.Empty;

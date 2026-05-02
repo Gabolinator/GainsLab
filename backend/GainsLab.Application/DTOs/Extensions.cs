@@ -129,7 +129,7 @@ public static class DescriptorUpdateOutcomeExtensions
                     $"Descriptor {descriptor!.UpdatedState!.Id} Not Updated {descriptor.Outcome}");
                 break;
             case UpdateOutcome.Updated:
-                messages.AddInfo($"Descriptor {descriptor!.UpdatedState!.Id} Updated to {descriptor.UpdatedState!.content}");
+                messages.AddInfo($"Descriptor {descriptor!.UpdatedState!.Id} Updated to {descriptor.UpdatedState!.Content}");
                 break;
             case UpdateOutcome.Failed: 
                 messages.AddError(
@@ -321,7 +321,7 @@ public static partial class DescriptorCreateOutcomeExtensions
                     $"Descriptor {descriptor!.CreatedDescriptor!.Id} Not Created {descriptor.Outcome}");
                 break;
             case CreateOutcome.Created:
-                messages.AddInfo($"Descriptor {descriptor!.CreatedDescriptor!.Id} Created to {descriptor.CreatedDescriptor!.content}");
+                messages.AddInfo($"Descriptor {descriptor!.CreatedDescriptor!.Id} Created to {descriptor.CreatedDescriptor!.Content}");
                 break;
             case CreateOutcome.Failed: 
                 messages.AddError(

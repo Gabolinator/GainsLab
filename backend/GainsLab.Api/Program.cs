@@ -1,4 +1,4 @@
-﻿using GainsLab.Api.Extensions;
+﻿using GainsLab.Api.Modularity;
 using GainsLab.Infrastructure.Logging;
 using GainsLab.Infrastructure.Utilities;
 
