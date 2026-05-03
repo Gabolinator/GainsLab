@@ -6,6 +6,7 @@ using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Interface;
 using GainsLab.Contracts.SyncService.Mapper;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
 using Microsoft.AspNetCore.Mvc;
@@ -72,7 +73,7 @@ public class DescriptorSyncService : ISyncService<DescriptorSyncDTO>
             .Take(take);
 
         var items = await q.Select(d => new DescriptorSyncDTO(
-            d.GUID,
+            DescriptorId.FromGuid(d.GUID),
             d.Content,
             d.UpdatedAtUtc,
             d.UpdatedSeq,
@@ -272,7 +273,7 @@ public class DescriptorSyncService : ISyncService<DescriptorSyncDTO>
         if(entity.IsDeleted) return Result<DescriptorSyncDTO>.Failure("Descriptor is deleted");
         
         var dto= new DescriptorSyncDTO(
-            entity.GUID,
+            DescriptorId.FromGuid(entity.GUID),
             entity.Content,
             entity.UpdatedAtUtc,
             entity.UpdatedSeq,

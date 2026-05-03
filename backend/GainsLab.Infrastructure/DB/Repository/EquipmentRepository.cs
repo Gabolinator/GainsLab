@@ -12,6 +12,7 @@ using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.Utilities;
@@ -26,7 +27,7 @@ public class EquipmentRepository(
     ILogger log)
     : IEquipmentRepository
 {
-    public async Task<APIResult<EquipmentGetDTO>> PullByIdAsync(Guid id, CancellationToken ct)
+    public async Task<APIResult<EquipmentGetDTO>> PullByIdAsync(EquipmentId id, CancellationToken ct)
     {
         log.Log(nameof(PullByIdAsync), $"Trying to pull equipment by id {id}" );
         
@@ -77,9 +78,9 @@ public class EquipmentRepository(
         EquipmentRecord entity,
         CancellationToken ct)
     {
-        return CrudResultUtilities.TryValidateUniqueAsync<EquipmentRecord, EquipmentGetDTO>(
+        return CrudValidation.TryValidateUniqueAsync<EquipmentRecord, EquipmentGetDTO>(
             entity,
-            EntityType.Descriptor,
+            EntityType.Equipment,
             getId: x => x.GUID,
             getName: x => x.Name,
             getContent: x => null,
@@ -156,7 +157,7 @@ public class EquipmentRepository(
     }
 
 
-    public async Task<APIResult<EquipmentPutDTO>> PutAsync(Guid id, EquipmentPutDTO payload, CancellationToken ct)
+    public async Task<APIResult<EquipmentPutDTO>> PutAsync(EquipmentId id, EquipmentPutDTO payload, CancellationToken ct)
     {
         try
         {
@@ -195,7 +196,7 @@ public class EquipmentRepository(
             // ensure descriptor identifier is set
             if (payload.Descriptor.Id == null || payload.Descriptor.Id == Guid.Empty)
             {
-                payload.Descriptor.Id = existing.Descriptor?.GUID ?? Guid.NewGuid();
+                payload.Descriptor.Id = DescriptorId.FromGuid((existing.Descriptor?.GUID) ?? DescriptorId.New());
             }
             
             var descriptorResult = await descriptorRepository.PutAsync(payload.Descriptor.Id.Value, payload.Descriptor, ct);
@@ -227,11 +228,11 @@ public class EquipmentRepository(
         }
     }
 
-    public async Task<APIResult<EquipmentUpdateOutcome>> PatchAsync(Guid id, EquipmentUpdateDTO payload, CancellationToken ct)
+    public async Task<APIResult<EquipmentUpdateOutcome>> PatchAsync(EquipmentId id, EquipmentUpdateDTO payload, CancellationToken ct)
     {
         try
         {
-            var equipment = id.Equals(Guid.Empty)? null: 
+            var equipment = id == Guid.Empty? null: 
                 await db.Equipments
                     .Include(equipmentRecord => equipmentRecord.Descriptor)
                     .FirstOrDefaultAsync(d => d.GUID == id  && !d.IsDeleted, ct);
@@ -254,21 +255,19 @@ public class EquipmentRepository(
         }
     }
 
-    public async Task<APIResult<EquipmentGetDTO>> DeleteAsync(Guid id, CancellationToken ct)
+    public async Task<APIResult<EquipmentGetDTO>> DeleteAsync(EquipmentId id, CancellationToken ct)
     {
         if (id == Guid.Empty) return APIResult<EquipmentGetDTO>.BadRequest($"Invalid id for delete");
         try
         {
-            var existing = 
-                await db.Equipments
-                    .Where(e=> !e.IsDeleted)
-                    .Include(equipmentRecord => equipmentRecord.Descriptor)
-                    .FirstOrDefaultAsync(d => d.GUID == id, ct);
-        
-            
             log.Log(nameof(EquipmentRepository),$"Trying to delete equipment - {id}");
+            var recordResult = await GetRecordByIdAsync(id, ct); 
+            var existing = recordResult.Value;
+            if (!recordResult.Success || existing == null)
+            {
+                return APIResult<EquipmentGetDTO>.NotFound($"Equipment {id} not found for deletion");
+            }
             
-            if (existing is null) return APIResult<EquipmentGetDTO>.NotFound($"Equipment {id} not found for deletion");
             log.Log(nameof(EquipmentRepository),$"Equipment - {id} found");
 
             

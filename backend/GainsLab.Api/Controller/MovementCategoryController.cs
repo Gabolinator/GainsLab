@@ -7,6 +7,7 @@ using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Infrastructure.SyncService;
 using Microsoft.AspNetCore.Mvc;
 using ILogger = GainsLab.Domain.Interfaces.ILogger;
@@ -50,7 +51,7 @@ public class MovementCategoryController : ControllerBase
         
         if( id == Guid.Empty)  return BadRequest();
         
-        var result = await _repo.PullByIdAsync(id,ct);
+        var result = await _repo.PullByIdAsync(MovementCategoryId.FromGuid(id),ct);
 
         return  APIResultValidation.ValidateResult<MovementCategoryGetDTO>(this,result);
     }
@@ -80,7 +81,7 @@ public class MovementCategoryController : ControllerBase
     {
         if(payload == null)  return BadRequest();
         
-        var result = await _repo.PutAsync(id,payload,ct);
+        var result = await _repo.PutAsync(MovementCategoryId.FromGuid(id),payload,ct);
         
         return  APIResultValidation.ValidateResult<MovementCategoryPutDTO>(this,result, new ActionResultInfo(GetActionName(),id));
         
@@ -93,7 +94,7 @@ public class MovementCategoryController : ControllerBase
     {
         if(payload == null|| id == Guid.Empty)  return BadRequest();
         
-        var result = await _repo.PatchAsync(id,payload,ct);
+        var result = await _repo.PatchAsync(MovementCategoryId.FromGuid(id),payload,ct);
         return  APIResultValidation.ValidateResult<MovementCategoryUpdateOutcome>(this,result);
     
     }
@@ -105,7 +106,7 @@ public class MovementCategoryController : ControllerBase
     {
         if (id == Guid.Empty) return BadRequest();
 
-        var result = await _repo.DeleteAsync(id, ct);
+        var result = await _repo.DeleteAsync(MovementCategoryId.FromGuid(id), ct);
         return APIResultValidation.ValidateResult<MovementCategoryGetDTO>(this, result);
     }
 

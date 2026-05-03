@@ -2,6 +2,7 @@
 using GainsLab.Application.DTOs.Description;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.SyncDto;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Infrastructure.Utilities;
 
 namespace GainsLab.Contracts.SyncService.Mapper;
@@ -60,7 +61,7 @@ public static class DescriptorSyncMapper
     public static DescriptorSyncDTO ToSyncDTO(DescriptorRecord e)
     {
         return new DescriptorSyncDTO(
-            e.Iguid,
+            DescriptorId.FromGuid(e.Iguid),
             e.Content,
             e.UpdatedAtUtc,
             e.UpdatedSeq,

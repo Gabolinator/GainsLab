@@ -3,6 +3,7 @@ using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.DTOs.Muscle;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.SyncDto;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Infrastructure.SyncService.Mapper;
 
@@ -41,7 +42,7 @@ public static class MuscleSyncMapper
         return new MuscleSyncDTO(
             dto.GUID,
             dto.Name,
-            dto.Descriptor?.GUID,
+            DescriptorId.FromNullableGuid(dto.Descriptor?.GUID), 
             dto.BodySection,
             antagonists ?? dto.AntagonistGUIDs.ToList(),
             dto.UpdatedAtUtc,

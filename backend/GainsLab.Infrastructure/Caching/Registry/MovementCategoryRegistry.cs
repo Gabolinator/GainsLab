@@ -9,6 +9,7 @@ using GainsLab.Contracts.Dtos.PostDto.Outcome;
 using GainsLab.Contracts.Dtos.PostDto.Request;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Infrastructure.Caching.QueryCache;
 
 namespace GainsLab.Infrastructure.Caching.Registry;
@@ -18,7 +19,7 @@ public sealed class MovementCategoryRegistry
     private readonly IMovementCategoryGateway _gateway;
     private readonly MovementCategoryQueryCache _cache;
 
-    public Dictionary<Guid, MovementCategoryGetDTO> MovementCategories { get; private set; } = new();
+    public Dictionary<MovementCategoryId, MovementCategoryGetDTO> MovementCategories { get; private set; } = new();
 
     public MovementCategoryRegistry(IMovementCategoryGateway gateway, MovementCategoryQueryCache cache)
     {
@@ -54,7 +55,7 @@ public sealed class MovementCategoryRegistry
     }
     
 
-    public async Task<Result<MovementCategoryGetDTO>> GetByIdAsync(Guid id, bool forceRefresh = false)
+    public async Task<Result<MovementCategoryGetDTO>> GetByIdAsync(MovementCategoryId id, bool forceRefresh = false)
     {
         if (id == Guid.Empty)
         {
@@ -78,7 +79,7 @@ public sealed class MovementCategoryRegistry
             : Result<MovementCategoryGetDTO>.SuccessResult(match);
     }
 
-    public async Task<MovementCategoryGetDTO?> GetMovementCategoryByIdAsync(Guid? id)
+    public async Task<MovementCategoryGetDTO?> GetMovementCategoryByIdAsync(MovementCategoryId? id)
     {
         if (id is null || id == Guid.Empty)
         {
@@ -105,7 +106,7 @@ public sealed class MovementCategoryRegistry
             Invalidate();
             if (movementCategoryEntityId.Id.HasValue)
             {
-                MovementCategories.Remove(movementCategoryEntityId.Id.Value);
+                MovementCategories.Remove(MovementCategoryId.FromGuid(movementCategoryEntityId.Id.Value));
             }
         }
 

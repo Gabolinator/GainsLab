@@ -1,5 +1,6 @@
 ﻿using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.SyncDto;
 
@@ -18,7 +19,7 @@ namespace GainsLab.Contracts.Dtos.SyncDto;
 public record MuscleSyncDTO(
     Guid GUID,
     string Name,
-    Guid? DescriptorGUID,
+    DescriptorId? DescriptorGUID,
     eBodySection BodySection,
     IReadOnlyList<Guid>? AntagonistGuids,
     DateTimeOffset UpdatedAtUtc,

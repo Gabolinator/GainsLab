@@ -1,5 +1,6 @@
 ﻿using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.SyncDto;
 
@@ -13,7 +14,7 @@ namespace GainsLab.Contracts.Dtos.SyncDto;
 /// <param name="IsDeleted">Flag indicating whether the descriptor represents a tombstone.</param>
 /// <param name="Authority">Indicates which tier owns the record.</param>
 public record DescriptorSyncDTO(
-    Guid GUID,
+    DescriptorId GUID,
     string DescriptionContent,
     DateTimeOffset UpdatedAtUtc,
     long UpdatedSeq,

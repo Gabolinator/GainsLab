@@ -1,12 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
+using GainsLab.Infrastructure.Utilities;
 using GainsLab.WebLayer.Model.Dto.Descriptor;
 
 namespace GainsLab.WebLayer.Model.Dto.Equipment;
 
 public class EquipmentFormDTO
 {
-    public Guid  Id { get; init; } = Guid.NewGuid();
+    public EquipmentId Id { get; init; } = EquipmentId.New();
     
     [StringLength(256, MinimumLength = 2), Required]
     public string? Name { get; set; } = "new name";

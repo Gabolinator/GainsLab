@@ -14,6 +14,7 @@ using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Contracts.SyncService.Mapper;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.Caching.QueryCache;
 using GainsLab.Infrastructure.Caching.Registry;
@@ -73,7 +74,7 @@ public class MovementCategoryGateway : IMovementCategoryGateway
             .SuccessResult(dtos.ToList());
     }
 
-    private void AssignChild(MovementCategoryGetDTO?[] dtos, Dictionary<Guid, MovementCategoryRefDTO> refs)
+    private void AssignChild(MovementCategoryGetDTO?[] dtos, Dictionary<MovementCategoryId, MovementCategoryRefDTO> refs)
     {
         if (!dtos.Any() || !refs.Any()) return;
         
@@ -106,7 +107,7 @@ public class MovementCategoryGateway : IMovementCategoryGateway
 
     }
 
-    private MovementCategoryRefDTO? GetRef(Guid? id, Dictionary<Guid, MovementCategoryRefDTO> refs)
+    private MovementCategoryRefDTO? GetRef(MovementCategoryId? id, Dictionary<MovementCategoryId, MovementCategoryRefDTO> refs)
     {
        if(id == null || id == Guid.Empty || !refs.Any()) return null;
        
@@ -114,7 +115,7 @@ public class MovementCategoryGateway : IMovementCategoryGateway
        
     }
 
-    private Dictionary<eMovementCategories,MovementCategoryRefDTO> GetBaseCategoryRefs(Dictionary<Guid, MovementCategoryRefDTO> refs)
+    private Dictionary<eMovementCategories,MovementCategoryRefDTO> GetBaseCategoryRefs(Dictionary<MovementCategoryId, MovementCategoryRefDTO> refs)
     {
         if (!refs.Any()) return new ();
         
@@ -128,7 +129,7 @@ public class MovementCategoryGateway : IMovementCategoryGateway
     
 
 
-    private Task<DescriptorGetDTO?> GetDescriptorAsync(Guid? id)
+    private Task<DescriptorGetDTO?> GetDescriptorAsync(DescriptorId? id)
         => _descriptorGateway.GetDescriptorByIdAsync(id);
 
     public async Task<Result<IReadOnlyList<MovementCategorySyncDTO>>> GetAllCategorySyncDtoAsync()

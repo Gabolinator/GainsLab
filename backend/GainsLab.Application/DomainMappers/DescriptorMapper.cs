@@ -27,7 +27,7 @@ public static class DescriptorMapper
         };
     }
 
-    public static DescriptorPostDTO ToPostDto(this DescriptorPutDTO dto, Guid? id = null)
+    public static DescriptorPostDTO ToPostDto(this DescriptorPutDTO dto, DescriptorId? id = null)
     {
         return new()
         {
@@ -50,7 +50,7 @@ public static class DescriptorMapper
         }
 
         mapped = new DescriptorGetDTO(
-            dto.GUID,
+            DescriptorId.FromGuid(dto.GUID),
             dto.Content,
             dto.CreatedAtUtc,
             dto.UpdatedAtUtc,
@@ -99,7 +99,7 @@ public static class DescriptorMapper
 
         mapped = new DescriptorPutDTO
         {
-            Id = dto.GUID,
+            Id = DescriptorId.FromGuid(dto.GUID),
             DescriptionContent = dto.Content,
             Notes = null,
             Tags = null,

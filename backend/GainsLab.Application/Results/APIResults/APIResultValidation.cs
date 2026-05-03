@@ -25,6 +25,7 @@ public static class APIResultValidation
                 : controller.Problem(result.GetErrorMessage()),
             ApiResultStatus.Deleted => controller.NoContent(),
             ApiResultStatus.NotFound => controller.NotFound(result.GetErrorMessage()),
+            ApiResultStatus.NotDeleted => controller.NotFound(result.GetErrorMessage()),
             ApiResultStatus.BadRequest => controller.BadRequest(result.GetErrorMessage()),
             ApiResultStatus.Unauthorized => controller.Unauthorized(result.GetErrorMessage()),
             ApiResultStatus.Forbidden => controller.Forbid(),
@@ -32,7 +33,5 @@ public static class APIResultValidation
             _ => controller.Problem(result.GetErrorMessage())
         };
     }
-
-
 }
 

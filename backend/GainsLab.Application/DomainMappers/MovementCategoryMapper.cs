@@ -33,7 +33,7 @@ public static class MovementCategoryMapper
         };
     }
 
-    public static MovementCategoryPostDTO ToPostDto(this MovementCategoryPutDTO dto, Guid? id)
+    public static MovementCategoryPostDTO ToPostDto(this MovementCategoryPutDTO dto, MovementCategoryId? id)
     {
         return new()
         {
@@ -58,11 +58,11 @@ public static class MovementCategoryMapper
         }
         
         dto = new MovementCategoryGetDTO(
-            record.GUID,
+            MovementCategoryId.FromGuid(record.GUID), 
             record.Name,
-            record.Descriptor?.GUID,
+            DescriptorId.FromNullableGuid(record.Descriptor?.GUID),
             record.Descriptor.ToGetDTO(),
-            record.ParentCategory?.GUID,
+            MovementCategoryId.FromNullableGuid(record.ParentCategory?.GUID), 
             ExtractCategoriesFromLinks(record.BaseCategoryLinks),
             record.CreatedAtUtc,
             record.UpdatedAtUtc,
@@ -80,7 +80,7 @@ public static class MovementCategoryMapper
     {
         if(record == null) return null;
         
-        return new MovementCategoryRefDTO(record.GUID, record.Name);
+        return new MovementCategoryRefDTO(MovementCategoryId.FromGuid(record.GUID), record.Name);
     }
 
     private static IReadOnlyList<eMovementCategories>? ExtractCategoriesFromLinks(ICollection<MovementCategoryRelationRecord> links)
@@ -161,14 +161,14 @@ public static class MovementCategoryMapper
 
         dto = new MovementCategoryPutDTO
         {
-            Id = record.GUID,
+            Id = MovementCategoryId.FromGuid(record.GUID),
             Outcome = outcome,
             Name = record.Name,
-            ParentCategoryId = record.ParentCategory?.GUID,
+            ParentCategoryId = MovementCategoryId.FromNullableGuid(record.ParentCategory?.GUID),
             BaseCategories = baseCategories,
             Descriptor = descriptorPutDto ?? new DescriptorPutDTO
             {
-                Id = record.Descriptor?.GUID,
+                Id = DescriptorId.FromNullableGuid(record.Descriptor?.GUID),
                 DescriptionContent = record.Descriptor?.Content ?? string.Empty,
                 Authority = record.Authority,
                 Outcome = outcome

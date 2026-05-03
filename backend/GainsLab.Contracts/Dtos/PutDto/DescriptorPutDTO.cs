@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.PutDto;
 
@@ -8,7 +9,7 @@ namespace GainsLab.Contracts.Dtos.PutDto;
 
 public record DescriptorPutDTO
 {
-    public Guid? Id { get; set; } =null;
+    public DescriptorId? Id { get; set; } =null;
 
     public UpsertOutcome Outcome { get; set; } = UpsertOutcome.Failed;
     

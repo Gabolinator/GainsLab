@@ -5,6 +5,7 @@ using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Domain.Entities.Identifier;
 
 
 namespace GainsLab.Infrastructure.DB.Repository;
@@ -12,7 +13,7 @@ namespace GainsLab.Infrastructure.DB.Repository;
 
 public class MovementRepository : IMovementRepository
 {
-    public Task<APIResult<MovementGetDTO>> PullByIdAsync(Guid id, CancellationToken ct)
+    public Task<APIResult<MovementGetDTO>> PullByIdAsync(MovementId id, CancellationToken ct)
     {
         throw new NotImplementedException();
     }
@@ -22,17 +23,17 @@ public class MovementRepository : IMovementRepository
         throw new NotImplementedException();
     }
 
-    public Task<APIResult<MovementPutDTO>> PutAsync(Guid id, MovementPutDTO payload, CancellationToken ct)
+    public Task<APIResult<MovementPutDTO>> PutAsync(MovementId id, MovementPutDTO payload, CancellationToken ct)
     {
         throw new NotImplementedException();
     }
 
-    public Task<APIResult<MovementUpdateOutcome>> PatchAsync(Guid id, MovementUpdateDTO payload, CancellationToken ct)
+    public Task<APIResult<MovementUpdateOutcome>> PatchAsync(MovementId id, MovementUpdateDTO payload, CancellationToken ct)
     {
         throw new NotImplementedException();
     }
 
-    public Task<APIResult<MovementGetDTO>> DeleteAsync(Guid id, CancellationToken ct)
+    public Task<APIResult<MovementGetDTO>> DeleteAsync(MovementId id, CancellationToken ct)
     {
         throw new NotImplementedException();
     }

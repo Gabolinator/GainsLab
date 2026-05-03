@@ -4,6 +4,7 @@ using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.DTOs.Equipment;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.SyncDto;
+using GainsLab.Domain.Entities.Identifier;
 
 
 namespace GainsLab.Contracts.SyncService.Mapper;
@@ -50,9 +51,9 @@ public static class EquipmentSyncMapper
     public static EquipmentSyncDTO ToSyncDTO(EquipmentRecord e)
     {
         return new EquipmentSyncDTO(
-            e.Iguid,
+            EquipmentId.FromGuid(e.Iguid),
             e.Name,
-            e.Descriptor == null ? null : e.Descriptor.GUID,
+            e.Descriptor == null ? null : DescriptorId.FromGuid(e.Descriptor.GUID),
             e.UpdatedAtUtc,
             e.UpdatedSeq,
             e.IsDeleted,

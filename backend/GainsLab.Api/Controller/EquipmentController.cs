@@ -7,6 +7,7 @@ using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Infrastructure.SyncService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -48,7 +49,7 @@ public class EquipmentController : ControllerBase
         
         if( id == Guid.Empty)  return BadRequest();
         
-        var result = await _repo.PullByIdAsync(id,ct);
+        var result = await _repo.PullByIdAsync(EquipmentId.FromGuid(id), ct);
 
         return  APIResultValidation.ValidateResult<EquipmentGetDTO>(this,result);
     }
@@ -73,7 +74,7 @@ public class EquipmentController : ControllerBase
     {
         if(payload == null)  return BadRequest();
         
-        var result = await _repo.PutAsync(id,payload,ct);
+        var result = await _repo.PutAsync(EquipmentId.FromGuid(id),payload,ct);
         
         return  APIResultValidation.ValidateResult<EquipmentPutDTO>(this,result, new ActionResultInfo(GetActionName(),id));
         
@@ -86,7 +87,7 @@ public class EquipmentController : ControllerBase
     {
         if(payload == null|| id == Guid.Empty)  return BadRequest();
         
-        var result = await _repo.PatchAsync(id,payload,ct);
+        var result = await _repo.PatchAsync(EquipmentId.FromGuid(id),payload,ct);
         return  APIResultValidation.ValidateResult<EquipmentUpdateOutcome>(this,result);
     
     }
@@ -98,7 +99,7 @@ public class EquipmentController : ControllerBase
     {
         if (id == Guid.Empty) return BadRequest();
 
-        var result = await _repo.DeleteAsync(id, ct);
+        var result = await _repo.DeleteAsync(EquipmentId.FromGuid(id), ct);
         return APIResultValidation.ValidateResult<EquipmentGetDTO>(this, result);
     }
 

@@ -28,9 +28,9 @@ public static class EquipmentMapper
         if (dto == null) return null;
 
         return new EquipmentGetDTO(
-            dto.GUID,
+            EquipmentId.FromGuid(dto.GUID), 
             dto.Name,
-            dto.Descriptor?.GUID,
+            DescriptorId.FromGuid(dto.GUID),
             dto.Descriptor?.ToGetDTO(),
             dto.CreatedAtUtc,
             dto.UpdatedAtUtc,
@@ -75,12 +75,12 @@ public static class EquipmentMapper
 
         return new EquipmentPutDTO
         {
-            Id = dto.GUID,
+            Id = EquipmentId.FromGuid(dto.GUID),
             Outcome = outcome,
             Name = dto.Name,
             Descriptor = dto.Descriptor?.ToPutDTO(clock, outcome) ?? new DescriptorPutDTO
             {
-                Id = dto.Descriptor?.GUID,
+                Id = DescriptorId.FromNullableGuid(dto.Descriptor?.GUID),
                 DescriptionContent = dto.Descriptor?.Content ?? string.Empty,
                 Authority = dto.Descriptor?.Authority ?? dto.Authority,
                 UpdatedBy = dto.Descriptor?.UpdatedBy

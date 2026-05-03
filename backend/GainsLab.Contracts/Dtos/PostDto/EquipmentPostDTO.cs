@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
+using GainsLab.Infrastructure.Utilities;
 
 namespace GainsLab.Contracts.Dtos.PostDto;
 
@@ -8,7 +10,7 @@ namespace GainsLab.Contracts.Dtos.PostDto;
 /// </summary>
 public record EquipmentPostDTO
 {
-    public Guid? Guid { get; set; }
+    public EquipmentId? Guid { get; init; } = EquipmentId.New();
     
     [Required]
     [StringLength(256, MinimumLength = 2)]

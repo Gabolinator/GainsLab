@@ -1,4 +1,5 @@
 ﻿using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.GetDto;
 
@@ -15,9 +16,9 @@ namespace GainsLab.Contracts.Dtos.GetDto;
 /// <param name="IsDeleted">Whether this record represents a tombstone.</param>
 /// <param name="Authority">Tier that owns the record.</param>
 public record EquipmentGetDTO(
-    Guid Id,
+    EquipmentId Id,
     string Name,
-    Guid? DescriptorId,
+    DescriptorId? DescriptorId,
     DescriptorGetDTO? Descriptor,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,

@@ -8,6 +8,7 @@ using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Infrastructure.SyncService;
 using Microsoft.AspNetCore.Mvc;
 using ILogger = GainsLab.Domain.Interfaces.ILogger;
@@ -59,7 +60,7 @@ public class DescriptionController :  ControllerBase
         
         if( id == Guid.Empty)  return BadRequest();
         
-        var result = await _repo.PullByIdAsync(id,ct);
+        var result = await _repo.PullByIdAsync(DescriptorId.FromGuid(id),ct);
 
         return  APIResultValidation.ValidateResult<DescriptorGetDTO>(this,result);
     }
@@ -84,7 +85,7 @@ public class DescriptionController :  ControllerBase
     {
         if(payload == null)  return BadRequest();
         
-        var result = await _repo.PutAsync(id,payload,ct);
+        var result = await _repo.PutAsync(DescriptorId.FromGuid(id),payload,ct);
         
         return  APIResultValidation.ValidateResult<DescriptorPutDTO>(this,result, new ActionResultInfo(GetActionName(),id));
         
@@ -100,7 +101,7 @@ public class DescriptionController :  ControllerBase
         if(payload == null|| id == Guid.Empty)  return BadRequest();
         
         
-        var result = await _repo.PatchAsync(id,payload,ct);
+        var result = await _repo.PatchAsync(DescriptorId.FromGuid(id),payload,ct);
         
         return  APIResultValidation.ValidateResult<DescriptorUpdateOutcome>(this,result);
     }

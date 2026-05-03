@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GainsLab.Domain;
+using GainsLab.Infrastructure.Utilities;
 
 namespace GainsLab.Contracts.Dtos.PostDto;
 
@@ -9,8 +10,8 @@ namespace GainsLab.Contracts.Dtos.PostDto;
 /// </summary>
 public record MusclePostDTO
 {
-   
-    public Guid? Id { get; init; }
+
+    public Guid? Id { get; init; } = CoreUtilities.GuidGenerator.New();
 
     [Required]
     [StringLength(256, MinimumLength = 2)]

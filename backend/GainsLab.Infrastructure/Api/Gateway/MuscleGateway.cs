@@ -14,6 +14,7 @@ using GainsLab.Contracts.Dtos.PostDto.Request;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.Caching.Registry;
 using GainsLab.Infrastructure.SyncService;
@@ -219,7 +220,7 @@ public class MuscleGateway : IMuscleGateway
 
    
 
-    private Task<DescriptorGetDTO?> GetDescriptorAsync(Guid? id)
+    private Task<DescriptorGetDTO?> GetDescriptorAsync(DescriptorId? id)
         => _descriptorGateway.GetDescriptorByIdAsync(id);
 
 

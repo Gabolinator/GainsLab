@@ -7,6 +7,7 @@
 @using GainsLab.Application.Results
 @using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Contracts.Dtos.PostDto.Outcome
+@using GainsLab.Domain.Entities.Identifier
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Caching.Registry
 @using GainsLab.WebLayer.Components.Control
@@ -70,7 +71,7 @@
     {
         return new MovementCategoryCreateDTO
         {
-            Id = Guid.NewGuid(),
+            Id = MovementCategoryId.New(),
             Descriptor = new DescriptorCreateDTO()
         };
     }
@@ -88,7 +89,7 @@
 
         if (createForm.Id == Guid.Empty)
         {
-            createForm.Id = Guid.NewGuid();
+            createForm.Id = MovementCategoryId.New();
         }
 
         var movementCategoryValid = createForm.IsValid(Logger);

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
+using GainsLab.Infrastructure.Utilities;
 
 namespace GainsLab.Contracts.Dtos.PostDto;
 
@@ -10,13 +12,13 @@ namespace GainsLab.Contracts.Dtos.PostDto;
 /// </summary>
 public record MovementCategoryPostDTO
 {
-    public Guid? Id { get; init; }
+    public MovementCategoryId? Id { get; init; } = MovementCategoryId.New();
 
     [Required]
     [StringLength(256, MinimumLength = 2)]
     public string Name { get; init; } = string.Empty;
 
-    public Guid? ParentCategoryId { get; init; }
+    public MovementCategoryId? ParentCategoryId { get; init; }
 
     [Required]
     public IReadOnlyList<eMovementCategories> BaseCategories { get; init; } =

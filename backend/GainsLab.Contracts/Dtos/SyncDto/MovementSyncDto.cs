@@ -1,12 +1,13 @@
 ﻿using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.SyncDto;
 
 public record MovementSyncDTO (
-    Guid GUID,
+    MovementCategoryId GUID,
     string Name,
-    Guid? DescriptorGUID,
+    DescriptorId? DescriptorGUID,
     IReadOnlyList<Guid>? PrimaryMuscles,
     IReadOnlyList<Guid>? SecondaryMuscles,
     IReadOnlyList<Guid>? Equipment,

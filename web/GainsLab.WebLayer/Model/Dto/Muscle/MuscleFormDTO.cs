@@ -2,13 +2,14 @@
 using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Domain;
+using GainsLab.Infrastructure.Utilities;
 using GainsLab.WebLayer.Model.Dto.Descriptor;
 
 namespace GainsLab.WebLayer.Model.Dto.Muscle;
 
 public class MuscleFormDTO
 {
-    public Guid  Id { get; set; }
+    public Guid  Id { get; set; } =  CoreUtilities.GuidGenerator.New();
     
     [StringLength(256, MinimumLength = 2), Required]
     public string? Name { get; set; }

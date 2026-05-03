@@ -6,6 +6,7 @@ using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Infrastructure.SyncService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,10 +44,9 @@ public class MuscleController : ControllerBase
         Guid id, CancellationToken ct = default)
     {
         
-        
         if( id == Guid.Empty)  return BadRequest();
         
-        var result = await _repo.PullByIdAsync(id,ct);
+        var result = await _repo.PullByIdAsync(MuscleId.FromGuid(id),ct);
 
         return  APIResultValidation.ValidateResult<MuscleGetDTO>(this,result);
     }
@@ -58,7 +58,6 @@ public class MuscleController : ControllerBase
     {
         
         if(payload == null)  return BadRequest();
-        
         
         var result = await _repo.PostAsync(payload,ct);
    
@@ -72,7 +71,7 @@ public class MuscleController : ControllerBase
     {
         if(payload == null)  return BadRequest();
         
-        var result = await _repo.PutAsync(id,payload,ct);
+        var result = await _repo.PutAsync(MuscleId.FromGuid(id),payload,ct);
         
         return  APIResultValidation.ValidateResult<MusclePutDTO>(this,result, new ActionResultInfo(GetActionName(),id));
         
@@ -85,7 +84,7 @@ public class MuscleController : ControllerBase
     {
         if(payload == null|| id == Guid.Empty)  return BadRequest();
         
-        var result = await _repo.PatchAsync(id,payload,ct);
+        var result = await _repo.PatchAsync(MuscleId.FromGuid(id),payload,ct);
         return  APIResultValidation.ValidateResult<MuscleUpdateOutcome>(this,result);
     
     }
@@ -97,7 +96,7 @@ public class MuscleController : ControllerBase
     {
         if (id == Guid.Empty) return BadRequest();
 
-        var result = await _repo.DeleteAsync(id, ct);
+        var result = await _repo.DeleteAsync(MuscleId.FromGuid(id), ct);
         return APIResultValidation.ValidateResult<MuscleGetDTO>(this, result);
     }
 

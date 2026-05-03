@@ -1,9 +1,10 @@
 ﻿using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.GetDto;
 
 public record DescriptorGetDTO(
-    Guid Id, 
+    DescriptorId Id, 
     string Content, 
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,

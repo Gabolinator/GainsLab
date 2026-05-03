@@ -17,7 +17,22 @@ namespace GainsLab.Application.DomainMappers;
 
 public static class MuscleMapper
 {
-    public static MuscleGetDTO? ToGetDTO(this MuscleRecord? record) =>
+    public static MusclePostDTO ToPostDto(this MusclePutDTO dto, Guid? id)
+    {
+        return new()
+        {
+            Id = CoreUtilities.GetOrGenerateGuid(id),
+            Authority =  dto.Authority,
+            BodySection = dto.BodySection,
+            Descriptor = dto.Descriptor.ToPostDto(),
+            AntagonistIds = dto.AntagonistIds,
+            LatinName = dto.LatinName,
+            Name = dto.Name,
+            CreatedBy = dto.UpdatedBy
+        };
+    }
+
+    public static MuscleGetDTO? ToGetDto(this MuscleRecord? record) =>
         record.TryMapToGetDTO(out var dto) ? dto : null;
 
     public static bool TryMapToGetDTO(this MuscleRecord? record, out MuscleGetDTO? dto)
@@ -107,7 +122,7 @@ public static class MuscleMapper
             AntagonistIds = record.AntagonistGUIDs?.ToArray(),
             Descriptor = descriptorPut ?? new DescriptorPutDTO
             {
-                Id = record.Descriptor?.GUID,
+                Id = DescriptorId.FromNullableGuid(record.Descriptor?.GUID),
                 DescriptionContent = record.Descriptor?.Content ?? string.Empty,
                 Authority = record.Authority,
                 Outcome = outcome

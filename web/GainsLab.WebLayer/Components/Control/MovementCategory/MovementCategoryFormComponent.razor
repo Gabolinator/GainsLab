@@ -5,6 +5,7 @@
 @using GainsLab.Application.Results
 @using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Domain
+@using GainsLab.Domain.Entities.Identifier
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Utilities
 @using GainsLab.WebLayer.Model
@@ -177,7 +178,7 @@
             return; 
         }
         Logger.Log(nameof(MovementCategoryFormComponent), $"Parent Selected: {cat.Name}");
-        ParentRef = new MovementCategoryRefDTO(parsedGuid, cat.Name);
+        ParentRef = new MovementCategoryRefDTO(MovementCategoryId.FromGuid(parsedGuid), cat.Name);
 
     }
 

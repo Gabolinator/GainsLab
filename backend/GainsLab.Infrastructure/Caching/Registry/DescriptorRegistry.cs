@@ -4,6 +4,7 @@ using GainsLab.Application.Results;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.Caching.QueryCache;
 
@@ -14,7 +15,7 @@ public sealed class DescriptorRegistry
     private readonly IDescriptorGateway _gateway;
     private readonly DescriptorQueryCache _cache;
     private readonly ILogger _logger;
-    public Dictionary<Guid,DescriptorGetDTO> Descriptors { get; private set; } = new Dictionary<Guid, DescriptorGetDTO>();
+    public Dictionary<DescriptorId,DescriptorGetDTO> Descriptors { get; private set; } = new Dictionary<DescriptorId, DescriptorGetDTO>();
 
     public DescriptorRegistry(IDescriptorGateway gateway, DescriptorQueryCache cache, ILogger logger)
     {
@@ -68,7 +69,7 @@ public sealed class DescriptorRegistry
        return result;
     }
 
-    public async Task<DescriptorGetDTO?> GetDescriptorByIdAsync(Guid? id)
+    public async Task<DescriptorGetDTO?> GetDescriptorByIdAsync(DescriptorId? id)
     {
       
         _logger.Log(nameof(GetDescriptorByIdAsync), $"Trying  to get descriptor for id {(id!=null ?id.ToString():"null" )}");

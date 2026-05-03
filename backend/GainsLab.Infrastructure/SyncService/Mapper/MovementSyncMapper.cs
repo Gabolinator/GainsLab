@@ -2,6 +2,7 @@
 using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.DTOs.Movement;
 using GainsLab.Contracts.Dtos.SyncDto;
+using GainsLab.Domain.Entities.Identifier;
 
 
 namespace GainsLab.Contracts.SyncService.Mapper;
@@ -39,9 +40,9 @@ public static class MovementSyncMapper
     {
 
         return new MovementSyncDTO(
-            dto.GUID,
+           MovementCategoryId.FromGuid(dto.GUID), 
             dto.Name,
-            dto.Descriptor?.GUID,
+            DescriptorId.FromNullableGuid(dto.Descriptor?.GUID),
             PrimaryMuscles ?? dto.PrimaryMuscleGUIDs.ToList(),
             SecondaryMuscles ?? dto.SecondaryMuscleGUIDs.ToList(),
             Equipment ?? dto.EquipmentGUIDs.ToList(),

@@ -8,6 +8,7 @@
         Created,
         Conflict,
         Deleted,
+        NotDeleted,
         NotFound,
         BadRequest,
         Unauthorized,

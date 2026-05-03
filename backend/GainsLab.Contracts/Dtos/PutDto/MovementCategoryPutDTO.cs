@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.PutDto;
 
@@ -10,7 +11,7 @@ namespace GainsLab.Contracts.Dtos.PutDto;
 /// </summary>
 public record MovementCategoryPutDTO
 {
-    public Guid? Id { get; set; }
+    public MovementCategoryId? Id { get; set; }
 
     public UpsertOutcome Outcome { get; set; } = UpsertOutcome.Failed;
 
@@ -18,7 +19,7 @@ public record MovementCategoryPutDTO
     [StringLength(256, MinimumLength = 2)]
     public string Name { get; set; } = string.Empty;
 
-    public Guid? ParentCategoryId { get; set; }
+    public MovementCategoryId? ParentCategoryId { get; set; }
 
     [Required]
     [MinLength(1)]

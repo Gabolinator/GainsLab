@@ -6,6 +6,7 @@ using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Infrastructure.SyncService;
 using Microsoft.AspNetCore.Mvc;
 
@@ -47,7 +48,7 @@ public class MovementController : ControllerBase
         
         if( id == Guid.Empty)  return BadRequest();
         
-        var result = await _repo.PullByIdAsync(id,ct);
+        var result = await _repo.PullByIdAsync(MovementId.FromGuid(id),ct);
 
         return  APIResultValidation.ValidateResult<MovementGetDTO>(this,result);
     }
@@ -72,7 +73,7 @@ public class MovementController : ControllerBase
     {
         if(payload == null)  return BadRequest();
         
-        var result = await _repo.PutAsync(id,payload,ct);
+        var result = await _repo.PutAsync(MovementId.FromGuid(id),payload,ct);
         
         return  APIResultValidation.ValidateResult<MovementPutDTO>(this,result, new ActionResultInfo(GetActionName(),id));
         
@@ -85,7 +86,7 @@ public class MovementController : ControllerBase
     {
         if(payload == null|| id == Guid.Empty)  return BadRequest();
         
-        var result = await _repo.PatchAsync(id,payload,ct);
+        var result = await _repo.PatchAsync(MovementId.FromGuid(id),payload,ct);
         return  APIResultValidation.ValidateResult<MovementUpdateOutcome>(this,result);
     
     }
@@ -97,7 +98,7 @@ public class MovementController : ControllerBase
     {
         if (id == Guid.Empty) return BadRequest();
 
-        var result = await _repo.DeleteAsync(id, ct);
+        var result = await _repo.DeleteAsync(MovementId.FromGuid(id), ct);
         return APIResultValidation.ValidateResult<MovementGetDTO>(this, result);
     }
 

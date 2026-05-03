@@ -4,6 +4,7 @@ using GainsLab.Application.DTOs.MovementCategory;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Infrastructure.SyncService.Mapper;
 
@@ -42,12 +43,12 @@ public static class MovementCategorySyncMapper
     /// </summary>
     public static MovementCategorySyncDTO ToSyncDTO(
         MovementCategoryRecord dto,
-        (Guid? parentCategoryGuid, IReadOnlyList<eMovementCategories>? baseCategories) parentAndBase)
+        (MovementCategoryId? parentCategoryGuid, IReadOnlyList<eMovementCategories>? baseCategories) parentAndBase)
     {
         return new MovementCategorySyncDTO(
-            dto.GUID,
+            MovementCategoryId.FromGuid(dto.GUID),
             dto.Name,
-            dto.Descriptor?.GUID,
+            DescriptorId.FromNullableGuid(dto.Descriptor?.GUID),
             parentAndBase.parentCategoryGuid,
             parentAndBase.baseCategories ?? Array.Empty<eMovementCategories>(),
             dto.UpdatedAtUtc,

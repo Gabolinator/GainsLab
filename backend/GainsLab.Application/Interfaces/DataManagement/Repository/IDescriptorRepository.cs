@@ -5,17 +5,18 @@ using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Application.Interfaces.DataManagement.Repository;
 
 
 public interface IDescriptorRepository
 {
-    Task<APIResult<DescriptorGetDTO>> PullByIdAsync(Guid id, CancellationToken ct);
+    Task<APIResult<DescriptorGetDTO>> PullByIdAsync(DescriptorId id, CancellationToken ct);
     Task<APIResult<DescriptorGetDTO>> PostAsync(DescriptorPostDTO payload, CancellationToken ct);
-    Task<APIResult<DescriptorPutDTO>> PutAsync(Guid id, DescriptorPutDTO payload, CancellationToken ct);
+    Task<APIResult<DescriptorPutDTO>> PutAsync(DescriptorId id, DescriptorPutDTO payload, CancellationToken ct);
 
-    Task<APIResult<DescriptorUpdateOutcome>> PatchAsync(Guid id, DescriptorUpdateDTO payload, CancellationToken ct);
+    Task<APIResult<DescriptorUpdateOutcome>> PatchAsync(DescriptorId id, DescriptorUpdateDTO payload, CancellationToken ct);
 
     public Task<APIResult<DescriptorRecord>> CreateAsync(DescriptorRecord entity, CancellationToken ct);
     

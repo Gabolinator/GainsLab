@@ -10,6 +10,7 @@ using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.Utilities;
@@ -19,7 +20,7 @@ namespace GainsLab.Infrastructure.DB.Repository;
 
 public class MovementCategoryRepository(GainLabPgDBContext db, IDescriptorRepository descriptorRepository ,IClock clock, ILogger log) : IMovementCategoryRepository
 {
-    public async Task<APIResult<MovementCategoryGetDTO>> PullByIdAsync(Guid id, CancellationToken ct)
+    public async Task<APIResult<MovementCategoryGetDTO>> PullByIdAsync(MovementCategoryId id, CancellationToken ct)
     {
         if(id == Guid.Empty) return APIResult<MovementCategoryGetDTO>.BadRequest("Id cannot be empty");
        
@@ -94,9 +95,9 @@ public class MovementCategoryRepository(GainLabPgDBContext db, IDescriptorReposi
         MovementCategoryRecord entity,
         CancellationToken ct)
     {
-        return CrudResultUtilities.TryValidateUniqueAsync<MovementCategoryRecord, MovementCategoryGetDTO>(
+        return CrudValidation.TryValidateUniqueAsync<MovementCategoryRecord, MovementCategoryGetDTO>(
             entity,
-            EntityType.Descriptor,
+            EntityType.MovementCategory,
             getId: x => x.GUID,
             getName: x => x.Name,
             getContent: x => null,
@@ -281,7 +282,7 @@ public class MovementCategoryRepository(GainLabPgDBContext db, IDescriptorReposi
     }
 
 
-    public async Task<APIResult<MovementCategoryPutDTO>> PutAsync(Guid id, MovementCategoryPutDTO payload,
+    public async Task<APIResult<MovementCategoryPutDTO>> PutAsync(MovementCategoryId id, MovementCategoryPutDTO payload,
         CancellationToken ct)
     {
         if (id == Guid.Empty) return APIResult<MovementCategoryPutDTO>.BadRequest("Id cannot be empty");
@@ -529,7 +530,7 @@ public class MovementCategoryRepository(GainLabPgDBContext db, IDescriptorReposi
     }
 
 
-    public async Task<APIResult<MovementCategoryUpdateOutcome>> PatchAsync(Guid id, MovementCategoryUpdateDTO payload, CancellationToken ct)
+    public async Task<APIResult<MovementCategoryUpdateOutcome>> PatchAsync(MovementCategoryId id, MovementCategoryUpdateDTO payload, CancellationToken ct)
     {
         if (id == Guid.Empty) return APIResult<MovementCategoryUpdateOutcome>.BadRequest("Id cannot be empty");
         try
@@ -559,7 +560,7 @@ public class MovementCategoryRepository(GainLabPgDBContext db, IDescriptorReposi
             }
 
             var requestedBaseGuids = payload.BaseCategories == null || payload.BaseCategories.Count == 0
-                ? new HashSet<Guid>()
+                ? new HashSet<MovementCategoryId>()
                 : payload.BaseCategories
                     .Select(b => b.Id)
                     .Where(id => id != Guid.Empty)
@@ -570,7 +571,7 @@ public class MovementCategoryRepository(GainLabPgDBContext db, IDescriptorReposi
 
             var existingLinks = category.BaseCategoryLinks ?? new List<MovementCategoryRelationRecord>();
             var existingGuids = existingLinks
-                .Select(link => link.ParentCategory?.GUID)
+                .Select(link => MovementCategoryId.FromNullableGuid(link.ParentCategory?.GUID))
                 .Where(g => g.HasValue && g.Value != Guid.Empty)
                 .Select(g => g!.Value)
                 .ToList();
@@ -583,7 +584,7 @@ public class MovementCategoryRepository(GainLabPgDBContext db, IDescriptorReposi
             if (basesChanged)
             {
                 var toRemove = existingLinks
-                    .Where(link => link.ParentCategory?.GUID is Guid guid && guidsToRemove.Contains(guid))
+                    .Where(link => link.ParentCategory?.GUID is Guid guid && guidsToRemove.Contains(MovementCategoryId.FromGuid(guid)))
                     .ToList();
                 
                 if (category.BaseCategoryLinks != null)
@@ -673,23 +674,18 @@ public class MovementCategoryRepository(GainLabPgDBContext db, IDescriptorReposi
         }
     }
 
-    public async Task<APIResult<MovementCategoryGetDTO>> DeleteAsync(Guid id, CancellationToken ct)
+    public async Task<APIResult<MovementCategoryGetDTO>> DeleteAsync(MovementCategoryId id, CancellationToken ct)
     {
         if (id == Guid.Empty) return APIResult<MovementCategoryGetDTO>.BadRequest("Invalid id for delete");
         try
         {
-            var existing = await db.MovementCategories
-                .Include(c => c.Descriptor)
-                .Include(c => c.ParentCategory)
-                .Include(c => c.BaseCategoryLinks)
-                .ThenInclude(link => link.ParentCategory)
-                .FirstOrDefaultAsync(c => c.GUID == id, ct);
-
-            if (existing is null)
+            var recordResult = await GetRecordByIdAsync(id, ct);
+            var existing = recordResult.Value;
+            if (!recordResult.Success || existing == null)
             {
                 return APIResult<MovementCategoryGetDTO>.NotFound($"Movement category {id} not found for deletion");
             }
-
+            
             var dto = existing.ToGetDTO();
             log.Log(nameof(MovementCategoryRepository),$"Deleted {existing.Name} with descriptor id : {(existing.Descriptor != null ? existing.Descriptor.Iguid : "null")}");
             

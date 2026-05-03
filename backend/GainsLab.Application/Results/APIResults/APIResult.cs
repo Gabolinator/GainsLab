@@ -1,4 +1,5 @@
 ﻿using GainsLab.Contracts.Dtos.GetDto;
+using GainsLab.Domain;
 using GainsLab.Infrastructure;
 using Microsoft.AspNetCore.Http.HttpResults;
 
@@ -49,10 +50,13 @@ public class APIResult<T> : Result<T>
 
     public static APIResult<T> Deleted(T value)
         => SuccessResult(ApiResultStatus.Deleted, value);
+    
+    public static APIResult<T> NotDeleted(Guid id, EntityType type, string? message = null)
+        => Failure(ApiResultStatus.NotDeleted, $"Could Not Delete {type} with id {id} : {message}");
 
     public static APIResult<T> NotFound(string notFoundMessage)
         => Failure(ApiResultStatus.NotFound, $"Not Found: {notFoundMessage}");
-
+    
     public static APIResult<T> Unauthorized(string unauthorizedMessage = "Access Denied") =>
         Failure(ApiResultStatus.Unauthorized, unauthorizedMessage);
 

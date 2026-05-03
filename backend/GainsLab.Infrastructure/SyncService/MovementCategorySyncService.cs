@@ -6,6 +6,7 @@ using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Interface;
 using GainsLab.Contracts.SyncService.Mapper;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.SyncService.Mapper;
@@ -62,12 +63,12 @@ public class MovementCategorySyncService : ISyncService<MovementCategorySyncDTO>
         var baseCategoriesMap = await LoadBaseCategoriesAsync(ct);
         var relationsDtos = await LoadCategoryRelationsAsync(movementCategoryDtos.Select(m => m.Id).ToArray(), ct);
 
-        (Guid? parent, IReadOnlyList<eMovementCategories>? bases) GetParentsAndBase(
+        (MovementCategoryId? parent, IReadOnlyList<eMovementCategories>? bases) GetParentsAndBase(
             MovementCategoryRecord m)
         {
             if (!relationsDtos.TryGetValue(m.Id, out var relationParents) || relationParents.Count == 0)
             {
-                return (m.ParentCategory?.GUID, null);
+                return (MovementCategoryId.FromNullableGuid(m.ParentCategory?.GUID), null);
             }
 
             var baseMatches = relationParents
@@ -76,7 +77,7 @@ public class MovementCategorySyncService : ISyncService<MovementCategorySyncDTO>
                 .Distinct()
                 .ToList();
 
-            return (m.ParentCategory?.GUID, baseMatches.Count == 0 ? null : baseMatches);
+            return (MovementCategoryId.FromNullableGuid(m.ParentCategory?.GUID), baseMatches.Count == 0 ? null : baseMatches);
         }
 
         var items = movementCategoryDtos

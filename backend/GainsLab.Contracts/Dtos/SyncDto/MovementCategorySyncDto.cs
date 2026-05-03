@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.SyncDto;
 
@@ -17,10 +18,10 @@ namespace GainsLab.Contracts.Dtos.SyncDto;
 /// <param name="IsDeleted">Marks tombstones.</param>
 /// <param name="Authority">Indicates who owns the record.</param>
 public record MovementCategorySyncDTO(
-    Guid GUID,
+    MovementCategoryId GUID,
     string Name,
-    Guid? DescriptorGUID,
-    Guid? ParentCategoryGUID,
+    DescriptorId? DescriptorGUID,
+    MovementCategoryId? ParentCategoryGUID,
     IReadOnlyList<eMovementCategories> BaseCategories,
     DateTimeOffset UpdatedAtUtc,
     long UpdatedSeq,

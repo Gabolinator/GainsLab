@@ -1,13 +1,15 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
+using GainsLab.Infrastructure.Utilities;
 using GainsLab.WebLayer.Model.Dto.Descriptor;
 
 namespace GainsLab.WebLayer.Model.Dto.MovementCategory;
 
 public class MovementCategoryFormDTO
 {
-    public Guid  Id { get; set; }
+    public MovementCategoryId  Id { get; set; } =  MovementCategoryId.New();
     
     [StringLength(256, MinimumLength = 2), Required]
     public string? Name { get; set; } = "new name";

@@ -10,6 +10,7 @@ using GainsLab.Contracts.Dtos.PutDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.Utilities;
@@ -24,7 +25,7 @@ public class DescriptorRepository(GainLabPgDBContext db, IClock clock, ILogger l
     
     //note : no Delete() as its handled in cascading delete of owning parent aggregate 
 
-    public async Task<APIResult<DescriptorGetDTO>> PullByIdAsync(Guid id, CancellationToken ct)
+    public async Task<APIResult<DescriptorGetDTO>> PullByIdAsync(DescriptorId id, CancellationToken ct)
     {
         if(id == Guid.Empty) return APIResult<DescriptorGetDTO>.BadRequest("Id cannot be empty");
         
@@ -90,19 +91,32 @@ public class DescriptorRepository(GainLabPgDBContext db, IClock clock, ILogger l
     {
         try
         {
-            var entity = payload.ToEntity(clock);           // GUID created here
-            if (entity == null) return APIResult<DescriptorGetDTO>.BadRequest("Could not create record from dto");
-            
-            var existing = await TryValidateUnique(entity, ct);
-            if (existing.AlreadyExists)
+            var validation =
+                CrudValidation.ValidatePayloadAndBuildEntity<DescriptorPostDTO, DescriptorRecord, DescriptorGetDTO>(
+                    payload,
+                    EntityType.Descriptor,
+                    p => p.Id,
+                    p => p.ToEntity(clock));
+
+            if (!validation.Success)
             {
-                return existing.ExistingResult!;
+                return validation.Error!;
             }
 
-            var record = await CreateAsync(entity, ct);
+            var entity = validation.Entity!;
+
+            var uniqueValidation = await TryValidateUnique(entity, ct);
+
+            if (uniqueValidation.AlreadyExists)
+            {
+                return uniqueValidation.ExistingResult!;
+            }
             
-            //if success => value != null
-            return record.Success  ? APIResult<DescriptorGetDTO>.Created(record.Value.ToGetDTO()!) : APIResult<DescriptorGetDTO>.NotCreated("Failed to create record", NotCreatedReason.Other);
+            var record = await CreateAsync(entity, ct);
+
+           //if success => value != null
+            return record.Success  ? APIResult<DescriptorGetDTO>.Created(record.Value.ToGetDTO()!) : 
+                APIResult<DescriptorGetDTO>.NotCreated("Failed to create record", NotCreatedReason.Other);
             
         }
         catch (Exception e)
@@ -134,7 +148,7 @@ public class DescriptorRepository(GainLabPgDBContext db, IClock clock, ILogger l
         DescriptorRecord entity,
         CancellationToken ct)
     {
-        return CrudResultUtilities.TryValidateUniqueAsync<DescriptorRecord, DescriptorGetDTO>(
+        return CrudValidation.TryValidateUniqueAsync<DescriptorRecord, DescriptorGetDTO>(
             entity,
             EntityType.Descriptor,
             getId: x => x.GUID,
@@ -145,7 +159,7 @@ public class DescriptorRepository(GainLabPgDBContext db, IClock clock, ILogger l
             ct);
     }
 
-    public async Task<APIResult<DescriptorPutDTO>> PutAsync(Guid id, DescriptorPutDTO payload, CancellationToken ct)
+    public async Task<APIResult<DescriptorPutDTO>> PutAsync(DescriptorId id, DescriptorPutDTO payload, CancellationToken ct)
     {
         try
         {
@@ -165,7 +179,7 @@ public class DescriptorRepository(GainLabPgDBContext db, IClock clock, ILogger l
                     APIResult<DescriptorPutDTO>.Created(created.Value!.ToPutDTO(clock, UpsertOutcome.Created)!);
             }
 
-            payload.Id = id;
+            payload.Id = DescriptorId.FromGuid(id);
             
             
             //nothing changed
@@ -189,12 +203,12 @@ public class DescriptorRepository(GainLabPgDBContext db, IClock clock, ILogger l
         }
     }
 
-    public async Task<APIResult<DescriptorUpdateOutcome>> PatchAsync(Guid id, DescriptorUpdateDTO payload, CancellationToken ct)
+    public async Task<APIResult<DescriptorUpdateOutcome>> PatchAsync(DescriptorId id, DescriptorUpdateDTO payload, CancellationToken ct)
     {
 
         try
         {
-            var description = id.Equals(Guid.Empty)? null: await db.Descriptors.FirstOrDefaultAsync(d => d.GUID == id  && !d.IsDeleted, ct);
+            var description = id == Guid.Empty? null: await db.Descriptors.FirstOrDefaultAsync(d => d.GUID == id  && !d.IsDeleted, ct);
             if(description == null) 
                 return APIResult<DescriptorUpdateOutcome>.NotUpdated("Not found for update");
             

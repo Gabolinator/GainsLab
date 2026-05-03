@@ -7,6 +7,7 @@ using GainsLab.Contracts.Dtos.PostDto.Outcome;
 using GainsLab.Contracts.Dtos.PostDto.Request;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Infrastructure.Caching.QueryCache;
 
 namespace GainsLab.Infrastructure.Caching.Registry;
@@ -15,7 +16,7 @@ public sealed class EquipmentRegistry
 {
     private readonly IEquipmentGateway _gateway;
     private readonly EquipmentQueryCache _cache;
-    public Dictionary<Guid,EquipmentGetDTO> Equipments { get; private set; } = new Dictionary<Guid, EquipmentGetDTO>();
+    public Dictionary<EquipmentId,EquipmentGetDTO> Equipments { get; private set; } = new Dictionary<EquipmentId, EquipmentGetDTO>();
 
 
     public EquipmentRegistry(IEquipmentGateway gateway, EquipmentQueryCache cache)
@@ -82,7 +83,7 @@ public sealed class EquipmentRegistry
     }
     
     
-    public async Task<EquipmentGetDTO?> GetEquipmentByIdAsync(Guid? id)
+    public async Task<EquipmentGetDTO?> GetEquipmentByIdAsync(EquipmentId? id)
     {
         if (id is null || id == Guid.Empty) return null;
 

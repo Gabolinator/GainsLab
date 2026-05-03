@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
+using GainsLab.Infrastructure.Utilities;
 
 namespace GainsLab.Contracts.Dtos.PostDto;
 
 public record DescriptorPostDTO
 {
-    public Guid? Id { get; init; }
+    public DescriptorId? Id { get; init; } =  DescriptorId.New();
 
     [Required]
     [StringLength(1024, MinimumLength = 3)]

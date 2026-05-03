@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.PutDto;
 
@@ -8,7 +9,7 @@ namespace GainsLab.Contracts.Dtos.PutDto;
 /// </summary>
 public record EquipmentPutDTO
 {
-    public Guid? Id { get; set; }
+    public EquipmentId? Id { get; set; }
 
     public UpsertOutcome Outcome { get; set; } = UpsertOutcome.Failed;
 

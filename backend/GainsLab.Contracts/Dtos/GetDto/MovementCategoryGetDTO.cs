@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.GetDto;
 
@@ -18,11 +19,11 @@ namespace GainsLab.Contracts.Dtos.GetDto;
 /// <param name="IsDeleted">Marks soft-deleted rows.</param>
 /// <param name="Authority">Authority that owns the record.</param>
 public record MovementCategoryGetDTO(
-    Guid Id,
+    MovementCategoryId Id,
     string Name,
-    Guid? DescriptorId,
+    DescriptorId? DescriptorId,
     DescriptorGetDTO? Descriptor,
-    Guid? ParentCategoryId,
+    MovementCategoryId? ParentCategoryId,
     IReadOnlyList<eMovementCategories>? BaseCategoriesEnum,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,
@@ -36,4 +37,4 @@ public record MovementCategoryGetDTO(
 }
 
 
-public sealed record MovementCategoryRefDTO(Guid Id, string Name);
+public sealed record MovementCategoryRefDTO(MovementCategoryId Id, string Name);

@@ -1,5 +1,6 @@
 ﻿using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.SyncDto;
 
@@ -14,9 +15,9 @@ namespace GainsLab.Contracts.Dtos.SyncDto;
 /// <param name="IsDeleted">Flag indicating whether the equipment represents a tombstone.</param>
 /// <param name="Authority">Indicates which tier owns the record.</param>
 public record EquipmentSyncDTO(
-    Guid GUID,
+    EquipmentId GUID,
     string Name,
-    Guid? DescriptorGUID,
+    DescriptorId? DescriptorGUID,
     DateTimeOffset UpdatedAtUtc,
     long UpdatedSeq,
     bool IsDeleted = false,
