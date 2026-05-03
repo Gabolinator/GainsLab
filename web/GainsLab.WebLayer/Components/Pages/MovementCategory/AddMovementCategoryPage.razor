@@ -7,6 +7,7 @@
 @using GainsLab.Application.Results
 @using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Contracts.Dtos.PostDto.Outcome
+@using GainsLab.Contracts.Dtos.SummaryDto
 @using GainsLab.Domain.Entities.Identifier
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Caching.Registry
@@ -45,7 +46,7 @@
     public MovementCategoryCreateDTO? CreateCategory { get; set; } = null;
     public MessagesContainer? Messages { get; set; } = new MessagesContainer();
 
-    public IReadOnlyList<MovementCategoryRefDTO> AllCategories { get; set; } = new List<MovementCategoryRefDTO>();
+    public IReadOnlyList<MovementCategorySummaryDTO> AllCategories { get; set; } = new List<MovementCategorySummaryDTO>();
 
 
     protected override async Task OnParametersSetAsync()
@@ -62,7 +63,7 @@
             return;
         }
 
-        AllCategories = categories.Value!.Select(c => new MovementCategoryRefDTO(c.Id, c.Name)).ToList();
+        AllCategories = categories.Value!.Select(c => new MovementCategorySummaryDTO(c.Id, c.Name)).ToList();
 
         CreateCategory = BuildInitialModel();
     }

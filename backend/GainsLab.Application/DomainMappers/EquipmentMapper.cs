@@ -5,6 +5,7 @@ using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Domain.Entities.CreationInfo;
 using GainsLab.Domain.Entities.Descriptor;
 using GainsLab.Domain.Entities.Identifier;
@@ -20,18 +21,36 @@ namespace GainsLab.Application.DomainMappers;
 /// </summary>
 public static class EquipmentMapper
 {
+    
+    public static EquipmentSummaryDTO? ToSummaryDto(this EquipmentRecord? record)
+    {
+        if (record is null) return null;
+
+        return new EquipmentSummaryDTO(
+            Id: EquipmentId.FromGuid(record.GUID),
+            Name: record.Name);
+    }
+    
+    public static EquipmentSummaryDTO? ToSummaryDto(this EquipmentGetDTO? record)
+    {
+        if (record is null) return null;
+
+        return new EquipmentSummaryDTO(
+            Id: record.Id,
+            Name: record.Name);
+    }
+    
     /// <summary>
     /// Projects an EF Core equipment record into the Get DTO.
     /// </summary>
-    public static EquipmentGetDTO? ToGetDTO(this EquipmentRecord? dto)
+    public static EquipmentGetDTO? ToGetDto(this EquipmentRecord? dto)
     {
         if (dto == null) return null;
 
         return new EquipmentGetDTO(
             EquipmentId.FromGuid(dto.GUID), 
             dto.Name,
-            DescriptorId.FromGuid(dto.GUID),
-            dto.Descriptor?.ToGetDTO(),
+            dto.Descriptor?.ToSummaryDto(),
             dto.CreatedAtUtc,
             dto.UpdatedAtUtc,
             dto.UpdatedSeq,

@@ -9,6 +9,7 @@ using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.ID;
 using GainsLab.Contracts.Dtos.PostDto.Outcome;
 using GainsLab.Contracts.Dtos.PostDto.Request;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
@@ -74,13 +75,13 @@ public class MovementCategoryGateway : IMovementCategoryGateway
             .SuccessResult(dtos.ToList());
     }
 
-    private void AssignChild(MovementCategoryGetDTO?[] dtos, Dictionary<MovementCategoryId, MovementCategoryRefDTO> refs)
+    private void AssignChild(MovementCategoryGetDTO?[] dtos, Dictionary<MovementCategoryId, MovementCategorySummaryDTO> refs)
     {
         if (!dtos.Any() || !refs.Any()) return;
         
         var validDtos = dtos
-            .Where(d => d is { ParentCategoryId: not null } 
-                        && d.ParentCategoryId != Guid.Empty);
+            .Where(d => d is { ParentCategory: not null } 
+                        && d.ParentCategory.Id != Guid.Empty);
         if (!validDtos.Any()) return;
         
         //we need to check which refs has dto as parent
@@ -88,9 +89,9 @@ public class MovementCategoryGateway : IMovementCategoryGateway
         {
             if(dto == null) continue;
             
-            var dtosWithThatParent = validDtos.Where(d => d != null && d!.ParentCategoryId == dto.Id);
+            var dtosWithThatParent = validDtos.Where(d => d != null && d!.ParentCategory?.Id == dto.Id);
             var childs = dtosWithThatParent.Select(c =>
-                refs.TryGetValue(c.Id, out var refDto) ? refDto : new MovementCategoryRefDTO(c.Id, ""));
+                refs.TryGetValue(c.Id, out var refDto) ? refDto : new MovementCategorySummaryDTO(c.Id, ""));
 
             dto.ChildCategories = childs.ToList();
         }
@@ -99,7 +100,7 @@ public class MovementCategoryGateway : IMovementCategoryGateway
     
     
 
-    private IReadOnlyList<MovementCategoryRefDTO>? GetBasesRefs(IEnumerable<eMovementCategories> basesCat, Dictionary<eMovementCategories, MovementCategoryRefDTO> refs)
+    private IReadOnlyList<MovementCategorySummaryDTO>? GetBasesRefs(IEnumerable<eMovementCategories> basesCat, Dictionary<eMovementCategories, MovementCategorySummaryDTO> refs)
     {
         if(!basesCat.Any() || !refs.Any()) return null;
 
@@ -107,7 +108,7 @@ public class MovementCategoryGateway : IMovementCategoryGateway
 
     }
 
-    private MovementCategoryRefDTO? GetRef(MovementCategoryId? id, Dictionary<MovementCategoryId, MovementCategoryRefDTO> refs)
+    private MovementCategorySummaryDTO? GetRef(MovementCategoryId? id, Dictionary<MovementCategoryId, MovementCategorySummaryDTO> refs)
     {
        if(id == null || id == Guid.Empty || !refs.Any()) return null;
        
@@ -115,7 +116,7 @@ public class MovementCategoryGateway : IMovementCategoryGateway
        
     }
 
-    private Dictionary<eMovementCategories,MovementCategoryRefDTO> GetBaseCategoryRefs(Dictionary<MovementCategoryId, MovementCategoryRefDTO> refs)
+    private Dictionary<eMovementCategories,MovementCategorySummaryDTO> GetBaseCategoryRefs(Dictionary<MovementCategoryId, MovementCategorySummaryDTO> refs)
     {
         if (!refs.Any()) return new ();
         

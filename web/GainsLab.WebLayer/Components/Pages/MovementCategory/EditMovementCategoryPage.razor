@@ -9,6 +9,7 @@
 @using GainsLab.Contracts.Dtos.Delete.Outcome
 @using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Contracts.Dtos.ID
+@using GainsLab.Contracts.Dtos.SummaryDto
 @using GainsLab.Contracts.Dtos.UpdateDto.Request
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Caching.Registry
@@ -71,7 +72,7 @@
    
     public MessagesContainer? Messages { get; set; } = new MessagesContainer();
 
-    public IReadOnlyList<MovementCategoryRefDTO> AllCategories { get; set; }
+    public IReadOnlyList<MovementCategorySummaryDTO> AllCategories { get; set; }
 
 
     protected override async Task OnParametersSetAsync()
@@ -93,7 +94,7 @@
         }
 
         _categories = eqs.Value!;
-        AllCategories=_categories.Select(c => new MovementCategoryRefDTO(c.Id, c.Name)).ToList();
+        AllCategories=_categories.Select(c => new MovementCategorySummaryDTO(c.Id, c.Name)).ToList();
 
         
         var eq =   _categories.FirstOrDefault(e => e.Id == Id);

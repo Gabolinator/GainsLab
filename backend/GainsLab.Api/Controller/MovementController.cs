@@ -14,21 +14,11 @@ namespace GainsLab.Api.Controller;
 
 [ApiController]
 [Route("movements")]
-public class MovementController : ControllerBase
+public class MovementController(IMovementRepository repo, ISyncService<MovementSyncDTO> svc)
+    : ControllerBase
 {
-    private readonly IMovementRepository _repo;
-    private readonly ISyncService<MovementSyncDTO> _svc;
-    private readonly ILogger _log;
 
-    public MovementController(IMovementRepository repo, ISyncService<MovementSyncDTO> svc, ILogger log)
-    {
-        _repo = repo;
-        _svc = svc;
-        _log = log;
-        
-    }
-    
-       [HttpGet("sync")]
+    [HttpGet("sync")]
     public async Task<IActionResult> GetMovements(
         [FromQuery] DateTimeOffset? ts, [FromQuery] long? seq, [FromQuery] int take = 200, CancellationToken ct = default)
     {
@@ -36,7 +26,7 @@ public class MovementController : ControllerBase
         var cursor = new SyncCursor(ts ?? DateTimeOffset.MinValue, seq ?? 0);
         take = Math.Clamp(take, 1, 500);
 
-        var page = await _svc.PullAsync(cursor, take, ct);
+        var page = await svc.PullAsync(cursor, take, ct);
         return Ok(page);
     }
     
@@ -48,7 +38,7 @@ public class MovementController : ControllerBase
         
         if( id == Guid.Empty)  return BadRequest();
         
-        var result = await _repo.PullByIdAsync(MovementId.FromGuid(id),ct);
+        var result = await repo.PullByIdAsync(MovementId.FromGuid(id),ct);
 
         return  APIResultValidation.ValidateResult<MovementGetDTO>(this,result);
     }
@@ -61,7 +51,7 @@ public class MovementController : ControllerBase
         
         if(payload == null)  return BadRequest();
         
-        var result = await _repo.PostAsync(payload,ct);
+        var result = await repo.PostAsync(payload,ct);
    
         return APIResultValidation.ValidateResult<MovementGetDTO>(this, result,
             result.Value != null ? new ActionResultInfo(GetActionName(), result.Value.Id) : null);
@@ -73,7 +63,7 @@ public class MovementController : ControllerBase
     {
         if(payload == null)  return BadRequest();
         
-        var result = await _repo.PutAsync(MovementId.FromGuid(id),payload,ct);
+        var result = await repo.PutAsync(MovementId.FromGuid(id),payload,ct);
         
         return  APIResultValidation.ValidateResult<MovementPutDTO>(this,result, new ActionResultInfo(GetActionName(),id));
         
@@ -86,7 +76,7 @@ public class MovementController : ControllerBase
     {
         if(payload == null|| id == Guid.Empty)  return BadRequest();
         
-        var result = await _repo.PatchAsync(MovementId.FromGuid(id),payload,ct);
+        var result = await repo.PatchAsync(MovementId.FromGuid(id),payload,ct);
         return  APIResultValidation.ValidateResult<MovementUpdateOutcome>(this,result);
     
     }
@@ -98,7 +88,7 @@ public class MovementController : ControllerBase
     {
         if (id == Guid.Empty) return BadRequest();
 
-        var result = await _repo.DeleteAsync(MovementId.FromGuid(id), ct);
+        var result = await repo.DeleteAsync(MovementId.FromGuid(id), ct);
         return APIResultValidation.ValidateResult<MovementGetDTO>(this, result);
     }
 

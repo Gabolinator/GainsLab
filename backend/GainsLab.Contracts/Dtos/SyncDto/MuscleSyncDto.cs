@@ -17,11 +17,11 @@ namespace GainsLab.Contracts.Dtos.SyncDto;
 /// <param name="IsDeleted">Marks tombstones.</param>
 /// <param name="Authority">Indicates who owns the record.</param>
 public record MuscleSyncDTO(
-    Guid GUID,
+    MuscleId GUID,
     string Name,
     DescriptorId? DescriptorGUID,
     eBodySection BodySection,
-    IReadOnlyList<Guid>? AntagonistGuids,
+    IReadOnlyList<MuscleId>? AntagonistGuids,
     DateTimeOffset UpdatedAtUtc,
     long UpdatedSeq,
     bool IsDeleted = false,

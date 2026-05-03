@@ -5,6 +5,7 @@ using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Domain.Entities.CreationInfo;
 using GainsLab.Domain.Entities.Descriptor;
 using GainsLab.Domain.Entities.Identifier;
@@ -21,7 +22,7 @@ public static class MuscleMapper
     {
         return new()
         {
-            Id = CoreUtilities.GetOrGenerateGuid(id),
+            Id = MuscleId.FromGuid(CoreUtilities.GetOrGenerateGuid(id)),
             Authority =  dto.Authority,
             BodySection = dto.BodySection,
             Descriptor = dto.Descriptor.ToPostDto(),
@@ -30,6 +31,17 @@ public static class MuscleMapper
             Name = dto.Name,
             CreatedBy = dto.UpdatedBy
         };
+    }
+    
+    public static MuscleSummaryDTO? ToSummaryDto(this MuscleRecord? record)
+    {
+        if (record is null) return null;
+
+        return new MuscleSummaryDTO(
+            Id: MuscleId.FromGuid(record.GUID),
+            Name: record.Name,
+            LatinName: string.Empty, // not implemented
+            BodySection: record.BodySection);
     }
 
     public static MuscleGetDTO? ToGetDto(this MuscleRecord? record) =>
@@ -44,17 +56,21 @@ public static class MuscleMapper
         }
 
         record.Descriptor.TryMapToGetDTO(out var descriptorDto);
-        var antagonistIds = record.AntagonistGUIDs?.ToArray();
+        var antagonists = record.Antagonists
+            .Where(link => link.Antagonist is not null)
+            .Select(link => link.Antagonist.ToSummaryDto())
+            .Where(summary => summary is not null)
+            .Select(summary => summary!)
+            .DistinctBy(summary => summary.Id)
+            .ToList();
 
         dto = new MuscleGetDTO(
-            record.GUID,
+            MuscleId.FromGuid(record.GUID),
             record.Name,
             null,
             record.BodySection,
-            record.Descriptor?.GUID,
-            descriptorDto,
-            antagonistIds,
-            null,
+            descriptorDto.ToSummaryDto(),
+            antagonists,
             record.CreatedAtUtc,
             record.UpdatedAtUtc,
             record.UpdatedSeq,
@@ -63,9 +79,9 @@ public static class MuscleMapper
         return true;
     }
 
-    public static MuscleRefDTO ToRefDto(this MuscleGetDTO syncDto)
+    public static MuscleSummaryDTO ToSummaryDto(this MuscleGetDTO syncDto)
     {
-        return new MuscleRefDTO(syncDto.Id, syncDto.Name, syncDto.LatinName);
+        return new MuscleSummaryDTO(syncDto.Id, syncDto.Name, syncDto.LatinName, syncDto.BodySection);
     }
     
     public static MuscleRecord? ToEntity(this MusclePostDTO? dto, IClock clock) =>

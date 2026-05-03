@@ -28,7 +28,7 @@ public class MovementCategoryRepository(GainLabPgDBContext db, IDescriptorReposi
         {
             var result = await GetRecordByIdAsync(id, ct);
             
-            return CrudResultUtilities.DispatchResult<MovementCategoryGetDTO, MovementCategoryRecord>(result, record => record.ToGetDTO()!);
+            return CrudResultUtilities.DispatchResult<MovementCategoryGetDTO, MovementCategoryRecord>(result, record => record.ToGetDto()!);
         }
         catch (Exception e)
         {
@@ -156,7 +156,7 @@ public class MovementCategoryRepository(GainLabPgDBContext db, IDescriptorReposi
             var createResult = await CreateAsync(entity, ct);
 
             return createResult.Success && createResult.Value != null
-                ? APIResult<MovementCategoryGetDTO>.Created(createResult.Value.ToGetDTO()!)
+                ? APIResult<MovementCategoryGetDTO>.Created(createResult.Value.ToGetDto()!)
                 : APIResult<MovementCategoryGetDTO>.NotCreated(
                     "Failed to create record",
                     NotCreatedReason.Other);
@@ -647,7 +647,7 @@ public class MovementCategoryRepository(GainLabPgDBContext db, IDescriptorReposi
 
                 descriptorChanged = category.Descriptor.TryUpdate(payload.Descriptor, clock);
                 descriptorOutcomeState = descriptorChanged ? UpdateOutcome.Updated : UpdateOutcome.NotUpdated;
-                descriptorOutcome = new DescriptorUpdateOutcome(descriptorOutcomeState, category.Descriptor.ToGetDTO());
+                descriptorOutcome = new DescriptorUpdateOutcome(descriptorOutcomeState, category.Descriptor.ToGetDto());
             }
 
             if (!categoryChanged && !descriptorChanged)
@@ -657,7 +657,7 @@ public class MovementCategoryRepository(GainLabPgDBContext db, IDescriptorReposi
 
             await db.SaveChangesAsync(ct).ConfigureAwait(false);
 
-            var updatedState = category.ToGetDTO();
+            var updatedState = category.ToGetDto();
             var outcome = new MovementCategoryUpdateOutcome(
                 categoryChanged ? UpdateOutcome.Updated : UpdateOutcome.NotUpdated,
                 descriptorOutcomeState,
@@ -686,7 +686,7 @@ public class MovementCategoryRepository(GainLabPgDBContext db, IDescriptorReposi
                 return APIResult<MovementCategoryGetDTO>.NotFound($"Movement category {id} not found for deletion");
             }
             
-            var dto = existing.ToGetDTO();
+            var dto = existing.ToGetDto();
             log.Log(nameof(MovementCategoryRepository),$"Deleted {existing.Name} with descriptor id : {(existing.Descriptor != null ? existing.Descriptor.Iguid : "null")}");
             
             db.MovementCategories.Remove(existing);

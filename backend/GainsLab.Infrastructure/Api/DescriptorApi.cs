@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using GainsLab.Application.DomainMappers;
 using GainsLab.Application.Interfaces;
 using GainsLab.Application.Results;
 using GainsLab.Contracts;
@@ -124,7 +125,7 @@ public class DescriptorApi : IDescriptorApi
             }
 
             
-            return Result<DescriptorCreateOutcome>.SuccessResult(new DescriptorCreateOutcome(CreateOutcome.Created,payload));
+            return Result<DescriptorCreateOutcome>.SuccessResult(new DescriptorCreateOutcome(CreateOutcome.Created,payload.ToSummaryDto()));
             
         }
         catch (OperationCanceledException)

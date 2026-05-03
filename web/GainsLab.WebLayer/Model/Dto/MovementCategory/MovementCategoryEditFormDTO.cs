@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Domain;
@@ -30,6 +31,15 @@ public class MovementCategoryEditFormDTO : MovementCategoryFormDTO
 public static class MovementCategoryEditFormDTOExtensions
 {
    
+    public static DescriptorFormDTO FromSummaryDTO(this DescriptorSummaryDTO dto)
+    {
+        return new()
+        {
+            Id = dto.Id,
+            DescriptionContent = dto.Content,
+
+        };
+    }
     
     public static MovementCategoryEditFormDTO FromGetDTO(this MovementCategoryGetDTO dto)
     {
@@ -44,7 +54,7 @@ public static class MovementCategoryEditFormDTOExtensions
             Authority = dto.Authority,
             Descriptor = dto.Descriptor is null
                 ? new DescriptorEditDTO()
-                : dto.Descriptor.FromGetDTO()
+                : dto.Descriptor.FromSummaryDTO()
         };
     }
 

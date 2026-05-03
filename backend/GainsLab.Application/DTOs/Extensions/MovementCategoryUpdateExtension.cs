@@ -4,6 +4,7 @@ using System.Linq;
 using GainsLab.Application.DTOs.MovementCategory;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PutDto;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Contracts.Dtos.UpdateDto;
 using GainsLab.Domain;
 using GainsLab.Domain.Interfaces;
@@ -130,7 +131,7 @@ public static class MovementCategoryUpdateExtension
             return oldAuthority !=newAuthority.Value;
         }
         
-        bool AsParentChanged(MovementCategoryRecord? oldParentCategory, MovementCategoryRefDTO? newParentCategory)
+        bool AsParentChanged(MovementCategoryRecord? oldParentCategory, MovementCategorySummaryDTO? newParentCategory)
         {
             
             if(oldParentCategory == null && newParentCategory == null) return false;

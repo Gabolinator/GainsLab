@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.GetDto;
 
@@ -19,19 +21,15 @@ namespace GainsLab.Contracts.Dtos.GetDto;
 /// <param name="IsDeleted">Marks soft-deleted records.</param>
 /// <param name="Authority">Authority that owns the record.</param>
 public sealed record MuscleGetDTO(
-    Guid Id,
+    MuscleId Id,
     string Name,
     string? LatinName,
     eBodySection BodySection,
-    Guid? DescriptorId,
-    DescriptorGetDTO? Descriptor,
-    IReadOnlyList<Guid>? AntagonistIds,
-    IReadOnlyList<MuscleRefDTO>? Antagonists,
+    DescriptorSummaryDTO? Descriptor,
+    IReadOnlyList<MuscleSummaryDTO>? Antagonists,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,
     long UpdatedSeq,
     bool IsDeleted = false,
     DataAuthority Authority = DataAuthority.Bidirectional);
-
-
-public sealed record MuscleRefDTO(Guid Id, string Name, string? LatinName ="");
+    

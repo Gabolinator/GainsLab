@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Domain;
 using GainsLab.Domain.Entities.Identifier;
 
@@ -21,9 +22,8 @@ namespace GainsLab.Contracts.Dtos.GetDto;
 public record MovementCategoryGetDTO(
     MovementCategoryId Id,
     string Name,
-    DescriptorId? DescriptorId,
-    DescriptorGetDTO? Descriptor,
-    MovementCategoryId? ParentCategoryId,
+    DescriptorSummaryDTO? Descriptor,
+    MovementCategorySummaryDTO? ParentCategory,
     IReadOnlyList<eMovementCategories>? BaseCategoriesEnum,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,
@@ -31,10 +31,6 @@ public record MovementCategoryGetDTO(
     bool IsDeleted = false,
     DataAuthority Authority = DataAuthority.Bidirectional)
 {
-    public MovementCategoryRefDTO? ParentCategory { get; set; }
-    public  IReadOnlyList<MovementCategoryRefDTO>? BaseCategories { get; set; }
-    public IReadOnlyList<MovementCategoryRefDTO>? ChildCategories { get; set; }
+    public IReadOnlyList<MovementCategorySummaryDTO>? BaseCategories { get; set; }
+    public IReadOnlyList<MovementCategorySummaryDTO>? ChildCategories { get; set; }
 }
-
-
-public sealed record MovementCategoryRefDTO(MovementCategoryId Id, string Name);

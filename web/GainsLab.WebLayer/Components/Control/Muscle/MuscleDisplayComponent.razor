@@ -5,6 +5,7 @@
 @using GainsLab.Contracts.Dtos.Delete.Outcome
 @using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Contracts.Dtos.ID
+@using GainsLab.Contracts.Dtos.SummaryDto
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Caching.Registry
 @using GainsLab.WebLayer.Model
@@ -122,16 +123,9 @@
     {
         return eq.Descriptor?.Content ?? "Description not found";
     }
+    
 
-    private string GetAntagonist(MuscleGetDTO muscleRecord)
-    {
-        if (muscleRecord.AntagonistIds == null || !muscleRecord.AntagonistIds.Any()) return "None";
-      //  IEnumerable<MuscleGetDTO> antagonist = GetAntagonists(muscleRecord.AntagonistIds.ToHashSet());
-        var antagonist = GetAntagonists(muscleRecord.Antagonists);
-        return string.Join(',', antagonist);
-    }
-
-    private IEnumerable<string> GetAntagonists(IReadOnlyList<MuscleRefDTO>? antagonists)
+    private IEnumerable<string> GetAntagonists(IReadOnlyList<MuscleSummaryDTO>? antagonists)
     {
         return antagonists != null ? antagonists.Select(a => a.Name) : new List<string>();
     }
@@ -140,7 +134,7 @@
     {
         if (_muscles == null || !_muscles.Any()) return new();
         
-        return _muscles.Where(m =>m.AntagonistIds !=null && m.AntagonistIds.Contains(eq.Id)).Select(m=>m.Name).ToList();
+        return _muscles.Where(m =>m.Antagonists !=null && m.Antagonists.Select(a=>a.Id).Contains(eq.Id)).Select(m=>m.Name).ToList();
     }
     
     private Link? GetEditLink(MuscleGetDTO eq) => new Link { Text = $" Edit: {eq.Name}", Page = $@"muscles/{eq.Id}" };

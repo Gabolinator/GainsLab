@@ -9,6 +9,7 @@ using GainsLab.Contracts.Dtos.UpdateDto.Request;
 using GainsLab.Domain;
 using GainsLab.Infrastructure.Utilities;
 using GainsLab.WebLayer.Model.Dto.Descriptor;
+using GainsLab.WebLayer.Model.Dto.MovementCategory;
 
 namespace GainsLab.WebLayer.Model.Dto.Muscle;
 
@@ -50,7 +51,7 @@ public static class MuscleEditFormDTOExtensions
             Authority = dto.Authority,
             Descriptor = dto.Descriptor is null
                 ? new DescriptorEditDTO()
-                : dto.Descriptor.FromGetDTO()
+                : dto.Descriptor.FromSummaryDTO()
         };
     }
 
@@ -142,27 +143,10 @@ public static class MuscleEditFormDTOExtensions
             : $"{{\"{request.Descriptor.DescriptionContent}\", Notes: \"{request.Descriptor.Notes ?? "null"}\", Tags: [{(request.Descriptor.Tags is { Count: > 0 } tags ? string.Join(", ", tags) : "none")}], Authority: {request.Descriptor.Authority}, CreatedBy: {request.Descriptor.UpdatedBy ?? "null"} }}";
 
         return
-            $"MuscleUpdateDTO {{Name: \"{request.Name}\", BodySection: {request.BodySection}, AntagonistIds: [{antagonists}], Descriptor: {descriptor}, Authority: {request.Authority}, CreatedBy: {request.UpdatedBy ?? "null"} }}"; }
-
- 
-   
-    
-    public static MuscleUpdateDTO ToUpdateDto(this MuscleEditFormDTO dto)
-    {
-        
-        var descriptor = dto.Descriptor is DescriptorEditDTO descriptorEditDto ?  descriptorEditDto : new  DescriptorEditDTO();
-
-        
-        return new  MuscleUpdateDTO
-        {
-            Name = dto.Name?? "",
-            BodySection = dto.BodySection,
-            AntagonistIds = dto.Antagonists !=null ? dto.Antagonists.Select(a=>a.Id).ToList() :  null,
-            Authority = dto.Authority ?? DataAuthority.Bidirectional,
-            UpdatedBy = dto.FilledBy,
-            Descriptor = descriptor.ToUpdateDTO()
-        };
+            $"MuscleUpdateDTO {{Name: \"{request.Name}\", BodySection: {request.BodySection}, AntagonistIds: [{antagonists}], Descriptor: {descriptor}, Authority: {request.Authority}, CreatedBy: {request.UpdatedBy ?? "null"} }}"; 
     }
+
+    
     
     
 }

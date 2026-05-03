@@ -4,6 +4,7 @@
 
 @using GainsLab.Application.Results
 @using GainsLab.Contracts.Dtos.GetDto
+@using GainsLab.Contracts.Dtos.SummaryDto
 @using GainsLab.Domain
 @using GainsLab.Domain.Entities.Identifier
 @using GainsLab.Domain.Interfaces
@@ -86,7 +87,7 @@
 
     
     [Parameter] public MovementCategoryFormDTO Model { get; set; } = new();
-    [Parameter] public IReadOnlyList<MovementCategoryRefDTO> AllCategories { get; set; } = new List<MovementCategoryRefDTO>();
+    [Parameter] public IReadOnlyList<MovementCategorySummaryDTO> AllCategories { get; set; } = new List<MovementCategorySummaryDTO>();
 
     private IReadOnlyList<string>? CategoryNames => AllCategories.Select(c => c.Name).ToList();
     [Parameter] public EventCallback<MovementCategoryFormDTO> OnSubmit { get; set; } = default;
@@ -116,7 +117,7 @@
     private string _originalDescriptorContent;
     
     private string _parentFieldID;
-    public MovementCategoryRefDTO? ParentRef { get; set; } = null;
+    public MovementCategorySummaryDTO? ParentRef { get; set; } = null;
     
     private Task OnNameChanged(string value)
     {
@@ -178,7 +179,7 @@
             return; 
         }
         Logger.Log(nameof(MovementCategoryFormComponent), $"Parent Selected: {cat.Name}");
-        ParentRef = new MovementCategoryRefDTO(MovementCategoryId.FromGuid(parsedGuid), cat.Name);
+        ParentRef = new MovementCategorySummaryDTO(MovementCategoryId.FromGuid(parsedGuid), cat.Name);
 
     }
 
@@ -222,7 +223,7 @@
 
     }
 
-    private HashSet<eMovementCategories> GetBaseCategoriesEnum(List<MovementCategoryRefDTO> basesCategory)
+    private HashSet<eMovementCategories> GetBaseCategoriesEnum(List<MovementCategorySummaryDTO> basesCategory)
     {
       return basesCategory.Select(c=>Enum.Parse<eMovementCategories>(c.Name)).ToHashSet();
     }
@@ -428,7 +429,7 @@
         return true;
     }
     
-    private bool IsSameBaseCategory(List<MovementCategoryRefDTO> editCategoryBasesCategory, List<MovementCategoryRefDTO> selectedBaseCat)
+    private bool IsSameBaseCategory(List<MovementCategorySummaryDTO> editCategoryBasesCategory, List<MovementCategorySummaryDTO> selectedBaseCat)
     {
         if(editCategoryBasesCategory.Count == 0 && selectedBaseCat.Count == 0)  return true;
         if(editCategoryBasesCategory.Count != selectedBaseCat.Count) return false;
@@ -436,16 +437,16 @@
         return editCategoryBasesCategory.SequenceEqual(selectedBaseCat);
     }
 
-    private bool IsSameParent(MovementCategoryRefDTO? editCategoryParent, MovementCategoryRefDTO? parentRef)
+    private bool IsSameParent(MovementCategorySummaryDTO? editCategoryParent, MovementCategorySummaryDTO? parentRef)
     {
         if (editCategoryParent == null && parentRef == null) return true;
         if((editCategoryParent == null && parentRef != null) || (editCategoryParent != null && parentRef == null)) return false;
         return editCategoryParent!.Id == parentRef!.Id;
     }
 
-    private List<MovementCategoryRefDTO>? GetCategoryRefs(IEnumerable<string>? names)
+    private List<MovementCategorySummaryDTO>? GetCategoryRefs(IEnumerable<string>? names)
     {
         if (names == null || !names.Any())  return null;
-        return AllCategories.Where(c => names.Contains(c.Name)).Select(c=>new MovementCategoryRefDTO(c.Id, c.Name)).ToList();
+        return AllCategories.Where(c => names.Contains(c.Name)).Select(c=>new MovementCategorySummaryDTO(c.Id, c.Name)).ToList();
     }
 }

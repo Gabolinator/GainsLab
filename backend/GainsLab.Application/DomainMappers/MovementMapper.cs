@@ -1,6 +1,8 @@
 ﻿using GainsLab.Application.DTOs;
 using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.DTOs.Movement;
+using GainsLab.Contracts.Dtos.GetDto;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Domain;
 using GainsLab.Domain.Entities.CreationInfo;
 using GainsLab.Domain.Entities.Descriptor;
@@ -15,6 +17,61 @@ namespace GainsLab.Application.DomainMappers;
 public static class MovementMapper
 {
     private static bool _verbose = true;
+
+    public static MovementSummaryDTO? ToSummaryDto(this MovementRecord? record)
+    {
+        return record is not null
+            ? new MovementSummaryDTO(
+                Id: MovementId.FromGuid(record.GUID),
+                Name: record.Name,
+                CategoryId: MovementCategoryId.FromNullableGuid(record?.Category?.GUID),
+                CategoryName: record?.Category?.Name,
+                VariantOfMovementId: MovementId.FromNullableGuid(record?.VariantOfMovementGuid))
+            : null;
+    }
+
+    public static MovementGetDTO ToGetDto(this MovementRecord domain, IClock clock)
+{
+    ArgumentNullException.ThrowIfNull(domain);
+    
+    var equipments = domain.EquipmentRelations
+        .Where(relation => relation.Equipment is not null)
+        .Select(relation => relation.Equipment!.ToSummaryDto())
+        .DistinctBy(equipment => equipment.Id)
+        .ToList();
+
+    var primaryMuscles = domain.MuscleRelations
+        .Where(relation =>
+            relation.MuscleRole == MuscleRole.Primary &&
+            relation.Muscle is not null)
+        .Select(relation => relation.Muscle!.ToSummaryDto())
+        .DistinctBy(muscle => muscle.Id)
+        .ToList();
+
+    var secondaryMuscles = domain.MuscleRelations
+        .Where(relation =>
+            relation.MuscleRole == MuscleRole.Secondary &&
+            relation.Muscle is not null)
+        .Select(relation => relation.Muscle!.ToSummaryDto())
+        .DistinctBy(muscle => muscle.Id)
+        .ToList();
+
+    return new MovementGetDTO(
+        Id: MovementId.FromGuid(domain.GUID),
+        Name: domain.Name,
+        Descriptor: domain.Descriptor?.ToSummaryDto(),
+        Category: domain.Category?.ToSummaryDto(),
+        Equipments: equipments,
+        PrimaryMuscles: primaryMuscles,
+        SecondaryMuscles: secondaryMuscles,
+        VariantOfMovement: domain.VariantOfMovement.ToSummaryDto(),
+        CreatedAtUtc: domain.CreatedAtUtc,
+        UpdatedAtUtc: domain.UpdatedAtUtc,
+        UpdatedSeq: domain.UpdatedSeq,
+        IsDeleted: domain.IsDeleted,
+        Authority: domain.Authority);
+}
+
     public static MovementRecord? ToRecord(MovementEntity? domain, IClock clock)
     {
         if (domain == null) return null;

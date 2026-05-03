@@ -1,4 +1,5 @@
-﻿using GainsLab.Domain;
+﻿using GainsLab.Contracts.Dtos.SummaryDto;
+using GainsLab.Domain;
 using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.GetDto;
@@ -18,8 +19,7 @@ namespace GainsLab.Contracts.Dtos.GetDto;
 public record EquipmentGetDTO(
     EquipmentId Id,
     string Name,
-    DescriptorId? DescriptorId,
-    DescriptorGetDTO? Descriptor,
+    DescriptorSummaryDTO? Descriptor,
     DateTimeOffset CreatedAtUtc,
     DateTimeOffset UpdatedAtUtc,
     long UpdatedSeq,

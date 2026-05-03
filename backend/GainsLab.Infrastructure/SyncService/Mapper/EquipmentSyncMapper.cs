@@ -3,6 +3,7 @@ using GainsLab.Application.DTOs;
 using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.DTOs.Equipment;
 using GainsLab.Contracts.Dtos.GetDto;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Domain.Entities.Identifier;
 
@@ -84,8 +85,7 @@ public static class EquipmentSyncMapper
         return new EquipmentGetDTO(
             dto.GUID,
             dto.Name,
-            dto.DescriptorGUID,
-            d,
+            d is not null ? new DescriptorSummaryDTO(d.Id, d.Content) : null,
             createdAtUtc,
             dto.UpdatedAtUtc,
             dto.UpdatedSeq,

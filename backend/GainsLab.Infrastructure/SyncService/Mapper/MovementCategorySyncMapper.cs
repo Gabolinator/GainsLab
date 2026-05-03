@@ -1,7 +1,9 @@
-﻿using GainsLab.Application.DTOs;
+﻿using GainsLab.Application.DomainMappers;
+using GainsLab.Application.DTOs;
 using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.DTOs.MovementCategory;
 using GainsLab.Contracts.Dtos.GetDto;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Domain;
 using GainsLab.Domain.Entities.Identifier;
@@ -57,7 +59,7 @@ public static class MovementCategorySyncMapper
             dto.Authority);
     }
 
-    public static MovementCategoryRefDTO ToRefDto(this MovementCategorySyncDTO dto)
+    public static MovementCategorySummaryDTO ToRefDto(this MovementCategorySyncDTO dto)
     {
         return new(dto.GUID, dto.Name);
     }
@@ -67,9 +69,9 @@ public static class MovementCategorySyncMapper
         Task<DescriptorGetDTO?> descriptor,
         DateTimeOffset createdAtUtc,
         string sync, 
-        MovementCategoryRefDTO? parent,  
-        IReadOnlyList< MovementCategoryRefDTO>? baseCategories,
-        IReadOnlyList< MovementCategoryRefDTO>? childCategories)
+        MovementCategorySummaryDTO? parent,  
+        IReadOnlyList< MovementCategorySummaryDTO>? baseCategories,
+        IReadOnlyList< MovementCategorySummaryDTO>? childCategories)
     {
         if (dto == null) return null;
         var d = await descriptor;
@@ -77,9 +79,8 @@ public static class MovementCategorySyncMapper
         return new MovementCategoryGetDTO(
             dto.GUID,
             dto.Name,
-            dto.DescriptorGUID,
-            d,
-            dto.ParentCategoryGUID,
+            d.ToSummaryDto(),
+            dto.ParentCategoryGUID != null ? new MovementCategorySummaryDTO(dto.ParentCategoryGUID.Value, string.Empty) : null,
             dto.BaseCategories,
             createdAtUtc,
             dto.UpdatedAtUtc,

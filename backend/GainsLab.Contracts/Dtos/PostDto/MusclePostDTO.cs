@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Infrastructure.Utilities;
 
 namespace GainsLab.Contracts.Dtos.PostDto;
@@ -11,7 +12,7 @@ namespace GainsLab.Contracts.Dtos.PostDto;
 public record MusclePostDTO
 {
 
-    public Guid? Id { get; init; } = CoreUtilities.GuidGenerator.New();
+    public MuscleId? Id { get; init; } = MuscleId.New();
 
     [Required]
     [StringLength(256, MinimumLength = 2)]
@@ -26,7 +27,7 @@ public record MusclePostDTO
 
     public DescriptorPostDTO? Descriptor { get; init; }
 
-    public IReadOnlyList<Guid>? AntagonistIds { get; init; }
+    public IReadOnlyList<MuscleId>? AntagonistIds { get; init; }
 
     [EnumDataType(typeof(DataAuthority))]
     public DataAuthority Authority { get; init; } = DataAuthority.Bidirectional;

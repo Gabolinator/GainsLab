@@ -35,7 +35,7 @@ public class EquipmentRepository(
         {
             var equipment = await GetRecordByIdAsync(id, ct);
             
-            return CrudResultUtilities.DispatchResult<EquipmentGetDTO, EquipmentRecord>(equipment, record => record.ToGetDTO()!);
+            return CrudResultUtilities.DispatchResult<EquipmentGetDTO, EquipmentRecord>(equipment, record => record.ToGetDto()!);
         }
         
         catch (Exception e)
@@ -64,7 +64,7 @@ public class EquipmentRepository(
             
             //if success => value != null
             return record.Success  ? 
-                APIResult<EquipmentGetDTO>.Created(record.Value.ToGetDTO()!) 
+                APIResult<EquipmentGetDTO>.Created(record.Value.ToGetDto()!) 
                 : APIResult<EquipmentGetDTO>.NotCreated("Failed to create record", NotCreatedReason.Other);
             
         }
@@ -246,7 +246,7 @@ public class EquipmentRepository(
             
             
             await  db.SaveChangesAsync(ct);
-            return APIResult<EquipmentUpdateOutcome>.Updated(new EquipmentUpdateOutcome(UpdateOutcome.Updated,UpdateOutcome.NotUpdated,null,equipment.ToGetDTO()));
+            return APIResult<EquipmentUpdateOutcome>.Updated(new EquipmentUpdateOutcome(UpdateOutcome.Updated,UpdateOutcome.NotUpdated,null,equipment.ToGetDto()));
 
         }
         catch (Exception e)
@@ -274,7 +274,7 @@ public class EquipmentRepository(
             existing.IsDeleted = true;
             existing.UpdatedAtUtc = clock.UtcNow;
 
-            var dto = existing.ToGetDTO();
+            var dto = existing.ToGetDto();
         
             db.Remove(existing);
             

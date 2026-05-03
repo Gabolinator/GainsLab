@@ -6,6 +6,7 @@ using GainsLab.Application.Results;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
 using Microsoft.EntityFrameworkCore;
@@ -98,7 +99,7 @@ public class MuscleSyncProcessor : ISyncEntityProcessor
                 _logger?.Log(nameof(MuscleSyncProcessor), $"Prepared muscle {entity.Name} ({entity.GUID})");
 
                 muscleLookup[dto.GUID] = entity;
-                pendingAntagonists[dto.GUID] = NormalizeAntagonistGuids(dto);
+                pendingAntagonists[dto.GUID] = NormalizeAntagonistGuids(dto).Select(id=> id.Value).ToArray();
             }
 
             _logger?.Log(nameof(MuscleSyncProcessor), "Save Changes Async (muscles)");
@@ -136,10 +137,10 @@ public class MuscleSyncProcessor : ISyncEntityProcessor
     /// <summary>
     /// Normalizes the antagonist GUID payload into a deduped list, enforcing empty sets for tombstones.
     /// </summary>
-    private static IReadOnlyList<Guid> NormalizeAntagonistGuids(MuscleSyncDTO dto)
+    private static IReadOnlyList<MuscleId> NormalizeAntagonistGuids(MuscleSyncDTO dto)
     {
         if (dto.IsDeleted)
-            return Array.Empty<Guid>();
+            return Array.Empty<MuscleId>();
 
         return dto.AntagonistGuids?
             .Where(g => g != Guid.Empty)

@@ -5,6 +5,7 @@ using GainsLab.Application.DTOs.Muscle;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Interface;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Interfaces;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.SyncService.Mapper;
@@ -100,7 +101,7 @@ public class MuscleSyncService : ISyncService<MuscleSyncDTO>
 
             var descriptor = GetDescriptorRecord(dto.DescriptorGUID);
             var entity = MuscleSyncMapper.FromSyncDTO(dto, descriptor, SyncActor);
-            var antagonists = (dto.IsDeleted ? Array.Empty<Guid>() : dto.AntagonistGuids ?? Array.Empty<Guid>())
+            var antagonists = (dto.IsDeleted ? Array.Empty<Guid>() : dto.AntagonistGuids?.Select(a => a.Value) ?? Array.Empty<Guid>())
                 .Where(g => g != Guid.Empty)
                 .Distinct()
                 .ToArray();

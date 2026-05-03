@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.PutDto;
 
@@ -24,7 +25,7 @@ public record MusclePutDTO
     [EnumDataType(typeof(eBodySection))]
     public eBodySection BodySection { get; set; } = eBodySection.undefined;
 
-    public IReadOnlyList<Guid>? AntagonistIds { get; set; }
+    public IReadOnlyList<MuscleId>? AntagonistIds { get; set; }
 
     [Required]
     public DescriptorPutDTO Descriptor { get; set; } = default!;

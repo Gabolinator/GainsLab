@@ -32,7 +32,7 @@ public class DescriptorRepository(GainLabPgDBContext db, IClock clock, ILogger l
         try
         {
             var description = await GetRecordByIdAsync(id, ct);
-            return CrudResultUtilities.DispatchResult<DescriptorGetDTO, DescriptorRecord>(description, record => record.ToGetDTO()!);
+            return CrudResultUtilities.DispatchResult<DescriptorGetDTO, DescriptorRecord>(description, record => record.ToGetDto()!);
         }
         catch (Exception e)
         {
@@ -115,7 +115,7 @@ public class DescriptorRepository(GainLabPgDBContext db, IClock clock, ILogger l
             var record = await CreateAsync(entity, ct);
 
            //if success => value != null
-            return record.Success  ? APIResult<DescriptorGetDTO>.Created(record.Value.ToGetDTO()!) : 
+            return record.Success  ? APIResult<DescriptorGetDTO>.Created(record.Value.ToGetDto()!) : 
                 APIResult<DescriptorGetDTO>.NotCreated("Failed to create record", NotCreatedReason.Other);
             
         }
@@ -216,7 +216,7 @@ public class DescriptorRepository(GainLabPgDBContext db, IClock clock, ILogger l
             {
                 await  db.SaveChangesAsync(ct);
                 
-                return APIResult<DescriptorUpdateOutcome>.Updated(new DescriptorUpdateOutcome(UpdateOutcome.Updated, description.ToGetDTO()));
+                return APIResult<DescriptorUpdateOutcome>.Updated(new DescriptorUpdateOutcome(UpdateOutcome.Updated, description.ToGetDto()));
             }
             
             return  APIResult<DescriptorUpdateOutcome>.NothingChanged("Nothing changed");

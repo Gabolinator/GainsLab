@@ -2,6 +2,7 @@
 @rendermode InteractiveServer
 @using GainsLab.Application.Results
 @using GainsLab.Contracts.Dtos.GetDto
+@using GainsLab.Contracts.Dtos.SummaryDto
 @using GainsLab.Domain
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Utilities
@@ -102,7 +103,7 @@
     [Parameter] public bool DisplayBackButton { get; set; } = false; 
     [Parameter] public string BackButtonText { get; set; } = "Close";
     [Parameter] public string BackAddress { get; set; } = "/muscles";
-    [Parameter] public IReadOnlyList<MuscleRefDTO>? Muscles { get; set; } = default;
+    [Parameter] public IReadOnlyList<MuscleSummaryDTO>? Muscles { get; set; } = default;
     
     public DropdownConfig BodySectionDropdown { get; set; } = default!;
 
@@ -203,7 +204,7 @@
     private HashSet<string> ExistingMuscleNames { get; set; } = new HashSet<string>();
 
     
-    private HashSet<MuscleRefDTO>? SelectedAntagonistsRef { get; set; } = null;
+    private HashSet<MuscleSummaryDTO>? SelectedAntagonistsRef { get; set; } = null;
     private string AddAntagonistText { get; set; } = "Add Antagonist";
     public DropdownConfig? AntagonistDropdown { get; set; }
    
@@ -217,7 +218,7 @@
     private string _originalDescriptorContent;
     private bool _seededAntagonists;
     private eBodySection _originalBodySection = eBodySection.undefined;
-    private List<MuscleRefDTO>? _originalAntagonists;
+    private List<MuscleSummaryDTO>? _originalAntagonists;
 
 
     private Task OnNameChanged(string value)
@@ -274,7 +275,7 @@
             _lastModelId = Model.Id;
             _seededAntagonists = false;
             SelectedBodySectionEnum = Model.BodySection;
-            SelectedAntagonistsRef = Model.Antagonists == null ? new HashSet<MuscleRefDTO>() : Model.Antagonists.ToHashSet();
+            SelectedAntagonistsRef = Model.Antagonists == null ? new HashSet<MuscleSummaryDTO>() : Model.Antagonists.ToHashSet();
             EditDescriptor = Model.Descriptor;
             _normalizedOriginalName = Normalize(Model!.Name);
             _originalDescriptorContent = Normalize(EditDescriptor.DescriptionContent);
@@ -306,7 +307,7 @@
         
     }
 
-    private void AddAntagonists(HashSet<MuscleRefDTO>? selectedAntagonistsRef)
+    private void AddAntagonists(HashSet<MuscleSummaryDTO>? selectedAntagonistsRef)
     {
       if(selectedAntagonistsRef == null || selectedAntagonistsRef.Count == 0) return;
       
@@ -520,7 +521,7 @@
         return  anythingChangedInCategory || descriptionChanged ;
     }
 
-    private bool AsAntagonistChanged(List<MuscleRefDTO>? originalAntagonists, HashSet<MuscleRefDTO>? selectedAntagonistsRef)
+    private bool AsAntagonistChanged(List<MuscleSummaryDTO>? originalAntagonists, HashSet<MuscleSummaryDTO>? selectedAntagonistsRef)
     {
         if ((originalAntagonists == null || originalAntagonists.Count == 0) &&
             (selectedAntagonistsRef == null || selectedAntagonistsRef.Count == 0))

@@ -5,6 +5,7 @@ using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PostDto.Request;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Infrastructure.Utilities;
 using GainsLab.WebLayer.Model.Dto.Descriptor;
 
@@ -118,7 +119,7 @@ public static class MuscleCreateDTOExtension
         
         return new MusclePostDTO
         {
-            Id = dto.Id,
+            Id = MuscleId.FromGuid(dto.Id),
             Name = dto.Name?? "",
             BodySection = dto.BodySection,
             AntagonistIds = dto.Antagonists !=null ? dto.Antagonists.Select(a=>a.Id).ToList() :  null,

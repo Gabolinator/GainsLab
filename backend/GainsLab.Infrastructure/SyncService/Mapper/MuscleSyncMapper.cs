@@ -1,7 +1,9 @@
-﻿using GainsLab.Application.DTOs;
+﻿using GainsLab.Application.DomainMappers;
+using GainsLab.Application.DTOs;
 using GainsLab.Application.DTOs.Description;
 using GainsLab.Application.DTOs.Muscle;
 using GainsLab.Contracts.Dtos.GetDto;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Domain.Entities.Identifier;
 
@@ -40,25 +42,25 @@ public static class MuscleSyncMapper
     public static MuscleSyncDTO ToSyncDTO(MuscleRecord dto, IReadOnlyList<Guid>? antagonists = null)
     {
         return new MuscleSyncDTO(
-            dto.GUID,
+            MuscleId.FromGuid(dto.GUID), 
             dto.Name,
             DescriptorId.FromNullableGuid(dto.Descriptor?.GUID), 
             dto.BodySection,
-            antagonists ?? dto.AntagonistGUIDs.ToList(),
+            antagonists?.Select(a=> MuscleId.FromGuid(a)).ToList() ?? dto.AntagonistGUIDs.ToList(),
             dto.UpdatedAtUtc,
             dto.UpdatedSeq,
             dto.IsDeleted,
             dto.Authority);
     }
 
-    public static MuscleRefDTO ToRefDto(this MuscleSyncDTO syncDto)
+    public static MuscleSummaryDTO ToSummaryDto(this MuscleSyncDTO syncDto)
     {
-            return new MuscleRefDTO(syncDto.GUID, syncDto.Name);
+            return new MuscleSummaryDTO(syncDto.GUID, syncDto.Name, string.Empty, syncDto.BodySection);
     }
 
     
     
-    public static async Task<MuscleGetDTO> ToGetDTOAsync(MuscleSyncDTO syncDto, Task<DescriptorGetDTO?> getDescriptorAsync, IReadOnlyList<MuscleRefDTO>? antagonist, DateTimeOffset updatedAtUtc, string sync)
+    public static async Task<MuscleGetDTO> ToGetDTOAsync(MuscleSyncDTO syncDto, Task<DescriptorGetDTO?> getDescriptorAsync, IReadOnlyList<MuscleSummaryDTO>? antagonist, DateTimeOffset updatedAtUtc, string sync)
     {
         var descriptor = await getDescriptorAsync;
         
@@ -69,9 +71,7 @@ public static class MuscleSyncMapper
                 syncDto.Name,
                 "",
                 syncDto.BodySection,
-                syncDto.DescriptorGUID,
-                descriptor,
-                syncDto.AntagonistGuids,
+                descriptor.ToSummaryDto(),
                 antagonist,
                 updatedAtUtc,
                 syncDto.UpdatedAtUtc,

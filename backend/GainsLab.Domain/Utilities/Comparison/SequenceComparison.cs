@@ -1,4 +1,4 @@
-﻿namespace GainsLab.Domain.Comparison;
+﻿namespace GainsLab.Domain.Utilities.Comparison;
 
 public static class SequenceComparison
 {

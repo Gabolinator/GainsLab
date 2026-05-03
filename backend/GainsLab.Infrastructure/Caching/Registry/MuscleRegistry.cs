@@ -8,6 +8,7 @@ using GainsLab.Contracts.Dtos.PostDto.Outcome;
 using GainsLab.Contracts.Dtos.PostDto.Request;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
+using GainsLab.Domain.Entities.Identifier;
 ﻿using GainsLab.Infrastructure.Caching.QueryCache;
 
 namespace GainsLab.Infrastructure.Caching.Registry;
@@ -18,7 +19,7 @@ public sealed class MuscleRegistry
     private readonly MuscleQueryCache _cache;
     
 
-    public Dictionary<Guid, MuscleGetDTO> Muscles { get; private set; } = new();
+    public Dictionary<MuscleId, MuscleGetDTO> Muscles { get; private set; } = new();
 
     public MuscleRegistry(IMuscleGateway gateway, MuscleQueryCache cache)
     {
@@ -64,7 +65,7 @@ public sealed class MuscleRegistry
 
     public void Invalidate() => _cache.Invalidate();
 
-    public async Task<Result<MuscleGetDTO>> GetByIdAsync(Guid id, bool forceRefresh = false)
+    public async Task<Result<MuscleGetDTO>> GetByIdAsync(MuscleId id, bool forceRefresh = false)
     {
         if (id == Guid.Empty)
         {
@@ -88,7 +89,7 @@ public sealed class MuscleRegistry
             : Result<MuscleGetDTO>.SuccessResult(match);
     }
 
-    public async Task<MuscleGetDTO?> GetMuscleByIdAsync(Guid? id)
+    public async Task<MuscleGetDTO?> GetMuscleByIdAsync(MuscleId? id)
     {
         if (id is null || id == Guid.Empty)
         {
@@ -142,7 +143,7 @@ public sealed class MuscleRegistry
             Invalidate();
             if (movementCategoryEntityId.Id.HasValue)
             {
-                Muscles.Remove(movementCategoryEntityId.Id.Value);
+                Muscles.Remove(MuscleId.FromGuid(movementCategoryEntityId.Id.Value));
             }
         }
         

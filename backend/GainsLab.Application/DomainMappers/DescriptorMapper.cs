@@ -4,6 +4,7 @@ using GainsLab.Contracts;
 using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.PostDto;
 using GainsLab.Contracts.Dtos.PutDto;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Domain.Entities.CreationInfo;
 using GainsLab.Domain.Entities.Descriptor;
 using GainsLab.Domain.Entities.Identifier;
@@ -17,6 +18,35 @@ namespace GainsLab.Application.DomainMappers;
 /// </summary>
 public static class DescriptorMapper
 {
+    public static DescriptorPutDTO? ToPutDto(this DescriptorSummaryDTO? dto)
+    {
+        if (dto is null) return null;
+
+        return new DescriptorPutDTO()
+        {
+            Id = DescriptorId.FromGuid(dto.Id),
+            DescriptionContent = dto.Content
+        };
+    }
+    
+    public static DescriptorSummaryDTO? ToSummaryDto(this DescriptorGetDTO? record)
+    {
+        if (record is null) return null;
+
+        return new DescriptorSummaryDTO(
+            Id: DescriptorId.FromGuid(record.Id),
+            Content: record.Content);
+    }
+    
+    public static DescriptorSummaryDTO? ToSummaryDto(this DescriptorRecord? record)
+    {
+        if (record is null) return null;
+
+        return new DescriptorSummaryDTO(
+            Id: DescriptorId.FromGuid(record.GUID),
+            Content: record.Content);
+    }
+    
     public static DescriptorPutDTO ToPutDto(this DescriptorGetDTO dto, IClock clock)
     {
         return new()
@@ -38,7 +68,7 @@ public static class DescriptorMapper
         };
     }
     
-    public static DescriptorGetDTO? ToGetDTO(this DescriptorRecord? dto) =>
+    public static DescriptorGetDTO? ToGetDto(this DescriptorRecord? dto) =>
         dto.TryMapToGetDTO(out var mapped) ? mapped : null;
 
     public static bool TryMapToGetDTO(this DescriptorRecord? dto, out DescriptorGetDTO? mapped)

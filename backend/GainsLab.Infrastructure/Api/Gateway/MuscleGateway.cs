@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography.Xml;
+using GainsLab.Application.DomainMappers;
 using GainsLab.Application.DTOs.Extensions;
 using GainsLab.Application.DTOs.Muscle;
 using GainsLab.Application.Interfaces.DataManagement;
@@ -11,6 +12,7 @@ using GainsLab.Contracts.Dtos.GetDto;
 using GainsLab.Contracts.Dtos.ID;
 using GainsLab.Contracts.Dtos.PostDto.Outcome;
 using GainsLab.Contracts.Dtos.PostDto.Request;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Contracts.Dtos.SyncDto;
 using GainsLab.Contracts.Dtos.UpdateDto.Outcome;
 using GainsLab.Contracts.Dtos.UpdateDto.Request;
@@ -48,7 +50,7 @@ public class MuscleGateway : IMuscleGateway
                 .SuccessResult(Array.Empty<MuscleGetDTO>());
 
        
-        var refs = syncDtos.Value!.ToDictionary(x => x.GUID, x=> x.ToRefDto());
+        var refs = syncDtos.Value!.ToDictionary(x => x.GUID, x=> x.ToSummaryDto());
         
         
         
@@ -204,14 +206,14 @@ public class MuscleGateway : IMuscleGateway
         cache?.Invalidate();
     }
 
-    IReadOnlyList<MuscleRefDTO>? GetAntagonistRefs(Dictionary<Guid, MuscleRefDTO> dict, IReadOnlyList<Guid>? antonistGuids)
+    IReadOnlyList<MuscleSummaryDTO>? GetAntagonistRefs(Dictionary<MuscleId, MuscleSummaryDTO> dict, IReadOnlyList<MuscleId>? antonistGuids)
     {
         if(antonistGuids == null || !antonistGuids.Any() || !dict.Any()) return null;
         
         
-        MuscleRefDTO GetRef(Guid guid)
+        MuscleSummaryDTO GetRef(MuscleId guid)
         {
-           return dict.TryGetValue(guid, out var result) ? result :new MuscleRefDTO(guid, "");
+           return dict.TryGetValue(guid, out var result) ? result :new MuscleSummaryDTO(guid, string.Empty, string.Empty, default);
         }
         
         return antonistGuids.Select(GetRef).ToList();

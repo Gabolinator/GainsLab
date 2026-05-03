@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GainsLab.Domain;
+using GainsLab.Domain.Entities.Identifier;
 
 namespace GainsLab.Contracts.Dtos.UpdateDto;
 
@@ -20,7 +21,7 @@ public record MuscleUpdateDTO
 
     public DescriptorUpdateDTO? Descriptor { get; init; }
 
-    public IReadOnlyList<Guid>? AntagonistIds { get; init; }
+    public IReadOnlyList<MuscleId>? AntagonistIds { get; init; }
 
     [EnumDataType(typeof(DataAuthority))]
     public DataAuthority? Authority { get; init; }

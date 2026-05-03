@@ -219,11 +219,12 @@ public class EntitySyncClient :IEntitySyncClient
             return Array.Empty<Guid>();
         }
 
-        return dto.AntagonistGuids?
-                   .Where(g => g != Guid.Empty)
-                   .Distinct()
-                   .ToList()
-               ?? new List<Guid>();
+        var guids = dto.AntagonistGuids?
+            .Where(g => g.Value != Guid.Empty)
+            .Distinct()
+            .Select(g => g.Value)
+            .ToList();
+        return guids ?? new List<Guid>();
     }
 
 

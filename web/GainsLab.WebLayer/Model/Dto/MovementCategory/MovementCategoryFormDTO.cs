@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GainsLab.Contracts.Dtos.GetDto;
+using GainsLab.Contracts.Dtos.SummaryDto;
 using GainsLab.Domain;
 using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Infrastructure.Utilities;
@@ -17,9 +18,9 @@ public class MovementCategoryFormDTO
     public virtual DescriptorFormDTO Descriptor { get; set; } = new DescriptorEditDTO();
 
     
-    public MovementCategoryRefDTO? Parent { get; set; }
+    public MovementCategorySummaryDTO? Parent { get; set; }
 
-    public List<MovementCategoryRefDTO> BasesCategory { get; set; } = new();
+    public List<MovementCategorySummaryDTO> BasesCategory { get; set; } = new();
 
     
     [EnumDataType(typeof(DataAuthority))]

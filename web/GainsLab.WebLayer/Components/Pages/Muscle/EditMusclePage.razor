@@ -8,6 +8,7 @@
 @using GainsLab.Contracts.Dtos.Delete.Outcome
 @using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Contracts.Dtos.ID
+@using GainsLab.Contracts.Dtos.SummaryDto
 @using GainsLab.Contracts.Dtos.UpdateDto.Outcome
 @using GainsLab.Contracts.Dtos.UpdateDto.Request
 @using GainsLab.Domain.Interfaces
@@ -103,9 +104,9 @@
         EditMuscle = Muscle!.FromGetDTO();
     }
 
-    public IReadOnlyList<MuscleRefDTO>? GetMusclesRefs()
+    public IReadOnlyList<MuscleSummaryDTO>? GetMusclesRefs()
     {
-        return _muscles.Select(m => new MuscleRefDTO(m.Id, m.Name, m.LatinName)).ToList();
+        return _muscles.Select(m => new MuscleSummaryDTO(m.Id, m.Name, m.LatinName, m.BodySection)).ToList();
     }
 
     

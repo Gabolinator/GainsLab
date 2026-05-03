@@ -13,6 +13,7 @@ using GainsLab.Domain;
 using GainsLab.Domain.Comparison;
 using GainsLab.Domain.Entities.Identifier;
 using GainsLab.Domain.Interfaces;
+using GainsLab.Domain.Utilities.Comparison;
 using GainsLab.Infrastructure.DB.Context;
 using GainsLab.Infrastructure.Utilities;
 using Microsoft.EntityFrameworkCore;
@@ -52,7 +53,7 @@ public class MuscleRepository(GainLabPgDBContext db, IDescriptorRepository descr
         {
             if (!payload.Id.HasValue)
             {
-                payload = payload with { Id = CoreUtilities.GuidGenerator.New() };
+                payload = payload with { Id = MuscleId.New() };
             }
             
             var buildResult = await ValidateAndBuildMuscleForCreateAsync(payload, ct);
@@ -72,7 +73,7 @@ public class MuscleRepository(GainLabPgDBContext db, IDescriptorRepository descr
 
             await AddAntagonistRelationsForCreatedMuscleAsync(
                 createdEntity,
-                payload.AntagonistIds,
+                payload.AntagonistIds?.Select(a=>a.Value),
                 payload.Id!.Value,
                 ct);
 
@@ -144,7 +145,7 @@ public class MuscleRepository(GainLabPgDBContext db, IDescriptorRepository descr
 
             OverwriteMuscleFields(existing, replacement, payload);
 
-            await ReplaceAntagonistRelationsAsync(existing, payload.AntagonistIds, id, ct);
+            await ReplaceAntagonistRelationsAsync(existing, payload.AntagonistIds?.Select(a=>a.Value), id, ct);
 
             await db.SaveChangesAsync(ct).ConfigureAwait(false);
 
@@ -197,8 +198,8 @@ public class MuscleRepository(GainLabPgDBContext db, IDescriptorRepository descr
             
            
             bool antagonistChanged = !SequenceComparison.SetEqualWithDiff(
-                antagonistGuids,
-                existingGuid,
+                antagonistGuids?.Select(id=> id.Value).ToList(),
+                existingGuid?.Select(id=> id.Value).ToList(),
                 g => g,
                 out SetDifference<Guid> difference
             );
@@ -239,7 +240,7 @@ public class MuscleRepository(GainLabPgDBContext db, IDescriptorRepository descr
 
                 descriptorChanged = existing.Descriptor.TryUpdate(payload.Descriptor, clock);
                 descriptorOutcomeState = descriptorChanged ? UpdateOutcome.Updated : UpdateOutcome.NotUpdated;
-                descriptorOutcome = new DescriptorUpdateOutcome(descriptorOutcomeState, existing.Descriptor.ToGetDTO());
+                descriptorOutcome = new DescriptorUpdateOutcome(descriptorOutcomeState, existing.Descriptor.ToGetDto());
             }
 
             if (!muscleContentChanged && !descriptorChanged)
@@ -500,11 +501,11 @@ public class MuscleRepository(GainLabPgDBContext db, IDescriptorRepository descr
                                 .Where(g => g != Guid.Empty && g != ownGuid)
                                 .Distinct()
                                 .ToList()
-                            ?? new List<Guid>();
+                            ?? new List<MuscleId>();
 
         var changed = !SequenceComparison.SetEqualWithDiff(
             requested,
-            existingGuids,
+            existingGuids.Select(id=> id.Value).ToList(),
             g => g,
             out SetDifference<Guid> difference);
 
@@ -525,7 +526,7 @@ public class MuscleRepository(GainLabPgDBContext db, IDescriptorRepository descr
 
         if (toAdd.Count > 0)
         {
-            await AddNewAntagonistsRelations(existing, toAdd, ct)
+            await AddNewAntagonistsRelations(existing, toAdd.ToList(), ct)
                 .ConfigureAwait(false);
         }
     }

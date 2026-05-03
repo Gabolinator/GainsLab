@@ -7,6 +7,7 @@
 @using GainsLab.Application.Results
 @using GainsLab.Contracts.Dtos.GetDto
 @using GainsLab.Contracts.Dtos.PostDto.Outcome
+@using GainsLab.Contracts.Dtos.SummaryDto
 @using GainsLab.Domain
 @using GainsLab.Domain.Interfaces
 @using GainsLab.Infrastructure.Caching.Registry
@@ -57,9 +58,9 @@
     public MessagesContainer? Messages { get; set; } = new MessagesContainer();
 
    
-    public IReadOnlyList<MuscleRefDTO>? GetMusclesRefs()
+    public IReadOnlyList<MuscleSummaryDTO>? GetMusclesRefs()
     {
-        return _muscles.Select(m => new MuscleRefDTO(m.Id, m.Name, m.LatinName)).ToList();
+        return _muscles.Select(m => new MuscleSummaryDTO(m.Id, m.Name, m.LatinName, m.BodySection)).ToList();
     }
 
     
